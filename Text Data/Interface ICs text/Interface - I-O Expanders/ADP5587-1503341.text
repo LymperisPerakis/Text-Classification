@@ -1,0 +1,1212 @@
+                                                                                                                     Mobile I/O Expander and
+                                                                                                                   QWERTY Keypad Controller
+Data Sheet                                                                                                                          ADP5587
+FEATURES                                                                                                                      FUNCTIONAL BLOCK DIAGRAM
+18-GPIO port expander or 10 × 8 keypad matrix                                                                                                                                                ADP5587
+GPIOs configurable as GPIs, GPOs, and keypad rows or
+   columns                                                                                                     GND 19
+I2C interface with auto-increment                                                                              VCC                                                                                               C9
+                                                                                                                    21                                                                                          18
+1.65 V to 3.6 V operation                                                                                      SCL 23
+Keypad lock capability                                                                                         SDA 22              CONTROL                             CONTROL
+                                                                                                                                  REGISTERS                           INTERFACE                                  C8
+Open-drain interrupt output                                                                                                                                                                                     17
+                                                                                                               RST 20
+Key press and key release interrupts
+                                                                                                                INT 24
+GPI interrupt with level programmability
+Programmable pull-ups
+Key event counter with overflow interrupt                                                                                1    2     3    4    5    6    7    8    9    10    11    12    13    14    15    16
+275 μs debounce on the reset line and GPIs                                                                           R7      R6   R5    R4   R3   R2   R1   R0   C0   C1    C2    C3    C4    C5    C6    C7          08612-001
+1 μA typical idle current                                                                                                                                   Figure 1.
+55 μA typical polling current
+4 mm × 4 mm LFCSP package
+Small 2 mm x 2 mm WLCSP package, 0.4 mm pitch
+Multiple I2C addresses available for the LFCSP package to
+   allow multiple port expanders on the same bus
+APPLICATIONS
+Keypad and I/O expander designed for QWERTY type phones
+  that require a large keypad matrix
+GENERAL DESCRIPTION
+The ADP5587 is an I/O port expander and keypad matrix                                                       All communication to the main processor is done using one
+designed for QWERTY type phones that require a large keypad                                                 interrupt line and two I2C-compatible interface lines. The
+matrix and expanded I/O lines. I/O expander ICs are used in                                                 ADP5587 can be configured as a keypad matrix of up to 8 rows ×
+mobile platforms as a solution to the limited number of GPIOs                                               10 columns (a maximum of 80 keys).
+available in the main processor.                                                                            When the ADP5587 is used for smaller keypad matrices, unused
+In its small 2 mm × 2 mm package, the ADP5587 contains                                                      row and column pins can be reconfigured to act as general-
+enough power to handle all key scanning and decoding and                                                    purpose inputs or outputs. R0 to R7 denote the row pins of the
+to flag the processor of key presses and releases via the I2C                                               matrix, whereas C0 to C9 denote the column pins. At power-up,
+interface and interrupt. The ADP5587 frees the main micro-                                                  all rows and columns default to GPIs and must be programmed
+processor from the need to monitor the keypad, thereby                                                      to function as part of the keypad matrix or as GPOs.
+minimizing current drain and increasing processor bandwidth.                                                Two options for I2C addresses exist for the LFCSP package to
+The ADP5587 is also equipped with a buffer/FIFO and key                                                     reduce the chance of port contention and allow up to two
+event counter to handle and keep track of up to 10 unprocessed                                              ADP5587 ICs to operate on the same I2C bus (see the Ordering
+key or GPI events with overflow wrap and interrupt capability.                                              Guide).
+The ADP5587 has keypad lock capability with an option to
+trigger or not trigger an interrupt at key presses and releases.
+Rev. E                                                                     Document Feedback
+Information furnished by Analog Devices is believed to be accurate and reliable. However, no
+responsibility is assumed by Analog Devices for its use, nor for any infringements of patents or other
+rights of third parties that may result from its use. Specifications subject to change without notice. No   One Technology Way, P.O. Box 9106, Norwood, MA 02062-9106, U.S.A.
+license is granted by implication or otherwise under any patent or patent rights of Analog Devices.         Tel: 781.329.4700 ©2009–2019 Analog Devices, Inc. All rights reserved.
+Trademarks and registered trademarks are the property of their respective owners.                           Technical Support                                  www.analog.com
+
+
+ADP5587                                                                                                                                                                                        Data Sheet
+TABLE OF CONTENTS
+Features .............................................................................................. 1            Typical Performance Characteristics ..............................................7
+Applications ....................................................................................... 1               Theory of Operation .........................................................................8
+Functional Block Diagram .............................................................. 1                               Keypad Operation .........................................................................8
+General Description ......................................................................... 1                         General-Purpose Inputs and Outputs ..................................... 12
+Revision History ............................................................................... 2                   I C Programming and Digital Control ........................................ 14
+                                                                                                                      2
+Specifications..................................................................................... 3                   Registers ....................................................................................... 15
+  DC Characteristics ....................................................................... 3                          Register Descriptions ................................................................. 16
+  AC Characteristics........................................................................ 4                       Applications Information .............................................................. 21
+Absolute Maximum Ratings............................................................ 5                                  Applications Overview .............................................................. 21
+  Thermal Resistance ...................................................................... 5                           Keypad Current .......................................................................... 21
+  ESD Caution .................................................................................. 5                   Outline Dimensions ....................................................................... 23
+Pin Configurations and Function Descriptions ........................... 6                                              Ordering Guide .......................................................................... 23
+REVISION HISTORY
+10/2019—Rev. D to Rev. E                                                                                             5/2010—Rev. A to Rev. B
+Changes to Table 16 ........................................................................ 16                      Changes to Features ..........................................................................1
+Updated Outline Dimensions ....................................................... 23                                Changes to Table 1............................................................................ 3
+Changes to Ordering Guide .......................................................... 23                              Changes to Table 8.............................................................................6
+1/2012—Rev. C to Rev. D                                                                                              3/2010—Rev. 0 to Rev. A
+Changes to Table 11 .......................................................................... 9                     Added WLCSP Information ........................................ Throughout
+Changes to Table 25 ........................................................................ 18                      Added Typical Performance Characteristics Section ...................7
+                                                                                                                     Updated Outline Dimensions, Changes to Ordering Guide .... 23
+7/2011—Rev. B to Rev. C
+Changes to Features and General Description,                                                                         12/2009—Revision 0: Initial Version
+I2C Address Options ........................................................................ 1
+Changes to the I2C Programming and Digital Control Section,
+Figure 16, Figure, 17, and Figure 18 ............................................. 14
+Changes to Ordering Guide .......................................................... 23
+                                                                                                    Rev. E | Page 2 of 24
+
+
+Data Sheet                                                                                                                                       ADP5587
+SPECIFICATIONS
+TA = TJ = −40°C to +85°C, unless otherwise noted.
+DC CHARACTERISTICS
+Table 1. General DC Electrical Characteristics
+Parameter                                                     Symbol                  Conditions                                  Min     Typ  Max         Unit
+SUPPLY VOLTAGE
+   VCC Input Voltage Range                                    VCC                                                                 1.65         3.6         V
+   Supply Current 1                                           ICC                     VCC = 1.8 V to 3.0 V, TA = −40°C to +85°C           1    10          μA
+       With One Key Press                                     ICC                     VCC = 1.8 V, TA = −40°C to +85°C                    55   90          μA
+                                                              ICC                     VCC = 3.0 V, TA = −40°C to +85°C                    100  200         μA
+       With GPI Low (Pull-Up Enabled) 2                       ICC                     VCC = 1.8 V to 3.0 V, TA = −40°C to +85°C           20   50          μA
+       With GPI Low (Pull-Up Disabled)                        ICC                     VCC = 1.8 V to 3.0 V, TA = −40°C to +85°C           2    10          μA
+       With One GPO Active 3                                  ICC                     VCC = 1.8 V, TA = −40°C to +85°C                         50          μA
+OSCILLATOR CURRENT
+   Oscillator Current (Enabled)                               ICC                     VCC = 1.8 V to 3.0 V                                40               μA
+1
+  Operating current measured with I/Os defaulting as GPIs, with all pull-ups enabled and all inputs open.
+2
+  With one GPI low.
+3
+  Load = 100 kΩ.
+Table 2. I/O DC Electrical Characteristics
+Parameter                                                               Symbol                Conditions                Min        Typ         Max        Unit
+INPUT LOGIC LEVELS (SCL, SDA, RST, C0 to C9, R0 to R7) 1
+   Logic Low Input Voltage                                              VIL                   1.8 V ≤ VIO ≤ 3.0 V                              0.3 × VCC  V
+   Logic High Input Voltage                                             VIH                   1.8 V ≤ VIO ≤ 3.0 V       0.7 × VCC                         V
+   Schmitt Trigger Hysteresis                                           VHYST                                                      0.10                   V
+   Input Leakage Current                                                VI-LEAKAGE            1.8 V ≤ VIO ≤ 3.0 V       −1                     +1         µA
+OUTPUT LOGIC LEVELS (C0 to C9, R0 to R7)
+   Logic Low Output Voltage                                             VOL                   ISINK = 1 mA                                     0.40       V
+   Output High Voltage                                                  VOH                   ISOURCE = 1 mA                       VCC − 0.3 V            V
+OUTPUT LOGIC LEVELS (INT, SDA)
+   Output Low Voltage                                                   VOL                   ISINK = 3 mA,                                    0.40       V
+                                                                                              1.8 V ≤ VCC ≤ 3.0 V
+   Output High Voltage                                                  VOH                   1.8 V ≤ VCC ≤ 3.0 V       0.7 × VCC                         V
+   Logic High Leakage Current                                           VO-LEAKAGE            1.8 V ≤ VCC ≤ 3.0 V                  0.1         1          µA
+PULL-UP RESISTANCE FOR GPIOs (C0 to C9, R0 to R7) 2                     RPULL-UP                                                   100                    kΩ
+1
+  Power-up default current. All I/Os default to GPIs and are open; C8 and C9 default to GPIs; I2C is idle.
+2
+  GPIO internal pull-ups are approximately 100 kΩ.
+Table 3. Capacitance Loading 1
+Parameter                                                                        Symbol                      Min            Typ         Max          Unit
+I/O Input Capacitance                                                            CIN                                        1           10           pF
+I/O Output Loading Capacitance                                                   COUT                                                   50           pF
+Capacitive Load for Each Bus Line                                                CB 2                                                   400          pF
+1
+  Guaranteed by design.
+2
+  CB = total capacitance of one bus line in picofarads.
+                                                                             Rev. E | Page 3 of 24
+
+
+ADP5587                                                                                                                                                    Data Sheet
+AC CHARACTERISTICS
+Table 4. General AC Characteristics1
+Parameter                                                                              Symbol               Min            Typ                  Max               Unit
+Delay from Reset Deassertion to I2C Access                                             RSTD                 60                                                    μs
+Keypad Unlock Timer                                                                    TKUT                                7                                      sec
+Keypad Interrupt Mask Timer                                                            TKIMT                               31                                     sec
+Debounce                                                                               TD                                  275                                    μs
+1
+    Guaranteed by design.
+Table 5. I2C AC Electrical Characteristics1
+Parameter                                                                              Symbol               Min            Typ                  Max                Unit
+SCL Clock Frequency                                                                    fSCL                                                     400                kHz
+SCL High Time                                                                          tHIGH                0.6                                                    μs
+SCL Low Time                                                                           tLOW                 1.3                                                    μs
+Data Setup Time                                                                        tSU, DAT             100                                                    ns
+Data Hold Time                                                                         tHD, DAT             0                                   0.9                μs
+Setup Time for Repeated Start                                                          tSU, STA             0.6                                                    μs
+Hold Time for Start/Repeated Start                                                     tHD, STA             0.6                                                    μs
+Bus Free Time for Stop and Start                                                       tBUF                 1.3                                                    μs
+Setup Time for Stop Condition                                                          tSU, STO             0.6                                                    μs
+Rise Time for SCL and SDA2                                                             tR                   20 + 0.1 CB                         300                ns
+Fall Time for SCL and SDA2                                                             tF                   20 + 0.1 CB                         300                ns
+Pulse Width of Suppressed Spike                                                        tSP                  0                                   50                 μs
+1
+    Guaranteed by design.
+2
+    tR and tF are measured between 0.3 × VCC and 0.7 × VCC.
+                SDA
+                                                                                                 tF                                             tBUF
+                                       tLOW         tR              tSU, DAT             tF                     tHD, STA   tSP         tR
+                SCL
+                                                                               tHIGH     tSU, STA                           tSU, STO
+                            S                            tHD, DAT                                      Sr                                   P          S
+                       S = START CONDITION
+                                                                                                                                                              08612-002
+                       Sr = REPEATED START CONDITION
+                       P = STOP CONDITION
+                                                                        Figure 2. I2C Interface Timing Diagram
+                                                                                   Rev. E | Page 4 of 24
+
+
+Data Sheet                                                                                                                              ADP5587
+ABSOLUTE MAXIMUM RATINGS
+Table 6.                                                                           THERMAL RESISTANCE
+Parameter                                     Rating                               θJA is specified for the worst-case conditions, that is, a device
+VCC                                           −0.3 V to + 4.0 V                    soldered in a circuit board for surface-mount packages.
+R0 to R7, C0 to C9                            −0.3 V to VCC + 0.3 V
+SCL                                           −0.3 V to VCC + 0.3 V                Table 7. Thermal Resistance
+SDA                                           −0.3 V to VCC + 0.3 V                Package Type                       θJA         θJC         Unit
+RST                                           −0.3 V to VCC + 0.3 V                24-Lead LFCSP_WQ                   57.8        9.4         °C/W
+INT                                           −0.3 V to VCC + 0.3 V                Maximum Power                      600         N/A         mW
+GND                                           −0.3 V to +0.3 V                     25-Ball WLCSP                      46          N/A         °C/W
+Operating Ambient Temperature Range           −40°C to +85°C                       Maximum Power                      600         N/A         mW
+Operating Junction Temperature Range          −40°C to +125°C
+Storage Temperature Range                     −65°C to +150°C                      ESD CAUTION
+ESD Machine Model                             ±200 V
+ESD Human Body Model                          ±2000 V
+ESD Charged Device Model                      ±1000 V
+Soldering Condition                           JEDEC J-STD-020
+Stresses at or above those listed under Absolute Maximum
+Ratings may cause permanent damage to the product. This is a
+stress rating only; functional operation of the product at these
+or any other conditions above those indicated in the operational
+section of this specification is not implied. Operation beyond
+the maximum operating conditions for extended periods may
+affect product reliability.
+                                                                  Rev. E | Page 5 of 24
+
+
+ADP5587                                                                                                                                                                Data Sheet
+PIN CONFIGURATIONS AND FUNCTION DESCRIPTIONS
+                                                                                                                                   BALL A1
+                                                                                                                                   CORNER
+                                                                                                                                      1       2      3    4     5
+                                23 SCL   22 SDA   21 VCC   20 RST   19 GND
+                                                                                                                               A
+                       24 INT                                                                                                        RST      C6    C1    R2    R7
+                                                                                                                               B
+                R7 1                                                         18 C9                                                   VCC      C7    C2    NC    R6
+                R6 2                                                         17 C8
+                                                                                                                               C
+                R5 3             ADP5587                                     16 C7                                                   SDA      C8    C3    R1    R5
+                                  TOP VIEW
+                R4 4            (Not to Scale)                               15 C6                                             D
+                R3 5                                                         14 C5                                                   SCL      C9    C4    R0    R4
+                R2 6                                                         13 C4
+                                                                                                                               E
+                                                                                                                                     INT     GND    C5    C0    R3
+                       R1 7     R0 8     C0 9     C1 10    C2 11    C3 12                                                                        TOP VIEW
+                                                                                                                                             (BALL SIDE DOWN)
+                NOTES
+                                                                                     08612-003                                                                          08612-004
+                                                                                                                                                Not to Scale
+                1. EXPOSED PAD. THE EXPOSED PAD                                                                                NOTES
+                   MUST BE CONNECTED TO GROUND.                                                                                1. NC = NO CONNECT.
+                  Figure 3. LFCSP Pin Configuration                                                                                Figure 4. WLCSP Pin Configuration
+Table 8. Pin Function Descriptions
+LFCSP      WLCSP
+Pin No.    Pin No.               Mnemonic                                    Description
+1          A5                    R7                                          GPIO, Row 7 in the Keypad Matrix.
+2          B5                    R6                                          GPIO, Row 6 in the Keypad Matrix.
+3          C5                    R5                                          GPIO, Row 5 in the Keypad Matrix.
+4          D5                    R4                                          GPIO, Row 4 in the Keypad Matrix.
+5          E5                    R3                                          GPIO, Row 3 in the Keypad Matrix.
+6          A4                    R2                                          GPIO, Row 2 in the Keypad Matrix.
+N/A        B4                    N/A                                         No Connect (NC)
+7          C4                    R1                                          GPIO, Row 1 in the Keypad Matrix.
+8          D4                    R0                                          GPIO, Row 0 in the Keypad Matrix.
+9          E4                    C0                                          GPIO, Column 0 in the Keypad Matrix.
+10         A3                    C1                                          GPIO, Column 1 in the Keypad Matrix.
+11         B3                    C2                                          GPIO, Column 2 in the Keypad Matrix.
+12         C3                    C3                                          GPIO, Column 3 in the Keypad Matrix.
+13         D3                    C4                                          GPIO, Column 4 in the Keypad Matrix.
+14         E3                    C5                                          GPIO, Column 5 in the Keypad Matrix.
+15         A2                    C6                                          GPIO, Column 6 in the Keypad Matrix.
+16         B2                    C7                                          GPIO, Column 7 in the Keypad Matrix.
+17         C2                    C8                                          GPIO, Column 8 in the Keypad Matrix.
+18         D2                    C9                                          GPIO, Column 9 in the Keypad Matrix.
+19         E2                    GND                                         Ground.
+20         A1                    RST                                         Hardware Reset (Active Low). This pin resets the device to the power default conditions. The reset
+                                                                             pin must be driven low for a minimum of 50 μs to be valid and to prevent false resets due to ESD
+                                                                             glitches or noise in the system. If not used, RST must be tied high with a pull-up resistor.
+21         B1                     VCC                                        Supply Voltage, 1.65 V to 3.6 V.
+22         C1                     SDA                                        I2C Serial Data. The open drain requires an external pull-up resistor.
+23         D1                     SCL                                        I2C Clock.
+24         E1                     INT                                        Processor Interrupt, Active Low, Open Drain. This pin can be pulled up to 2.7 V or 1.8 V for selection
+                                                                             flexibility in the processor GPIO supply group.
+EP         N/A                   EPAD                                        Exposed Pad. The exposed pad must be connected to ground.
+                                                                                                  Rev. E | Page 6 of 24
+
+
+Data Sheet                                                                                                                                                                                                         ADP5587
+TYPICAL PERFORMANCE CHARACTERISTICS
+TA = 25°C, unless otherwise specified.
+                           3.5                                                                                                                            60
+                           3.0
+                                                                                                                                                          50
+                                                                                                                                                                                VCC AT 1.8V
+                           2.5
+                                                                                                                                  INPUT/OUTPUT VOL (mV)
+                                                                                                                                                          40
+   ICC CURRENT (µA)
+                                                          VCC AT 3.0V
+                           2.0                                                                                                                                                            VCC AT 3.0V
+                                                                   VCC AT 1.8V                                                                            30
+                           1.5
+                                                                                                                                                          20
+                           1.0
+                           0.5                                                                                                                            10
+                            0                                                                                                                              0
+                                                                                            08612-017                                                                                                                           08612-018
+                            –40      –20      0      20    40           60       80   100                                                                  –40     –20      0       20    40            60         80     100
+                                                  TEMPERATURE (°C)                                                                                                               TEMPERATURE (°C)
+                                   Figure 5. Standby (ICC) Current vs. Temperature                                                            Figure 7. Input/Output VOL vs. Temperature (Sink Current = 1 mA)
+                           140                                                                                                                            1.7
+                                                                                                                                                          1.6
+                           120                    VCC AT 1.8V
+                                                                                                                                                          1.5
+   INPUT/OUTPUT VOH (mV)
+                           100
+                                                                                                                                 STANDBY CURRENT (µA)
+                                                                                                                                                          1.4
+                                                  VCC AT 3.0V                                                                                             1.3
+                            80
+                                                                                                                                                          1.2
+                            60
+                                                                                                                                                          1.1
+                            40                                                                                                                            1.0
+                                                                                                                                                          0.9
+                            20
+                                                                                                                                                          0.8
+                             0                                                                                                                            0.7
+                                                                                             08612-019                                                                                                                           08612-020
+                             –40     –20      0      20    40           60       80   100                                                                   1.7    1.9    2.1    2.3   2.5   2.7             2.9    3.1   3.3
+                                                  TEMPERATURE (°C)                                                                                                              SUPPLY VOLTAGE (V)
+      Figure 6. Input/Output VOH vs. Temperature (Source Current = 1 mA)                                                                                          Figure 8. Supply Voltage vs. Standby Current
+                                                                                                         Rev. E | Page 7 of 24
+
+
+ADP5587                                                                                                                                                                               Data Sheet
+THEORY OF OPERATION
+                                       GND                                                                                          ADP5587
+                                              19
+                      VCC
+                                       VCC
+                                              21
+                                                                                                                                                      C9
+                                       SCL                                                                                                       18
+                                              23
+                                       SDA
+                                              22               CONTROL                                  CONTROL
+                                                              REGISTERS                                INTERFACE
+                                       RST                                                                                                            C8
+                                              20
+                                                                                                                                                 17
+                                        INT
+                                              24
+                            SCL
+                                                   1     2      3    4     5     6     7     8     9    10    11    12    13    14    15    16
+                            SDA
+                            RST                R7       R6    R5    R4    R3    R2    R1    R0    C0   C1    C2    C3    C4    C5    C6    C7
+                            INT
+                                                   A7 A6 A5 A4 A3 A2 A1 A0
+                                                   B7 B6 B5 B4 B3 B2 B1 B0
+                                                   C7 C6 C5 C4 C3 C2 C1 C0
+                                                   D7 D6 D5 D4 D3 D2 D1 D0
+                                                   E7 E6 E5 E4 E3 E2 E1 E0
+                                                   F7 F6 F5 F4 F3 F2 F1 F0
+                                                   G7 G6 G5 G4 G3 G2 G1 G0
+                                                   H7 H6 H5 H4 H3 H2 H1 H0
+                                                   I7    I6    I5    I4    I3    I2    I1    I0
+                                                   J7 J6       J5 J4 J3 J2 J1 J0                                                                                     08612-005
+                                                                     Figure 9. Typical Operating Circuit
+The ADP5587 is a GPIO expander that can be configured either                                           Table 9. Key Event Number Assignment Table
+as an 18 I/O port expander or as a 10 column × 8 row keypad                                            Row          C0         C1          C2    C3        C4   C5               C6    C7   C8   C9
+matrix (80 keys maximum). It is ideal for cellular phone designs                                       R0           1          2           3     4         5    6                7     8    9    10
+and other portable devices that require a large extended keypad                                        R1           11         12          13    14        15   16               17    18   19   20
+and/or expanded I/Os. When smaller size keypads are required,                                          R2           21         22          23    24        25   26               27    28   29   30
+unused GPIOs in the keypad matrix can be used as I/Os (GPOs                                            R3           31         32          33    34        35   36               37    38   39   40
+and GPIs). All GPIOs (rows and columns) default to GPIs at                                             R4           41         42          43    44        45   46               47    48   49   50
+power-up with pull-ups and debounce enabled.                                                           R5           51         52          53    54        55   56               57    58   59   60
+KEYPAD OPERATION                                                                                       R6           61         62          63    64        65   66               67    68   69   70
+                                                                                                       R7           71         72          73    74        75   76               77    78   79   80
+Any number of rows and columns, up to 10 columns × 8 rows,
+can be configured to be part of the keypad matrix. The rows and                                        When one key press or multiple key presses (short between
+columns that make up the keypad matrix must be configured by                                           column and row) occur, the internal state machine checks the
+setting the corresponding bits in Register 0x1D to Register 0x1F.                                      row pins to determine which one is driven low and then triggers
+Key presses and releases appear in the key event table/registers                                       an internal interrupt. The state machine then starts a key scan
+with a decimal value of 1 (0x01 hexadecimal or 0000001 binary)                                         cycle to determine which columns are involved in the key press.
+through a decimal value of 80 (0x50 hexadecimal or 1010000                                             After a key has been pressed for 25 ms, the state machine sets
+binary). See Table 9 for key event number assignments. The                                             the appropriate key number in the key event status register with
+keypad, in idle mode, is configured with columns driven low                                            the key-pressed bits set (the MSB in the key event register) in
+and rows as inputs configured high with pull-up resistors.                                             the order detected. The state machine then sets the KE_INT bit
+                                                                                                       in Register 0x02. If the KE_IEN field in Register 0x01 is set, an
+                                                                                                       interrupt is sent to the host processor.
+                                                                                Rev. E | Page 8 of 24
+
+
+Data Sheet                                                                                                                                                                                                                         ADP5587
+To prevent glitches or narrow press times registering as valid                                                                                                    bits display the binary representation of the keys that are pressed
+key presses, the key scanner requires the key to be pressed for                                                                                                   or released.
+two scan cycles. The key scanner has a sampling period of 25 ms;                                                                                                  The first read of any of the FIFO registers displays the first
+therefore, the key must be pressed and held for at least 25 ms to                                                                                                 event that happened and its status. Subsequent reads of the
+register as pressed. If the key is continuously pressed, the key                                                                                                  same register replace the register data with the next event that
+scanner continues to sample every 25 ms. If a pressed key is                                                                                                      happens. If tracking of all the events is important, it is best to
+released for 25 ms or greater, the state machine sets the                                                                                                         use a single register per event. After all the events in the FIFO
+appropriate key number in the key event status register with the                                                                                                  are read, reading of any of the event registers yields a zero value.
+key-pressed bits cleared in the order detected. Because the
+release of a key is not necessarily in sync with the key scan                                                                                                     Table 10 and Table 11 show the event sequences as they are
+sampling period, it may take between 25 ms and 50 ms for a key                                                                                                    logged in and read from the FIFO. The 10 FIFO registers are
+to register as released. After the key is registered as released, the                                                                                             labeled A through J, and the keys are labeled A0 through J7.
+key scanner returns to idle mode. Figure 10 shows the row and                                                                                                     Table 10. Example of Event Sequence
+column pins connected to a typical 10 × 8, 80-switch keypad
+                                                                                                                                                                  Key Pressed/Released                 Status             Key Event Counter
+matrix.
+                                                                                                                                                                  A0                                   Pressed            1
+                                                                                   VCC
+                                                                                                                                                                  B1                                   Pressed            2
+ D7_PULL   D6_PULL   D5_PULL   D4_PULL   D3_PULL   D2_PULL   D1_PULL    D0_PULL
+                                                                                                                                                                  A0                                   Released           3
+                                                                                                                                                                  C2                                   Pressed            4
+                                                                                                                                                                  B1                                   Released           5
+                                                                                         KEYPAD SCAN AND DECODE
+                                                                                                                                                                  D3                                   Pressed            6
+                                                                                                                                                                  C2                                   Released           7
+                                                                                                                                                                  E4                                   Pressed            8
+                                                                                                                                                                  E4                                   Released           9
+                                                                                                                                                                  D3                                   Released           10
+                                                                                                                                                                  Table 11. Interpretation of FIFO Event Reading
+  R7 R6 R5 R4 R3 R2 R1 R0                                                                                         C0 C1 C2 C3 C4 C5 C6 C7 C8 C9
+                                                                                                                                                                                     Key Event         Key Event Reg-          Key Event
+      A7 A6 A5 A4 A3 A2 A1 A0
+                                                                                                                                                                  Key Event          Register          ister Content           Register
+      B7 B6 B5 B4 B3 B2 B1 B0
+                                                                                                                                                                  Counter            Read              (Binary)1               Interpretation
+      C7 C6 C5 C4 C3 C2 C1 C0                                                                                                                                     10                 N/A               N/A                     N/A
+      D7 D6 D5 D4 D3 D2 D1 D0                                                                                                                                     9                  D                 1 0000001               Key A0 pressed
+      E7 E6 E5 E4 E3 E2 E1 E0                                                                                                                                     8                  E                 1 0001100               Key B1 pressed
+       F7 F6 F5 F4 F3 F2 F1 F0                                                                                                                                    7                  C                 0 0000001               Key A0 released
+      G7 G6 G5 G4 G3 G2 G1 G0
+                                                                                                                                                                  6                  F                 1 0010111               Key C2 pressed
+      H7 H6 H5 H4 H3 H2 H1 H0
+                                                                                                                                                                  5                  G                 0 0001100               Key B1 released
+       I7        I6        I5        I4        I3        I2            I1         I0
+       J7        J6        J5        J4        J3        J2        J1         J0
+                                                                                                                                                                  4                  A                 1 0100010               Key D3 pressed
+                                                                                                                                                                  3                  B                 0 0010111               Key C2 released
+                     10 × 8 KEYPAD MATRIX
+                                                                                                                                                                  2                  H                 1 0101101               Key E4 pressed
+                                                                                                                                                    08612-006
+NOTES:
+1. Dx_PULL STANDS FOR GPIO PULL-UP.                                                                                                                               1                  J                 0 0101101               Key E4 released
+                                               Figure 10. Keypad Decode Configuration                                                                             0                  I                 0 0100010               Key D3 released
+                                                                                                                                                                  1
+                                                                                                                                                                      The MSB indicates a key press or key release in the key event register: 1 = key
+Key Event Tracking                                                                                                                                                    press; 0 = key release.
+The 10 key event registers are set to act as a FIFO, meaning that                                                                                                 Key Event Overflow
+reading any of the 10 key event registers yields the key events in
+                                                                                                                                                                  The ADP5587 is equipped with an overflow feature to handle
+the order the keys were pressed and released.
+                                                                                                                                                                  key events beyond the FIFO capacity. When all events are filled, any
+Tracking of key events is done with the help of the key event                                                                                                     additional events set the OVR_FLOW_INT bit in Register 0x02;
+counter (the KEC field in Register 0x03) and the FIFO/key                                                                                                         if the OVR_FLOW_IEN bit in Register 0x01 is set, the host
+event registers (Register 0x04 through Register 0x0D). The KEC                                                                                                    processor is also interrupted when overflow occurs. When the
+count increases as keys are pressed and released; up to 10 events                                                                                                 FIFO is not full, new events are added as the last events.
+can be logged in the counter. The FIFO/key event registers, on
+                                                                                                                                                                  The OVR_FLOW_M bit in Register 0x01 sets the mode of
+the other hand, display the key events and their status (pressed
+                                                                                                                                                                  operation during overflows. Clearing the OVR_FLOW_M bit
+or released) as they are read out of the FIFO. The FIFO registers
+                                                                                                                                                                  causes new incoming events to be discarded, and setting this bit
+contain eight bits, with the MSB dedicated as the status bit (1
+                                                                                                                                                                  rolls over and overwrites old data with new data starting at the
+indicates a press and 0 indicates a release); the remaining seven
+                                                                                                                                                                  first event.
+                                                                                                                                                  Rev. E | Page 9 of 24
+
+
+ADP5587                                                                                                                                           Data Sheet
+Auto-Increment                                                                            FIFO, it then reads the KEC field again (in Register 0x03) to
+The ADP5587 features automatic increment during I C read   2                              make sure that no new events have come in. After all the events
+access, which allows the user to increment the address pointer                            are read, the KEC field is decremented to zero (KEC = 0), and
+without the need to send a read command for subsequent                                    the KE_INT bit can be cleared by writing a 1 to it. Both key
+addresses. This minimizes processor intervention and, therefore,                          presses and key releases are capable of generating key event
+saves processor bandwidth and current drain. Bit 7 of Register 0x01                       interrupts. The KE_INT bit cannot be cleared, and the INT pin
+must be set to initiate auto-increment (see Figure 17 for the full                        cannot be deasserted, until the FIFO is cleared of all events.
+write and read sequence).                                                                        REG. 0x1D
+                                                                                             THROUGH REG. 0x1F
+                                                                                               KEYPAD MODE
+Key Event Interrupt
+                                                                                                                        REG. 0x02
+On a key event (KE) interrupt, the processor reads the interrupt                                   REG. 0x01         WRITE 1 TO CLEAR
+                                                                                                    KE_IEN               KE_INT             AND        INT DRIVE
+status register to determine the cause of the interrupt. If the
+                                                                                                  REG. 0x03
+KE_INT bit in Register 0x02 is set, the processor reads the key
+                                                                                                                                                                   08612-007
+                                                                                             READ KE(s) TO CLEAR
+event count from the KEC [3:0] field in Register 0x03 to determine                                   KEC
+the number of events. After reading all the events from the                                                Figure 11. Key Event Interrupt Generation
+                                                                           START
+                                                               NO                         YES
+                                                                     MASK TIMER = 0
+                                   NO    KEY PRESS         YES                                         KEY PRESS        NO
+                                         DETECTED                                                      DETECTED
+                                                                                                               YES
+                                                          GENERATE
+                                                         KE INTERRUPT
+                                                                                                     FIRST UNLOCK       NO
+                                                       START MASK TIMER                              KEY DETECTED
+                                                                                                               YES
+                                               YES        MASK TIMER
+                                                                                                START UNLOCK1 TO UNLOCK2
+                                                           EXPIRES
+                                                                    NO
+                                                                                                      UNLOCK1 TO
+                                                                                                                          YES
+                                                  NO     FIRST UNLOCK                                   UNLOCK2
+                                                         KEY DETECTED                                TIMER EXPIRES
+                                                                                                               NO
+                                                                    YES
+                                              START UNLOCK1 TO UNLOCK2
+                                                                                                     SECOND UNLOCK       NO
+                                                                                                      KEY DETECTED
+                                                          UNLOCK1 TO
+                                            YES
+                                                            UNLOCK2                                            YES
+                                                         TIMER EXPIRES
+                                                                                                       GENERATE
+                                                                    NO                             KEYLOCK INTERRUPT
+                                              YES         MASK TIMER
+                                                           EXPIRES
+                                                                    NO
+                                               NO       SECOND UNLOCK
+                                                         KEY DETECTED
+                                                                    YES
+                                                                                                                                08612-008
+                                                           GENERATE
+                                                       KEYLOCK INTERRUPT
+                                                  Figure 12. Keypad Lock Interrupt Mask Timer Flowchart
+                                                                         Rev. E | Page 10 of 24
+
+
+Data Sheet                                                                                                                                  ADP5587
+Keypad Lock/Unlock Feature                                                      interrupt, the state machine does not interrupt the processor
+                                                                                again unless the correct sequence is keyed. The state machine is
+The ADP5587 has a locking feature that allows the user to lock
+                                                                                reset if the correct sequences are not keyed before the keypad
+the keypad or GPIs (configured to be part of the event table).
+                                                                                lock interrupt mask timer expires.
+When enabled, the keypad lock can prevent generation of key
+event interrupts and prevent key events from being recorded                     The state of the keypad lock interrupt mask bit (Register 0x01,
+in the key event table. This feature comprises the Unlock Key 1                 Bit 2) in the configuration register determines whether the
+and Unlock Key 2 registers (Register 0x0F and Register 0x10,                    interrupt pin is asserted when the keylock interrupt status bit
+respectively), the keypad lock interrupt mask and keypad                        (Register 0x02, Bit 2) is set. Setting the keylock interrupt mask
+unlock timers (Register 0x0E), and the LCK1, LCK2, and                          bit causes the INT pin to be asserted when the keylock interrupt
+keylock enable (K_LCK_EN) bits (Register 0x03).                                 status bit is set in Register 0x02; clearing that bit masks the
+                                                                                interrupt, causing the interrupt pin not to respond to the keylock
+The unlock keys can be programmed with any value of the keys
+                                                                                interrupt status bit. The mask interrupt timer should be set for
+in the keypad matrix or any GPI event values that are part of the
+                                                                                the time that it takes for the LCD to dim or turn off so that, if a
+key event table. When the keypad lock interrupt mask timer is
+                                                                                key is pressed, the backlight is set to bright mode again or reset
+enabled, the user must press two specific keys before a keylock
+                                                                                to turn on the LCD.
+interrupt is generated or keypad events are recorded. After the
+keypad is locked (set Bit 6, Register 0x03, to enable the lock),                When the unlock mask interrupt timer equals 0, only the
+the first time that the user presses any key, a key event interrupt             correct unlock sequence can generate an interrupt. Disabling
+is generated. No additional interrupt is generated unless both                  the unlock mask interrupt timer allows the processor to remain
+unlock key sequences are correct.                                               undisturbed for situations in which the user, for example, has
+                                                                                the phone in a pocket or purse and the keys are constantly
+If the correct unlock keys are not pressed before the mask timer
+                                                                                pressed. The flowchart in Figure 11 shows the interaction of
+expires, the state machine starts over. The first key event inter-
+                                                                                interrupt enable, key event counter, key event interrupt status,
+rupt is generated to allow the software to see that the user has
+                                                                                and interrupt generation.
+pressed a key so that the host can turn on the LCD and display
+the unlock message. The host then reads the lock status register
+to see if the keypad is unlocked. After the first key event
+                                                                                                        VCC
+                      KEY EVENT INTERRUPT
+                         GPIO INTERRUPT
+                                                        OR                                        INT
+                       KEYLOCK INTERRUPT                                          INT
+                                                                                 LOGIC
+                      OVERFLOW INTERRUPT
+                    GPIEM_ OVR_FLOW_ K_LCK_IM GPI_IEN KE_IEN K_LCK_EN
+                     CFG      IEN
+                         KEYPAD LOCK INTERRUPT MASK TIMER
+                                                                                                                                08612-009
+                              INTERRUPT CONFIGURATION
+                                                             Figure 13. INT Pin Drive
+                                                               Rev. E | Page 11 of 24
+
+
+ADP5587                                                                                                                                        Data Sheet
+                                                                                              REG. 0x23
+GENERAL-PURPOSE INPUTS AND OUTPUTS                                                            THROUGH
+                                                                                              REG. 0x25                        REG. 0x11
+                                                                                                Dx_IN                          THROUGH
+The ADP5587 supports up to 18 programmable GPIOs that can                                                 INTERRUPT            REG. 0x13     REG. 0x02
+                                                                                                                              READ TWICE      WRITE 1
+be configured to address a variety of uses. Figure 14 shows the                               REG. 0x26   CONDITION            TO CLEAR      TO CLEAR
+                                                                                              THROUGH       DECODE                                         INT
+makeup of a typical GPIO block where GPIOx represents any of                                  REG. 0x28                AND    Dx_IN_ISTAT     GPI_INT
+                                                                                                                                                           DRIVE
+                                                                                               Dx_ILVL
+the 18 I/O lines.
+                                   VCC                                                        REG. 0x01
+                                                                                              Dx_IN_IEN
+                                                                                          NOTES:
+                                                                                          1. Dx_IN STANDS FOR ANY OF THE 18 GPIOs CONFIGURED AS GPIs.
+                                                                                          2. Dx_ILVL STANDS FOR GPIO INTERRUPT LEVEL.
+                    Dx_PULL                                                               3. Dx_IN_IEN STANDS FOR GPI INTERRUPT ENABLE.
+                                                                                                                                                                   08612-011
+   Dx_IN_DBNC                                                                             4. Dx_IN_STAT STANDS FOR GPI INTERRUPT STATUS.
+                                                                                          5. GPI_INT STANDS FOR GPI INTERRUPT.
+   Dx_IN         DEBOUNCE
+                                                                                                            Figure 15. GPIO Interrupt Generation
+                 VCC
+                                                                                         GPI Events
+   Dx_OUT                                      GPIOx                                     A column or row configured as a GPI can be programmed to be
+                                                                                         part of the key event table and is, therefore, also capable of
+   Dx_DIR
+                                                                                         generating a key event interrupt. A key event interrupt caused
+                                                                                         by a GPI follows the same process flow as a key event interrupt
+   NOTES:
+   1. Dx_IN STANDS FOR ANY OF THE 18 GPIOs CONFIGURED AS GPIs.                           caused by a key press or key release. GPIs configured as part of
+   2. Dx_OUT STANDS FOR ANY OF THE 18 GPIOs CONFIGURED AS GPOs.                          the key event table allow single key switches and other GPI
+   3. Dx_IN_DBNC STANDS FOR GPI DEBOUNCE.
+                                                                  08612-010
+   4. Dx_DIR STANDS FOR GPIO DIRECTION.                                                  interrupts to be monitored. As part of the event table, GPIs are
+   5. Dx_PULL STANDS FOR GPIO PULL-UP.
+                                                                                         represented by a decimal value of 97 (0x61 hexadecimal or
+                     Figure 14. Typical GPIO Block                                       1100001 binary) through a decimal value of 114 (0x72
+                                                                                         hexadecimal or 1110010 binary). See Table 12 and Table 13 for
+General-Purpose Inputs (GPI)                                                             GPI event number assignments for rows and columns,
+The ADP5587 allows the user to configure all or some of its                              respectively.
+GPIOs as general-purpose inputs (GPIs). After the GPIOs are
+configured as GPIs, the user can choose to also turn on pull-up                          Table 12. GPI Event Number Assignments for Rows
+resistors and interrupt generation capability, thus reducing the                         R0         R1      R2         R3      R4        R5        R6          R7
+amount of software monitoring and processor interaction and                              97         98      99         100     101       102       103         104
+saving power.
+                                                                                         Table 13. GPI Event Number Assignments for Columns
+The programmed level of the GPI interrupt determines the                                 C0       C1      C2     C3     C4     C5      C6      C7        C8     C9
+active level of the GPI pin. For example, if a GPI interrupt level                       105      106     107    108    109    110     111     112       113    114
+is programmed as high, a high on that pin is considered active
+and meets the interrupt requirement. If the interrupt is pro-                            For a GPI that is set as active high and is enabled in the key
+grammed as low, a low on that pin is considered active and                               event table, the state machine adds an event to the event count
+meets the interrupt requirement.                                                         and event tables whenever that GPI goes high. If the GPI is set
+                                                                                         to active low, a transition from high to low is considered a press
+GPI data status and interrupt status are reflected in the GPIO                           and is also added to the event count and event table. After the
+interrupt status and data status registers (Register 0x11 through                        interrupt state is met, the state machine internally sets an
+Register 0x16). Caution is necessary during software imple-                              interrupt for the opposite state programmed in the register to
+mentation because an interrupt may be set immediately after                              prevent polling for the released state, thereby saving current.
+the registers are set. To prevent this, the correct logic levels                         After the released state is achieved, it is added to the event table.
+must be present at the GPIs, and the GPIO interrupt level must                           The press and release are still indicated by Bit 7 in the event
+be set before GPIO interrupt enable or GPI event FIFO enable                             register (Register 0x04 through Register 0x0D). The GPI events
+registers are set. Figure 15 shows the interrupt generation                              can also be used as unlocked sequences.
+scheme, where Dx represents any one of the 18 GPIOs.
+                                                                                         When the GPI_EM_REGx bit in Register 0x20 through Register
+                                                                                         0x22 is set, GPI events are not tracked when the keypad is locked.
+                                                                                         The GPIEM_CFG bit (Register 0x01, Bit 6) must be cleared for
+                                                                                         the GPI events to be tracked in the event counter and event
+                                                                                         table when the keypad is locked.
+                                                                        Rev. E | Page 12 of 24
+
+
+Data Sheet                                                                                                                            ADP5587
+275 Microsecond Interrupt Configuration                                          General-Purpose Outputs (GPOs)
+The ADP5587 gives the user the flexibility of deasserting the                    The ADP5587 allows the user to configure all or some of its
+interrupt for 275 μs while there is a pending event. When the                    GPIOs as GPOs. These GPOs can be used as extra enables for
+INT_CFG bit in Register 0x01 is set, any attempt to clear the                    the host processor or simply as trigger outputs. When configured
+interrupt bit while the interrupt pin is already asserted results                as an output (GPO), a digital buffer drives the pin to 0 V for a 0
+in a 275 μs deassertion. When the INT_CFG bit is cleared, the                    and to VCC for a 1. To set any GPIO as a GPO, make sure that
+processor interrupt remains asserted if the host tries to clear                  the corresponding bits in Register 0x1D through Register 0x1F are
+the interrupt. This feature is particularly useful for software                  set for GPIO mode; then use Register 0x23 through Register 0x25
+development and edge triggering applications.                                    to set the corresponding bits for GPO mode.
+Debouncing                                                                       Power-On Reset
+The ADP5587 has a 275 μs debounce time for GPIOs configured                      For built-in power-up initialization for applications lacking a
+as GPIs and rows in keypad scanning mode. The reset line                         power-on reset signal, a reset pin, RST, allows the user to reset
+always has a 275 μs debounce time.                                               the registers to default values in the event of a brownout or
+                                                                                 other reset condition.
+Table 14. Device Configuration
+                                Keypad                                                                         GPIO
+Matrix          Active Pins                  Number of Keys                  Available GPIO                          Number of GPIOs
+10 × 8          C0 to C9, R0 to R7           80                              0                                       0
+8×8             C0 to C7, R0 to R7           64                              C8, C9                                  2
+8×7             C0 to C7, R0 to R6           56                              R7, C8, C9                              3
+8×6             C0 to C7, R0 to R5           48                              R6, R7, C8, C9                          4
+8×5             C0 to C7, R0 to R4           40                              R5 to R7, C8, C9                        5
+7×7             C0 to C6, R0 to R6           49                              R7, C7 to C9                            4
+7×6             C0 to C6, R0 to R5           42                              R6, R7, C7 to C9                        5
+7×5             C0 to C6, R0 to R4           35                              R5 to R7, C7 to C9                      6
+6×6             C0 to C5, R0 to R5           36                              R6, R7, C6 to C9                        6
+6×5             C0 to C5, R0 to R4           30                              R5 to R7, C6 to C9                      7
+6×4             C0 to C5, R0 to R3           24                              R4 to R7, C6 to C9                      8
+…               …                            …                               …                                       …
+0×0             None                         0                               R0 to R7, C0 to C9                      18
+                                                                Rev. E | Page 13 of 24
+
+
+ADP5587                                                                                                                                                                                                                                                                                         Data Sheet
+I2C PROGRAMMING AND DIGITAL CONTROL
+The ADP5587 provides full I2C software programmability to                                                                                                                     byte to be written is sent next. The ADP5587 acknowledges the
+facilitate its adoption in various product architectures. All                                                                                                                 data byte by pulling the data line low, and a stop condition
+register programming is done via the I2C bus. The LFCSP                                                                                                                       completes the sequence.
+package has two options for I2C addressing.                                                                                                                                   Figure 17 shows a typical read sequence for reading back an
+The default part option I C write address is located at 0x68
+                                    2                                                                                                                                         internal register. The cycle begins with a start condition
+(0b01101000), and the read address is at 0x69 (0b 01101001).                                                                                                                  followed by the chip write address. The ADP5587 acknowledges
+                                                                                                                                                                              the chip write address byte by pulling the data line low. The
+The ADP5587ACPZ-1-R7 has the I2C write address at 0x60 (0b                                                                                                                    address of the register from which data is to be read is sent next.
+01100000) and the read address at 0x61 (0b 01100001).                                                                                                                         The ADP5587 acknowledges the register address byte by pulling
+All communication to the ADP5587 is performed via its I2C-                                                                                                                    the data line low. The cycle continues with a repeat start
+compatible serial interface. Figure 16 shows a typical write                                                                                                                  followed by the chip read address. The ADP5587 acknowledges
+sequence for programming an internal register. The cycle                                                                                                                      the chip read address byte by pulling the data line low. The
+begins with a start condition followed by the chip write address.                                                                                                             ADP5587 places the contents of the previously addressed
+The ADP5587 acknowledges the chip write address byte by                                                                                                                       register on the bus for readback. There is no acknowledge
+pulling the data line low. The address of the register to which                                                                                                               following the readback data byte, and a stop condition
+data is to be written is sent next. The ADP5587 acknowledges                                                                                                                  completes the cycle.
+the register address byte by pulling the data line low. The data
+                                                                                                       0 = WRITE
+                                                               ST 0    1    1        0         1   0   0       0            0                                                            0                                                   0 SP
+                                                                                                                         ADP5587 ACK                                                 ADP5587 ACK                                         ADP5587 ACK
+                                                                           CHIP ADDRESS 1                                                       SUBADDRESS                                         ADP5587 RECEIVES D ATA
+                                                  1DEFAULT WRITE ADDRESS IS 0x68. OPTION 1 WRITE ADDRESS IS 0x60.                                                                                                                                      08612-012
+                                                                                                                                  Figure 16. I2C Write Sequence
+                                                                       0 = WRITE                                                                                                                           1 = READ
+                             ST 0       1    1    0            1   0   0    0       0          0   0   0      0            0           0   1    1      0 ST 0             1    1        0          1   0   0   1      0                                                1 SP
+                                                                                                                                                                                                                                                                   ADP5587 NO ACK
+                                                                                 ADP5587 ACK                                                        ADP5587 ACK                                                    ADP5587 ACK
+                                            CHIP ADDRESS 1                                             SUBADDRESS                                                             CHIP ADDRESS 2                                     ADP5587 SENDS DATA
+                                                                                                                                                                                                                                                                                    08612-013
+                         1DEFAULT WRITE ADDRESS IS 0x68. OPTION 1 WRITE ADDRESS IS 0x60.
+                         2DEFAULT READ ADDRESS IS 0x69. OPTION 1 READ ADDRESS IS 0x61.
+                                                                                                           Figure 17. I2C Read and Write Sequences
+                                        0 = WRITE                                                                                                                         1 = READ
+         ST 0    1   1   0   1   0      0    0      0          0   0   0     0       0         0   1   1      0 ST 0                       1    1     0           1   0   0    1      0                                                  0 ...                                                       1 ST
+         START                                                                                                                                                                                                                                                                                                    STOP
+                                                                                                                                                                                                                                                                                                 ADP5587 NO ACK
+                                                 ADP5587 ACK                                               ADP5587 ACK                                                             ADP5587 ACK                                        ADP5587 ACK
+                     CHIP ADDRESS                                  READ START ADDR                                                             CHIP ADDRESS 1                                      ADP5587 SENDS DATA 1                                  ADP5587 SENDS DATA N
+       1DEFAULT READ ADDRESS IS 0x69. OPTION 1 READ ADDRESS IS 0x61.                                                                                                                                                                                                                                                     08612-014
+                                                                                                                     Figure 18. I2C Read Auto-Increment
+                                                                                                                                           Rev. E | Page 14 of 24
+
+
+Data Sheet                                                                                                                           ADP5587
+REGISTERS
+The general behavior of registers is as follows:                               •     Interrupt bits are cleared by writing 1 to the flag; writing 0
+•    All registers are 0 on reset.                                                   or reading the flag has no effect, with the exception of the
+                                                                                     key press, key release, and GPIO interrupt status registers,
+•    All registers are read/write unless otherwise specified.
+                                                                                     which are cleared on a read.
+•    Unused bits are read as 0.
+Table 15.
+Address                    Register Name                           Description
+0x00                       DEV_ID                                  Device ID
+0x01                       CFG                                     Configuration Register 1
+0x02                       INT_STAT                                Interrupt status register
+0x03                       KEY_LCK_EC_STAT                         Keylock and event counter register
+0x04                       KEY_EVENTA                              Key Event Register A
+0x05                       KEY_EVENTB                              Key Event Register B
+0x06                       KEY_EVENTC                              Key Event Register C
+0x07                       KEY_EVENTD                              Key Event Register D
+0x08                       KEY_EVENTE                              Key Event Register E
+0x09                       KEY_EVENTF                              Key Event Register F
+0x0A                       KEY_EVENTG                              Key Event Register G
+0x0B                       KEY_EVENTH                              Key Event Register H
+0x0C                       KEY_EVENTI                              Key Event Register I
+0x0D                       KEY_EVENTJ                              Key Event Register J
+0x0E                       KP_LCK_TMR                              Keypad Unlock 1 timer to Keypad Unlock 2 timer
+0x0F                       UNLOCK1                                 Unlock Key 1
+0x10                       UNLOCK2                                 Unlock Key 2
+0x11                       GPIO_INT_STAT1                          GPIO interrupt status
+0x12                       GPIO_INT_STAT2                          GPIO interrupt status
+0x13                       GPIO_INT_STAT3                          GPIO interrupt status
+0x14                       GPIO_DAT_STAT1                          GPIO data status, read twice to clear
+0x15                       GPIO_DAT_STAT2                          GPIO data status, read twice to clear
+0x16                       GPIO_DAT_STAT3                          GPIO data status, read twice to clear
+0x17                       GPIO_DAT_OUT1                           GPIO data out
+0x18                       GPIO_DAT_OUT2                           GPIO data out
+0x19                       GPIO_DAT_OUT3                           GPIO data out
+0x1A                       GPIO_INT_EN1                            GPIO interrupt enable
+0x1B                       GPIO_INT_EN2                            GPIO interrupt enable
+0x1C                       GPIO_INT_EN3                            GPIO interrupt enable
+0x1D                       KP_GPIO1                                Keypad or GPIO selection
+0x1E                       KP_GPIO2                                Keypad or GPIO selection
+0x1F                       KP_GPIO3                                Keypad or GPIO selection
+0x20                       GPI_EM_REG1                             GPI Event Mode 1
+0x21                       GPI_EM_REG2                             GPI Event Mode 2
+0x22                       GPI_EM_REG3                             GPI Event Mode 3
+0x23                       GPIO_DIR1                               GPIO data direction
+0x24                       GPIO_DIR2                               GPIO data direction
+0x25                       GPIO_DIR3                               GPIO data direction
+0x26                       GPIO_INT_LVL1                           GPIO level detect
+0x27                       GPIO_INT_LVL2                           GPIO level detect
+0x28                       GPIO_INT_LVL3                           GPIO level detect
+0x29                       DEBOUNCE_DIS1                           Debounce disable
+                                                              Rev. E | Page 15 of 24
+
+
+ADP5587                                                                                                                      Data Sheet
+Address               Register Name                               Description
+0x2A                  DEBOUNCE_DIS2                               Debounce disable
+0x2B                  DEBOUNCE_DIS3                               Debounce disable
+0x2C                  GPIO_PULL1                                  GPIO pull disable
+0x2D                  GPIO_PULL2                                  GPIO pull disable
+0x2E                  GPIO_PULL3                                  GPIO pull disable
+REGISTER DESCRIPTIONS
+Table 16. DEV_ID—Register 0x00 (Device ID)
+Default: 0000 XXXX (where X = don’t care).
+Register Name    Register Description                     Bit 7         Bit 6       Bit 5    Bit 4         Bit 3    Bit 2      Bit 1     Bit 0
+DEV_ID           Device ID[3:0], MFG ID[7:4]              MFID3         MFID2       MFID1    MFID0         DID3     DID2       DID1      DID0
+Table 17. CFG—Register 0x01 (Configuration Register 1)
+Field            Bits       Description
+AUTO_INC         7          I2C auto-increment. Burst read is supported; burst write is not supported.
+                            1: I2C auto-increment is on.
+                            0: I2C auto-increment is off.
+GPIEM_CFG        6          GPI event mode configuration.
+                            1: GPI events are not tracked when the keypad is locked.
+                            0: GPI events are tracked when the keypad is locked.
+OVR_FLOW_M       5          Overflow mode.
+                            1: overflow mode is on; register overflow data shifts in, starting at the last event and losing first event data.
+                            0: overflow mode is off; register overflow data is lost.
+INT_CFG          4          Interrupt configuration.
+                            1: processor interrupt is deasserted for 275 μs and is reasserted with pending key events.
+                            0: processor interrupt remains asserted when host tries to clear interrupt while there is a pending key event.
+OVR_FLOW_IEN     3          Overflow interrupt enable.
+                            1: overflow interrupt is enabled.
+                            0: overflow interrupt is disabled.
+K_LCK_IM         2          Keypad lock interrupt mask.
+                            1: keypad lock interrupt is enabled.
+                            0: keypad lock interrupt is disabled.
+GPI_IEN          1          GPI interrupt enable.
+                            1: GPI interrupt is enabled.
+                            0: GPI interrupt is disabled.
+KE_IEN           0          Key events interrupt enable.
+                            1: key events interrupt is enabled.
+                            0: key events interrupt is disabled.
+                                                             Rev. E | Page 16 of 24
+
+
+Data Sheet                                                                                                                                                    ADP5587
+Table 18. INT_STAT—Register 0x02 (Interrupt Status Register)
+Field                                       Bits              Description
+Not Used                                    [7:4]             N/A
+OVR_FLOW_INT 1                              3                 Overflow interrupt status. When set, write 1 to clear.
+                                                              1: overflow interrupt is detected.
+                                                              0: overflow interrupt is not detected.
+K_LCK_INT 2                                 2                 Keylock interrupt status. When set, write 1 to clear.
+                                                              1: keylock interrupt is detected.
+                                                              0: keylock interrupt is not detected.
+GPI_INT1, 3                                 1                 GPI interrupt status. When set, write 1 to clear.
+                                                              1: GPI interrupt is detected.
+                                                              0: GPI interrupt is not detected.
+KE_INT1, 3                                  0                 Key events interrupt status. When set, write 1 to clear.
+                                                              1: key events interrupt is detected.
+                                                              0: key events interrupt is not detected.
+1
+  The KE_INT, GPI_INT, and OVR_FLOW_INT bits reflect the status of the interrupts when the interrupt types are enabled even if the processor interrupt is masked.
+2
+  The K_LCK_INT bit is the interrupt to the processor when the keypad lock sequence is triggered.
+3
+  If there is a pending key event or GPI interrupt in their respective registers, KE_INT is not cleared until the FIFO is empty, and GPI_INT is not cleared until the cause of
+  the interrupt is resolved. The host must write a 1 to the KE_INT and GPI_INT bits to clear them.
+Table 19. KEY_LCK_EC_STAT—Register 0x03 (Keylock and Event Counter Register)
+Field                                       Bits              Description
+K_LCK_EN                                    [6]               0: lock feature is disabled.
+                                                              1: lock feature is enabled.
+LCK2, LCK1                                  [5:4]             Keypad lock status[1:0] (00 = unlocked; 11 = locked; read-only bits).
+KEC 1                                       [3:0]             Key event count of key event register.
+1
+  The KEC field indicates the key event count of key event registers that have values in the bit (KEC(0000) = 0 events, KEC(0001) = 1 event, KEC(1010) = 10 events). As the
+  key events are read and cleared, the state machine automatically reduces the event count in KEC.
+Table 20. KEY_EVENTx—Register 0x04 to Register 0x0D (Key Event Register A to Key Event Register J) 1
+Register Name                Register Description                                             Bit 7      Bit 6       Bit 5     Bit 4     Bit 3      Bit 2     Bit 1       Bit 0
+KEY_EVENTA                   Key Event Register A status (KE[6:0] = key number),              KA7        KA6         KA5       KA4       KA3        KA2       KA1         KA0
+(Register 0x04)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTB                   Key Event Register B status (KE[6:0] = key number),              KB7        KB6         KB5       KB4       KB3        KB2       KB1         KB0
+(Register 0x05)              KP[7 ] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTC                   Key Event Register C status (KE[6:0] = key number),              KC7        KC6         KC5       KC4       KC3        KC2       KC1         KC0
+(Register 0x06)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTD                   Key Event Register D status (KE[6:0] = key number),              KD7        KD6         KD5       KD4       KD3        KD2       KD1         KD0
+(Register 0x07)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTE 2                 Key Event Register E status (KE[6:0] = key number),              KE7        KE6         KE5       KE4       KE3        KE2       KE1         KE0
+(Register 0x08)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTF                   Key Event Register F status (KE[6:0] = key number),              KF7        KF6         KF5       KF4       KF3        KF2       KF1         KF0
+(Register 0x09)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTG                   Key Event Register G status (KE[6:0] = key number),              KG7        KG6         KG5       KG4       KG3        KG2       KG1         KG0
+(Register 0x0A)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTH                   Key Event Register H status (KE[6:0] = key number),              KH7        KH6         KH5       KH4       KH3        KH2       KH1         KH0
+(Register 0x0B)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTI                   Key Event Register I status (KE[6:0] = key number),              KI7        KI6         KI5       KI4       KI3        KI2       KI1         KI0
+(Register 0x0C)              KP[7] = 0: released, 1: pressed (cleared on read)
+KEY_EVENTJ                   Key Event Register J status (KE[6:0] = key number),              KJ7        KJ6         KJ5       KJ4       KJ3        KJ2       KJ1         KJ0
+(Register 0x0D)              KP[7] = 0: released, 1: pressed (cleared on read)
+1
+  Data in key event registers is provided as a FIFO, where data is sequentially provided on each read, regardless of an event register read. The user can read the
+  KEY_EVENTA register only for an event count or can read registers sequentially.
+2
+  KE[6:0] reflects the value 1 to 80 for key press events and the value 97 to 114 for GPI events. For KE[7:0], 0 = key released event, 1 = key pressed event. For GPIEM_CFG,
+  0 reflects a change in the GPI from GPI_INT_LVL = true to GPI_INT_LVL = false; 1 reflects a change in the GPI in which the GPI_INT_LVL condition becomes true.
+                                                                              Rev. E | Page 17 of 24
+
+
+ADP5587                                                                                                                                                 Data Sheet
+Table 21. KP_LCK_TMR—Register 0x0E (Keypad Unlock 1 Timer to Keypad Unlock 2 Timer)
+Register Name            Register Description                                     Bit 7       Bit 6       Bit 5      Bit 4        Bit 3       Bit 2       Bit 1      Bit 0
+KP_LCK_TMR               Keypad Unlock 1 timer to Keypad Unlock 2                 KIMT7       KIMT6       KIMT5      KIMT4        KIMT3       KLLT2       KLLT1      KLLT0
+                         timer[2:0] (0: disabled, 1 sec to 7 sec)
+                         Keypad Lock Interrupt Mask Timer[7:3]
+                         (0: disabled, 0 sec to 31 sec) 1, 2
+1
+  When the keypad lock interrupt mask timer is enabled, the user must press two specific keys before a keylock interrupt is generated or keypad events are recorded.
+  After the keypad is locked, the first time that the user presses any key, a key event interrupt is generated. No additional interrupt is generated unless both unlock key
+  sequences are correct; then a keylock interrupt is generated. When the interrupt mask timer is disabled (0), an interrupt is generated only when the correct full unlock
+  sequence is completed.
+2
+  The Unlock 1 timer and Unlock 2 timer keys can be either a key sequence or GPIEM_CFG sequence. The unlock timer keys can be programmed with any value of the
+  keys in the keypad matrix or any GPI values that are part of the key event table. The keylock enable bit (Bit 6, Register 0x03) must be set to lock the keypad.
+Table 22. UNLOCK1—Register 0x0F (Unlock Key 1)
+Register Name              Register Description                                   Bit 7       Bit 6       Bit 5      Bit 4        Bit 3       Bit 2       Bit 1      Bit 0
+UNLOCK1                    Unlock Key 1[6:0] (contains key number                 N/A         ULK6        ULK5       ULK4         ULK3        ULK2        ULK1       ULK0
+                           for Unlock Key 1; 0: disabled)
+Table 23. UNLOCK2—Register 0x10 (Unlock Key 2)
+Register Name              Register Description                                   Bit 7       Bit 6       Bit 5      Bit 4        Bit 3       Bit 2       Bit 1      Bit 0
+UNLOCK2                    Unlock Key 2[6:0] (contains key number                 N/A         ULK6        ULK5       ULK4         ULK3        ULK2        ULK1       ULK0
+                           for Unlock Key 2; 0: disabled)
+Table 24. GPIO_INT_STATx—Register 0x11 to Register 0x13 (GPIO Interrupt Status)
+Register Name              Register Description                                   Bit 7       Bit 6       Bit 5      Bit 4        Bit 3       Bit 2       Bit 1      Bit 0
+GPIO_INT_STAT1             GPIO interrupt status (used to check                   R7IS        R6IS        R5IS       R4IS         R3IS        R2IS        R1IS       R0IS
+(Register 0x11)            GPIO interrupt status, cleared on read)
+GPIO_INT_STAT2             GPIO interrupt status (used to check                   C7IS        C6IS        C5IS       C4IS         C3IS        C2IS        C1IS       C0IS
+(Register 0x12)            GPIO interrupt status, cleared on read)
+GPIO_INT_STAT3             GPIO interrupt status (used to check                   N/A         N/A         N/A        N/A          N/A         N/A         C9IS       C8IS
+(Register 0x13)            GPIO interrupt status, cleared on read)
+Table 25. GPIO_DAT_STATx—Register 0x14 to Register 0x16 (GPIO Data Status)
+Register Name              Register Description                                   Bit 7       Bit 6       Bit 5      Bit 4        Bit 3       Bit 2       Bit 1      Bit 0
+GPIO_DAT_STAT1             GPIO data status (shows GPIO state                     R7DS        R6DS        R5DS       R4DS         R3DS        R2DS        R1DS       R0DS
+(Register 0x14)            when read for inputs)
+GPIO_DAT_STAT2             GPIO data status (shows GPIO state                     C7DS        C6DS        C5DS       C4DS         C3DS        C2DS        C1DS       C0DS
+(Register 0x15)            when read for inputs)
+GPIO_DAT_STAT3             GPIO data status (shows GPIO state                     N/A         N/A         N/A        N/A          N/A         N/A         C9DS       C8DS
+(Register 0x16)            when read for inputs)
+Table 26. GPIO_DAT_OUTx—Register 0x17 to Register 0x19 (GPIO Data Out)
+Register Name              Register Description                                   Bit 7       Bit 6       Bit 5      Bit 4        Bit 3       Bit 2       Bit 1      Bit 0
+GPIO_DAT_OUT1              GPIO data out (GPIO data to be written                 R7DO        R6DO        R5DO       R4DO         R3DO        R2DO        R1DO       R0DO
+(Register 0x17)            to GPIO out driver, inputs are not
+                           affected). This is needed so that the
+                           value can be written prior to being set
+                           as an output.
+GPIO_DAT_OUT2              GPIO data out (GPIO data to be written                 C7DO        C6DO        C5DO       C4DO         C3DO        C2DO        C1DO       C0DO
+(Register 0x18)            to GPIO out driver, inputs are not
+                           affected). This is needed so that the
+                           value can be written prior to being set
+                           as an output.
+GPIO_DAT_OUT3              GPIO data out (GPIO data to be written                 N/A         N/A         N/A        N/A          N/A         N/A         C9DO       C8DO
+(Register 0x19)            to GPIO out driver, inputs are not
+                           affected). This is needed so that the
+                           value can be written prior to being set
+                           as an output.
+                                                                              Rev. E | Page 18 of 24
+
+
+Data Sheet                                                                                               ADP5587
+Table 27. GPIO_INT_ENx—Register 0x1A to Register 0x1C (GPIO Interrupt Enable)
+Register Name      Register Description                   Bit 7        Bit 6   Bit 5 Bit 4 Bit 3 Bit 2 Bit 1 Bit 0
+GPIO_INT_EN1       GPIO interrupt enable (enables         R7IE         R6IE    R5IE  R4IE  R3IE  R2IE  R1IE  R0IE
+(Register 0x1A)    interrupts for GP inputs only)
+GPIO_INT_EN2       GPIO interrupt enable (enables         C7IE         C6IE    C5IE  C4IE  C3IE  C2IE  C1IE  C0IE
+(Register 0x1B)    interrupts for GP inputs only)
+GPIO_INT_EN3       GPIO interrupt enable (enables         N/A          N/A     N/A   N/A   N/A   N/A   C9IE  C8IE
+(Register 0x1C)    interrupts for GP inputs only)
+Table 28. KP_GPIOx—Register 0x1D to Register 0x1F (Keypad or GPIO Selection)
+Register Name      Register Description                   Bit 7        Bit 6   Bit 5 Bit 4 Bit 3 Bit 2 Bit 1 Bit 0
+KP_GPIO1           Keypad or GPIO selection               R7           R6      R5    R4    R3    R2    R1    R0
+(Register 0x1D)    0: GPIO
+                   1: KP matrix
+KP_GPIO2           Keypad or GPIO selection               C7           C6      C5    C4    C3    C2    C1    C0
+(Register 0x1E)    0: GPIO
+                   1: KP matrix
+KP_GPIO3           Keypad or GPIO selection               N/A          N/A     N/A   N/A   N/A   N/A   C9    C8
+(Register 0x1F)    0: GPIO
+                   1: KP matrix
+Table 29. GPI_EM_REGx—Register 0x20 to Register 0x22 (GPI Event Mode 1 to GPI Event Mode 3)
+Register Name      Register Description                   Bit 7        Bit 6   Bit   Bit 4 Bit 3 Bit 2 Bit 1 Bit 0
+GPI_EM_REG1        GPI Event Mode Register 1              R7_EM        R6_EM   R5_EM R4_EM R3_EM R2_EM R1_EM R0_EM
+(Register 0x20)    0: GPI not part of event FIFO
+                   1: GPI part of event FIFO (R0 to R7)
+GPI_EM_REG2        GPI Event Mode Register 2              C7_EM        C6_EM   C5_EM C4_EM C3_EM C2_EM C1_EM C0_EM
+(Register 0x21)    0: GPI not part of event FIFO
+                   1: GPI part of event FIFO (C0 to C7)
+GPI_EM_REG3        GPI Event Mode Register 3              NA           NA      NA    NA    NA    NA    C9_EM C8_EM
+(Register 0x22)    0: GPI not part of event FIFO
+                   1: GPI part of event FIFO (C8 to C9)
+Table 30. GPIO_DIRx—Register 0x23 to Register 0x25 (GPIO Data Direction)
+Register Name      Register Description                   Bit 7        Bit 6   Bit 5 Bit 4 Bit 3 Bit 2 Bit 1 Bit 0
+GPIO_DIR1          GPIO data direction                    R7D          R6D     R5D   R4D   R3D   R2D   R1D   R0D
+(Register 0x23)    0: input
+                   1: output
+GPIO_DIR2          GPIO data direction                    C7D          C6D     C5D   C4D   C3D   C2D   C1D   C0D
+(Register 0x24)    0: input
+                   1: output
+GPIO_DIR3          GPIO data direction                    N/A          N/A     N/A   N/A   N/A   N/A   C9D   C8D
+(Register 0x25)    0: input
+                   1: output
+Table 31. GPIO_INT_LVLx—Register 0x26 to Register 0x28 (GPIO Level Detect)
+Register Name      Register Description                   Bit 7        Bit 6   Bit 5 Bit 4 Bit 3 Bit 2 Bit 1 Bit 0
+GPIO_INT_LVL1      GPIO INT level detect                  R7IL         R6IL    R5IL  R4IL  R3IL  R2IL  R1IL  R0IL
+(Register 0x26)    0: low
+                   1: high
+GPIO_INT_LVL2      GPIO INT level detect                  C7IL         C6IL    C5IL  C4IL  C3IL  C2IL  C1IL  C0IL
+(Register 0x27)    0: low
+                   1: high
+GPIO_INT_LVL3      GPIO INT level detect                  N/A          N/A     N/A   N/A   N/A   N/A   C9IL  C8IL
+(Register 0x28)    0: low
+                   1: high
+                                                        Rev. E | Page 19 of 24
+
+
+ADP5587                                                                                                         Data Sheet
+Table 32. DEBOUNCE_DISx—Register 0x29 to Register 0x2B (Debounce Disable)
+Register Name     Register Description                                 Bit 7      Bit 6 Bit 5 Bit 4 Bit 3 Bit 2  Bit 1 Bit 0
+DEBOUNCE_DIS1     Debounce disable (inputs)                            R7DD       R6DD  R5DD  R4DD  R3DD  R2DD   R1DD  R0DD
+(Register 0x29)   0: enabled
+                  1: disabled
+DEBOUNCE_DIS2     Debounce disable (inputs)                            C7DD       C6DD  C5DD  C4DD  C3DD  C2DD   C1DD  C0DD
+(Register 0x2A)   0: enabled
+                  1: disabled
+DEBOUNCE_DIS3     Debounce disable (inputs)                            N/A        N/A   N/A   N/A   N/A   N/A    C9DD  C8DD
+(Register 0x2B)   0: enabled
+                  1: disabled
+Table 33. GPIO_PULLx—Register 0x2C to Register 0x2E (GPIO Pull Disable)
+Register Name     Register Description                                 Bit 7      Bit 6 Bit 5 Bit 4 Bit 3 Bit 2  Bit 1 Bit 0
+GPIO_PULL1        GPIO pull disable (remove pull-ups from inputs)      R7PD       R6PD  R5PD  R4PD  R3PD  R2PD   R1PD  R0PD
+(Register 0x2C)   0: pull enabled
+                  1: pull disabled
+GPIO_PULL2        GPIO pull disable (remove pull-ups from inputs)      C7PD       C6PD  C5PD  C4PD  C3PD  C2PD   C1PD  C0PD
+(Register 0x2D)   0: pull enabled
+                  1: pull disabled
+GPIO_PULL3        GPIO pull disable (remove pull-ups from inputs)      N/A        N/A   N/A   N/A   N/A   N/A    C9PD  C8PD
+(Register 0x2E)   0: pull enabled
+                  1: pull disabled
+                                                           Rev. E | Page 20 of 24
+
+
+Data Sheet                                                                                                                                                                        ADP5587
+APPLICATIONS INFORMATION
+                                      GND                                                                                           ADP5587
+                                             19
+                   VCC
+                                       VCC
+                                             21
+                                                                                                                                                      C9
+                                      SCL                                                                                                        18
+                                             23
+                                      SDA
+                                             22                 CONTROL                                     CONTROL
+                                                               REGISTERS                                   INTERFACE
+                                      RST                                                                                                             C8
+                                             20
+                                                                                                                                                 17
+                                       INT
+                                             24
+                         SCL
+                         SDA
+                                                  1     2     3     4     5     6     7     8     9    10    11     12    13    14    15    16
+            HOST         RST
+         PROCESSOR       INT                 R7        R6    R5    R4    R3    R2    R1    R0    C0   C1    C2    C3     C4    C5    C6    C7
+                                VCC
+                                      GPI1
+                                      VCC                                                                                                        ENABLE 2 (GPO)
+                                         GPI2
+                                                                                                                                                   BACKLIGHT
+                                                  A7 A6 A5 A4 A3 A2 A1 A0                                                                         ENABLE (GPO)               BACKLIGHT
+                                                                                                                                                                              DRIVER
+                                                  B7 B6 B5 B4 B3 B2 B1 B0
+                                                  C7 C6 C5 C4 C3 C2 C1 C0
+                                                  D7 D6 D5 D4 D3 D2 D1 D0
+                                                  E7 E6 E5 E4 E3 E2 E1 E0
+                                                  F7 F6 F5 F4 F3 F2 F1 F0
+                                                  G7 G6 G5 G4 G3 G2 G1 G0
+                                                  H7 H6 H5 H4 H3 H2 H1 H0
+                                                  I7    I6    I5    I4    I3    I2    I1    I0
+                                                  J7 J6       J5 J4 J3 J2 J1 J0
+                          PWM OUTPUT                                                                                                                                                     08612-015
+                                                            Figure 19. ADP5587 Detailed Application Block Diagram
+APPLICATIONS OVERVIEW                                                                                        KEYPAD CURRENT
+The ADP5587 is designed to complement host processors in                                                     Keypad current drain varies based on how many keys and how
+a variety of ways. Its versatility makes it the ideal solution for                                           many rows and columns are pressed during multiple key
+mobile platforms that require extended keypads and GPIO                                                      presses. Table 34 shows the typical current drain for a single key
+expanders. The programmable registers give the designer the                                                  press and for two key presses.
+flexibility to configure any or all of its GPIOs in a variety of
+ways. Figure 19 shows a detailed application diagram.                                                        Table 34. Typical Current Drain
+                                                                                                             Number of Key Presses                         Conditions1            Typical            Unit
+                                                                                                             1                                             VCC = 1.8 V to 3.0 V   55                 μA
+                                                                                                             2                                             VCC = 1.8 V to 3.0 V   100                μA
+                                                                                                             1
+                                                                                                                 TA = TJ = −40°C to +85°C.
+                                                                                     Rev. E | Page 21 of 24
+
+
+ADP5587                                                                                          Data Sheet
+                                                             KEYPAD MATRIX
+                                                   A0 B0 C0 D0 E0 F0 G0 H0 I0   J0
+                                                   A1 B1 C1 D1 E1 F1 G1 H1 I1   J1
+                                                   A2 B2 C2 D2 E2 F2 G2 H2 I2   J2
+                                                   A3 B3 C3 D3 E3 F3 G3 H3 I3   J3
+                                                   A4 B4 C4 D4 E4 F4 G4 H4 I4   J4
+                                                   A5 B5 C5 D5 E5 F5 G5 H5 I5   J5
+                                                   A6 B6 C6 D6 E6 F6 G6 H6 I6   J6
+                                                   A7 B7 C7 D7 E7 F7 G7 H7 I7   J7
+                      I2 C
+             HOST     INT
+          PROCESSOR
+                               ADP5587
+                      RST
+                                                             EXPANDED
+                                      BACKLIGHT                GPIOs
+                                      ENABLE
+              PWM             BACKLIGHT
+                                                                                     08612-016
+                                                             BACKLIGHT
+                               DRIVER
+                             Figure 20. Integration Block Diagram
+                                    Rev. E | Page 22 of 24
+
+
+Data Sheet                                                                                                                                                                                                                     ADP5587
+OUTLINE DIMENSIONS
+                                                                                                                                                             DETAIL A
+                                                                                                                                                            (JEDEC 95)
+                                                                          4.10                                    0.30
+                                                                          4.00 SQ                                 0.25
+                                                     PIN 1
+                                                INDICATOR                 3.90                                    0.20
+                                                     AREA
+                                                                                                                                           24               P IN 1
+                                                                                                                        19
+                                                                                                                                                            IN D IC ATO R AR E A OP T IO N S
+                                                                                                                   18                           1           (SEE DETAIL A)
+                                                                                                     0.50
+                                                                                                     BSC                                                          2.20
+                                                                                                                               EXPOSED
+                                                                                                                                 PAD                              2.10 SQ
+                                                                                                                                                                  2.00
+                                                                                                                   13                               6
+                                                                                                   0.50                 12                 7
+                                                                                                                                                                0.20 MIN
+                                                                         TOP VIEW                                            BOTTOM VIEW
+                                                                                                   0.40
+                                                                                                   0.30
+                                                                                                                                    FOR PROPER CONNECTION OF
+                                                       0.80                                                                         THE EXPOSED PAD, REFER TO
+                                                       0.75              SIDE VIEW                                                  THE PIN CONFIGURATION AND
+                                                                                                    0.05 MAX                        FUNCTION DESCRIPTIONS
+                                                       0.70
+                                                                                                    0.02 NOM                        SECTION OF THIS DATA SHEET.
+                                                                                                      COPLANARITY
+                                                SEATING                                                    0.08
+                                                 PLANE                                          0.203 REF
+                                                                                                                                                                                                              09-07-2018-B
+                                 PKG-004714
+                                                                          COMPLIANT TO JEDEC STANDARDS MO-220-WGGD-8
+                                                                      Figure 21. 24-Lead Lead Frame Chip Scale Package [LFCSP]
+                                                                          4 mm × 4 mm Body and 0.75 mm Package Height
+                                                                                              (CP-24-10)
+                                                                                   Dimensions shown in millimeters
+                                                                          2.010
+                                                                          1.970 SQ
+                                                                          1.930
+                                                                                                                                5    4     3            2         1
+                                                                                                                                                                             A
+                                                 BALL A1
+                                              IDENTIFIER
+                                                                                                                                                                             B
+                                                                                                           1.60
+                                                                                                           REF
+                                                                                                                                                                             C
+                                                                                                                                                                             D
+                                                                                                                                                                             E
+                                                                                                       0.40
+                                                                                                       BSC
+                                                                         TOP VIEW                                                   BOTTOM VIEW
+                                                                      (BALL SIDE DOWN)                                              (BALL SIDE UP)
+                                                                                                   0.395
+                                               0.645          0.022                                0.375
+                                                              REF       SIDE VIEW
+                                               0.600                                               0.355
+                                               0.555
+                                                                                                       COPLANARITY
+                                                                                                       0.05
+                                               SEATING                               0.287             0.230
+                                                PLANE                                0.267             0.200
+                                                                                                                                                                                               11-02-2012-B
+                                                                                     0.247             0.170
+                                                                      Figure 22. 25-Ball Wafer Level Chip Scale Package [WLCSP]
+                                                                                               (CB-25-4)
+                                                                                   Dimensions shown in millimeters
+ORDERING GUIDE
+                                                                          I2C Write Address
+Model 1                        Temperature Range                         Write       Read              Package Description                                                                                                   Package Option
+ADP5587ACPZ-R7                 −40°C to +85°C                            0x68        0x69              24-Lead Lead Frame Chip Scale Package [LFCSP]                                                                         CP-24-10
+ADP5587ACPZ-1-R7               −40°C to +85°C                            0x60        0x61              24-Lead Lead Frame Chip Scale Package [LFCSP]                                                                         CP-24-10
+ADP5587ACBZ-R7                 −40°C to +85°C                            0x68        0x69              25-Ball Wafer Level Chip Scale Package [WLCSP]                                                                        CB-25-4
+ADP5587CP-EVALZ                                                          0x68        0x69              Evaluation Board [LFCSP]
+ADP5587CB-EVALZ                                                          0x68        0x69              Evaluation Board [WLCSP]
+1
+    Z = RoHS Compliant Part.
+                                                                                             Rev. E | Page 23 of 24
+
+
+ADP5587                                                                                                          Data Sheet
+NOTES
+I2C refers to a communications protocol originally developed by Philips Semiconductors (now NXP Semiconductors).
+©2009–2019 Analog Devices, Inc. All rights reserved. Trademarks and
+ registered trademarks are the property of their respective owners.
+                                                  D08612-0-10/19(E)
+                                                                          Rev. E | Page 24 of 24
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Analog Devices Inc.:
+ ADP5587ACPZ-1-R7 ADP5587CP-EVALZ ADP5587ACBZ-R7 ADP5587ACPZ-R7 ADP5587CB-EVALZ

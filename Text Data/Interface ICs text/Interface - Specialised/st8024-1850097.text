@@ -1,0 +1,922 @@
+                                                                                              ST8024
+                                                                              Smartcard interface
+Features
+■  Designed to be compatible with the NDS
+   conditional access system
+■  IC card interface
+■  3 or 5 V supply for the IC (VDD and GND)
+■  Three specifically protected half-duplex bi-
+   directional buffered I/O lines to card contacts                    SO-28                  TSSOP28
+   C4, C7 and C8
+■  DC-DC converter for VCC generation
+   separately powered from a 5 V ± 20% supply            ■   ISO 7816, GSM11.11 and EMV (payment
+   (VDDP and PGND)                                           systems) compatibility
+■  3 or 5 V ± 5 % regulated card supply voltage          ■   Supply supervisor for spike-killing during
+   (VCC) with appropriate decoupling has the                 power-on and power-off and power-on reset
+   following capabilities:                                   (threshold fixed internally or externally by a
+   – ICC < 80 mA at VDDP = 4 to 6.5 V                        resistor bridge)
+   – Handles current spikes of 40 nA up to 20            ■   Built-in debounce on card presence contacts
+       MHz                                               ■   One multiplexed status signal off
+   – Controls rise and fall times
+   – Filtered overload detection at                      Description
+       approximately 120 mA
+■  Thermal and short-circuit protection on all card      The ST8024 is a complete low cost analog
+   contacts                                              interface for asynchronous 3 V and 5 V smart
+                                                         cards. It can be placed between the card and the
+■  Automatic activation and deactivation                 microcontroller with few external components to
+   sequences; initiated by software or by                perform all supply protection and control
+   hardware in the event of a short-circuit, card        functions. ST8024 is a direct replacement of
+   take-off, overheating, VDD or VDDP drop-out           ST8004.
+■  Enhanced ESD protection on card side (> 6 kV)
+                                                         Main applications are: smartcard readers for set-
+■  26 MHz integrated crystal oscillator                  top-box, IC card readers for banking,
+■  Clock generation for cards up to 20 MHz               identification, pay TV.
+   (divided by 1, 2, 4 or 8 through CLKDIV1 and
+   CLKDIV2 signals) with synchronous frequency
+   changes
+■  Non-inverted control of RST via pin RSTIN
+Table 1.      Device summary
+     Order codes         Temperature range               Packages                         Packaging
+     ST8024CDR               - 25 to 85 °C          SO-28 (tape and reel)            1000 parts per reel
+      ST8024CTR              - 25 to 85 °C        TSSOP28 (tape and reel)            2500 parts per reel
+March 2009                                          Rev 8                                                  1/31
+                                                                                                      www.st.com 31
+
+
+Contents                                                                                                             ST8024
+Contents
+1        Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+2        Pin configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3        Maximum ratings . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+4        Electrical characteristics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+5        Functional description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+         5.1    Power supply . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+         5.2    Voltage supervisor . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+                5.2.1    Without external divider on pin PORADJ . . . . . . . . . . . . . . . . . . . . . . . . 16
+                5.2.2    With an external divider on pin PORADJ . . . . . . . . . . . . . . . . . . . . . . . . 17
+                5.2.3    Application examples . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+         5.3    Clock circuitry . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+         5.4    I/O transceivers . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+         5.5    Inactive mode . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+         5.6    Activation sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+         5.7    Active mode . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+         5.8    Deactivation sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+         5.9    VCC generator . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+         5.10   Fault detection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+6        Application . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+7        Package mechanical data . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+8        Revision history . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+2/31
+
+
+ST8024                                                                                                                           List of tables
+List of tables
+Table 1.  Device summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+Table 2.  Pin description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+Table 3.  Absolute maximum ratings . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+Table 4.  Thermal data. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+Table 5.  Recommended operating conditions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+Table 6.  Electrical characteristics over recommended operating condition . . . . . . . . . . . . . . . . . . . . 9
+Table 7.  Step-up converter . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+Table 8.  Card supply voltage characteristics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+Table 9.  Crystal connection (pins XTAL1 and XTAL2) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+Table 10. Data lines (pins I/O, I/OUC, AUX1, AUX2, AUX1UC AND AUX2UC). . . . . . . . . . . . . . . . . 11
+Table 11. Data lines to card reader (pins I/O, AUX1 AND AUX2 with integrated
+          11 kΩ pull-up resistor to VCC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+Table 12. Data lines to microcontroller (pins I/OUC, AUX1UC AND AUX2UC with
+          integrated 11 kΩ pull-up resistor to VDD . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+Table 13. Internal oscillator. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+Table 14. Reset output to card reader (pin RST) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+Table 15. Clock output to card reader (pin CLK) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+Table 16. Control inputs (pins CLKDIV1, CLKDIV2, CMDVCC, RSTIN and 5 V / 3 V . . . . . . . . . . . . 14
+Table 17. Card presence inputs (pins PRES and PRES) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+Table 18. Interrupt output (pin OFF NMOS drain with integrated 20 kΩ pull-up resistor to VDD); . . . 14
+Table 19. Protection and limitation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+Table 20. Timing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+Table 21. Clock frequency selection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+Table 22. Card presence indicator . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+Table 23. Document revision history . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+                                                                                                                                                 3/31
+
+
+List of figures                                                                                                                         ST8024
+List of figures
+Figure 1.    Block diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+Figure 2.    Pin connections . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+Figure 3.    Definition of output and input transition times . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+Figure 4.    Voltage supervisor . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+Figure 5.    Activation sequence using RSTIN and CMDVCC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+Figure 6.    Activation sequence at t3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+Figure 7.    Deactivation sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+Figure 8.    Behavior of OFF, CMDVCC, PRES and VCC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+Figure 9.    Emergency deactivation sequence (card extraction) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+Figure 10.   Application diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+4/31
+
+
+ST8024                  Diagram
+1         Diagram
+Figure 1. Block diagram
+                            5/31
+
+
+Pin configuration                                                                                        ST8024
+2           Pin configuration
+Figure 2.   Pin connections
+Table 2.    Pin description
+    Pin n°     Symbol                                       Name and function
+       1       CLKDIV1    Control of CLK frequency
+       2       CLKDIV2    Control of CLK frequency
+       3        5V/3V     VCC selection pin
+       4        PGND      Power ground for step-up converter
+       5          C1+     External cap. for step-up converter
+       6         VDDP     Power supply for step-up converter
+       7          C1-     External cap. step-up converter
+       8          VUP     Output of step-up converter
+       9        PRES      Card presence input (active low)
+      10        PRES      Card presence input (active high)
+      11          I/O     Data line to and from card (C7) (internal 11 kΩ pull-up resistor connected to VCC)
+      12         AUX2     Auxiliary line to and from card (C8) (internal 11 kΩ pull-up resistor connected to VCC)
+      13         AUX1     Auxiliary line to and from card (C4) (internal 11 kΩ pull-up resistor connected to VCC)
+      14        CGND      Ground for card signal (C5)
+      15         CLK      Clock to card (C3)
+      16         RST      Card reset (C2)
+      17          VCC     Supply voltage for the card (C1)
+      18        VTHSEL    Deactivation threshold selector pin (under voltage lock-out)
+6/31
+
+
+ST8024                                                                                     Pin configuration
+Table 2.  Pin description (continued)
+   Pin n°    Symbol                                       Name and function
+     19     CMDVCC      Start activation sequence input (active low)
+     20       RSTIN     Card reset input from MCU
+     21         VDD     Supply voltage
+     22        GND      Ground
+     23        OFF      Interrupt to MCU (active low)
+     24       XTAL1     Crystal or external clock input
+     25       XTAL2     Crystal connection (leave this pin open if external clock is used)
+     26       I/OUC     MCU data I/O line (internal 11 kΩ pull-up resistor connected to VDD)
+     27      AUX1UC     Non-inverting receiver input (internal 11 kΩ pull-up resistor connected to VDD)
+     28      AUX2UC     Non-inverting receiver input (internal 11 kΩ pull-up resistor connected to VDD)
+                                                                                                        7/31
+
+
+Maximum ratings                                                                                                  ST8024
+3              Maximum ratings
+Table 3.       Absolute maximum ratings
+  Symbol                                    Parameter                                       Min.         Max.     Unit
+ VDD, VDDP Supply voltage                                                                    -0.3         7         V
+              Voltage on pins XTAL1, XTAL2, 5V/3V, RSTIN, AUX2UC,
+     Vn1      AUX1UC, I/OUC, CLKDIV1, CLKDIV2, PORADJ, CMDVCC,                               -0.3      VDD + 0.3    V
+              PRES, PRES and OFF
+     Vn2      Voltage on card contact pins I/O, RST, AUX1, AUX2 and CLK                      -0.3      VCC + 0.3    V
+     Vn3      Voltage on pins VUP, S1 and S2                                                              7         V
+              MIL-STD-883 class 3 on card contact pins, PRES and PRES (1)
+    ESD1      (2)                                                                             -6          6        kV
+              MIL-STD-883 class 2 on microcontroller contact pins and
+    ESD2                                                                                      -2          2        kV
+              RSTIN (1) (2)
+   TJ(MAX)    Maximum operating junction temperature                                                     150       °C
+    TSTG      Storage temperature range                                                      -40         150       °C
+1. All card contacts are protected against any short with any other card contact
+2. Method 3015 (HBM, 1500 Ω, 100 pF) 3 positive pulses and 3 negative pulses on each pin referenced to ground.
+Note:          Absolute maximum ratings are those values beyond which damage to the device may occur.
+               Functional operation under these conditions is not implied.
+Table 4.       Thermal data
+ Symbol                           Parameter                                 Condition            SO-28  TSSOP28   Unit
+                                                                       Multilayer test board
+   RthJA    Thermal resistance junction-ambient temperature                                        56      50     °K/W
+                                                                         (Jedec standard)
+Table 5.       Recommended operating conditions
+  Symbol               Parameter                      Test conditions                Min.         Typ.    Max.    Unit
+     TA       Temperature range                                                       -25                  85      °C
+8/31
+
+
+ST8024                                                                                Electrical characteristics
+4              Electrical characteristics
+               VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+               TA = 25 °C.
+Table 6.       Electrical characteristics over recommended operating condition
+  Symbol              Parameter                        Test conditions               Min.    Typ.   Max.   Unit
+    VDD       Supply voltage                                                          2.7            6.5     V
+              Supply voltage for the     VCC = 5V; |ICC| < 80 mA                      4.0      5     6.5
+   VDDP                                                                                                      V
+              voltage doubler            VCC = 5V; |ICC| < 20 mA                      3.0            6.5
+                                         Card Inactive                                               1.2
+     IDD      Supply current                                                                               mA
+                                         Card Active; fCLK = fXTAL; CL = 30pF                        1.5
+                                         Inactive mode                                               0.1
+                                         Active mode; fCLK = fXTAL; CL = 30pF; |ICC|
+              DC-DC converter supply                                                                 10
+    IDDP                                 =0                                                                mA
+              current
+                                         VCC = 5V; |ICC| = 80 mA                                    200
+                                         VCC = 3V; |ICC| = 65 mA                                    100
+              Falling threshold voltage  no external resistors at pin PORADJ;
+    Vth2                                                                             2.35    2.45   2.55    V
+              on VDD                     VDD level falling
+              Hysteresis of threshold
+   VHYS2                                 no external resistors at pin PORADJ          50     100    150    mV
+              voltage Vth2
+              External rising threshold  external resistor bridge at pin PORADJ;
+ Vth(ext)rise                                                                        1.25    1.28   1.31     V
+              voltage on VDD             VDD level rising
+              External falling threshold external resistor bridge at pin PORADJ;
+ Vth(ext)fall                                                                        1.19    1.22   1.25    V
+              voltage on VDD             VDD level falling
+              Hysteresis of threshold
+ VHYS(ext)                               external resistor bridge at pin PORADJ       30      60     90    mV
+              voltage Vth(ext)
+              Hysteresis of threshold
+ ΔVHYS(ext) voltage Vth(ext) variation   external resistor bridge at pin PORADJ                     0.25  mV/K
+              with temperature
+              Width of internal Power-   no external resistor at pin PORADJ            4      8      12
+      tW                                                                                                   ms
+              On reset pulse             external resistor bridge at pin PORADJ        8      16     24
+              Leakage current on pin     VPORADJ < 0.5 V                             -0.1      4     10
+       IL                                                                                                   µA
+              PORADJ                     VPORADJ > 1.0 V                              -1              1
+   PTOT       Total power dissipation    Continuous operation; Ta = -25 to 85°C                     0.56    W
+                                                                                                            9/31
+
+
+Electrical characteristics                                                                         ST8024
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                TA = 25 °C.
+Table 7.        Step-up converter
+ Symbol              Parameter                       Test conditions           Min.  Typ.    Max.    Unit
+    fCLK    Clock frequency              Card active                            2.2           3.2    MHz
+            Threshold voltage for step- 5 V card                                5.2   5.8     6.2
+ Vth(vd-vf) up converter to change to                                                                  V
+            voltage follower             3 V card                               3.8   4.1     4.4
+            Output voltage on pin VUP    VCC = 5 V                              5.2   5.7     6.2
+ VUP(av)                                                                                               V
+            (average value)              VCC = 3 V; VDDP = 3.3 V                3.5   3.9     4.3
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                TA = 25 °C (Note 1).
+Table 8.        Card supply voltage characteristics
+ Symbol            Parameter                       Test conditions             Min.  Typ.    Max.    Unit
+             External capacitance
+   CVCC                              Note 2 and Note 3                          80           220      nF
+             on pin VCC
+                                     Card Inactive; |ICC| = 0 mA 5 and 3V card -0.1    0      0.1
+                                     Card Inactive; |ICC| = 1 mA 5 and 3V card -0.1    0      0.3
+                                     Card Active; |ICC| < 80 mA   5 V card     4.75    5     5.25
+                                     Card Active; |ICC| < 65 mA   3 V card     2.85    3     3.15
+                                     Card Active; single current
+                                                                  5 V card     4.65    5     5.25
+             Card supply voltage     pulse IP =-100 mA; tp=2 µs
+     VCC     (including ripple                                                                         V
+                                     Card Active; single current
+             voltage)                                             3 V card     2.76    3     3.20
+                                     pulse IP =-100 mA; tp =2 µs
+                                     Card active; current pulses, 5 V card     4.65    5     5.25
+                                     QP = 40 nAs                  3 V card     2.76    3     3.20
+                                     Card Active; current pulses 5 V card      4.65    5     5.25
+                                     QP =40 nAs with
+                                     |ICC| < 200mA, tp < 400 ns 3 V card       2.76    3     3.20
+     VCC
+             Ripple voltage on VCC
+  (RIPPLE)                           fRIPPLE = 20 kHz to 200 MHz                              350     mV
+             (Peak to Peak value)
+     (P-P)
+                                     VCC = 0 to 5V                                            80
+    |ICC|    Card supply current     VCC = 0 to 3V                                            65      mA
+                                     VCC short circuit to GND                   90            120
+      SR     Slew rate               Slew up or down                           0.08  0.15    0.22    V/µs
+10/31
+
+
+ST8024                                                                                      Electrical characteristics
+                 VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                 TA = 25 °C.
+Table 9.         Crystal connection (pins XTAL1 and XTAL2)
+  Symbol                     Parameter                       Test conditions           Min.    Typ.      Max.   Unit
+              External capacitance on pins XTAIL1, Depends on type of
+ CXTAL1,2                                                                                                 15     pF
+              XTAIL2                                    crystal or resonator used
+    fXTAL     Crystal frequency                                                         2                 26    MHz
+   fXTAL1     Frequency applied on pin XTAL1                                            0                 26    MHz
+     VIH      High level input voltage on pin XTAIL1                                 0.7 VDD           VDD+0.3    V
+      VIL     Low level input voltage on pin XTAIL1                                    -0.3            +0.3VDD    V
+                 VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                 TA = 25 °C.
+Table 10.        Data lines (pins I/O, I/OUC, AUX1, AUX2, AUX1UC AND AUX2UC)
+   Symbol                        Parameter                        Test conditions        Min.    Typ.     Max.  Unit
+ tD(I/O-I/OUC), I/O to I/OUC, I/OUC to I/O falling edge
+                                                                                                           200    ns
+ tD(I/OUC-I/O) delay
+        tpu      Active pull-up pulse width                                                                100    ns
+   fI/O(MAX)     Maximum frequency on data lines                                                            1   MHz
+         CI      Input capacitance on data lines                                                           10    pF
+                 VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                 TA = 25 °C.
+Table 11.       Data lines to card reader (pins I/O, AUX1 AND AUX2 with integrated 11 kΩ pull-up
+                 resistor to VCC
+  Symbol                Parameter                      Test conditions               Min.     Typ.      Max.    Unit
+                                                                 NO LOAD              0                  0.1
+ VO(inactive) Output voltage                  Inactive mode                                                       V
+                                                                 IO(inactive)=1mA                        0.3
+ IO(inactive) Output current                  Inactive mode; pin grounded                                -1     mA
+                                              No DC Load                           0.9 VCC            VCC+0.1
+     VOH       High level output voltage      5 and 3 V cards; IOH < - 40µA       0.75 VCC            VCC+0.1     V
+                                              |IOH| ≥ 10mA                            0                  0.4
+                                              IOL = 1 mA                              0                  0.2
+      VOL      Low level output voltage                                                                           V
+                                              IOL ≥ 15 mA                         VCC-0.4               VCC
+      VIH      High level input voltage                                              1.5              VCC+0.3     V
+      VIL      Low level input voltage                                               0.3                 0.8     V
+               High level input leakage
+     |ILIH|                                   VIH = VCC                                                  10      µA
+               current
+      |IIL|    Low level input current        VIL = 0 V                                                 600      µA
+                                                                                                                 11/31
+
+
+Electrical characteristics                                                                              ST8024
+Table 11.     Data lines to card reader (pins I/O, AUX1 AND AUX2 with integrated 11 kΩ pull-up
+              resistor to VCC
+ Symbol              Parameter                      Test conditions             Min.     Typ.    Max.    Unit
+    RPU     Integrated pull-up resistor    Pull-up resistor to VCC                9       11       13     kΩ
+    tT(DI)  Data input transition time     VIL max to VIH min.                                    1.2     µs
+                                           VO = 0 to VCC; CL ≤ 80 pF; 10%
+   tT(DO)   Data output transition time                                                           0.1     µs
+                                           to 90%
+     IPU    Current when pull-up active    VOH = 0.9VCC; CL = 80 pF              -1                       mA
+              VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+              TA = 25 °C.
+Table 12.     Data lines to microcontroller (pins I/OUC, AUX1UC AND AUX2UC with integrated 11
+              kΩ pull-up resistor to VDD
+ Symbol              Parameter                      Test conditions             Min.     Typ.    Max.    Unit
+                                           5 and 3 V card; IOH < − 40µA      0.75 VDD           VDD+0.1
+    VOH     High level output voltage                                                                      V
+                                           No DC Load                         0.9 VDD           VDD+0.1
+     VOL    Low level output voltage       IOL = 1 mA                             0               0.3      V
+     VIH    High level input voltage                                          0.7 VDD           VDD+0.3    V
+     VIL    Low level input voltage                                             -0.3            0.3 VDD    V
+            High level input leakage
+    |ILIH|                                 VIH = VDD                                               10     µA
+            current
+      |IL|  Low level input current        VIL = 0 V                                              600     µA
+            Internal pull-up resistance to
+    RPU                                    Pull-up resistor to VDD                9       11       13     kΩ
+            VDD
+    tT(DI)  Data input transition time     VIL(max) to VIH(min)                                   1.2     µs
+                                           VO = 0 to VDD; CL < 30 pF;
+   tT(DO)   Data output transition time                                                           0.1     µs
+                                           10% to 90%
+     IPU    Current when pull-up active    VOH = 0.9VDD; CL = 30 pF              -1                       mA
+              VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+              TA = 25 °C.
+Table 13.     Internal oscillator
+  Symbol                    Parameter                        Test conditions        Min.   Typ.    Max.  Unit
+                                                       Inactive mode                 55     140    200   kHz
+  fOSC(INT)   Frequency of internal oscillator
+                                                       Active mode                   2.2    2.7     3.2  MHz
+12/31
+
+
+ST8024                                                                                Electrical characteristics
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to TA =
+                25 °C.
+Table 14.       Reset output to card reader (pin RST)
+    Symbol                Parameter                      Test conditions       Min.     Typ.     Max.     Unit
+                 Output voltage in inactive      IO(inactive) = 1 mA             0                0.3
+   VO(inactive)                                                                                            V
+                 mode                            No Load                         0                0.1
+   IO(inactive)  Output current                  Inactive mode; pin grounded     0                 -1     mA
+ tD(RSTIN-RST) RSTN to RST Delay                 RST Enable                                         2      µs
+                                                 IOL = 200 µA                    0                0.2
+       VOL       Low level output voltage                                                                  V
+                                                 IOL = 20 mA (current limit)  VCC-0.4             VCC
+                                                 IOH = -200 µA                0.9VCC              VCC
+      VOH        High level output voltage                                                                 V
+                                                 IOH = -20 mA (current limit)    0                0.4
+     tR, tF      Rise and fall time              CL = 100 pF; VCC = 5 or 3 V                      0.1      µs
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                TA = 25 °C.
+Table 15.       Clock output to card reader (pin CLK)
+    Symbol                  Parameter                       Test conditions    Min.     Typ.     Max.     Unit
+                                                      IO(inactive) = 1 mA        0                0.3
+   VO(inactive)  Output voltage in inactive mode                                                           V
+                                                      No Load                    0                0.1
+                                                      CLK Inactive mode; pin
+   IO(inactive)  Output current                                                  0                 -1     mA
+                                                      grounded
+                                                      IOL = 200 µA               0                0.3
+       VOL       Low level output voltage             IOL = 70 mA (current                                 V
+                                                                              VCC-0.4             VCC
+                                                      limit)
+                                                      IOH = -200 µA           0.9VCC              VCC
+      VOH        High level output voltage            IOH = -70 mA (current                                V
+                                                                                 0                0.4
+                                                      limit)
+      tR, tF     Rise and fall time                   CL = 30 pF (Note 4)                          16      ns
+        δ        Duty factor (except for fXTALS)      CL = 30 pF (Note 4)       45                 55      %
+                                                      Slew up or down;
+       SR        Slew rate                                                      0.2                       V/ns
+                                                      CL = 30 pF
+                                                                                                           13/31
+
+
+Electrical characteristics                                                                         ST8024
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                TA = 25 °C (Note 5)
+Table 16.       Control inputs (pins CLKDIV1, CLKDIV2, CMDVCC, RSTIN and 5 V / 3 V
+  Symbol                Parameter                    Test conditions            Min.  Typ.  Max.      Unit
+      VIL     Input voltage low                                                 -0.3       0.3VDD       V
+      VIH     Input voltage high                                              0.7VDD         VDD        V
+     |ILIH|   Input leakage current high     VIH = VDD                                         1       µA
+     |ILIL|   Input leakage current low      VIL = 0                                           1       µA
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to TA =
+                25 °C (Note 6)
+Table 17.       Card presence inputs (pins PRES and PRES)
+  Symbol                Parameter                    Test conditions            Min.  Typ.  Max.      Unit
+      VIL     Input voltage low                                                 -0.3       0.3 VDD      V
+      VIH     Input voltage high                                              0.7 VDD      VDD+0.3      V
+     |ILIH|   Input leakage current high     VIH = VDD                                         5       µA
+     |ILIL|   Input leakage current low      VIL = 0                                           5       µA
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                TA = 25 °C
+Table 18.       Interrupt output (pin OFF NMOS drain with integrated 20 kΩ pull-up resistor to VDD);
+     Symbol                Parameter                   Test conditions         Min.   Typ.  Max.      Unit
+        VOL      Low level output voltage       IOL = 2 mA                       0           0.3        V
+       VOH       High level output voltage      IOH = -15 µA                 0.75 VDD                   V
+       RPU       Integrated pull-up resistor    20kΩ Pull-up resistor to VDD     16    20     24      kΩ
+                VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+                TA = 25 °C.
+Table 19.       Protection and limitation
+ Symbol                  Parameter                      Test conditions         Min.  Typ.  Max.      Unit
+            Shutdown and limitation current pin
+ |ICC(SD)|                                                                       90          120      mA
+            VCC
+            limitation current pins I/O, AUX1
+  II/O(lim)                                                                     -15           15      mA
+            and AUX2
+ ICLK(lim) limitation current pin CLK                                           -70           70      mA
+ IRST(lim) limitation current pin RST                                           -20           20      mA
+    TSD     Shut down temperature                                                     150              °C
+14/31
+
+
+ST8024                                                                           Electrical characteristics
+            VDD = 3.3 V, VDDP = 5 V, fXTAL = 10 MHz, unless otherwise noted. Typical values are to
+            TA = 25 °C.
+Table 20.   Timing
+ Symbol                Parameter                 Test conditions        Min.        Typ.     Max.     Unit
+    tACT   Activation time                  (See Figure 5)                          180       220      µs
+     tDE   Deactivation time                (See Figure 7)                60         80       100      µs
+           Start of the windows for sending
+      t3                                    (See Figure 6)                                    130      µs
+           CLK to card
+           End of the windows for sending
+      t5                                    (See Figure 6)               140                           µs
+           CLK to card
+           Debounce time pins PRES and
+ tdebounce                                  (See Figure 8)               140                           µs
+           PRES
+Note:    1   All parameters remain within limits but are tested only statistically for the temperature
+            range. When a parameter is specified as a function of VDD or VCC it means their actual value
+            at the moment of measurement.
+         2  To meet these specifications, pin VCC should be decoupled to CGND using two ceramic
+            multilayer capacitors of low ESR both with values of 100 nF and 100 nF (see Figure 10).
+         3  Permitted capacitor values are 100 + 100 nF, or 220 nF.
+         4  Transition time and duty factor definitions are shown in Figure 3; δ = t1/(t1+ t2).
+         5  Pin CMDVCC is active LOW; pin RSTIN is active HIGH; for CLKDIV1 and CLKDIV2
+            functions see Table 20
+         6  Pin PRES is active LOW; pin PRES is active HIGH see Figure 8 and Figure 9; PRES has an
+            integrated 1.25 µA current source to GND. (PRES to VDD); the card is considered present if
+            at least one of the inputs PRES or PRES is active.
+            Figure 3.       Definition of output and input transition times
+                                                                                                       15/31
+
+
+Functional description                                                                             ST8024
+5           Functional description
+            Throughout this document it is assumed that the reader is familiar with ISO7816
+            terminology.
+5.1         Power supply
+            The supply pins for the IC are VDD and GND. VDD should be in the range of 2.7 to 6.5 V. All
+            signals interfacing with the system controller are referred to VDD, therefore VDD should also
+            supply the system controller. All card reader contacts remain inactive during power-on or
+            power-off.
+            The internal circuits are maintained in the reset state until VDD reaches Vth2 +Vhys2 and for
+            the duration of the internal power-on reset pulse, tW (see Figure 4). When VDD falls below
+            Vth2, an automatic deactivation of the contacts is performed.
+            A DC-DC converter is incorporated to generate the 5 or 3 V card supply voltage (VCC). The
+            DC-DC converter should be supplied separately by VDDP and PGND. Due to the possibility
+            of large transient currents, the two 100 nF capacitors of the DC-DC converter should be
+            located as near as possible to the IC and have an ESR less than 100 mΩ.
+            The DC-DC converter functions as a voltage doubler or a voltage follower according to the
+            respective values of VCC and VDDP (both have thresholds with a hysteresis of 100 mV).
+            The DC-DC converter function changes as follows:
+            VCC = 5 V and VDDP > 5.8 V; voltage follower
+            VCC = 5 V and VDDP < 5.7 V; voltage doubler
+            VCC = 3 V and VDDP > 4.1 V; voltage follower
+            VCC = 3 V and VDDP < 4.0 V; voltage doubler.
+            Supply voltages VDD and VDDP may be applied to the IC in any sequence.
+            After powering the device, OFF remains LOW until CMDVCC is set HIGH.
+            During power off, OFF falls LOW when VDD is below the falling threshold voltage.
+5.2         Voltage supervisor
+5.2.1       Without external divider on pin PORADJ
+            The voltage supervisor surveys the VDD supply. A defined reset pulse of approximately 8 ms
+            (tW) is used internally to keep the IC inactive during power-on or power-off of the VDD supply
+            (see Figure 4).
+            As long as VDD is less than Vth2 + Vhys2, the IC remains inactive whatever the levels on the
+            command lines. This state also lasts for the duration of tW after VDD has reached a level
+            higher than Vth2 + Vhys2. When VDD falls below Vth2, a deactivation sequence of the
+            contacts is performed.
+16/31
+
+
+ST8024                                                                        Functional description
+       Figure 4.       Voltage supervisor
+5.2.2  With an external divider on pin PORADJ
+       If an external resistor bridge is connected to pin PORADJ (R1 and R2 in Figure 1), then the
+       following occurs:
+           – The internal threshold voltage Vth2 is overridden by the external voltage and by the
+              hysteresis, therefore:
+             Vth2(ext)(rise) = (1 + R1/R2) x (Vbridge + Vhys(ext)/2)
+             Vth2(ext)(fall) = (1 + R1/R2) x (Vbridge - Vhys(ext)/2)
+             where Vbridge = 1.25 V typ. and Vhys(ext) = 60 mV typ.
+           – The reset pulse width tW is doubled to approximately 16 ms.
+       Input PORADJ is biased internally with a pull-down current source of 4 µA which is removed
+       when the voltage on pin PORADJ exceeds 1 V.
+       This ensures that after detection of the external bridge by the IC during power-on, the input
+       current on pin PORADJ does not cause inaccuracy of the bridge voltage.
+       The minimum threshold voltage should be higher than 2 V. The maximum threshold voltage
+       may be up to VDD.
+5.2.3  Application examples
+       The voltage supervisor is used as power-on reset and as supply dropout detection during a
+       card session. Supply dropout detection is to ensure that a proper deactivation sequence is
+       followed before the voltage is too low. For the internal voltage supervisor to function, the
+       system microcontroller should operate down to 2.35 V to ensure a proper deactivation
+       sequence. If this is not possible, external resistor values can be chosen to overcome the
+       problem.
+5.3    Clock circuitry
+       The card clock signal (CLK) is derived from a clock signal input to pin XTAL1 or from a
+       crystal operating at up to 26 MHz connected between pins XTAL1 and XTAL2.
+       The clock frequency can be fXTAL, 1/2 x fXTAL, 1/4 x fXTAL or 1/8 x fXTAL. Frequency selection
+       is made via inputs CLKDIV1 and CLKDIV2 (see Table 21).
+                                                                                                  17/31
+
+
+Functional description                                                                                          ST8024
+            Table 21.      Clock frequency selection (1)
+                         CLKDIV1                            CLKDIV2                                    fCLK
+                              0                                   0                                   fXTAL/8
+                              0                                   1                                   fXTAL/4
+                              1                                   1                                   fXTAL/2
+                              1                                   0                                    fXTAL
+            1. The status of pins CLKDIV1 and CLKDIV2 must not be changed simultaneously; a delay of 10 ns minimum
+                 between changes is needed; the minimum duration of any state of CLK is eight periods of XTAL1.
+            The frequency change is synchronous, which means that during transition no pulse is
+            shorter than 45 % of the smallest period, and that the first and last clock pulses about the
+            instant of change have the correct width.
+            When changing the frequency dynamically, the change is effective for only eight periods of
+            XTAL1 after the command. The duty factor of fXTAL depends on the signal present at pin
+            XTAL1. In order to reach a 45 to 55 % duty factor on pin CLK, the input signal on pin XTAL1
+            should have a duty factor of 48 to 52 % and transition times of less than 5 % of the input
+            signal period.
+            If a crystal is used, the duty factor on pin CLK may be 45 to 55 % depending on the circuit
+            layout and on the crystal characteristics and frequency. In other cases, the duty factor on pin
+            CLK is guaranteed between 45 and 55 % of the clock period.
+            The crystal oscillator runs as soon as the IC is powered up. If the crystal oscillator is used,
+            or if the clock pulse on pin XTAL1 is permanent, the clock pulse is applied to the card as
+            shown in the activation sequences shown in Figure 5 and Figure 6
+            If the signal applied to XTAL1 is controlled by the system microcontroller, the clock pulse will
+            be applied to the card when it is sent by the system microcontroller (after completion of the
+            activation sequence).
+5.4         I/O transceivers
+            The three data lines I/O, AUX1 and AUX2 are identical.The idle state is realized by both I/O
+            and I/OUC lines being pulled HIGH via a 11 kΩ resistor (I/O to VCC and I/OUC to VDD). Pin
+            I/O is referenced to VCC, and pin I/OUC to VDD, thus allowing operation when VCC is not
+            equal to VDD. The first side of the transceiver to receive a falling edge becomes the master.
+            An anti-latch circuit disables the detection of falling edges on the line of the other side, which
+            then becomes a slave. After a time delay td(edge), an N transistor on the slave side is turned
+            on, thus transmitting the logic 0 present on the master side. When the master side returns to
+            logic 1, a P transistor on the slave side is turned on during the time delay tpu and then both
+            sides return to their idle states. This active pull-up feature ensures fast LOW-to-HIGH
+            transitions; it is able to deliver more than 1 mA at an output voltage of up to 0.9 VCC into an
+            80 pF load. At the end of the active pull-up pulse, the output voltage depends only on the
+            internal pull-up resistor and the load current. The current to and from the card I/O lines is
+            limited internally to 15 mA and the maximum frequency on these lines is 1 MHz.
+18/31
+
+
+ST8024                                                                         Functional description
+5.5    Inactive mode
+       After a power-on reset, the circuit enters the inactive mode. A minimum number of circuits
+       are active while waiting for the microcontroller to start a session:
+            – All card contacts are inactive (approximately 200 Ω to GND)
+            – Pins I/OUC, AUX1UC and AUX2UC are in the high-impedance state (11 kΩ pull-up
+               resistor to VDD)
+            – Voltage generators are stopped
+            – XTAL oscillator is running
+            – Voltage supervisor is active
+            – The internal oscillator is running at its low frequency.
+5.6    Activation sequence
+       After power-on and after the internal pulse width delay, the system microcontroller can
+       check the presence of a card using the signals OFF and CMDVCC as shown in Table 22.
+       If the card is in the reader (this is the case if PRES or PRES is active), the system
+       microcontroller can start a card session by pulling CMDVCC LOW. The following sequence
+       then occurs (see Figure 6):
+             1. CMDVCC is pulled LOW and the internal oscillator changes to its high frequency (t0).
+             2. The voltage doubler is started (between t0 and t1).
+             3. VCC rises from 0 to 5 V (or 3 V) with a controlled slope (t2 = t1 + 1.5 x T) where T is
+             64 times the period of the internal oscillator (approximately 25 µs).
+             4. I/O, AUX1 and AUX2 are enabled (t3 = t1 + 4T) (these were pulled LOW until this
+             moment).
+             5. CLK is applied to the C3 contact of the card reader (t4).
+             6. RST is enabled (t5 = t1 + 7T).
+             The clock may be applied to the card using the following sequence (see Figure 5):
+             1. Set RSTIN HIGH.
+             2. Set CMDVCC LOW.
+             3. Reset RSTIN LOW between t3 and t5; CLK will start at this moment.
+             4. RST remains LOW until t5, when RST is enabled to be the copy of RSTIN.
+             5. After t5, RSTIN has no further affect on CLK; this allows a precise count of CLK
+             pulses before toggling RST.
+       If the applied clock is not needed, then CMDVCC may be set LOW with RSTIN LOW. In this
+       case, CLK will start at t3 (minimum 200 ns after the transition on I/O), and after t5, RSTIN
+       may be set HIGH in order to obtain an Answer To Request (ATR) from the card.
+       Activation should not be performed with RSTIN held permanently HIGH
+       Table 22.      Card presence indicator
+                       OFF                          CMDVCC                          Indication
+                        H                                H                         Card present
+                        L                                H                       Card not present
+                                                                                                   19/31
+
+
+Functional description                                            ST8024
+            Figure 5.  Activation sequence using RSTIN and CMDVCC
+            Figure 6.  Activation sequence at t3
+20/31
+
+
+ST8024                                                                       Functional description
+5.7    Active mode
+       When the activation sequence is completed, the ST8024 will be in its active mode. Data are
+       exchanged between the card and the microcontroller via the I/O lines.
+       The ST8024 is designed for cards without VPP (the voltage required to program or erase the
+       internal non-volatile memory).
+5.8    Deactivation sequence
+       When a session is completed, the microcontroller sets the CMDVCC line HIGH. The circuit
+       then executes an automatic deactivation sequence by counting the sequencer back and
+       finishing in the inactive mode (see Figure 7):
+       1. RST goes LOW (t10).
+       2. CLK is held LOW (t12 = t10 + 0.5 x T) where T is 64 times the period of the internal
+       oscillator (approximately 25 µs).
+       3. I/O, AUX1 and AUX2 are pulled LOW (t13 = t10 + T).
+       4. VCC starts to fall towards zero (t14 = t10 + 1.5 x T).
+       5. The deactivation sequence is complete at tde, when VCC reaches its inactive state.
+       6. VUP falls to zero (t15 = t10 + 5T) and all card contacts become low-impedance to GND;
+       I/OUC, AUX1UC and AUX2UC remain at VDD (pulled-up via a 11 kΩ resistor).
+       7. The internal oscillator returns to its lower frequency.
+       Figure 7.      Deactivation sequence
+5.9    VCC generator
+       The VCC generator has a capacity to supply up to 80 mA continuously at 5 V and 65 mA at 3
+       V. An internal overload detector operates at approximately 120 mA. Current samples to the
+                                                                                               21/31
+
+
+Functional description                                                                              ST8024
+            detector are internally filtered, allowing spurious current pulses up to 200 mA with a duration
+            in the order of µs to be drawn by the card without causing deactivation. The average current
+            must stay below the specified maximum current value. For reasons of VCC voltage accuracy,
+            a 100 nF capacitor with an ESR < 100 mΩ should be tied to CGND near to pin VCC, and 100
+            nF capacitor with the same ESR should be tied to CGND near card reader contact C1.
+5.10        Fault detection
+            The following fault conditions are monitored:
+                – Short-circuit or high current on VCC
+                – Removal of a card during a transaction
+                – VDD dropping
+                – DC-DC converter operating out of the specified values (VDDP too low or current from
+                    VUP too high)
+                – Overheating.
+                – There are two different cases (see Figure 8):
+                – CMDVCC HIGH outside a card session. Output OFF is LOW if a card is not in the
+                    card reader, and HIGH if a card is in the reader. A voltage drop on the VDD supply is
+                    detected by the supply supervisor, this generates an internal Power-on reset pulse
+                    but does not act upon OFF. No short-circuit or overheating is detected because the
+                    card is not powered-up.
+                – CMDVCC LOW within a card session. Output OFF goes LOW when a fault condition
+                    is detected. As soon as this occurs, an emergency deactivation is performed
+                    automatically (see Figure 9). When the system controller resets CMDVCC to HIGH it
+                    may sense the OFF level again after completing the deactivation sequence. This
+                    distinguishes between a hardware problem or a card extraction (OFF goes HIGH
+                    again if a card is present).
+            Depending on the type of card-present switch within the connector (normally-closed or
+            normally-open) and on the mechanical characteristics of the switch, bouncing may occur on
+            the PRES signals at card insertion or withdrawal.
+            There is a debounce feature in the device with an 8 ms typical duration (see Figure 8).
+            When a card is inserted, output OFF goes HIGH only at the end of the debounce time.
+            When the card is extracted, an automatic deactivation sequence of the card is performed on
+            the first true/false transition on PRES or PRES and output OFF goes LOW.
+            Figure 8.      Behavior of OFF, CMDVCC, PRES and VCC
+22/31
+
+
+ST8024                                                           Functional description
+       Figure 9. Emergency deactivation sequence (card extraction)
+                                                                                  23/31
+
+
+Application                                                                                                                            ST8024
+6           Application
+            Figure 10. Application diagram
+                                                    CLKDIV1    1                           28 AUX2UC
+                                                    CLKDIV2    2                           27 AUX1UC
+                                                    5/3V       3                           26 I/OUC
+                     10µF             100nF
+                                                                                              XTAL2
+                                                                                                                               +3.3 V POWERED
+                                                    PGND       4                           25
+              +5V
+                                                                                              XTAL1        15pF               MICROCONTROLLER
+                                                    C1 +       5                           24
+                             (1)                    VDDP       6                           23 OFF
+                       100nF
+                                                    C1 -       7                           22 GND
+                                                    VUP        8
+                                                                      ST8024               21 VDD    100nF   10µF
+                             (1)                                                                                          (2)
+                       100nF                                                                  RSTIN              +3.3V
+                                                    PRES       9                           20
+                                                    PRES       10                          19 CMDVCC
+                                                    I/O        11                          18 PORADJ
+                                                    AUX2       12                          17 VCC
+                                                                                                               +3.3V
+                                                    AUX1       13                          16 RST
+                                                    CGND       14                          15 CLK
+                                                                                                                    Vdd
+                                                         (3)                        (4)
+                                                                          100nF
+                                                                                                                        R1
+                                 R100K
+                                                                                                               (7)
+               +3.3V
+                                                                     CARD READER
+                                                                  (normally closed type)
+                                                                                                                        R2
+                                                                                      (5)
+                                                                            100nF
+                                                                         C5     C1
+                                                                         C6     C2
+                                                                                          (6)
+                                                                         C7     C3
+                                                                         C8     C4
+                                                                                        K1
+                                                                                        K2
+            (1) These capacitors must be of the low ESR-type and be placed near the IC (within 100 mm).
+            (2) ST8024 and the microcontroller must use the same VDD supply.
+            (3) Make short, straight connections between CGND, C5 and the ground connection to the capacitor.
+            (4) Mount one low ESR-type 100 nF capacitor close to pin VCC.
+            (5) Mount one low ESR-type 100 nF capacitor close to C1 contact.
+            (6) The connection to C3 should be routed as far from C2, C7, C4 and C8 and, if possible, surrounded by
+                   grounded tracks.
+            (7) Optional resistor bridge for changing the threshold of VDD. If this bridge is not required pin 18 should be
+                   connected to ground.
+24/31
+
+
+ST8024                                                                    Package mechanical data
+7      Package mechanical data
+       In order to meet environmental requirements, ST offers these devices in different grades of
+       ECOPACK® packages, depending on their level of environmental compliance. ECOPACK®
+       specifications, grade definitions and product status are available at: www.st.com. ECOPACK
+       is an ST trademark.
+                                                                                              25/31
+
+
+Package mechanical data                                           ST8024
+                        SO-28 mechanical data
+                         mm.                             inch.
+      Dim.
+                Min.     Typ.     Max.             Min.   Typ. Max.
+       A                           2.65                        0.104
+       a1        0.1               0.3             0.004       0.012
+       b        0.35               0.49            0.014       0.019
+       b1       0.23               0.32            0.009       0.012
+       C                  0.5                            0.020
+       c1                               45° (typ.)
+       D        17.70             18.10            0.697       0.713
+       E        10.00             10.65            0.393       0.419
+       e                 1.27                            0.050
+       e3                16.51                           0.650
+       F        7.40               7.60            0.291       0.300
+       L        0.50               1.27            0.020       0.050
+       S                                8° (max.)
+                                                               0016023
+26/31
+
+
+ST8024                                    Package mechanical data
+              TSSOP28 mechanical data
+                  mm.                       inch.
+    Dim.
+         Min.    Typ.   Max.       Min.      Typ.         Max.
+     A                   1.2                              0.047
+     A1  0.05           0.15       0.002    0.004         0.006
+     A2   0.8      1    1.05       0.031    0.039         0.041
+     b   0.19           0.30       0.007                  0.012
+      c  0.09           0.20       0.004                 0.0079
+     D    9.6     9.7    9.8       0.378    0.382         0.386
+     E    6.2     6.4    6.6       0.244    0.252         0.260
+     E1   4.3     4.4   4.48       0.169    0.173         0.176
+     e         0.65 BSC                  0.0256 BSC
+     K    0°             8°          0°                     8°
+     L   0.45     0.60  0.75       0.018    0.024         0.030
+                                                  0128292B
+                                                                27/31
+
+
+Package mechanical data                                             ST8024
+                        Tape & reel SO-28 mechanical data
+                           mm.                            inch.
+      Dim.
+                Min.       Typ.       Max.      Min.       Typ.  Max.
+       A                               330                      12.992
+       C        12.8                  13.2     0.504             0.519
+       D        20.2                           0.795
+       N         60                            2.362
+       T                              30.4                       1.197
+       Ao       10.8                  11.0     0.425             0.433
+       Bo       18.2                  18.4     0.716             0.724
+       Ko        2.9                   3.1     0.114             0.122
+       Po        3.9                   4.1     0.153             0.161
+       P        11.9                  12.1     0.468             0.476
+28/31
+
+
+ST8024                                          Package mechanical data
+              Tape & reel TSSOP28 mechanical data
+                    mm.                           inch.
+    Dim.
+         Min.       Typ.      Max.     Min.        Typ.       Max.
+     A                        330                            12.992
+     C   12.8                 13.2     0.504                  0.519
+     D   20.2                          0.795
+     N    60                           2.362
+     T                        22.4                            0.882
+     Ao   6.8                  7       0.268                  0.276
+     Bo  10.1                 10.3     0.398                  0.406
+     Ko   1.7                 1.9      0.067                  0.075
+     Po   3.9                 4.1      0.153                  0.161
+     P   11.9                 12.1     0.468                  0.476
+                                                                    29/31
+
+
+Revision history                                                      ST8024
+8           Revision history
+Table 23.   Document revision history
+       Date      Revision                                    Changes
+   18-Mar-2004       4       Pag. 10, fig. 4, RSTIN ==> CLK.
+   27-Jun-2006       5       Add package TSSOP28.
+   13-Dec-2006       6       Removed: the comment point 5 on page 22.
+   03-Jun-2008       7       Added: Table 1 on page 1.
+   30-Mar-2009       8       Modified: Figure 10 on page 24.
+30/31
+
+
+ST8024
+                                                             Please Read Carefully:
+Information in this document is provided solely in connection with ST products. STMicroelectronics NV and its subsidiaries (“ST”) reserve the
+right to make changes, corrections, modifications or improvements, to this document, and the products and services described herein at any
+time, without notice.
+All ST products are sold pursuant to ST’s terms and conditions of sale.
+Purchasers are solely responsible for the choice, selection and use of the ST products and services described herein, and ST assumes no
+liability whatsoever relating to the choice, selection or use of the ST products and services described herein.
+No license, express or implied, by estoppel or otherwise, to any intellectual property rights is granted under this document. If any part of this
+document refers to any third party products or services it shall not be deemed a license grant by ST for the use of such third party products
+or services, or any intellectual property contained therein or considered as a warranty covering the use in any manner whatsoever of such
+third party products or services or any intellectual property contained therein.
+UNLESS OTHERWISE SET FORTH IN ST’S TERMS AND CONDITIONS OF SALE ST DISCLAIMS ANY EXPRESS OR IMPLIED
+WARRANTY WITH RESPECT TO THE USE AND/OR SALE OF ST PRODUCTS INCLUDING WITHOUT LIMITATION IMPLIED
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE (AND THEIR EQUIVALENTS UNDER THE LAWS
+OF ANY JURISDICTION), OR INFRINGEMENT OF ANY PATENT, COPYRIGHT OR OTHER INTELLECTUAL PROPERTY RIGHT.
+UNLESS EXPRESSLY APPROVED IN WRITING BY AN AUTHORIZED ST REPRESENTATIVE, ST PRODUCTS ARE NOT
+RECOMMENDED, AUTHORIZED OR WARRANTED FOR USE IN MILITARY, AIR CRAFT, SPACE, LIFE SAVING, OR LIFE SUSTAINING
+APPLICATIONS, NOR IN PRODUCTS OR SYSTEMS WHERE FAILURE OR MALFUNCTION MAY RESULT IN PERSONAL INJURY,
+DEATH, OR SEVERE PROPERTY OR ENVIRONMENTAL DAMAGE. ST PRODUCTS WHICH ARE NOT SPECIFIED AS "AUTOMOTIVE
+GRADE" MAY ONLY BE USED IN AUTOMOTIVE APPLICATIONS AT USER’S OWN RISK.
+Resale of ST products with provisions different from the statements and/or technical features set forth in this document shall immediately void
+any warranty granted by ST for the ST product or service described herein and shall not create or extend in any manner whatsoever, any
+liability of ST.
+                            ST and the ST logo are trademarks or registered trademarks of ST in various countries.
+                           Information in this document supersedes and replaces all information previously supplied.
+            The ST logo is a registered trademark of STMicroelectronics. All other names are the property of their respective owners.
+                                                 © 2009 STMicroelectronics - All rights reserved
+                                                     STMicroelectronics group of companies
+   Australia - Belgium - Brazil - Canada - China - Czech Republic - Finland - France - Germany - Hong Kong - India - Israel - Italy - Japan -
+              Malaysia - Malta - Morocco - Singapore - Spain - Sweden - Switzerland - United Kingdom - United States of America
+                                                                   www.st.com
+                                                                                                                                         31/31
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+STMicroelectronics:
+ ST8024CDR ST8024CTR

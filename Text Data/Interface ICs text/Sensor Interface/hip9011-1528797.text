@@ -1,0 +1,646 @@
+                                                                                                                              DATASHEET
+HIP9011                                                                                                                                             FN4367
+Engine Knock Signal Processor                                                                                                                      Rev 2.00
+                                                                                                                                             January 6, 2006
+The HIP9011 is used to provide a method of detecting                                          Features
+premature detonation often referred to as “Knock or Ping” in
+internal combustion engines.                                                                  • Two Sensor Inputs
+                                                                                              • Microprocessor Programmable
+The IC is shown in the Simplified Block Diagram. The chip
+can select between one of two sensors, if needed for                                          • Accurate and Stable Filter Elements
+accurate monitoring or for “V” type engines. Internal control
+                                                                                              • Digitally Programmable Gain
+via the SPI bus is fast enough to switch sensors between
+each firing cycle. A programmable bandpass filter                                             • Digitally Programmable Time Constants
+processes the signal from either of the sensor inputs. The                                    • Digitally Programmable Filter Characteristics
+bandpass filter can be selected to optimize the extraction
+the engine knock or ping signals from the engine                                              • On-Chip Crystal Oscillator
+background noise. Further single processing is obtained by                                    • Programmable Frequency Divider
+full wave rectification of the filtered signal and applying it to
+                                                                                              • External Clock Frequencies up to 24MHz
+an integrator whose output voltage level is proportional to
+                                                                                                - 4, 5, 6, 8, 10, 12, 16, 20, and 24MHz
+the knock signal amplitude. The chip is under
+microprocessor control via a SPI interface bus.                                               • Operating Temperature Range -40oC to 125oC
+                                                                                              • Pb-Free Plus Anneal Available (RoHS Compliant)
+Ordering Information
+                                          TEMP.                                               Applications
+   PART            PART                   RANGE                                   PKG.
+  NUMBER          MARKING                  (oC)                     PACKAGE      DWG. #       • Engine Knock Detector Processor
+ HIP9011AB        HIP9011AB               -40 to 125               20 Ld SOIC    M20.3        • Analog Signal Processing Where Controllable Filter
+ HIP9011ABZ HIP9011ABZ                    -40 to 125               20 Ld SOIC    M20.3          Characteristics are Required
+ (See Note)                                                        (Pb-free)
+Add “T” suffix for tape and reel.
+NOTE: Intersil Pb-free plus anneal products employ special Pb-free
+material sets; molding compounds/die attach materials and 100%
+matte tin plate termination finish, which are RoHS compliant and
+compatible with both SnPb and Pb-free soldering operations. Intersil
+Pb-free products are MSL classified at Pb-free peak reflow
+temperatures that meet or exceed the Pb-free requirements of
+IPC/JEDEC J STD-020.
+Simplified Block Diagram
+      CH0FB
+                                               3RD ORDER
+      CH0IN
+              -
+                         CHANNEL SELECT
+      CH0NI   +                                                  PROGRAMMABLE       PROGRAMMABLE
+                                                                                                                  PROGRAMMABLE            OUTPUT
+                                                                       GAIN           BANDPASS        ACTIVE                              DRIVER INTOUT
+      CH1FB                                                           STAGE                                         INTEGRATOR
+                                                                                        FILTER       FULL WAVE                             AND
+                                                                                                                      40 - 600s
+                                           ANTIALIASING FILTER
+                            SWITCHES
+                                                                   2- 0.111             1-20kHz      RECTIFIER                            SAMPLE
+      CH1IN                                                          64 STEPS                                         32 STEPS           AND HOLD
+              -                                                                        64 STEPS
+      CH1NI   +
+                                                                                                                                                 OSCIN
+                                                                                                                    PROGRAMMABLE
+                                                                                                                                          CLOCK OSCOUT
+                                                                                                                       DIVIDER
+                                                                                                    TO SWITCHED
+                                                                                                      CAPACITOR
+                                                                                                      NETWORKS                                       SCK
+                                                                                                                                                      CS
+                                                                 POWER SUPPLY                    REGISTERS                       SPI                   SI
+                                                                      AND                           AND                      INTERFACE                SO
+                                                                 BIAS CIRCUITS                 STATE MACHINE
+                                                                                                                                                INT/HOLD
+                                                          VMID     VDD   GND
+                                                                                                   TEST
+FN4367 Rev 2.00                                                                                                                           Page 1 of 11
+January 6, 2006
+
+
+HIP9011
+Pinout
+                                                               HIP9011
+                                                                (SOIC)
+                                                              TOP VIEW
+                                                   VDD    1                    20 CH0NI
+                                                   GND    2                    19 CH0IN
+                                                  VMID    3                    18 CH0FB
+                                               INTOUT     4                    17 CH1FB
+                                                     NC   5                    16 CH1IN
+                                                     NC   6                    15 CH1NI
+                                             INT/HOLD     7                    14 TEST
+                                                     CS   8                    13 SCK
+                                                OSCIN     9                    12 SI
+                                              OSCOUT 10                        11 SO
+Pin Descriptions
+   PIN
+ NUMBER     DESIGNATION                                                        DESCRIPTION
+     1           VDD    Five volt power input.
+     2           GND    This pin is tied to ground.
+     3           VMID   This pin is connected to the internal mid-supply generator and is brought out for bypassing by a 0.022F capacitor.
+     4         INTOUT   Buffered output of the integrator. Output signal is held by an internal Sample and Hold circuit when INT/HOLD is
+                        low.
+   5, 6           NC    These pins are not internally connected. Do Not Use.
+     7        INT/HOLD  Selects whether the chip is in the Integrate Mode (Input High) or in the Hold Mode (Input Low). This pin has an
+                        internal pull down.
+     8            CS    A low input on this pin enables the chip to communicate over the SPI bus. This pin has an internal pull-up.
+     9          OSCIN   Input to inverter used for the oscillator circuit. A 4MHz crystal or ceramic resonator is connected between this pin and
+                        pin 10. To bias the inverter, a 1.0M to 10M resistor is usually connected between this pin and pin 10.
+    10         OSCOUT   Output of the inverter used for the oscillator. See pin 9 above.
+    11            SO    Output of the chip SPI data bus. This is a three-state output that is controlled via the SPI bus. The output is
+                        placed in the high impedance state by setting CS high when the chip is not selected. This high impedance state
+                        can also be programmed by setting the LSB of the prescaler word to 1. This will take precedence over CS. A 0
+                        enables the active state. The Diagnostic Mode overrides these conditions.
+    12            SI    Input of the chip SPI data bus. Data length is eight bits. This pin has an internal pull-up.
+    13           SCK    Input from the SPI clock. Normally low, the data is transferred to the chip internal circuitry on the falling clock
+                        edge. This pin has an internal pull up.
+    14           TEST   A low on this pin places the chip in the diagnostic mode. For normal operation this pin is tied high or left open.
+                        This pin has an internal pull up.
+    15          CH1NI   Non-inverting input of Channel one.
+    16          CH1IN   Inverting input to channel one amplifier. A resistor is tied from this summing input to the transducer. A second
+                        resistor is tied between this pin and pin 17, CH1FB to establish the gain of the amplifier.
+    17          CH1FB   Output of the channel one amplifier. This pin is used to apply feedback.
+    18          CH0FB   Output of the channel zero amplifier. This pin is used to apply feedback.
+    19          CH0IN   Inverting input to channel zero amplifier. Remainder same as channel one amplifier except feedback is applied
+                        from pin 18.
+    20          CH0NI   Non-inverting input of Channel 0. Remainder the same as pin 16, except feedback is applied from terminal 18.
+FN4367 Rev 2.00                                                                                                            Page 2 of 11
+January 6, 2006
+
+
+HIP9011
+Absolute Maximum Ratings                                                                             Thermal Information
+DC Logic Supply, VDD . . . . . . . . . . . . . . . . . . . . . . . . . -0.5V to 7.0V                 Thermal Resistance (Typical, Note 1)                                     JA (oC/W)
+Output Voltage, VO . . . . . . . . . . . . . . . . . . . . . . . . . . . -0.5V to 7.0V                 SOIC Package . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    120
+Input Voltage, VIN . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7V Max          Maximum Power Dissipation, PD
+                                                                                                       For TA = -40oC to 70oC . . . . . . . . . . . . . . . . . . . . . . . 400mW Max
+Operating Conditions                                                                                   For TA = 70oC to 125oC, Derate Linearly at . . . . . . . . . . 6mW/oC
+                                                                                                     Maximum Junction Temperature . . . . . . . . . . . . . . . . . . . . . . .150oC
+Temperature Range . . . . . . . . . . . . . . . . . . . . . . . . . -40oC to 125oC
+                                                                                                     Maximum Storage Temperature Range, TSTG . . . . -65oC to 150oC
+                                                                                                     Maximum Lead Temperature (Soldering 10s) . . . . . . . . . . . . .300oC
+                                                                                                       At a Distance 1/16 1/32 inch, (1.59 0.79mm) from Case for
+                                                                                                       10s Max. (SOIC - Lead Tips Only)
+CAUTION: Stresses above those listed in “Absolute Maximum Ratings” may cause permanent damage to the device. This is a stress only rating and operation of the
+device at these or any other conditions above those indicated in the operational sections of this specification is not implied.
+NOTE:
+  1. JA is measured with the component mounted on an evaluation PC board in free air.
+Electrical Specifications                    VDD = 5V 5%, GND = 0V, Clock Frequency 4MHz 0.1%, TA = -40oC to 125oC,
+                                             Unless Otherwise Specified
+                     PARAMETER                                              SYMBOL                TEST CONDITIONS                  MIN             TYP            MAX          UNITS
+ DC ELECTRICAL SPECIFICATIONS
+ Quiescent Supply Current                                                         IDD       VDD = 5.25V, GND = 0V                     -             5.0             8.0          mA
+ Midpoint Voltage, Pin 3                                                        VMID        VDD = 5.0V, IL = 2mA Source             2.3            2.45            2.55           V
+ Midpoint Voltage, Pin 3                                                        VMID        VDD = 5.0V, IL = 0mA                    2.4             2.5             2.6           V
+ Low Input Voltage, Pins INT/HOLD, CS, SI, SCK                                    VIL                                                 -               -             30        % of VDD
+ High Input Voltage, Pins INT/HOLD, CS, SI, SCK                                   VIH                                                70               -               -       % of VDD
+ Hysteresis voltage, Pins INT/HOLD, CS, SI, SCK                               VHYST                                                0.85               -               -           V
+ Internal Pull-Up Current                                              I Source CS, SI, VDD = 5.0V, Measured at GND                   -             50                -          A
+                                                                          SCK, TEST
+ Internal Pull-Down Current                                                    I Sink,      VDD = 5.0V, Measured at VDD               -             -50               -          A
+                                                                           INT/HOLD
+ Low Level Output, Pin SO                                                        VOL        ISOURCE = 1.6mA, VDD = 5.0V            0.01               -            0.30           V
+ High Level Output, Pin SO                                                       VOH        ISINK = 200A, VDD = 5.0V               4.8             4.9             5.0           V
+ Three-State Leakage Pin SO                                                        IL       Measured at GND; VDD = 5.0V               -               -            10           A
+ Low Level Output, Pin 10, OSCOUT                                                VOL        ISOURCE = 500A; VDD = 5.0V               -               -             1.5           V
+ High Level Output, Pin 10, OSCOUT                                               VOH        ISINK = -500A; VDD = 5.0V              4.4               -               -           V
+ SPI BUS INTERFACE            AC Parametrics
+ CS Falling to SCLK Rising                                                      tCCH                                                 10               -               -          ns
+ CS Rising to SCLK Falling                                                       tCCL                                                80               -               -          ns
+ SCLK Low                                                                       tPWL                                                 60               -               -          ns
+ SCLK High                                                                      tPWH                                                 60               -               -          ns
+ SCLK Falling to CS Rising                                                     tSCCH                                                 60               -               -          ns
+ Data High Setup Time                                                           tSUH                                                 20               -               -          ns
+ Data Low Setup Time                                                             tSUL                                                20               -               -          ns
+ Data High Hold Time                                                              tHH                                                10               -               -          ns
+ Data Low Hold Time                                                               tHL                                                10               -               -          ns
+ Min Time Between 2 Programmed Words                                            tCSH                                                200               -               -          ns
+ CS Rising to INT/Hold Rising                                                    tCIH                                                 8               -               -          s
+FN4367 Rev 2.00                                                                                                                                                   Page 3 of 11
+January 6, 2006
+
+
+HIP9011
+Electrical Specifications             VDD = 5V 5%, GND = 0V, Clock Frequency 4MHz 0.1%, TA = -40oC to 125oC,
+                                      Unless Otherwise Specified (Continued)
+                    PARAMETER                           SYMBOL              TEST CONDITIONS            MIN    TYP    MAX     UNITS
+  INPUT AMPLIFIERS
+ CH0 and CH1 High Output Voltage                         VOUTHI       ISINK = 100A, VDD = 5.0V         4.7    4.9     -        V
+ CH0 and CH1 Low Output Voltage                          VOUTLO       ISOURCE = 100A; VDD = 5.0V         -    15     200      mV
+ Voltage Gain                                               ACL       Input R = 47.5K, Feedback         +18   +20     +21      dB
+                                                                      R = 475k
+ ANTIALIASING FILTER
+ Response 1kHz to 20kHz, Referenced to 1kHz                 BW        Test Mode                           -   -0.5     -       dB
+ Attenuation at 180kHz, Referenced                        ATTEN       Test Mode                         -10   -15      -       dB
+ to 1kHz
+ PROGRAMMABLE FILTERS
+ Peak to Peak Voltage Output                               VOUT       Run Mode                          3.5    4.0     -      VP-P
+ Filters Q (Note 2)                                          Q        Run Mode                            -    2.5     -       Q
+ PROGRAMMABLE GAIN AMPLIFIERS
+ Percent Amplifier Gain Deviation                           %G        Run Mode                            -    1      -       %
+ INTEGRATOR
+ Integrator Reset Voltage                                VRESET       Pin 4 Voltage at Start of          75   125     175      mV
+                                                                      Integration
+                                                                      Cycle; VDD = 5.0V
+ Integrator Droop after 500s                            VDROOP       Hold Mode, Pin 7 = 0V,              -    3     50      mV
+                                                                      VDD = 5.0V
+                                                                      Pin 4 set to 20% to 80% of VDD
+ DIFFERENTIAL CONVERTER
+ Differential to Single Ended Converter Offset            DIFVIO      By Design                           -    0.1     -       mV
+ Voltage
+ Change In Converter Output                              DIFOUT       Run Mode, 500A Sinking Load        -    1     10      mV
+                                                                      to No Load Condition
+ SYSTEM GAIN DEVIATION
+ Gain Deviation from “Ideal Equation” Correlation         VOUT -      Run Mode, maximum signal         -8%, Equatio   8%,       V
+ Factor + 5.0% (Note 3)                                  VRESET       output from Input Amplifier    100mV     n   100mV
+                                                                      <2.25VP-P, Equation Output X           X 0.95
+                                                                      0.95 + Device Reset Voltage;              -
+                                                                      For Total VOUT  4.7V                VRESET
+NOTES:
+  2. Q = fo/BW, where: fo = Center Frequency, BW = 3dB Bandwidth
+  3. Ideal Equation: INTOUT (Volts) = [VIN * GIN * GPR * GBPF * 1/ * (N/tC(ms) * fQ(kHz)) * GDSE] + VRESET
+     Where: VIN = input signal amplitude (VP-P)
+               GIN = External Input Gain; GIN = RF/RIN
+             GPR = Programmed Gain
+            GBPF = Gain of Bandpass Filter (2 for Ideal Case at Center)
+              tINT = Integration Time; tINT = N/fQ
+            0.318 = 1/
+                 N = Number of Cycles of Input Signal
+                fQ = Frequency of Input Signal
+                RF = Feedback Resistor Value
+               RIN = Signal Input Resistor Value
+                tC = Programmed Time Constant
+            GDSE = Gain of DSE Converter (2 for Ideal Case)
+         VRESET = Integrator Reset Voltage = 0.125V, Typ
+FN4367 Rev 2.00                                                                                                      Page 4 of 11
+January 6, 2006
+
+
+HIP9011
+Timing Diagrams
+                      INT/HOLD
+                                                                            tCIH
+                                 tCSH
+                      CS
+                  tCSCH                             tPWL             tSCCH
+                    SCK
+                     tCSCF                tPWH
+                    SI              B7  B6    B5   B4     B3   B2     B1   B0
+                        tSUH
+                                         tHH
+                     SO            B7    B6    B5  B4     B3    B2     B1   B0
+                                               FIGURE 1. SPI TIMING
+                                       TABLE 1. SPI TIMING REQUIREMENTS
+        SYMBOL                                         REQUIREMENT                          TIME
+         tCSCH  Minimum time from CS falling edge to SCK rising edge.                        10ns
+         tCSCF  Minimum time from CS falling edge to SCK falling edge.                       80ns
+          tPWL  Minimum time for the SCK low.                                                60ns
+          tPWH  Minimum time for the SCK high.                                               60ns
+         tSCCH  Minimum time from SCK falling after 8 bits to CS raising edge.               80ns
+          tSUH  Minimum time from data high to falling edge of spiclk.                       20ns
+           tSUL Minimum time from data low to falling edge of spiclk.                        20ns
+            tHH Minimum time for data high after the falling edge of the spiclk.             10ns
+            tHL Minimum time for data low after the falling edge of the spiclk.              10ns
+           tCIH Minimum time after CS raises until INT/HOLD goes high.                        8s
+          tCSH  Minimum time between programming 2 internal registers.                      200ns
+                                t1                             t3
+                          INT/HOLD
+                                 t2
+                                                                  t4
+                          INTOUT
+                                         FIGURE 2. INTEGRATOR TIMING
+                             TABLE 2. INTEGRATE/HOLD TIMING REQUIREMENTS
+        SYMBOL                                         REQUIREMENT                          TIME
+             t1 Maximum rise time of the INT/HOLD signal.                                    45ns
+             t2 Maximum time after INT/HOLD rises for INTOUT to begin to integrate.          20s
+             t3 Maximum fall time of INT/HOLD signal.                                        45ns
+             t4 Typical time after INT/HOLD goes low before chip goes into hold state.       20s
+FN4367 Rev 2.00                                                                        Page 5 of 11
+January 6, 2006
+
+
+HIP9011
+                            +5V      VDD
+                                                                                 EXAMPLE CASE USING IDEAL SYSTEM EQUATION
+                                     VMID       HIP9011
+                    0.022F
+                                     GND                                      When the Input Signal is Present for the Period tINT:
+                                                                              INTOUT (Volts) =
+                                     CH0NI
+                                                                SI                                           1 t int
+                                     CH1NI                                    V IN  G IN   G BPR  G PR  ---  --------  G DSE + V RESET
+                                                                                                              tc 
+                                                               SO
+                                     CH1IN
+                        Rin                                   SCK  SPI BUS   Where:
+                                     CH1FB
+                               RF                              CS                           VIN = 200mVP-P , Continuous AC Signal
+                                     CH0IN                                                 GIN = 1.0, Ratio of RF to RIN
+                        Rin                                                               GPR = 0.190
+                                     CH0FB               INT/HOLD
+                               RF
+                                                                                         GBPF = 2.0 Ideal Gain Value
+                                                                                             tC = 200s
+     TRANSDUCERS                                                                           tINT = 2ms
+                                                             TEST   +5V                  GDSE = 2.0 Ideal Gain Value
+                                     OSCIN
+                                                                                      VRESET = 0.125V, Typical Value
+                                                                                  INTOUT (Volts) =
+              20pF     4MHz                                                       200x10-3*1* [2 * 0.19 * 0.318 * 2x10-3/200x10-6*
+                                                                                                2]+0.125
+                                     OSCOUT                                                     = 0.4833 + 0.125
+                       20pF                     INTOUT                                          = 0.608V
+                            1M
+                                                  A/D
+                                              CONVERTER
+                                           MICROPROCESSOR
+                       FIGURE 3. SIMPLIFIED BLOCK DIAGRAM OF THE HIP9011 IN AN AUTOMOTIVE APPLICATION
+Description of the HIP9011 Operation
+This IC is designed to be a universal digitally controlled, analog         Broadband piezoelectric ceramic transducers used for the
+interface between engine acoustical sensors or accelerometers              engine signal pickup have device capacitances in the order
+and internal combustion engine fuel management systems.                    of 1100pF and output voltages that range from 5mV to 8V
+Two wideband input amplifiers are provided which will allow the            RMS. During normal engine operation, a single input
+use of two sensors. These sensors be of the piezoelectric type,            channel is selected and applied to the HIP9011. The engine
+that can be mounted in optimum locations on either in-line or V            background noise is typically well below in amplitude than
+type engine configurations.                                                the pre-detonation noise. Therefore, the bandpass filter
+                                                                           stages can be optimized to further discriminate between
+Output from these input amplifiers are directed to a channel
+                                                                           engine background and combustion noise and pre-
+select mux switch and then into a 3rd order antialiasing filter.
+                                                                           detonation noise.
+The output signal is then directed to two programmable gain
+stages, where one stage inverts or shifts the knock signal 180             A basic approach to engine pre-detonation systems is to
+degrees. The gain stage signals are outputted to two                       only observe engine background during the time interval
+programmable bandpass filter stages. Outputs from the two                  that noise is expected and if detected, retard timing. This
+BPF stages are then full wave rectified before being digitally             basic approach does not require the sensitivity and
+integrated by the programmable integrator. The integrator                  selectivity that is needed for a continuously adjustable
+output is applied to a line driver for further processing by the           solution. Enhanced fuel economy and performance is
+engine fuel management control system. The gain, bandpass                  obtainable when this IC is coupled with a microprocessor
+filter and integrator stage settings are programmable from a               controlled fuel management system.
+microprocessor via the SPI Bus Interface
+FN4367 Rev 2.00                                                                                                                   Page 6 of 11
+January 6, 2006
+
+
+HIP9011
+Circuit Block Description                                                 Programmable Gain Stage
+                                                                          The gains for two identical programmable gain stages can
+Input Amplifiers
+                                                                          be adjusted, so that the knock energies can be
+Two amplifiers can be selected to interface to the engine                 compensated if needed. This adjustment can be made with
+sensors. These amplifiers have a typical open loop gain of                64 different gain settings, ranging between 2 and 0.111.
+100dB, with a typical bandwidth of 2.6MHz. The common                     The signals can swing between 20 to 80 percent of VDD .
+mode input voltage range extends to within 0.5V of either                 Programming is discussed in the SPI Communications
+supply rail. The amplifier output has a similar output range.             Protocol section.
+Sufficient gain, bandwidth and output swing capability is
+                                                                          Programmable Bandpass Filter
+provided to ensure that the amplifier can handle
+                                                                          Two identical programmable filters are used to detect the
+attenuation gain settings of 20 to 1 or -26dB. This would be
+                                                                          frequencies of interest. The Band Pass Filter (BPF) is
+needed when high peak output signals, in the range of
+                                                                          programmed to pass the frequency component of the engine
+8VRMS are obtained from the transducer. Gain settings of
+                                                                          knock. The filter frequency is established by the characteristics
+10 times can also be needed when the transducers have
+                                                                          of the particular engine and transducer. By integrating the
+output levels of 5mVRMS .
+                                                                          rectified outputs from these two filters at the INTEGRATOR
+In a typical application the input signal frequency may vary              stage, a knock can be detected if it has occurred.
+from 1kHz to 20kHz. External capacitors are used to
+                                                                          The filters have a nominal differential gain of 4. Their
+decouple the IC from the sensor (C1 and C2) refer to
+                                                                          frequency is set by a programmable word (discussed in the
+Figure 4. A typical value of the capacitor would be 3.3nF.
+                                                                          SPI Communications Protocol section.) Center frequencies
+Series input resistors, R1 and R2, are used to connect the
+                                                                          can be programed from 1.22kHz to 19.98kHz, in 64 steps.
+inverting inputs of the amplifiers, (pins 19 and 16.)
+                                                                          The filter Qs are typically 2.4.
+Feedback resistors, R3 and R4, in conjunction with R3 and
+R4 are used to set the gain of the amplifiers.                            Active Full Wave Rectifier
+A mid voltage level is generated internally within the IC. This           The output of the bandpass filters are unity gain buffered prior
+level is set to be half way between VDD and ground.                       to full wave rectification using switch capacitor techniques.
+Throughout the IC this level is used as a quiet, DC reference             Each side of the rectifier circuit provides both negative and
+for the signal processing circuits within the IC. This point is           positive values of the knock frequency bandpass frequency
+brought out for several reasons, it can be used as a                      filter outputs. The output is able to swing from 20 to 80 percent
+reference voltage, and it must be bypassed to insure that it              of VDD . Care was taken to minimize the RMS variations from
+remains as a quiet reference for the internal circuitry.                  input to output of this stage.
+The input amplifiers are designed with power down                         Programmable Integrator Stage
+capability, which, when activated disables their bias circuit             The signals from the rectifier stage are separated into 2 output
+and their output goes into a three-state state condition. This            signal paths which are then integrated together. A differential
+is utilized during the diagnostic mode, in which the output               system is used to minimize noise. One side integrates the
+terminals of the amplifiers are driven by the outside world               positive energy value from the Knock Frequency Rectifier.
+with various test signals.                                                The second side does the integration of the negative energy
+                                                                          value. The positive and negative energy signals are opposite
+Antialiasing Filter
+                                                                          phase signals. Using this technique reduces system noise
+The IC has a 3rd order Butterworth filter with a 3dB point at             from affecting the actual signal.
+70kHz. Double poly capacitors and implanted resistors are
+used to set poles in the filter. This filter is required to have no       The integrator time constant is software programmable by
+more than 1dB attenuation at 20kHz (highest frequency off                 the Integrator Time Constant discussed in the
+interest) and a minimum attenuation of 10dB at 180kHz. This               Communications Protocol section. The time constant can be
+filter precedes the switch capacitor filter stages which run at           programmed from 40s to 600s, with a total of 32 steps. If
+the system frequency of 200kHz.                                           for example, we program a time constant to 200s, then with
+                                                                          one volt difference between each channel, the output of the
+                                                                          integrator will change by volt in 200s.
+                                                 R3                                                                 R4
+                     C1      R1                                                            C2     R2
+                                           19                                                                 16
+         SENSOR                                -   18                         SENSOR                             -     17
+                                  VMID         +                                                      VMID       +
+                                           20                                                                 15
+                                                  FIGURE 4. INPUT AMPLIFIER CONNECTIONS
+FN4367 Rev 2.00                                                                                                           Page 7 of 11
+January 6, 2006
+
+
+HIP9011
+Integration is enabled by the rising edge of the input control     Programming Words
+signal INT/HOLD. Within 20s after the integrate input
+                                                                    1. Band Pass Filter Frequency: Defines the center
+reaches a logic high level, the output of the integrator will fall     frequency of the Band Pass Filter in the system. The first
+to approximately VRESET, 0.125V. The output of the                     2 bits are used for the address and the last 6 bits are used
+integrator is an analog voltage.                                       for its value. 00FFFFFF Example: 00001010 would be
+                                                                       the Band Pass Filter at a center frequency of 1.78kHz (bit
+Differential to Single-Ended Converter
+                                                                       value of 10 in Table 3).
+This circuit takes the differential output of the integrators
+                                                                    2. Gain Control: defines the value of the gain stage
+(through the test-multiplexer circuit) and provides a signal           attenuation of gain setting. The first 2 bits are again used
+that is the sum of the two signals. This technique is used to          for the address and the last 6 bits for its value.
+improve the noise immunity of the system.                              10GGGGGG Example: 10010100 would be the Gain
+                                                                       Control (10 for the first two bits) with an attenuation of
+Output Buffer
+                                                                       0.739 (bit value of 20 in Table 3).
+This output amplifier is the same amplifier circuits as the
+                                                                    3. Integrator Time Constant: Defines the Integration Time
+input amplifier used to interface with the sensors. For                Constant for the system. The first 3 bits are used for the
+diagnostic purposes when the output of the antialias filter is         address and the last 5 bits for the value. 110TTTTT
+being evaluated, this amplifier is in the power down mode.             Example: 11000011 would be the Integrator Time
+                                                                       Constant (110 for the first 3 bits) and an Integration Time
+Test Multiplexer
+                                                                       Constant of 55s (bit value 3 in Table 3).
+This circuit receives the positive and negative outputs from
+                                                                    4. Test/Channel Select Control: Again the first three bits, 111
+the integrator, together with the outputs from different parts         are the address for this function, and the last five bits
+of the IC. The Test Mux output is controlled by the fifth              define the functions that may be programmed. Example:
+programming word of the communications protocol. This                  111B4B3B2B1B0; The options are:
+multiplexes the switch capacitor filter output, the gain control       A) If B0 is “0”, than channel 0 is selected. If B0 is “1”;
+output and the antialias filter output.                                     than channel 1 is selected as the input.
+SPI Communications Protocol                                            B) The remaining bits are used for selection of the various
+                                                                            diagnostic modes. TEST pin (14) = low. Not applicable
+Communicating to the Knock Sensor via the SPI Bus
+                                                                            in Run Mode.
+(MOSI). A chip select pin (CS) is used to enable the chip,
+which, in conjunction with the SPI clock (SCK), which moves         5. Prescaler/SO terminal status: Defines the division ratio of
+                                                                       the internal frequency prescaler and the status of the SO
+an eight bit programming word. Five different programming
+                                                                       terminal, pin 11. P1 to P4 bits define the frequency that
+words are used to set the following internal programmable
+                                                                       may be used with an external clock. The status of the
+registers: GAIN, BANDPASS FREQUENCY FILTER,                            three state SO pin is set by the last, Z bit.
+INTEGRATOR TIME CONSTANT, CHANNEL SELECT, SO                           01P5P4P3P2P1Z; Example: 0100000, Note, in this case
+output mode, and TEST MODES.                                           bit P5 is not used. (01 for the first 2 bits sets the
+                                                                       Prescaler/SO function) P1 to P4 set Prescaler for a clock
+When chip select (CS) goes low, on the next falling edge of
+                                                                       frequency of 4MHz and the last bit sets the S0 terminal to
+the SPI clock (SCK), data is latched into the SPI register.
+                                                                       an active state.
+The data is shifted with the most significant bit first and least
+significant bit last. Each word is divided into two parts: first
+the address and then the value. Depending on the function
+being controlled, the address is 2 or 3 bits, and the value is
+either 5 or 6 bits long. All five programming words can be
+entered into the IC during the HOLD mode of operation. The
+integration or hold mode of operation is controlled by the
+INT/HOLD input signal.
+FN4367 Rev 2.00                                                                                                   Page 8 of 11
+January 6, 2006
+
+
+HIP9011
+                                   TABLE 3. FREQUENCY, GAIN, AND INTEGRATOR TIME CONSTANT
+  BIT VALUE PER       FREQUENCY                              TIME         BIT VALUE PER     FREQUENCY
+    FUNCTION              (kHz)              GAIN        CONSTANT(s)      FUNCTION           (kHz)          GAIN
+         0                 1.22              2.000             40               32              4.95          0.421
+         1                 1.26              1.882             45               33              5.12          0.400
+         2                 1.31              1.778             50               34              5.29          0.381
+         3                 1.35              1.684             55               35              5.48          0.364
+         4                 1.40              1.600             60               36              5.68          0.348
+         5                 1.45              1.523             65               37              5.90          0.333
+         6                 1.51              1.455             70               38              6.12          0.320
+         7                 1.57              1.391             75               39              6.37          0.308
+         8                 1.63              1.333             80               40              6.64          0.296
+         9                 1.71              1.280             90               41              6.94          0.286
+        10                 1.78              1.231            100               42              7.27          0.276
+        11                 1.87              1.185            110               43              7.63          0.267
+        12                 1.96              1.143            120               44              8.02          0.258
+        13                 2.07              1.063            130               45              8.46          0.250
+        14                 2.18              1.000            140               46              8.95          0.236
+        15                 2.31              0.944            150               47              9.50          0.222
+        16                 2.46              0.895            160               48             10.12          0.211
+        17                 2.54              0.850            180               49             10.46          0.200
+        18                 2.62              0.810            200               50             10.83          0.190
+        19                 2.71              0.773            220               51             11.22          0.182
+        20                 2.81              0.739            240               52             11.65          0.174
+        21                 2.92              0.708            260               53             12.10          0.167
+        22                 3.03              0.680            280               54             12.60          0.160
+        23                 3.15              0.654            300               55             13.14          0.154
+        24                 3.28              0.630            320               56             13.72          0.148
+        25                 3.43              0.607            360               57             14.36          0.143
+        26                 3.59              0.586            400               58             15.07          0.138
+        27                 3.76              0.567            440               59             15.84          0.133
+        28                 3.95              0.548            480               60             16.71          0.129
+        29                 4.16              0.500            520               61             17.67          0.125
+        30                 4.39              0.471            560               62             18.76          0.118
+        31                 4.66              0.444            600               63             19.98          0.111
+                   TABLE 4. PRESCALER                                            TABLE 5. SO TERMINAL STATUS
+  CLOCK FREQUENCY                                                             SO TERMINAL STATUS                 Z
+          (MHz)             P5      P4    P3     P2   P1
+                                                                    High Impedance                               1
+             4              X        0     0       0   0
+                                                                    SO Terminal Active                           0
+             5              X        0     0       0   1
+             6              X        0     0       1   0
+             8              X        0     0       1   1
+            10              X        0     1       0   0
+            12              X        0     1       0   1
+            16              X        0     1       1   0
+            20              X        0     1       1   1
+            24              X        1     0       0   0
+NOTE: X = Don’t care, P5 not used.
+FN4367 Rev 2.00                                                                                          Page 9 of 11
+January 6, 2006
+
+
+HIP9011
+                                           ADDRESS DECODER
+              SI                                         PRESCALER/SO TERMINAL STATUS
+                                                                 BANDPASS FILTER
+                           SPI INTERFACE
+              SCK
+                                                                                                               DIGITAL MULTIPLEXER
+                                                                  GAIN CONTROL
+                                                             INTEGRATOR TIME CONSTANT                                                SO
+              CS
+                                                         TEST/CHANNEL SELECT CONTROL
+                                                                                                   SI
+                                                                                                TEST
+                                                                                          COMP OUT
+                                            FIGURE 5. PROGRAMMABLE REGISTERS AND STATE MACHINE
+The Digital SPI Block diagram in Figure 5 shows the                          In the diagnostic mode, we can use the digital multiplexer to
+programming flow of the chip. An eight bit word is received at               output one of the following results through the SO pin (11):
+the SI port. Data is shifted in by the SCK clock when the chip
+                                                                              1. Value of one of the five registers in the chip
+is enable by the CS pin. The word is decoded by the address
+decoding circuit, and the information is directed to one of 5                 2. Buffered value of the SI pin (12).
+registers. These registers control the following chip functions:              3. Value of an internal comparator used to rectify the analog
+                                                                                 signal
+ 1. Band Pass Filter frequency.
+                                                                             A digital SPI filter is located in the SPI Block which provides
+ 2. Gain control or attenuation.                                             a pseudo noise immunity characteristic.
+ 3. Integration time constant of the rectified BPF output.
+                                                                             The digital SPI filter operation requires that the SCK be low
+ 4. Prescaler.
+                                                                             prior to the fall of CS, followed by 8 SCK pulses (low-high-
+ 5. Test/Channel Select.                                                     low transitions). With the SCK ending the pulse sequence in
+    a) Test conditions of the part.                                          a logic low condition, the transition of CS from a low to high
+    b) Channel select to one of two input amplifiers.                        transition will cause the data-word in the SPI Buffer to be
+                                                                             loaded into the proper addressed programmable register.
+A crystal oscillator circuit is provided. The chip requires at
+minimum a 4MHz crystal to be connected across OSCIN and                      During the Integration mode, INT/HOLD pin is high, any
+OSCOUT pins. An external 4MHz signal may also be                             single SPI byte that is entered will be acted upon if the
+provided to the OSCIN Terminal Pin 9.                                        conditions of the digital SPI filter are met. The digital SPI
+                                                                             filter allows for only 8 bits per word to be accepted.
+FN4367 Rev 2.00                                                                                                                      Page 10 of 11
+January 6, 2006
+
+
+HIP9011
+Small Outline Plastic Packages (SOIC)
+ N
+                                                                                            M20.3 (JEDEC MS-013-AC ISSUE C)
+                                                                                            20 LEAD WIDE BODY SMALL OUTLINE PLASTIC PACKAGE
+         INDEX                                    0.25(0.010) M      B M
+         AREA                              H
+                                                                                                                 INCHES                 MILLIMETERS
+                                E
+                                                                                             SYMBOL          MIN          MAX           MIN          MAX       NOTES
+                                  -B-
+                                                                                                 A          0.0926       0.1043        2.35          2.65          -
+  1    2    3                                                                                   A1          0.0040       0.0118        0.10          0.30          -
+                                                                 L
+                                                                                                 B          0.014        0.019         0.35          0.49         9
+                             SEATING PLANE                                                       C          0.0091       0.0125        0.23          0.32          -
+        -A-                                                                                      D          0.4961       0.5118       12.60        13.00          3
+               D                      A                            h x 45°
+                                                                                                 E          0.2914       0.2992        7.40          7.60         4
+                                -C-                                                              e              0.050 BSC                  1.27 BSC                -
+                                                  
+                                                                                                 H          0.394        0.419        10.00        10.65           -
+              e                            A1
+                                                                             C                   h          0.010        0.029         0.25          0.75         5
+              B                                   0.10(0.004)
+                                                                                                 L          0.016        0.050         0.40          1.27         6
+      0.25(0.010) M    C A M       B S
+                                                                                                 N                   20                        20                 7
+                                                                                                             0°           8°            0°            8°          -
+NOTES:
+                                                                                                                                                             Rev. 2 6/05
+  1. Symbols are defined in the “MO Series Symbol List” in Section
+     2.2 of Publication Number 95.
+  2. Dimensioning and tolerancing per ANSI Y14.5M-1982.
+  3. Dimension “D” does not include mold flash, protrusions or gate
+     burrs. Mold flash, protrusion and gate burrs shall not exceed
+     0.15mm (0.006 inch) per side.
+  4. Dimension “E” does not include interlead flash or protrusions.
+     Interlead flash and protrusions shall not exceed 0.25mm (0.010
+     inch) per side.
+  5. The chamfer on the body is optional. If it is not present, a visual
+     index feature must be located within the crosshatched area.
+  6. “L” is the length of terminal for soldering to a substrate.
+  7. “N” is the number of terminal positions.
+  8. Terminal numbers are shown for reference only.
+  9. The lead width “B”, as measured 0.36mm (0.014 inch) or greater
+     above the seating plane, shall not exceed a maximum value of
+     0.61mm (0.024 inch)
+10. Controlling dimension: MILLIMETER. Converted inch
+     dimensions are not necessarily exact.
+                                             © Copyright Intersil Americas LLC 1999-2006. All Rights Reserved.
+                                All trademarks and registered trademarks are the property of their respective owners.
+                                                    For additional products, see www.intersil.com/en/products.html
+                              Intersil products are manufactured, assembled and tested utilizing ISO9001 quality systems as noted
+                                      in the quality certifications found at www.intersil.com/en/support/qualandreliability.html
+Intersil products are sold by description only. Intersil may modify the circuit design and/or specifications of products at any time without notice, provided that such
+modification does not, in Intersil's sole judgment, affect the form, fit or function of the product. Accordingly, the reader is cautioned to verify that datasheets are
+current before placing orders. Information furnished by Intersil is believed to be accurate and reliable. However, no responsibility is assumed by Intersil or its
+subsidiaries for its use; nor for any infringements of patents or other rights of third parties which may result from its use. No license is granted by implication or
+otherwise under any patent or patent rights of Intersil or its subsidiaries.
+                                         For information regarding Intersil Corporation and its products, see www.intersil.com
+FN4367 Rev 2.00                                                                                                                                Page 11 of 11
+January 6, 2006
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Renesas Electronics:
+ HIP9011ABZ HIP9011ABZT

@@ -1,0 +1,1428 @@
+                                                                                                                       STUSB1702
+                                                                                                                               Datasheet
+                                     USB Type-C™ source controller with TX/RX line driver and BMC
+                                                        Features
+                                                         •    Type-C™ attach and cable orientation detection
+                                                         •    Power role support: source
+                                                         •    Integrated power switch for VCONN supply:
+                                                              –     programmable current limit up to 600 mA
+                                                              –     overcurrent, overvoltage, and thermal protection
+                                                              –     undervoltage lockout
+                                                         •    I²C interface and interrupt
+                                                         •    Integrated VBUS voltage monitoring
+                                                         •    Integrated VBUS and VCONN discharge path
+                                                         •    Integrated BMC transceiver
+                                                         •    VBUS switch gate driver
+                                                         •    Short-to-VBUS protection on CC pins (22 V) and VBUS pins (28 V)
+                                                         •    Accessory mode support
+                                                         •    Dual power supply (VSYS and/or VDD):
+                                                              –     VSYS = [3.0 V; 5.5 V]
+                                                              –     VDD = [4.1 V; 22 V]
+                                                         •    Temperature range: -40 °C up to 105 °C
+                                                         •    ESD: 4 kV HBM - 1.5 kV CDM
+                                                         •    AEC-Q100 qualified
+               Maturity status link                      •    Compliant with:
+                  STUSB1702                                   –     USB Type-C™ rev 1.2
+                                                              –     USB PD rev 2.0
+                Device summary
+                                                         •    Compatible with:
+   Order code             STUSB1702YQTR
+                                                              –     USB PD rev 3.0
+    AEC-Q100                      Yes
+     Package
+                         QFN24 EP 4x4 mm                Applications
+                            wettable flanks
+                                                         •    Car charger, car infotainment
+  Temp. range            - 40 °C up to 105 °C
+                                                         •    Smart plugs, wall adapters, and chargers
+     Marking                     1702Y
+                                                         •    Power hubs and docking stations
+                                                         •    Any Type-C source device
+                                                        Description
+                                                        The STUSB1702 is a generic IC, in a 20 V technology it addresses a USB Type-C™
+                                                        port management on the host side. It is designed for a broad range of applications
+                                                        and can handle the following USB Type-C functions: attach detection, plug
+                                                        orientation detection, host to device connection, VCONN support, and VBUS
+                                                        configuration.
+                                                        It also provides a USB PD TX/RX line driver and BMC (bi-phase mark coding)
+                                                        transceiver which allow USB PD negotiation and an alternate mode through an
+                                                        external MCU.
+DS12664 - Rev 1 - July 2018                                                                                                         www.st.com
+For further information contact your local STMicroelectronics sales office.
+
+
+                                                                                                                                                                      STUSB1702
+                                                                                                                                                              Functional description
+1               Functional description
+                The STUSB1702 is a USB Type-C controller IC. It is designed to interface with the Type-C receptacle on host
+                side. It is used to establish and manage the source-to-sink connection between two USB Type-C host and device
+                ports.
+                The STUSB1702 major role is to:
+                1.    Detect the connection between two USB Type-C ports (attach detection)
+                2.    Establish a valid source-to-sink connection
+                3.    Determine the attached device mode
+                4.    Resolve cable orientation and twist connections to establish USB data routing (MUX control)
+                5.    Configure and monitor VBUS power path
+                6.    Manage VBUS power capability: USB default, Type-C medium or Type-C high current mode
+                7.    Configure VCONN when required
+                8.    Support USB PD negotiation
+                The STUSB1702 also provides:
+                •     Low power standby mode
+                •     I²C interface and interrupt
+                •     Start-up configuration customization: static through NVM and/or dynamic through I²C
+                •     High voltage protection
+                •     Accessory mode detection
+                                                                   Figure 1. Functional block diagram
+                                      VREG_1V2       VDD      VSYS      GND         VREG_2V7 RESET
+                                                          Power Supply                            Power On                                I2C Interface                  SCL
+                                               VREG_1V2     Generation       VREG_2V7               Reset         Oscillator   NVM              &                        SDA
+                                                                    VPU   I2C_REGx                Controller                                Registers                    ALERT#
+                                                                                                                                          RESET
+                                                                                                                                          I2C_REGx
+                                        VDD1V2                       VPU              VDD2V7         RESET           CLK     I2C_REGx
+                       CC1GND
+                           CC1
+                                                                                                                                                                         VBUS_SENSE
+                                          VCONN Monitoring               CC Lines                        CC Control           VBUS Monitoring
+                       VCONN                                                                                                                                             VBUS_EN_SRC
+                                           & Power Switches             Interface                          Logic                  & Control
+                           CC2
+                                                                                                                                                                         A_B_SIDE
+                       CC2GND                                                               BMC
+                                                                                         Transceiver
+                                                                                            BMC
+                                                                                       Clock Recovery
+                                                                                      Tx Enc. / Rx Dec.
+                                                                         MISO TX_EN SCLK              NSS     MOSI
+                                                                                                                                                       High voltage pins
+DS12664 - Rev 1                                                                                                                                                                   page 2/38
+
+
+                                                                                                                                               STUSB1702
+                                                                                                                                                 Inputs / outputs
+2                 Inputs / outputs
+2.1               Pinout
+                                               Figure 2. STUSB1702 pin connections
+                                                                  VREG_2V7             VREG_1V2   VBUS_EN_SRC
+                                                            VDD              VSYS                               NC
+                                                             24   23         22        21          20           19
+                                       CC1GND          1                                                          18   VBUS_SENSE
+                                             CC1        2                                                         17   A_B_SIDE
+                                       VCONN            3                                                         16   SCLK
+                                                                                  EP
+                                             CC2        4                                                         15   TX_EN
+                                       CC2GND          5                                                          14   MISO
+                                        RESET          6                                                          13   ADDR0
+                                                              7     8         9        10         11            12
+                                                            SCL   SDA                  GND        MOSI          NSS
+                                                                             ALERT#
+2.2               Pin list
+                                                        Table 1. Pin functions list
+                   Pin        Name    Type                                   Description                                             Typical connection
+                    1        CC1GND    GND         Ground reference channel 1                                                 Ground
+                    2         CC1     HV AIO       Type-C configuration channel 1                                             Type-C receptacle A5
+                    3        VCONN    PWR          Power input for active plug                                                5 V power source
+                    4         CC2     HV AIO       Type-C configuration channel 2                                             Type-C receptacle B5
+                    5        CC2GND    GND         Ground reference channel 2                                                 Ground
+                    6        RESET      DI         Reset input (active high)
+                    7         SCL       DI         I²C clock input                                                            To I²C master, ext. pull-up
+                    8         SDA     DI/OD        I²C data input/output, active low open drain                               To I²C master, ext. pull-up
+                    9        ALERT#    OD          I²C interrupt, active low open drain                                       To I²C master, ext. pull-up
+                   10         GND      GND         Ground                                                                     Ground
+                   11         MOSI     DO          Master out slave in: serial data from                                      To MCU, ext. pull-up referenced to
+                                                   STUSB1702 to MCU, BMC decoded from                                         MCU Vio
+                                                   connected CC line
+                   12         NSS      OD          Chip select, open drain active low to control                              To MCU, ext. pull-up referenced to
+                                                   MCU SPI/MSP interface                                                      MCU Vio
+DS12664 - Rev 1                                                                                                                                             page 3/38
+
+
+                                                                                                                       STUSB1702
+                                                                                                                         Pin description
+                 Pin         Name           Type                         Description                          Typical connection
+                  13        ADDR0             DI      I²C device address setting (see Section 5 I²C   Static
+                                                      interface)
+                  14          MISO            DI      Master in slave out: serial data from MCU to    From MCU, ext. pull-up referenced
+                                                      STUSB1702 encoded in BMC to drive the CC        to MCU Vio
+                                                      line
+                  15         TX_EN            DI      TX enable, open drain active high to drive CC   From MCU, needs to be
+                                                      line from the embedded BMC interface            maintained low by MCU or pulled
+                                                                                                      down when receiving standby
+                  16         SCLK            DO       Serial clock to clock data transfer between     To MCU, ext. pull-up referenced to
+                                                      MCU and the STUSB1702. Open drain output MCU Vio
+                                                      pin, needs external pull-up referenced to MCU
+                                                      Vio
+                  17       A_B_SIDE          OD       Cable orientation, active low open drain        USB super speed MUX select, ext.
+                                                                                                      pull-up
+                  18     VBUS_SENSE         HV AI     VBUS voltage monitoring and discharge path      From VBUS
+                  19            NC         HV AIO     Not connected                                   Open
+                  20    VBUS_EN_SRC        HV AIO     VBUS source power path enable, active low       To switch or power system, ext.
+                                                      open drain                                      pull-up
+                  21       VREG_1V2         PWR       1.2 V internal regulator output                 1 µF typ. decoupling capacitor
+                  22         VSYS           PWR       Power supply from system                        From power system, connect to
+                                                                                                      ground if not used
+                  23       VREG_2V7         PWR       2.7 V internal regulator output                 1 µF typ. decoupling capacitor
+                  24           VDD        HV PWR      Main power supply from USB power line           From VBUS
+                   -            EP          GND       Exposed pad is connected to ground              To ground
+                                                      Table 2. Pin function descriptions
+                            Type                                                      Description
+                               D                                                          Digital
+                               A                                                          Analog
+                              O                                                        Output pad
+                               I                                                        Input pad
+                              IO                                                    Bidirectional pad
+                             OD                                                     Open drain output
+                             PD                                                         Pull-down
+                             PU                                                           Pull-up
+                             HV                                                       High voltage
+                            PWR                                                           Power
+                            GND                                                          Ground
+2.3             Pin description
+2.3.1           CC1 / CC2
+                CC1 and CC2 are the configuration channel pins used for connection and attachment detection, plug orientation
+                determination and system configuration management across USB Type-C cable.
+DS12664 - Rev 1                                                                                                                  page 4/38
+
+
+                                                                                                                      STUSB1702
+                                                                                                                        Pin description
+2.3.2           CC1GND / CC2GND
+                CC1GND and CC2GND are used as a reference to ground and must be connected to ground.
+2.3.3           VCONN
+                This power input is connected to a power source that can be a 5 V power supply. It is used to provide power to
+                the local plug. It is internally connected to power switches that are protected against short-circuit and overvoltage.
+                This does not require any protection on the input side. When a valid source-to-sink connection is determined and
+                the VCONN power switches are enabled, VCONN is provided by the source to the unused CC pin (see Section
+                3.4 VCONN supply).
+2.3.4           RESET
+                Active high reset.
+2.3.5           I²C interface pins
+                                                             Table 3. I²C interface pins list
+                        Name                                                       Description
+                         SCL                                            I²C clock – need external pull-up
+                        SDA                                              I²C data – need external pull-up
+                      ALERT#                                          I²C interrupt – need external pull-up
+                       ADDR0                                   I²C device address bit (see Section 5 I²C interface)
+2.3.6           GND
+                Ground.
+2.3.7           MOSI
+                Master out slave in: data from the connected CC line are decoded using the BMC and then transmitted via the
+                STUSB1702 to the MCU. Data are valid on the falling edge of the SCLK line and must be sampled by the MCU on
+                this edge.
+2.3.8           NSS
+                The chip select signal is driven by the STUSB1702 and is connected to the MCU. It activates the SPI/MSP
+                interface transfer. The NSS signal drives the MCU so that:
+                •     When TX_EN is asserted (TX mode), the STUSB1702 transmits data from the MCU over the CC line. Note,
+                      the MCU must provide data to be encoded on the MISO line which must be in synchrony with the SCLK
+                •     When TX_EN is not asserted (RX mode, default), the CC line is activity detected, data are received, and the
+                      BMC is decoded by the STUSB1702. Decoded data are sent on the MOSI line in synchrony with the SCLK
+2.3.9           MISO
+                Master in slave out: data from the MCU are encoded using the BMC and then transmitted via the STUSB1702 to
+                the connected CC line driver. Data are sampled by the STUSB1702 on the rising edge of the SCLK line and must
+                be stable on this edge.
+2.3.10          TX_EN
+                TX_EN is a control signal from the MCU to the STUSB1702. It enables the BMC control logic that transfers data
+                from the MCU serial interface, encodes it in BMC format, and drives the connected CC line.
+Note:           TX mode overrides RX mode.
+DS12664 - Rev 1                                                                                                                page 5/38
+
+
+                                                                                                                       STUSB1702
+                                                                                                                        Pin description
+2.3.11          SCLK
+                The serial clock signal from the STUSB1702 drives the SPI/MSP interface of the MCU and the clock data on the
+                MISO and MOSI pins.
+2.3.12          A_B_SIDE
+                This output pin provides cable orientation. It is used to establish USB SuperSpeed signal routing. The cable
+                orientation is also provided by an internal I²C register. This signal is not required in the case of USB 2.0 support.
+                                                            Table 4. USB data MUX select
+                         Value                                                   CC pin position
+                           HiZ                                            CC1 pin is attached to CC line
+                            0                                             CC2 pin is attached to CC line
+2.3.13          VBUS_SENSE
+                This input pin is used to sense VBUS presence, monitor VBUS voltage and discharge VBUS on USB Type-C
+                receptacle side.
+2.3.14          VBUS_EN_SRC
+                In source power role, this pin allows the outgoing VBUS power to be enabled when the connection to a sink is
+                established and VBUS is in a valid operating range. The open drain output allows a PMOS transistor to be directly
+                driven. The logic value of the pin is also advertised in a dedicated I²C register bit.
+2.3.15          VREG_1V2
+                This pin is used only for external decoupling of 1.2 V internal regulator. The recommended decoupling capacitor
+                is: 1 µF typ. (0.5 µF min.; 10 µF max.).
+2.3.16          VSYS
+                This is the low power supply of the system, if there is any. It can be connected directly to a system power supply
+                delivering 3.3 V or 5 V. It is recommended to connect this pin to ground when it is not used.
+2.3.17          VREG_2V7
+                This pin is used for external decoupling of the 2.7 V internal regulator. The recommended decoupling capacitor is:
+                1 µF typ. (0.5 µF min., 10 µF max.).
+2.3.18          VDD
+                This is the power supply from the USB power line for applications powered by VBUS.
+                In source power role, this pin can be used to sense the voltage level of the main power supply providing the VBUS.
+                It allows UVLO and OVLO thresholds to be considered independently on the VDD pin as additional conditions to
+                enable the VBUS power path through the VBUS_EN_SRC pin (see Section 3.3.3 VBUS power path assertion).
+                When the UVLO threshold detection is enabled, the VDD pin must be connected to the main power supply to
+                establish the connection and to assert the VBUS power path.
+DS12664 - Rev 1                                                                                                                page 6/38
+
+
+                                                                                                                     STUSB1702
+                                                                                                                   General description
+3               General description
+3.1             CC interface
+                The STUSB1702 controls the connection to the configuration channel (CC) pins, CC1 and CC2, through two main
+                blocks: the CC line interface block and the CC control logic block.
+                The CC line interface block is used to:
+                •     Configure termination mode on the CC pins relative to the power mode supported i.e. pull-up for source
+                      power role
+                •     Monitor the CC pin voltage values relative to the attachment detection thresholds
+                •     Configure VCONN on the unconnected CC pin when required
+                •     Protect the CC pins against overvoltage
+                The CC control logic block is used to:
+                •     Execute the Type-C FSM relative to the Type-C power mode supported
+                •     Determine the electrical state for each CC pin relative to the detected thresholds
+                •     Evaluate the conditions relative to the CC pin states and the VBUS voltage value to transition from one state
+                      to another in the Type-C FSM
+                •     Detect and establish a valid source-to-sink connection
+                •     Determine the attached device mode
+                •     Determine cable orientation to allow external routing of the USB data
+                •     Manage VBUS power capability: USB default, Type-C medium or Type-C high current mode
+                •     Handle hardware faults
+                The CC control logic block implements the Type-C FSMs corresponding to the following Type-C power modes:
+                •     Source power role with accessory support
+                The default Type-C power mode is selected through NVM programming (see Section 6 Start-up configuration)
+                and can be changed by software during operation through the I²C interface.
+3.2             BMC interface
+                                                                 Figure 3. BMC interface
+3.2.1           BMC interface behavior
+                When a connection is established on the STUSB1702 (any attached state), the CC line used for connection is
+                also internally connected to BMC block which allows the communication on this line.
+                The CC line is primary managed by CC control logic. BMC communication on the CC line must not interact with
+                this control logic, as driving times of the line are short and are related to denounce times of the CC logic.
+DS12664 - Rev 1                                                                                                               page 7/38
+
+
+                                                                                                                     STUSB1702
+                                                                                                             VBUS power path control
+                BMC block handles BMC encoding and decoding. It also handles CC line activity detection, discharging the
+                external MCU of such operations.
+                The default state of the BMC block is to listen to the line (RX mode). TX mode is enabled only by assertion of the
+                TX_EN signal via the external MCU.
+3.2.2           TX mode
+                When the TX_EN signal is asserted via MCU, BMC block goes to the TX state:
+                •      NSS signal is driven low, indicating to the SPI/MSP slave interface of the MCU that data are being
+                       transmitted on the CC line. MCU provides the data
+                •      The STUSB1702 drives the NSS signal low, informing SPI/MSP slave interface of the MCU that data are
+                       requested on the MISO line
+                •      The STUSB1702 clocks the SCLK signal
+                •      MCU presents data to be transmitted on the MISO line and data are sampled on the rising edge of SCLK
+                       (data must be stable on this edge)
+                •      Sampled data (from MISO line) are encoded by the BMC, and the resulting values drive the CC line
+                       according to USB PD standard
+                When all data are transmitted, MCU drives the TX_EN pin low, and lists the end of transmission. The STUSB1702
+                ends transmission with a corresponding trailing edge termination. It then goes back into to default state and
+                releases the CC line from the BMC driver to the pull-up/pull-down CC line interfaces.
+3.2.3           RX mode
+                RX mode is the default state of the BMC interface.
+                In this mode, the receiver listens to the connected CC line. It does not interface with the CC line interfaces or the
+                CC control logic.
+                When all data are detected and received on the CC line, according to the activity described in the USB Power
+                Delivery Standard, the BMC interface:
+                •      Drives NSS signal low
+                •      Outputs the clock on the SCLK signal which is recovered from the BMC signal
+                •      Outputs recovered data (from the BMC signal) on the MOSI line to the connected MCU. Data are valid on
+                       the SCLK falling edge and are sampled on this edge by the SPI/MSP interface of MCU
+                When no more data are detected on the CC line, the NSS goes back to “high” which is its default state. This
+                informs the MCU that no more activity is present on the bus.
+3.3             VBUS power path control
+3.3.1           VBUS monitoring
+                The VBUS monitoring block supervises from the VBUS_SENSE pin the VBUS voltage on the USB Type-C
+                receptacle side.
+                It is used to check that the VBUS is within a valid voltage range:
+                •      To establish a valid source-to-sink connection according to USB Type-C standard specifications
+                •      To safely enable the VBUS power path through the VBUS_EN_SRC pin
+                It allows detection of unexpected VBUS voltage conditions such as undervoltage or overvoltage relative to the
+                valid VBUS voltage range. When such conditions occur, the STUSB1702 reacts as follows:
+                •      At attachment, it prevents the source-to-sink connection and the VBUS power path assertion
+                •      After attachment, it deactivates the source-to-sink connection and disables the VBUS power path. In source
+                       power role, the device goes into error recovery state.
+                The VBUS voltage value is adjusted automatically at attachment (vSafe5V) and via MCU at each PDO transition.
+                Monitoring is then disabled during T_PDO_transition (i.e. the default value of 300 ms is changed through NVM
+                programming). Additionally, if a transition occurs to a lower voltage, the discharge path is activated during this
+                time.
+DS12664 - Rev 1                                                                                                               page 8/38
+
+
+                                                                                                                      STUSB1702
+                                                                                                               VBUS power path control
+                The valid VBUS voltage range is defined from the VBUS nominal voltage by a high threshold voltage and a low
+                threshold voltage whose nominal values are respectively VBUS +5% and VBUS -5%. The nominal threshold limits
+                can be shifted by a fraction of VBUS from +1% to +15% for the high threshold voltage and from -1% to -15% for
+                the low threshold voltage. This means the threshold limits can vary from VBUS +5% to VBUS +20% for the high
+                limit and from VBUS-5% to VBUS -20% for the low limit.
+                The threshold limits are preset by default in NVM (see Section 8.3 Electrical and timing characteristics). The
+                threshold limits can be changed independently through NVM programming (see Section 6 Start-up configuration)
+                and also by software during attachment through the I²C interface.
+3.3.2           VBUS discharge
+                The monitoring block also handles the internal VBUS discharge path connected to the VBUS_SENSE pin. The
+                discharge path is activated at detachment, or when the device goes into the error recovery state whatever the
+                power role (see Section 3.6 Hardware fault management).
+                The VBUS discharge path is enabled by default in NVM and can be disabled through NVM programming only (see
+                Section 6 Start-up configuration). The discharge time duration is also preset by default in NVM (see Section
+                8.3 Electrical and timing characteristics). The discharge time duration can be changed through NVM programming
+                (see Section 6 Start-up configuration) and also by software through the I²C interface.
+3.3.3           VBUS power path assertion
+                The STUSB1702 can control the assertion of the VBUS power path on the USB Type-C port, directly or indirectly,
+                through the VBUS_EN_SRC pin.
+                The tables below summarize the configurations of the STUSB1702 and the operation conditions that determine
+                the electrical value of the VBUS_EN_SRC pin during system operations.
+                                    Table 5. Conditions for VBUS power path assertion in source power role
+                                                                       Operation conditions
+                                   Electrical
+                        Pin                     Type-C attached         VDD pin                                            Comment
+                                     value                                            VBUS_SENSE pin monitoring
+                                                      state           monitoring
+                                                                                         VBUS is within valid voltage
+                                                Attached.SRC or      VDD > UVLO if                                     The signal is
+                                                                                                  range if
+                                                                      VDD_UVLO                                         asserted only if
+                                                UnorientedDebug      enabled and/or       VBUS_VALID_RANGE             all the valid
+                                        0       Accessory.SRC or     VDD < OVLO if                                     operation
+                                                 OrientedDebug                                   enabled or
+                                                                      VDD_OVLO                                         conditions are
+                                                 Accessory.SRC                             VBUS > UVLO if VBUS
+                                                                        enabled                                        met
+                                                                                         _VALID_RANGE disabled
+                  VBUS_EN_SRC
+                                                                                         VBUS is out ofvalid voltage
+                                                                     VDD < UVLO if
+                                                                                                  range if             The signal is de-
+                                                                      VDD_UVLO
+                                                                                                                       asserted when
+                                                                     enabled and/or       VBUS_VALID_RANGE
+                                      HiZ        Any other state                                                       at least one non
+                                                                     VDD > OVLO if
+                                                                                                 enabled or            valid operation
+                                                                      VDD_OVLO
+                                                                                           VBUS < UVLO if VBUS         condition is met
+                                                                        enabled
+                                                                                         _VALID_RANGE disabled
+                As specified in the USB Type-C standard specification, the attached state “Attached.SRC” is reached only if the
+                voltage on the VBUS receptacle side is at vSafe0V condition when a connection is detected.
+                “Type-C attached state” refers to the Type-C FSM states as defined in the USB Type-C standard specification and
+                as described in the I²C register CC_OPERATION_STATUS.
+                “VDD pin monitoring” is valid only in source power role. Activation of the UVLO and OVLO threshold detections
+                can be done through NVM programming (see Section 6 Start-up configuration) and also by software through the
+                I²C interface. When UVLO and/or OVLO threshold detection is activated, VBUS_EN_SRC pin is asserted only if
+                the device is attached and the valid threshold conditions on VDD are met. Once the VBUS_EN_SRC pin is
+                asserted, the VBUS monitoring is done on VBUS_SENSE pin instead of the VDD pin.
+DS12664 - Rev 1                                                                                                                  page 9/38
+
+
+                                                                                                                 STUSB1702
+                                                                                                                    VCONN supply
+                “VBUS_SENSE pin monitoring” relies, by default, on a valid VBUS voltage range. The voltage range condition can
+                be disabled to consider UVLO threshold detection instead. The monitoring condition of the VBUS voltage can be
+                changed through NVM programming (see Section 6 Start-up configuration) and also by software through the I²C
+                interface. VBUS_EN_SRC pin is maintained asserted as long as the device is attached and a valid voltage
+                condition on the VBUS is met.
+3.4             VCONN supply
+3.4.1           VCONN input voltage
+                VCONN is a regulated supply used to power circuits in the plug of USB3.1 full-featured cables and other
+                accessories. VCONN nominal operating voltage is 5.0 V +/- 5%.
+3.4.2           VCONN application conditions
+                VCONN pin of the STUSB1702 is connected to each CC pin (CC1 and CC2) across independent power switches.
+                The STUSB1702 applies VCONN only to the CC pin not connected to the CC wire when all below conditions are
+                met:
+                •     The device is configured in source power role
+                •     VCONN power switches are enabled
+                •     A valid connection to a sink is achieved
+                •     Ra presence is detected on the unwired CC pin
+                •     A valid power source is applied to the VCONN pin with respect to a predefined UVLO threshold
+3.4.3           VCONN monitoring
+                The VCONN monitoring block detects if VCONN power supply is available on the VCONN pin. It is used to check that
+                VCONN voltage is above a pre-defined undervoltage lockout (UVLO) threshold to allow the enabling of the VCONN
+                power switches.
+                The default value of the UVLO threshold is 4.65 V typical for powered cables operating at 5 V. This value can be
+                changed by software to 2.65 V typical to support VCONN-powered accessories that operate down to 2.7 V.
+3.4.4           VCONN discharge
+                The behavior of Type-C FSMs is extended to an internal VCONN discharge path capability on the CC pins in
+                source power mode only. The discharge path is activated during 250 ms from sink detachment detection. This
+                feature is disabled by default. It can be activated through NVM programming (see Section 6 Start-up
+                configuration) and also by software through the I²C interface.
+3.4.5           VCONN control and status
+                The supplying conditions of VCONN across the STUSB1702 are managed through the I²C interface. Different I²C
+                registers and bits are used specifically for this purpose.
+3.4.6           VCONN power switches
+                Features
+                The STUSB1702 integrates two current limited high-side power switches with protection that tolerates high
+                voltage up to 22 V on the CC pins.
+                Each VCONN power switch is presents the following features:
+                •     Soft-start to limit inrush current
+                •     Constant current mode overcurrent protection
+                •     Adjustable current limit
+                •     Thermal protection
+DS12664 - Rev 1                                                                                                           page 10/38
+
+
+                                                                                                                             STUSB1702
+                                                                                                                                VCONN supply
+                •    Undervoltage and overvoltage protections
+                •    Reverse current and reverse voltage protections
+                                             Figure 4. VCONN to CC1 and CC2 power switch protections
+                Current limit programming
+                The current limit can be set within the range 100 mA to 600 mA by a step of 50 mA. The default current limit is
+                programmed through NVM programming (see Section 6 Start-up configuration) and can be changed by software
+                through the I²C interface. At power-on or after a reset, the current limit takes the default value preset in the NVM.
+                Fault management
+                The table below summarizes the different fault conditions that could occur during switch operation and the
+                associated responses. An I²C alert is generated when a fault condition happens.
+                                                         Table 6. Fault management conditions
+                   Fault types               Fault conditions                                        Expected actions
+                                  CC output pin shorted to ground via   Power switch limits the current and reduces the output voltage. I²C
+                   Short-circuit  very low resistive path causing rapid alert is asserted immediately thanks to VCONN_SW_OCP_FAULT
+                                  current surge                         bits
+                                  CC output pin connected to a load     Power switch limits the current and reduces the output voltage. I²C
+                   Overcurrent    that sinks current above programmed alert is asserted immediately thanks to VCONN_SW_OCP_FAULT
+                                  limit                                 bits
+                                                                        Power switch is disabled immediately until the temperature falls
+                                  Junction temperature exceeding 145    below 145 °C minus hysteresis of 15 °C. I²C alert is asserted
+                   Overheating
+                                  °C due to any reason                  immediately thanks to THERMAL_FAULT bit. The STUSB1702 goes
+                                                                        into transient error recovery state
+                                                                        Power switch is disabled immediately until the input voltage rises
+                                  VCONN input voltage drops below
+                  Undervoltage                                          above the UVLO threshold. I²C alert is asserted immediately thanks
+                                  UVLO threshold minus hysteresis
+                                                                        to VCONN_PRESENCE bit
+                                                                        Power switch is opened immediately until the voltage falls below the
+                                  CC output pin voltage exceeds
+                   Overvoltage                                          voltage limit. I²C alert is asserted immediately thanks to
+                                  maximum operating limit of 6.0 V
+                                                                        VCONN_SW_OVP_FAULT bits
+DS12664 - Rev 1                                                                                                                      page 11/38
+
+
+                                                                                                                              STUSB1702
+                                                                                                                        High voltage protection
+                   Fault types                Fault conditions                                     Expected actions
+                                   CC output pin voltage exceeds        The reverse biased body diode of the back- to-back MOS switches is
+                  Reverse current VCONN input voltage when the power    naturally disabled preventing current from flowing from CC output pin
+                                   switch is turned off                 to the input
+                                   CC output pin voltage exceeds
+                                                                        Power switch is opened immediately until the voltage difference falls
+                                   V       input voltage of more than
+                 Reverse voltage CONN                                   below the voltage limit. I²C alert is asserted immediately thanks to
+                                   0.35 V for 5 V when the power switch
+                                                                        VCONN_SW_RVP_FAULT bits
+                                   is turned on
+3.5             High voltage protection
+                The STUSB1702 can be safely used in systems or connected to systems that handle high voltage on the VBUS
+                power path. The device integrates an internal circuitry on the CC pins that tolerates high voltages and ensures
+                protection up to 22 V in case of unexpected short-circuits with the VBUS or in the case of a connection to a device
+                supplying high voltage on the VBUS.
+3.6             Hardware fault management
+                The STUSB1702 handles hardware fault conditions related to the device itself and to the VBUS power path during
+                system operation.
+                When such conditions occur, the circuit goes into a transient error recovery state named ErrorRecovery in the
+                Type-C FSM. In this state, the device de-asserts the VBUS power path by disabling the VBUS_EN_SRC pin and it
+                removes the terminations from the CC pins during several tens of milliseconds. Then, it goes to the unattached
+                source state.
+                The STUSB1702 goes into error recovery state when at least one condition listed below is met:
+                •     If an overtemperature is detected, the “THERMAL_FAULT” flag is asserted
+                •     If an internal pull-up voltage on the CC pins is below the UVLO threshold, the “VPU_VALID” flag is asserted
+                •     If an overvoltage is detected on the CC pins, the “VPU_OVP_FAULT” flag is asserted
+                •     If the VBUS voltage is out of the valid voltage range during attachment, the “VBUS_VALID” flag is asserted
+                •     If an undervoltage is detected on the VDD pin during attachment when UVLO detection is enabled, the
+                      “VDD_UVLO_DISABLE” flag is asserted
+                •     If an overvoltage is detected on the VDD pin during attachment when OVLO detection is enabled, the
+                      “VDD_OVLO_DISABLE” flag is asserted
+                The I²C register bits mentioned above give either the state of the hardware fault when it occurs or the setting
+                condition to detect the hardware fault.
+3.7             Accessory mode detection
+                The STUSB1702 supports the detection of audio accessory mode and debug accessory mode as defined in the
+                USB Type-C standard specification with the following Type-C power modes (see Section 6 Start-up configuration):
+                •     Source power role with accessory support
+3.7.1           Audio accessory mode detection
+                The STUSB1702 detects an audio accessory device when both CC1 and CC2 pins are pulled down to ground by
+                an Ra resistor from the connected device. The audio accessory detection is advertised through the
+                CC_ATTACHED_MODE bits of the I²C register CC_CONNECTION_STATUS.
+3.7.2           Debug accessory mode detection
+                The STUSB1702 detects a connection to a debug and test system (DTS). The debug accessory detection is
+                advertised through the CC_ATTACHED_MODE bits of the I²C register CC_CONNECTION_STATUS.
+                •     In source power role, a debug accessory device is detected when both the CC1 and CC2 pins are pulled
+                      down to ground by an Rd resistor from the connected device. The orientation detection is performed in two
+DS12664 - Rev 1                                                                                                                       page 12/38
+
+
+                                                                                                                STUSB1702
+                                                                                                       Accessory mode detection
+                   steps as described in the table below. The DEBUG2 pin is asserted to advertise the DTS detection and the
+                   A_B_SIDE pin indicates the orientation of the connection. The orientation detection is advertised through the
+                   TYPEC_FSM_STATE bits of the I²C register CC_OPERATION_STATUS.
+                                                          Table 7. Orientation detection
+                                                                                     A_B_SIDE pin
+                   CC1 pin     CC2 pin                                                              Orientation detection state
+                #                                      Detection process               CC1/CC2
+                  (CC2 pin)   (CC1 pin)                                                           TYPEC_FSM_STATE bits value
+                                                                                      (CC2/CC1)
+                1    Rd           Rd       1st step: debug accessory mode detected     HiZ (HiZ)  UnorientedDebugAccessory.SRC
+                                           2nd step: orientation detected (DTS
+                2    Rd         ≤ Ra       presents a resistance to GND with a value    HiZ (0)    OrientedDebugAccessory.SRC
+                                           ≤ Ra on its CC2 pin)
+DS12664 - Rev 1                                                                                                         page 13/38
+
+
+                                                                                                               STUSB1702
+                                                                                                   Managing USB PD transactions
+4               Managing USB PD transactions
+                Due to specific HW/SW partitioning, the STUSB1702 requires a specific alignment between the lower protocol
+                stack (managed by the STUSB1702) and the higher protocol stack (managed by the external MCU). Therefore,
+                dedicated read and write I²C accesses are needed to perform the following actions:
+                •    Acknowledge a HW reset request
+                •    Request a HW reset
+                •    Perform a VCONN SWAP
+                •    Perform a data role SWAP
+DS12664 - Rev 1                                                                                                        page 14/38
+
+
+                                                                                                                                                STUSB1702
+                                                                                                                                                     I²C interface
+5               I²C interface
+5.1             Read and write operations
+                The I²C interface is used to configure, control and read the operation status of the device. It is compatible with the
+                Philips I²C BUS® (version 2.1). The I²C is a slave serial interface based on two signals:
+                •      SCL - serial clock line: input clock used to shift data
+                •      SDA - serial data line: input/output bidirectional data transfers
+                A filter rejects the potential spikes on the bus data line to preserve data integrity.
+                The bidirectional data line supports transfers up to 400 Kbit/s (fast mode). The data are shifted to and from the
+                chip on the SDA line, MSB first.
+                The first bit must be high (START) followed by the 7-bit device address and the read/write control bit.
+                Two 7-bit device addresses are available for the STUSB1702 thanks to external programming of DevADDR0
+                through ADDR0 pin setting, i.e. 0x28 or 0x29. This allows two STUSB1702 devices to be connected on the same
+                I²C bus.
+                                                                             Table 8. Device address format
+                       Bit7                      Bit6                   Bit5              Bit4              Bit3               Bit2             Bit1          Bit0
+                   DevADDR6                DevADDR5               DevADDR4             DevADDR3         DevADDR2          DevADDR1          DevADDR0          R/W
+                         0                         1                     0                   1               0                    0           ADDR0            0/1
+                                                                           Table 9. Register address format
+                       Bit7                   Bit6                  Bit5              Bit4             Bit3            Bit2            Bit1               Bit0
+                  RegADDR7              RegADDR6               RegADDR5          RegADDR4           RegADDR3        RegADDR2        RegADDR1         RegADDR0
+                                                                             Table 10. Register data format
+                       Bit7                   Bit6                  Bit5              Bit4             Bit3            Bit2            Bit1               Bit0
+                     DATA7                  DATA6                 DATA5             DATA4             DATA3           DATA2           DATA1             DATA0
+                                                                                Figure 5. Read operation
+                         Master                         Slave
+                          Start     Device addr       W A     Reg address    A Restart   Device addr  R  A  Reg data   A  Reg data  A  Reg data    A    Stop
+                                       7 bits                    8 bits                    7 bits            8 bits        8 bits      8 bits
+                                                                                                                           Address     Address
+                         Start bit = SDA falling when SCL= 1                                                                 n+1         n+2
+                         Stop bit = SDA rising when SCL= 1
+                         Restart bit = start after a start
+                         Acknowledg e = SDA forced low during a SCL clock
+DS12664 - Rev 1                                                                                                                                           page 15/38
+
+
+                                                                                                                                           STUSB1702
+                                                                                                                                       Timing specifications
+                                                                           Figure 6. Write operation
+                          Start     Device addr        W A        Reg address       A Reg data          A   Reg data      A   Reg data     A   Stop
+                                       7 bits                        8 bits               8 bits             8 bits            8 bits
+                                                                                                            Address            Address
+                         Start bit = SD A fa lling when S CL = 1                                               n+1               n+2
+                         Stop bit = SD A rising when SCL = 1
+                         Restart bit = start after a start
+5.2             Timing specifications
+                The device uses a standard slave I²C channel at speed up to 400 kHz.
+                                                    Table 11. I²C timing parameters - VDD = 5 V
+  Symbol                                               Parameter                                                     Min.           Typ.     Max.      Unit
+     Fscl       SCL clock frequency                                                                                    0              -      400       kHz
+    thd,sta     Hold time (repeated) START condition                                                                  0.6             -        -
+      tlow      LOW period of the SCL clock                                                                           1.3             -        -
+     thigh      HIGH period of the SCL clock                                                                          0.6             -        -
+                                                                                                                                                        μs
+    tsu,dat     Set-up time for repeated START condition                                                              0.6             -        -
+    thd,dat     Data hold time                                                                                       0.04             -       0.9
+    tsu,dat     Data setup time                                                                                       100             -        -
+        tr      Rise time of both SDA and SCL signals                                                           20 + 0.1 Cb           -      300
+                                                                                                                                                        ns
+        tf      Fall time of both SDA and SCL signals                                                           20 + 0.1 Cb           -      300
+    tsu,sto     Set-up time for STOP condition                                                                        0.6             -        -
+                                                                                                                                                        μs
+      tbuf      Bus free time between a STOP and START condition                                                      1.3             -        -
+       Cb       Capacitive load for each bus line                                                                       -             -      400        pF
+                                                                         Figure 7. I²C timing diagram
+                                                     tf
+                                            Vih
+                                  SDA
+                                            Vil
+                                                        t hd,st a
+                                                                                 tr         t su,dat t high
+                                  SCL
+                                                                      t low            t hd,dat                     t su,st a
+DS12664 - Rev 1                                                                                                                                     page 16/38
+
+
+                                                                                                                         STUSB1702
+                                                                                                                           I²C register map
+5.3             I²C register map
+                                                      Table 12. Register access legend
+                    Access code         Expanded name                                         Description
+                         RO                Read only         Register can be read only
+                         R/W              Read /write        Register can be read or written
+                          RC             Read and clear      Register can be read and is cleared after it is read
+                                                Table 13. STUSB1702 register map overview
+                  Address              Register name               Access                             Description
+                 00h to 0Ah Reserved                                  RO     Do not use
+                    0Bh      ALERT_STATUS                             RC     Alerts register linked to transition registers
+                                                                             Allows the interrupt mask on the ALERT_STATUS register
+                    0Ch      ALERT_STATUS_MASK_CTRL                  R/W
+                                                                             to be changed
+                                                                             Alerts about transition in CC_DETECTION_STATUS
+                    0Dh      CC_DETECTION_STATUS_TRANS                RC
+                                                                             register
+                    0Eh      CC_DETECTION_STATUS                      RO     CC detection status
+                             TYPE_C_HANDSHAKE and                            Allows Type-C FSM to be synchronized with software.
+                    0Fh                                               RC
+                             MONITORING_STATUS_TRANS                         Alerts about transition in MONITORING_STATUS register
+                    10h      MONITORING_STATUS                        RO     Gives status on VBUS and VCONN voltage monitoring
+                    11h      CC_CONNECTION_STATUS                     RO     CC connection status
+                    12h      HW_FAULT_STATUS_TRANS                    RC     Alerts about transition in HW_FAULT_STATUS register
+                    13h      HW_FAULT_STATUS                          RO     Gives status on hardware faults
+                 14h to 17h Reserved                                  RO     Do not use
+                    18h      CC_CAPABILITY_STATUS_CTRL               R/W     Allows the CC capabilities to be changed
+                 19h to 1Dh Reserved                                  RO     Do not use
+                                                                             Allows the current limit of VCONN power switches to be
+                    1Eh      CC_VCONN_SWITCH_CTRL                    R/W
+                                                                             changed
+                    1Fh      TYPE_C_CTRL                             R/W     Allows software to be synchronized with Type- C FSM
+                                                                             Allows the monitoring conditions of VCONN voltage to be
+                    20h      VCONN_MONITORING_CTRL                   R/W
+                                                                             changed
+                                                                             Allows the DAC value related to the targeted VBUS voltage
+                    21h      VBUS_SELECT                             R/W
+                                                                             to be changed
+                                                                             Allows the voltage range for VBUS monitoring to be
+                    22h      VBUS_RANGE_MONITORING_CTRL              R/W
+                                                                             changed
+                    23h      RESET_CTRL                              R/W     Controls the device reset by software
+                    25h      VBUS_DISCHARGE_TIME_CTRL                R/W     Allows the VBUS discharge time to be changed
+                    26h      VBUS_DISCHARGE_CTRL                     R/W     Controls the VBUS discharge path
+                    27h      VBUS_ENABLE_STATUS                      R/W     Gives status on VBUS power path activation
+                 29h to 2Dh Reserved                                  RO     Do not use
+                                                                             Allows the monitoring conditions of VBUS voltage to be
+                    2Eh      VBUS_MONITORING_CTRL                    R/W
+                                                                             changed
+                    2Fh      Reserved                                 RO     Do not use
+DS12664 - Rev 1                                                                                                                    page 17/38
+
+
+                                                                                                                        STUSB1702
+                                                                                                                   Start-up configuration
+6               Start-up configuration
+6.1             User-defined parameters
+                The STUSB1702 has a set of user-defined parameters that can be customized by NVM reprogramming and/or by
+                software through the I²C interface. This feature allows the customer to change the preset configuration of the USB
+                Type-C interface and to define a new configuration to meet specific customer requirements addressing various
+                applications, use cases, or specific implementations.
+                The NVM re-programming overrides the initial default setting to define a new default setting that is used at power-
+                up or after a reset. The default value is copied at power-up, or after a reset, from the embedded NVM into
+                dedicated I²C register bits. The NVM re-programming is possible only once with a customer password.
+                When a default value is changed during functioning by software, the new setting remains in effect as long as the
+                STUSB1702 runs or when it is changed again. But after power- off and power-up, or after a reset, the
+                STUSB1702 takes back the default values defined in the NVM.
+6.2             Default start-up configuration
+                The table below lists the user-defined parameters and indicates the default start-up configuration of the
+                STUSB1702.
+                Three types of user-defined parameters are specified in the table with respect to the “Customization type” column:
+                •     SW: indicates parameters that can be customized only by software through the I²C interface during system
+                      operation
+                •     NVM: indicates parameters that can be customized only by NVM re-programming
+                •     NVM/SW: indicates parameters that can be customized by NVM re-programming and/or by software through
+                      the I²C interface during system operation
+                                        Table 14. STUSB1702 user-defined parameters and default setting
+                                                                                                                             I²Cregister
+                 Customization type                  Parameter                      Default value and description
+                                                                                                                               address
+                       NVM/SW          CC_CONNECTION_STATUS_AL_MASK           1b: interrupt masked                               0Ch
+                       NVM/SW          MONITORING_STATUS_AL_MASK              1b: interrupt masked                               0Ch
+                       NVM/SW          HW_FAULT_STATUS_AL_MASK                1b: interrupt masked                               0Ch
+                        NVM            STANDBY_POWER_MODE_DISABLE             1b: disables standby power mode                    n.a.
+                       NVM/SW          CC_CURRENT_ADVERTISED                  01b: 1.5 A                                         18h
+                       NVM/SW          CC_VCONN_DISCHARGE_EN                  0b: VCONN discharge disabled on CC pin             18h
+                                                                              1b: VCONN supply capability enabled on
+                       NVM/SW          CC_VCONN_SUPPLY_EN                                                                        18h
+                                                                              CC pin
+                       NVM/SW          CC_VCONN_SWITCH_ILIM                   0000b: 350 mA                                      1Eh
+                                                                              1b: enables UVLO threshold detection on
+                         SW            VCONN_MONITORING_EN                                                                       20h
+                                                                              VCONN pin
+                         SW            VCONN_UVLO_THRESHOLD                   0b: high UVLO threshold of 4.65 V                  20h
+                                                                              0101b: in source power role, shifts
+                       NVM/SW          SHIFT_HIGH_VBUS_LIMIT_SOURCE                                                              22h
+                                                                              nominal high voltage limit by 5% of VBUS
+                                                                              0101b: in source power role, shifts
+                       NVM/SW          SHIFT_LOW_VBUS_LIMIT_SOURCE                                                               22h
+                                                                              nominal low voltage limit by -5% of VBUS
+                                                                              0b: device reset is performed from
+                         SW            SW_RESET_EN                                                                               23h
+                                                                              hardware RESET pin
+DS12664 - Rev 1                                                                                                                  page 18/38
+
+
+                                                                                                           STUSB1702
+                                                                                              Default start-up configuration
+                                                                                                                I²Cregister
+                Customization type            Parameter                 Default value and description
+                                                                                                                  address
+                     NVM/SW        VBUS_DISCHARGE_TIME_TO_0V      1010b: 840 ms discharge time                      25h
+                     NVM/SW        VBUS_DISCHARGE_TIME_TRANSITION 1010b: 200 ms discharge time                      25h
+                      NVM          VBUS_DISCHARGE_DISABLE         0b: enables VBUS discharge path                   n. a.
+                                                                  0b: enables OVLO threshold detection on
+                     NVM/SW        VDD_OVLO_DISABLE                                                                 2Eh
+                                                                  VDD pin
+                                                                  0b: enables valid VBUS voltagerange
+                     NVM/SW        VBUS_VALID_RANGE_DISABLE                                                         2Eh
+                                                                  detection
+                     NVM/SW        VBUS_VSAFE0V_THRESHOLD         00b: VBUS vSafe0Vthreshold = 0.6 V                2Eh
+                                                                  1b: disables UVLO threshold detection on
+                     NVM/SW        VDD_UVLO_DISABLE                                                                 2Eh
+                                                                  VDD pin
+DS12664 - Rev 1                                                                                                      page 19/38
+
+
+                                                                                                                    STUSB1702
+                                                                                                                        Application
+7               Application
+                The sections below are not part of the ST product specifications. They are intended to give a generic application
+                overview to be used by the customer as a starting point for further implementation and customization. ST does
+                not warrant compliancy with customer specifications. Full system implementation and validation are under the
+                customer’s responsibility.
+7.1             General description
+7.1.1           Power supplies
+                The STUSB1702 can be supplied in three different ways depending on the targeted application:
+                •    Through the VDD pin only for applications powered by VBUS that operate either in source power role
+                •    Through the VSYS pin only for AC powered applications with a system power supply delivering 3.3 V or 5 V
+                •    Through the VDD and VSYS pins for applications powered by VBUS with a system power supply delivering
+                     3.3 V or 5 V. When both VDD and VSYS power supplies are present, the low power supply VSYS is selected
+                     when VSYS voltage is above 3.1 V. Otherwise VDD is selected
+7.1.2           Connection to MCU or application processor
+                The I²C interface is used to provide extensive functionality during system operation. For instance:
+                1.   Define the port configuration during system boot (in case NVM parameters are not customized during
+                     manufacturing)
+                2.   Change the default configuration at any time during operation
+                3.   Adjust the port power capability in source power role according to contextual power availability and/or the
+                     power partitioning with other ports
+                4.   Save system power by shutting down the DC-DC converter according to the attachment detection state
+                5.   Provide a diagnostic of the Type-C connection and the VBUS power path in real time
+DS12664 - Rev 1                                                                                                           page 20/38
+
+
+                                                                                                                                                                                                                                       STUSB1702
+                                                                                                                                                                                                  USB Type-C typical applications
+7.2               USB Type-C typical applications
+7.2.1             Source type application schematic
+                                              Figure 8. Typical STUSB1702 implementation in source type application
+                                                                                                                                       STL9P3LLH6                       STL9P3LLH6
+                                             VBUS
+                                                                                                                                                                                                                                                VBUS
+                               Power          3V3                                                                  C2
+                             Management                                                                                                                        R1
+                                              VI O                                                                                                             10K
+                                Unit                                                                              1µF                                                                            C1                                             CC1
+                                                                                                                                                                                                 10µF
+                                                                                                                                                    R2
+                                                                                                                                                    1K
+                                                                                                                                                                                                                                                CC2
+                                                                                                                                                                                          GND
+                                                                                                                                                                                                                            ESDA25 L
+                                                                                                                                                                                                           SMM4 F24A
+                                                                                                                        GND                                                                                            D1
+                                                          R10 R4     R5       R6  R7    R8  R9 R3         22                  24         20             19                  U1
+                                                                                                                                                                                                                                       D2
+                                                          10K 10K    10K      10K 10K   10K 10K 10K
+                                                                                                           VSYS
+                                                                                                                                          VBUS_EN_SRC
+                                                                                                                                                         NC
+                                VI O                                                                                            VDD                                                                                                             GND
+                                                  MI SO                                           14
+                                                                                                            MISO                                                                 18
+                                                                                                                                                                   VBUS_SENSE                                                           Type C connector
+                                                  MOSI                                            11                                                                                                                    GND
+                                                                                                            MOSI
+                                                  NSS                                             12                                                                             1
+                                                                                                            NSS               SSI                                     CC1GND                   GND
+                             Application          SCLK                                            16                                                                             2
+                                                                                                            SCLK                                                          CC1
+                                                  TX_EN                                           15                                                                             4
+                                                                                                            TX_EN                                                         CC2
+                             Processor
+                                                  SCL                                                 7                                                                          5
+                                                                                                            SCL                                                       CC2GND                   GND
+                                                  SDA                                                 8                 I²C           STUSB1702
+                                                                                                            SDA
+                                                  ALERT#                                              9
+                                                                                                           AL ERT#
+                                                  RESET                                               6                                                                          21            C3
+                                                                                                           RESET                                                      VReg_1V2
+                                                                                                                                                                                               1µF
+                                                                        R11    R12                                                                                               23            C4
+                        SPC5 Power Architecture                         10K                                                                                           VReg_2V7
+                                                                               100K                                                                                                            1µF
+                            32-bit MCUs
+                                                                                                                                                                                          5V         GND
+                                                                        GND
+                                                             A_B_Side                             17
+                               To Super Speed M UX                                                        A_B_SIDE                                                               3
+                                                                                                                                                                       VCONN
+                                                             ADDR0                                13
+                                To GND/VIO                                                                ADDR0
+                                                                                                                                                        GND    EP
+                                                                                                                                                        10     0
+                                                                                                                                                                                     C5        10µF
+                                                                                                                                                             GND                      GND
+                                                                 Table 15. Default setting for a source type application
+                   I²C register
+                                                         I²C register field name                                                I²C register reset value/description                                                        Customization type
+                     address
+                      0Eh              START_UP_POWER_MODE                                                                0b: device starts in normal mode                                                                              NVM/SW
+                       18h             CC_CURRENT_ADVERTISED                                                              01b: 1.5 A                                                                                                    NVM/SW
+                       18h             CC_VCONN_DISCHARGE_EN                                                              0b: VCONN discharge disabled on CC pin                                                                        NVM/SW
+                                                                                                                          1b: VCONN supply capability enabled on CC
+                       18h             CC_VCONN_SUPPLY_EN                                                                                                                                                                               NVM/SW
+                                                                                                                          pin
+                      1Eh              CC_VCONN_SWITCH_ILIM                                                               0000b: 350 mA                                                                                                 NVM/SW
+                                                                                                                          1b: enables UVLO threshold detection on
+                       20h             VCONN_MONITORING_EN                                                                                                                                                                                   SW
+                                                                                                                          VCONN pin
+                       20h             VCONN_UVLO_THRESHOLD                                                               0b: high UVLO threshold of 4.65 V                                                                                  SW
+                                                                                                                          0101b: in source power role, shifts nominal
+                       22h             SHIFT_HIGH_VBUS_LIMIT_SOURCE                                                                                                                                                                     NVM/SW
+                                                                                                                          high voltage limit by +5% of VBUS
+                                                                                                                          0101b: in source power role, shifts nominal
+                       22h             SHIFT_LOW_VBUS_LIMIT_SOURCE                                                                                                                                                                      NVM/SW
+                                                                                                                          low voltage limit by -5% of VBUS
+                       25h             VBUS_DISCHARGE_TIME_TO_0V                                                          1010b: 840 ms discharge time                                                                                  NVM/SW
+                       25h             VBUS_DISCHARGE_TIME_TRANSITION 1010b: 200 ms discharge time                                                                                                                                      NVM/SW
+                       26h             VBUS_DISCHARGE_EN                                                                  1b: enables the VBUS discharge path                                                                           NVM/SW
+                                                                                                                          0b: enables OVLO threshold detection on
+                      2Eh              VDD_OVLO_DISABLE                                                                                                                                                                                      SW
+                                                                                                                          VDD pin
+DS12664 - Rev 1                                                                                                                                                                                                                                   page 21/38
+
+
+                                                                                                                      STUSB1702
+                                                                                                       USB Type-C typical applications
+                 I²C register
+                                        I²C register field name           I²C register reset value/description    Customization type
+                   address
+                      2Eh      VBUS_RANGE_DISABLE                     0b: enables VBUS voltage range detection              SW
+                      2Eh      VBUS_VSAFE0V_THRESHOLD                 00b: VBUS vSafe0V threshold = 0.6 V                   SW
+                                                                      1b: disables UVLO threshold detection on
+                      2Eh      VDD_UVLO_DISABLE                                                                             SW
+                                                                      VDD pin
+                                   Table 16. Conditions for VBUS power path assertion in source power role
+                                                                    Operation conditions
+                                   Electrical
+                         Pin                       Type-C attached       VDD pin             VBUS_SENSEpin              Comment
+                                     value
+                                                          state        monitoring               monitoring
+                                                   Attached.SRC or
+                                                   UnorientedDebug                                                     The signal is
+                                                                      VDD < OVLO if
+                                                    Accessory.SRC                             VBUS within valid     asserted only if all
+                                       0                                VDD pin is
+                                                                                               voltage range       the valid operation
+                                                  or OrientedDebug       supplied
+                                                                                                                   conditions are met
+                                                    Accessory.SRC
+                VBUS_EN_SRC
+                                                                                                                     The signal is de-
+                                                                      VDD > OVLO if                                 asserted when at
+                                                                                             VBUS is out ofvalid
+                                      HiZ           Anyother state      VDD pin is                                 least one non valid
+                                                                                               voltage range
+                                                                         supplied                                  operation condition
+                                                                                                                          is met.
+                                               Table 17. Source power role with accessory support
+                                                Type-C device state
+                Connection    CC1    CC2                             A_B_SIDE VCONN VBUS_EN_SRC CC_CONNECTION_STATUS
+                                             CC_OPERATION_STATUS
+                     state     pin    pin                               pin        supply          pin              register @0Eh
+                                                   register @11h
+                   Nothing
+                              Open Open           Unattached.SRC        HiZ         OFF            HiZ                    00h
+                   attached
+                     Sink      Rd    Open                               HiZ         OFF             0                    2Dh
+                                                   Attached.SRC
+                   attached   Open    Rd                                  0         OFF             0                    2Dh
+                   Powered    Open    Ra                                HiZ         OFF            HiZ                    00h
+                     cable
+                                                  Unattached.SRC
+                withoutsink    Ra    Open                               HiZ         OFF            HiZ                    00h
+                   attached
+                   Powered     Rd     Ra                                HiZ         CC2             0                     2Fh
+                  cable with
+                      sink
+                attached or
+                                                   Attached.SRC
+                   VCONN-      Ra     Rd                                  0         CC1             0                     2Fh
+                   powered
+                  accessory
+                   attached
+                    Debug
+                  accessory
+                     mode      Rp     Rp          Unattached.SRC        HiZ         OFF            HiZ                    00h
+                   attached
+                source role
+                    Debug
+                  accessory                      UnorientedDebug
+                     mode      Rd     Rd                                HiZ         OFF             0                    6Dh
+                   attached                       Accessory.SRC
+                   sink role
+DS12664 - Rev 1                                                                                                               page 22/38
+
+
+                                                                                                                      STUSB1702
+                                                                                                         USB Type-C typical applications
+                                             Type-C device state
+                 Connection   CC1    CC2                                 A_B_SIDE VCONN VBUS_EN_SRC CC_CONNECTION_STATUS
+                                           CC_OPERATION_STATUS
+                     state     pin   pin                                    pin       supply         pin             register @0Eh
+                                                register @11h
+                    Debug      Rd    ≤Ra                                    HiZ        OFF            0                   6Dh
+                  accessory                     OrientedDebug
+                     mode
+                   attached   ≤ Ra    Rd        Accessory.SRC                0         OFF            0                   6Dh
+                   sink role
+                    Audio
+                   adapter
+                  accessory    Ra     Ra       AudioAccessory               HiZ        OFF           HiZ                   81h
+                    mode
+                   attached
+                The value of the CC1 and CC2 pins is defined from a termination perspective and corresponds to the termination
+                presented by the connected device. The CC_CONNECTION_STATUS register can report other values than the
+                one presented in table above. In this table, it reflects the state transitions in Type-C FSM that can be ignored from
+                the application stand point.
+DS12664 - Rev 1                                                                                                                page 23/38
+
+
+                                                                                                                  STUSB1702
+                                                                                                         Electrical characteristics
+8               Electrical characteristics
+8.1             Absolute maximum ratings
+                All voltages are referenced to GND.
+                                                       Table 18. Absolute maximum ratings
+                                       Symbol                                         Parameter                  Value         Unit
+                 VDD                                                  Supply voltage                               28
+                 VSYS                                                 Supply voltage on VSYS pin                    6
+                 VCC1, VCC2, VCC1GND, VCC2GND                         High voltage on CC pins                      22
+                 VVBUS_EN_SRC, VVBUS_SENSE                            High voltage on VBUS pins                    28            V
+                 VSCL, VSDA, VALERT#, VRESET, VA_B_SIDE
+                                                                      Operating voltage on I/O pins            -0.3 to 6
+                 VMOSI, VMISO, VNSS, VTX_EN, VSCLK
+                 VCONN                                                VCONN voltage                                 6
+                 TSTG                                                 Storagetemperature                      -55 to 150
+                                                                                                                                °C
+                 TJ                                                   Maximum junction temperature                 145
+                                                                      HBM                                           4
+                 ESD                                                                                                            kV
+                                                                      CDM                                          1.5
+8.2             Operating conditions
+                                                         Table 19. Operating conditions
+                                      Symbol                                         Parameter                     Value       Unit
+                 VDD                                              Supply voltage                                 4.1 to 22
+                 VSYS                                             Supply voltage on VSYS pin                     3.0 to 5.5
+                 VCC1, VCC2, VCC1GND, VCC2GND                     CC pins                                       -0.3 to 5.5
+                 VVBUS_EN_SRC, VVBUS_SENSE                        High voltage pins                               0 to 22         V
+                 VSCL, VSDA, VALERT#, VRESET, VA_B_SIDE
+                                                                  Operating voltage on I/O pins                   0 to 4.5
+                 VMOSI, VMISO, VNSS, VTX_EN, VSCLK
+                 VCONN                                            VCONN voltage                                  2.7 to 5.5
+                 ICONN                                            VCONN rated current (default = 0.35 A)         0.1 to 0.6       A
+                 TA                                               Operating temperature                         -40 to 105       °C
+Note:           The transient voltage on the CC1 and CC2 pins drops to -0.3 during BMC communication.
+DS12664 - Rev 1                                                                                                             page 24/38
+
+
+                                                                                                                         STUSB1702
+                                                                                                     Electrical and timing characteristics
+8.3             Electrical and timing characteristics
+                Unless otherwise specified: VDD = 5 V, TA = +25 °C, all voltages are referenced to GND.
+                                                       Table 20. Electrical characteristics
+                  Symbol         Parameter                           Conditions                              Min.     Typ.   Max.    Unit
+                                                                                        VSYS @ 3.3 V                  158
+                             Current           Device idle as a SOURCE (not
+                  IDD (SRC)                                                                                                           µA
+                             consumption       connected, no communication)             VDD @ 5.0 V                   188
+                                                                                        VSYS @ 3.3 V                   33
+                             Standby current   Device in standby (not connected, low
+                   ISTDBY                                                                                                             µA
+                             consumption       power)                                   VDD @ 5.0 V                    53
+                CC1 and CC2 pins
+                    IP-USB                                                                                  -20%       80    +20%
+                             CC current        CC pin voltage, VCC = -0.3 to 2.6 V,
+                     IP-1.5                                                                                  -8%      180     +8%     µA
+                             sources           40 °C < TA < 105 °C
+                     IP-3.0                                                                                  -8%      330     +8%
+                             CC open pin
+                    VCCO                       CC unconnected, VDD = 3.0 to 5.5 V                            2.75                      V
+                             voltage
+                             CC pull-down
+                      Rd                       40 °C < TA < 105 °C                                          -10%       5.1    10%     kΩ
+                             resistors
+                             CC input
+                    RINCC                      Pull-up and pull-down resistors off                           200                      kΩ
+                             impedance
+                                               Max. Ra detection by DFP at IP = IP-USB, min. IP_USB
+                             Detection
+                   VTH0.2                      detection by UFP on Rd, min CC voltage for connected          0.15     0.20    0.25     V
+                             threshold 1
+                                               UFP
+                             Detection
+                   VTH0.4                      Max. Ra detection by DFP at IP = IP-1.5                       0.35     0.40    0.45     V
+                             threshold 2
+                             Detection
+                   VTH0.8                      Max. Ra detection by DFP at IP = IP-3.0                       0.75     0.80    0.85     V
+                             threshold 4
+                             Detection
+                   VTH1.6                      Max. Rd detection by DFP at IP = IP-USB and IP = IP-1.5       1.50     1.60    1.65     V
+                             threshold 6
+                             Detection         Max. Rd detection by DFP at IP-3.0, max. CC voltage for
+                   VTH2.6                                                                                    2.45     2.60    2.75     V
+                             threshold 7       connected UFP
+                VCONN protection
+                             VCONN power
+                  RVCONN                       IVCONN = 0.2 A-                                               0.25     0.50   0.975     Ω
+                             path resistance
+                                                                                                              85      100     125
+                             Overcurrent       Programmable current limit threshold
+                     IOCP                                                                                    300      350     400     mA
+                             protection        (from 100 mA to 600 mA by step of 50 mA)
+                                                                                                             550      600     650
+                             Output
+                     VOVP    overvoltage                                                                      5.9      6.0     6.1     V
+                             protection
+                             Input             Low UVLO threshold                                             2.6              2.7
+                     VUVP    undervoltage                                                                                              V
+                             protection        High UVLO threshold (default)                                  4.6              4.8
+                VBUS monitoring and driving
+                             VBUS presence
+                   VTHUSB                      VSYS = 3.0 to 5.5 V                                            3.8      3.9     4.0     V
+                             threshold
+DS12664 - Rev 1                                                                                                                  page 25/38
+
+
+                                                                                                                      STUSB1702
+                                                                                                                  Thermal Information
+                   Symbol           Parameter                              Conditions                      Min.   Typ.    Max.    Unit
+                                                    VSYS = 3.0 to 5.5 V                                    0.5     0.6     0.7      V
+                                VBUS safe 0 V       Programmable threshold                                 0.8     0.9      1       V
+                    VTH0V       threshold
+                                (vSafe0V)           Programmable threshold from 0.6 V to 1.8 V             1.1     1.2     1.3      V
+                                                    Default VTHOV = 0.6 V                                  1.7     1.8     1.9      V
+                                VBUS discharge
+                   RDISUSB                                                                                 600     700     800      Ω
+                                resistor
+                                VBUS discharge      Default TDISPARAM = 840 ms, the coefficient TDISPARAM
+                                                                                                            70      84     100
+                                time to 0V          is programmable by NVM
+                  TDISUSB (1)                                                                                                      ms
+                                VBUS discharge      Default TDISPARAM = 200 ms, the coefficient TDISPARAM
+                                                                                                            20      24      28
+                                time to PDO         is programmable by NVM
+                                VBUS monitoring     VBUS = nominal target value, default VMONUSBH = VBUS
+                                                                                                                 VBUS +
+                  VMONUSBH      high voltage        +10 %, the threshold limit is programmable by NVM                               V
+                                                                                                                  10%
+                                threshold           from +5 % to +20 %
+                                VBUS monitoring     VBUS = nominal target value, default VMONUSBL = VBUS
+                                                                                                                 VBUS -
+                  VMONUSBL      low voltage         -10 %, the threshold limit is programmable by NVM from                          V
+                                                                                                                  10%
+                                threshold           -20 % to -5 %
+                 Digital input/output (SCL, SDA, ALERT#, A_B_SIDE, MOSI, MISO, NSS, TX_EN, SCLK)
+                                High level input
+                      VIH                                                                                  1.2                      V
+                                voltage
+                                Low level input
+                      VIL                                                                                                 0.35      V
+                                voltage
+                                Low level output
+                     VOL                            Ioh = 3 mA                                                             0.4      V
+                                voltage
+                 20 V open drain outputs (VBUS_EN_SRC)
+                                Low level output
+                     VOL                            Ioh = 3 mA                                                             0.4      V
+                                voltage
+                1. TDISPARAM
+8.4             Thermal Information
+                                                               Table 21. Thermal information
+                      Symbol                                          Parameter                                 Value          Unit
+                       RθJA          Junction to ambient thermal resistance                                       37          °C/W
+                       RθJC          Junction to case thermal resistance                                           5          °C/W
+DS12664 - Rev 1                                                                                                               page 26/38
+
+
+                                                                                        STUSB1702
+                                                                                    Ordering information
+9               Ordering information
+                                       Table 22. Order code
+       Order code       AEC-Q100              Package               Temperature range          Marking
+    STUSB1702YQTR         Yes       QFN24 EP 4x4 mm wettable flanks - 40 °C up to105 °C         1702Y
+DS12664 - Rev 1                                                                                 page 27/38
+
+
+                                                                                                                  STUSB1702
+                                                                                                          Terms and abbreviations
+10              Terms and abbreviations
+                                            Table 23. List of terms and abbreviations
+                        Term                                                 Description
+                                   Audio adapter accessory mode. It is defined by the presence of Ra/Ra on the CC1/CC2 pins.
+                   Accessory modes Debug accessory mode. It is defined by the presence of Rd/Rd on CC1/CC2 pins in source
+                                   power role or Rp/Rp on CC1/CC2 pins in sink power role.
+                                   Downstream facing port, specifically associated with the flow of data in a USB connection.
+                        DFP        Typically, the ports on a HOST or the ports on a hub to which devices are connected. In its
+                                   initial state, DFP sources VBUS and VCONN, and supports data.
+                                   Dual-role port. A port that can operate as either a source or a sink. The port role may be
+                        DRP
+                                   changed dynamically.
+                                   Port asserting Rd on the CC pins and consuming power from the VBUS; most commonly a
+                         Sink
+                                   device.
+                                   Port asserting Rp on the CC pins and providing power over the VBUS; most commonly a host
+                       Source
+                                   or hub DFP.
+                                   Upstream facing port, specifically associated with the flow of data in a USB connection. The
+                        UFP        port on a device or a hub that connects to a host or the DFP of a hub. In its initial state, the
+                                   UFP sinks the VBUS and supports data.
+DS12664 - Rev 1                                                                                                              page 28/38
+
+
+                                                                                                                 STUSB1702
+                                                                                                              Package information
+11              Package information
+                In order to meet environmental requirements, ST offers these devices in different grades of ECOPACK®
+                packages, depending on their level of environmental compliance. ECOPACK® specifications, grade definitions
+                and product status are available at: www.st.com. ECOPACK® is an ST trademark.
+DS12664 - Rev 1                                                                                                          page 29/38
+
+
+                                                                                                                     STUSB1702
+                                                                                    QFN24 EP 4x4 mm wetable flank package information
+11.1              QFN24 EP 4x4 mm wettable flank package information
+                                  Figure 9. QFN24 EP 4x4 mm wetable flank package outline
+                                                                     D
+                                                                                                     E
+                                                             TOP VIEW
+                                                                                          Detail A
+                                                                                                     A
+                                      A3   A2                                                 A1
+                                                                SIDE VIEW
+                                                                     D
+                                                                                                     L2
+                                                   19                           24
+                                       b
+                                           18                                                  1     e
+                                                                    C0.35
+                                                        E2                                                 E
+                                       J                            D2
+                                           13                                                  6
+                                                                                                     L
+                                                   12                            7
+                                                           BOTTOM VIEW
+                                                                                               DETAIL A
+                                                  Terminal length                L
+                                                                                     L1
+                                                                               L3
+                                                                                          Terminal thickness
+                                                L1 L3
+                                                                         L2
+                                                  FRONT VIEW             SECTION VIEW
+DS12664 - Rev 1                                                                                                             page 30/38
+
+
+                                                                                          STUSB1702
+                                                         QFN24 EP 4x4 mm wetable flank package information
+                         Table 24. QFN24 EP 4x4 mm wetable flank mechanical data
+                                                       Dimensions (mm)
+                Ref.
+                                     Min.                    Typ.                        Max.
+                 A                   0.90                    0.95                        1.00
+                A1                                           0.10
+                A2                   0.00                    0.02                        0.05
+                A3                                           0.20
+                 b                   0.20                    0.25                        0.30
+                 D                   3.85                    4.00                        4.15
+                D2                   2.40                    2.50                        2.60
+                 E                   3.85                    4.00                        4.15
+                E2                   2.40                    2.50                        2.60
+                 e                                           0.50
+                  J                                          0.35
+                 L                   0.30                    0.40                        0.50
+                 L1                                          0.20
+                 L2                                          0.05
+                 L3                                          0.10
+                     Figure 10. QFN24 EP 4x4 mm wetable flank recommended footprint
+DS12664 - Rev 1                                                                                   page 31/38
+
+
+                                                                             STUSB1702
+Revision history
+                                   Table 25. Document revision history
+                   Date     Revision                                 Changes
+                06-Jul-2018    1           Initial release.
+DS12664 - Rev 1                                                                  page 32/38
+
+
+                                                                                                                                                   STUSB1702
+                                                                                                                                                              Contents
+Contents
+1      Functional description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+2      Inputs / outputs. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .3
+      2.1       Pinout . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+      2.2       Pin list . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+      2.3       Pin description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+                2.3.1       CC1 / CC2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+                2.3.2       CC1GND / CC2GND. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+                2.3.3       VCONN. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.4       RESET . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.5       I²C interface pins. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.6       GND . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.7       MOSI . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.8       NSS . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.9       MISO . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.10      TX_EN . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.11      SCLK . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+                2.3.12      A_B_SIDE. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.13      VBUS_SENSE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.14      VBUS_EN_SRC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.15      VREG_1V2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.16      VSYS . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.17      VREG_2V7 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.18      VDD . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3      General description. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .7
+      3.1       CC interface . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+      3.2       BMC interface . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                3.2.1       BMC interface behavior. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                3.2.2       TX mode . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+                3.2.3       RX mode. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+      3.3       VBUS power path control . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+DS12664 - Rev 1                                                                                                                                               page 33/38
+
+
+                                                                                                                                             STUSB1702
+                                                                                                                                                        Contents
+                3.3.1    VBUS monitoring . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+                3.3.2    VBUS discharge . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+                3.3.3    VBUS power path assertion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+      3.4       VCONN supply . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+                3.4.1    VCONN input voltage . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+                3.4.2    VCONN application conditions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+                3.4.3    VCONN monitoring . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+                3.4.4    VCONN discharge. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+                3.4.5    VCONN control and status . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+                3.4.6    VCONN power switches . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+      3.5       High voltage protection. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+      3.6       Hardware fault management . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+      3.7       Accessory mode detection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+                3.7.1    Audio accessory mode detection. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+                3.7.2    Debug accessory mode detection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+4      Managing USB PD transactions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .14
+5      I²C interface . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .15
+      5.1       Read and write operations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+      5.2       Timing specifications. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+      5.3       I²C register map. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+6      Start-up configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .18
+      6.1       User-defined parameters . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+      6.2       Default start-up configuration. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+7      Application . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .20
+      7.1       General description. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+                7.1.1    Power supplies . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+                7.1.2    Connection to MCU or application processor . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+      7.2       USB Type-C typical applications . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+                7.2.1    Source type application schematic . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+8      Electrical characteristics. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .24
+      8.1       Absolute maximum ratings. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+DS12664 - Rev 1                                                                                                                                         page 34/38
+
+
+                                                                                                                                           STUSB1702
+                                                                                                                                                      Contents
+      8.2       Operating conditions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+      8.3       Electrical and timing characteristics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+      8.4       Thermal Information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+9      Ordering information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .27
+10     Terms and abbreviations. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .28
+11     Package information. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .29
+      11.1      QFN24 EP 4x4 mm wettable flank package information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+Revision history . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .32
+DS12664 - Rev 1                                                                                                                                       page 35/38
+
+
+                                                                                                                                                  STUSB1702
+                                                                                                                                                        List of tables
+List of tables
+Table 1.     Pin functions list . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+Table 2.     Pin function descriptions . . . . . . . . . . . . . . . . . . . . . . . . . . .    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+Table 3.     I²C interface pins list. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+Table 4.     USB data MUX select. . . . . . . . . . . . . . . . . . . . . . . . . . . . .       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+Table 5.     Conditions for VBUS power path assertion in source power role                      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+Table 6.     Fault management conditions . . . . . . . . . . . . . . . . . . . . . . .          . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  11
+Table 7.     Orientation detection . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  13
+Table 8.     Device address format . . . . . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  15
+Table 9.     Register address format . . . . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  15
+Table 10.    Register data format. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  15
+Table 11.    I²C timing parameters - VDD = 5 V . . . . . . . . . . . . . . . . . . . .          . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  16
+Table 12.    Register access legend . . . . . . . . . . . . . . . . . . . . . . . . . . .       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  17
+Table 13.    STUSB1702 register map overview . . . . . . . . . . . . . . . . . . .              . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  17
+Table 14.    STUSB1702 user-defined parameters and default setting . . . .                      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  18
+Table 15.    Default setting for a source type application. . . . . . . . . . . . . .           . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  21
+Table 16.    Conditions for VBUS power path assertion in source power role                      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  22
+Table 17.    Source power role with accessory support. . . . . . . . . . . . . . .              . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  22
+Table 18.    Absolute maximum ratings . . . . . . . . . . . . . . . . . . . . . . . . .         . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  24
+Table 19.    Operating conditions . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  24
+Table 20.    Electrical characteristics . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  25
+Table 21.    Thermal information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  26
+Table 22.    Order code . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  27
+Table 23.    List of terms and abbreviations . . . . . . . . . . . . . . . . . . . . . .        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  28
+Table 24.    QFN24 EP 4x4 mm wetable flank mechanical data. . . . . . . . .                     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  31
+Table 25.    Document revision history . . . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  32
+DS12664 - Rev 1                                                                                                                                               page 36/38
+
+
+                                                                                                                                                  STUSB1702
+                                                                                                                                                       List of figures
+List of figures
+Figure 1.       Functional block diagram . . . . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+Figure 2.       STUSB1702 pin connections . . . . . . . . . . . . . . . . . . . . . . . .           . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+Figure 3.       BMC interface . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+Figure 4.       VCONN to CC1 and CC2 power switch protections . . . . . . . . . .                   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  11
+Figure 5.       Read operation. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+Figure 6.       Write operation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+Figure 7.       I²C timing diagram. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+Figure 8.       Typical STUSB1702 implementation in source type application .                       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+Figure 9.       QFN24 EP 4x4 mm wetable flank package outline . . . . . . . . .                     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+Figure 10.      QFN24 EP 4x4 mm wetable flank recommended footprint . . . .                         . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+DS12664 - Rev 1                                                                                                                                               page 37/38
+
+
+                                                                                                                                             STUSB1702
+                                                       IMPORTANT NOTICE – PLEASE READ CAREFULLY
+ STMicroelectronics NV and its subsidiaries (“ST”) reserve the right to make changes, corrections, enhancements, modifications, and improvements to ST
+ products and/or to this document at any time without notice. Purchasers should obtain the latest relevant information on ST products before placing orders. ST
+ products are sold pursuant to ST’s terms and conditions of sale in place at the time of order acknowledgement.
+ Purchasers are solely responsible for the choice, selection, and use of ST products and ST assumes no liability for application assistance or the design of
+ Purchasers’ products.
+ No license, express or implied, to any intellectual property right is granted by ST herein.
+ Resale of ST products with provisions different from the information set forth herein shall void any warranty granted by ST for such product.
+ ST and the ST logo are trademarks of ST. All other product or service names are the property of their respective owners.
+ Information in this document supersedes and replaces information previously supplied in any prior versions of this document.
+                                                          © 2018 STMicroelectronics – All rights reserved
+DS12664 - Rev 1                                                                                                                                        page 38/38
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+STMicroelectronics:
+ STUSB1702YQTR

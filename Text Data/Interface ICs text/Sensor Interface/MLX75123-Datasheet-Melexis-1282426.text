@@ -1,0 +1,1830 @@
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+Features & Benefits                          Description
+    Combines four high speed ADCs with a    MLX75123 is a fully integrated companion chip for
+     digital sensor control for Melexis’ TOF Melexis’ Time-of-Flight (TOF) sensors. It’s perfectly
+     camera sensors                          suited for automotive and non-automotive
+    Integrated light source control with    applications, including, but not limited to, gesture
+     modulation frequencies between          recognition, driver monitoring, skeleton tracking,
+     12-40 MHz                               people or obstacle detection and traffic monitoring.
+    Programmable modulation frequencies to  This sensor interface is designed to connect
+     avoid module to module crosstalk        instinctively to any Melexis TOF sensor and the
+    Up to 8 raw phases per frame            output can be directly connected to a camera
+    Pre-processed difference & sum output   parallel port and I 2C interface of a microcontroller.
+     modes to reduce the data bandwidth      The chip features a configurable sequencer to
+    Continuous or triggered operation modes control the TOF sensor and will sequentially provide
+    Configurable over I 2C up to 400kHz     the 12-bit output data from its four built-in high-
+    12-bit parallel camera interface up to  speed ADCs for an accurate analog to digital
+     80Mpix/s                                conversion. Furthermore, MLX75123 synchronously
+    Region of interest (ROI) selection      provides the control signals for a modulated light
+    Horizontal & vertical flip/mirror modes source (LED or laser based). Combined with a TOF
+    Per-phase statistics & diagnostics      sensor like MLX75023, the MLX75123 offers a cost-
+    Ambient operating temperature ranges    effective, integrated, QVGA (320x240) pixel
+     of -20 +85°C and -40 +105°C             resolution camera solution. This chipset can deliver
+    AEC-Q100 qualification available!       raw TOF data up to 600 frames per second. The
+                                             device is available in a compact 7x7mm AQFN
+                                             package and offers a variety of integration
+                                             possibilities.
+     Figure 1 : MLX75123 package
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+Contents
+Features & Benefits ................................................................................................................................... 1
+Description ................................................................................................................................................ 1
+1. Datasheet Changelog............................................................................................................................. 4
+2. Ordering Information ............................................................................................................................ 5
+3. Application System Architecture............................................................................................................ 6
+4. System Block Diagram ........................................................................................................................... 7
+5. Pinout Description ................................................................................................................................. 8
+6. Absolute Maximum Ratings1................................................................................................................ 10
+7. Electrical Specifications ....................................................................................................................... 10
+   7.1. Crystal Oscillator Requirements ....................................................................................................... 10
+   7.2. Operating Conditions ........................................................................................................................ 11
+   7.3. ADC Characteristics........................................................................................................................... 13
+8. Power Consumption ............................................................................................................................ 14
+   8.1. Power Up & Down Sequence ........................................................................................................... 14
+9. Output Modes ..................................................................................................................................... 15
+   9.1. Mode#0: 11bit A-B + error bit .......................................................................................................... 15
+   9.2. Mode#1: 12bit A-B............................................................................................................................ 15
+   9.3. Mode#2: 11bit A+B + error bit ......................................................................................................... 15
+   9.4. Mode#3: 12bit A+B ........................................................................................................................... 15
+   9.5. Mode#4: Raw A ................................................................................................................................. 16
+   9.6. Mode#5: Raw B ................................................................................................................................. 16
+10. Parallel Output Sequence & Timing ................................................................................................... 17
+11. Distance Calculation .......................................................................................................................... 18
+12. I2C Commands .................................................................................................................................. 19
+   12.1. I2C_READ ......................................................................................................................................... 19
+   12.2. I2C_WRITE ....................................................................................................................................... 19
+   12.3. I2C_RESET ........................................................................................................................................ 20
+   12.4. I2C_GLOBAL_RESET ......................................................................................................................... 20
+   12.5. I2C_SAVEREGMAP ........................................................................................................................... 20
+13. Registers ............................................................................................................................................ 21
+   13.1. Configuration Parameters Registers .............................................................................................. 22
+   13.2. FrameTable & Phase Registers ....................................................................................................... 25
+     13.2.1. Frame : Tx_SETTINGS ............................................................................................................... 26
+ Version V1.4                                                                                                                                      Page 2 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+     13.2.2. Frame : Tx_IDLETIME ................................................................................................................ 27
+     13.2.3. Frame : Tx_MODE ..................................................................................................................... 28
+     13.2.4. Frame : Tx_FRAMECOUNT ....................................................................................................... 29
+     13.2.5. Frame : Tx_UPPER_LIMIT ......................................................................................................... 29
+     13.2.6. Frame : Tx_LOWER_LIMIT ........................................................................................................ 29
+     13.2.7. Frame : Tx_ROI_START & Tx_ROI_SIZE .................................................................................... 30
+     13.2.8. Phase : Tx_Py_SETTINGS .......................................................................................................... 31
+     13.2.9. Phase : Tx_Py_INTEGRATION ................................................................................................... 32
+     13.2.10. Phase : Tx_Py_PREHEAT ......................................................................................................... 33
+     13.2.11. Phase : Tx_Py_PREMIX ........................................................................................................... 34
+     13.2.12. Phase : Tx_Py_IDLE ................................................................................................................. 35
+     13.2.13. Phase : READOUT.................................................................................................................... 35
+   13.3. USER Registers ................................................................................................................................ 36
+14. MetaData .......................................................................................................................................... 37
+15. Diagnostics ........................................................................................................................................ 42
+16. Sleep Mode(s) ................................................................................................................................... 43
+17. FMOD Generator ............................................................................................................................... 44
+18. Package Dimensions .......................................................................................................................... 45
+19. Layout & Solder Recommendations................................................................................................... 46
+   19.1. PCB Footprint Design ...................................................................................................................... 46
+   19.2. Solder Profile ................................................................................................................................... 47
+Disclaimer................................................................................................................................................ 48
+ Version V1.4                                                                                                                                      Page 3 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+1. Datasheet Changelog
+  Version           Date        Changes
+     1.0         17.01.2017     Initial version
+     1.1         11.04.2017     Updated section 13.3 : USER[0..3] are visible in Metadata1, not MetaData2
+                                Updated section 7.1 : Clock thresholds depend on VDDD_1V8, not VDD_IO
+                                Updated section 13.1 : VIDEO_DRIVE has 2 options (low & high), not 16
+                                Added and updated electrical operating conditions in section 7.2
+                                Updated the power consumption values from section 8
+                                Changed BLOCK_ENABLE register to BLOCK_DISABLE in section 16
+     1.2         02.08.2017     Added LEDP specifications for single ended mode
+                                Updated description of parameters in section 7.2
+                                Updated default register values in section 13
+                                Minor updates to register descriptions
+                                Updated default register values from chapter 13
+     1.3         31.01.2018     Updated ordering information in section 2
+                                Updated description of I2C_SAVEREGMAP in section 12.5
+                                Corrected calculation method for distance & amplitude in section 11
+                                Update footprint recommendations in section 19.1
+                                Several other minor description updates
+     1.4          23.3.2018     Removed Tx_Py_SETUP registers (not needed for application)
+                                Updated Tx_Py_SETTINGS bit[6] value to fixed high
+                                Added phase read out calculation
+                                Updated multiple register descriptions
+         Table 1 : Datasheet changelog
+ Version V1.4                                                                                             Page 4 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+2. Ordering Information
+        Product           Temperature Code              Package      Option Code Packing Form
+       MLX75123                     R                      LA          ABA-000      RE or SP
+       MLX75123                      S                     LA          ABA-000         RE
+       MLX75123                     R                      LA          BAG-000         RE
+       MLX75123                      S                     LA          BAG-000         RE
+        Table 2 : Order code(s)
+Legend:
+    Temperature Code         R : -40°C to 105°C
+                             S : -20°C to 85°C
+    Package Code             LA : Array QFN package, 84pins
+    Option Code              ABA-000 : Default product configuration
+                             BAG-000 : Samples available in Q3 2018
+    Packing Form             RE : Reel
+                             SP : Sample pack (10 pcs)
+    Ordering Example         MLX75123RLA-ABA-000-RE
+        Table 3
+ Version V1.4                                                                           Page 5 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+3. Application System Architecture
+A complete TOF system or camera module typically includes the following main components:
+    MLX75123 + MLX75023 TOF chipset
+    A synchronized high bandwidth near infrared (NIR) active illumination source (LED or laser)
+    Beam shaping optics for the light distribution
+    A receiving sensor lens, optimized for maximum NIR transmittance
+    A microprocessor (like Freescale i.MX6 or equivalent) or DSP to calculate and process all data
+                                 3V 3
+                                 MIXH
+                                 AR  RAYBIAS                                                      Memory
+                                                                     3V3
+                                                                     1V8   CLK
+                     Receiving
+                      optics
+                                                                                      I2C
+                                  TOF Sensor      Digital Control     TOF CC
+                                                                                                Microcontroller
+                                  MLX750xx                           MLX75123                         or
+                                                  Analog Data                    Digital Data
+                                                                                                     DSP
+ Scene                                                  LEDP
+                                  Illum. Driver
+                                                                    LEDN
+                                 LED / VCSEL
+                Beam shaping
+                   optics         Illumination
+                                                  Figure 2
+ Version V1.4                                                                                        Page 6 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+4. System Block Diagram
+                                       1V8       3V3
+                             POR                            Registers
+                                                                          I2C SDA, SCL
+                                                             Memory           RSTB
+      LEDP, LEDN    LED Control
+   DMIX[1], DMIX[0]               Mix Control
+                                                               Timing
+             SHUT                                            Generator
+            FLUSH                                                             CLK
+     ARRAY_RST                     Sequencer
+                                                                              QUIET
+                                                                              TRIGGER
+       LATCH_EN                                                                PIXD [11:0]
+        ROW [7:0]                                                              HSYNC, VSYNC, FSYNC
+         COL [7:0]
+                                                                               PIXCLK
+                                                Delay line
+            A_IN[0]              ADC                                  Data
+                                                                    process
+            A_IN[1]              ADC
+            A_IN[2]              ADC
+            A_IN[3]              ADC
+                                                GND
+                                     Figure 3 : System block diagram
+ Version V1.4                                                                              Page 7 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+5. Pinout Description
+     Designator  Pin #    Function    Description                                                         Domain
+        PIXCLK    B28     Digital Out Pixel clock                                                          VDD_IO
+        HSYNC     B29     Digital Out Horizontal sync bit                                                  VDD_IO
+        VSYNC     A32     Digital Out Vertical sync bit                                                    VDD_IO
+        FSYNC     A31     Digital Out Frame sync bit (optional)                                            VDD_IO
+       PIXD[11]   B22
+       PIXD[10]   A25
+        PIXD[9]   B23
+        PIXD[8]   A26
+        PIXD[7]   B24
+        PIXD[6]   A27
+                          Digital Out Pixel data                                                           VDD_IO
+        PIXD[5]   B25
+        PIXD[4]   A28
+        PIXD[3]   B26
+        PIXD[2]   A29
+        PIXD[1]   B27
+        PIXD[0]   A30
+        QUIET     A15     Digital Out Configurable indication output                                       VDD_IO
+          CLK     B13      Digital In Input clock                                                          VDD_IO
+       TRIGGER    A13      Digital In Frame trigger (= active high)                                        VDD_IO
+         RSTB     A14      Digital In Reset pin (= active low)                                             VDD_IO
+          SDA     B11     Digital Out  2
+                                      I C clock and data                                                  VDD_I2C
+          SCL     A12      Digital In
+         LEDP     B31
+                          Digital Out Single ended or differential LED control signal                    VDDD_3V3
+         LEDN     A34
+       DMIX[1]    B32
+                          Digital Out Differential pixel modulation signals                              VDDD_3V3
+       DMIX[0]    A35
+      LATCH_EN    A4      Digital Out Pixel array latch enable                                           VDDD_3V3
+         SHUT      B2     Digital Out Pixel array shutter                                                VDDD_3V3
+     ARRAY_RST    A3      Digital Out Pixel array reset signal                                           VDDD_3V3
+        FLUSH      B3     Digital Out Pixel array flush output                                           VDDD_3V3
+       ROW[7]     A2
+       ROW[6]      B1
+       ROW[5]     A1
+       ROW[4]     A44
+                          Digital Out Row addressing                                                     VDDD_3V3
+       ROW[3]     B40
+       ROW[2]     A43
+       ROW[1]     B39
+       ROW[0]     A42
+        COL[7]    A37
+        COL[6]    B34
+        COL[5]    A38
+        COL[4]    B35
+                          Digital Out Column addressing                                                  VDDD_3V3
+        COL[3]    A39
+        COL[2]    B36
+        COL[1]    A40
+        COL[0]    B37
+                                                                    1
+    Table 4.1                                                         can be selected as active high or active low
+ Version V1.4                                                                                             Page 8 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+     Designator   Pin #    Function  Description                                                  Domain
+       A_IN[3]     B7
+       A_IN[2]     A7
+                           Analog In Analog input of the pixel data
+       A_IN[1]     A6
+       A_IN[0]     B6
+                                     Analog supply in the 1.8V domain for the PLL
+     VDDA_1V8      B14    1V8 Supply
+                                     (referenced to GNDA_1V8)
+                   A9                Analog supply for the ADC in the 1.8V
+   VDDA_ADC_1V8           1V8 Supply
+                   B5                analog domain (referenced to GNDA_ADC_1V8)
+                                     Analog supply for the ADC in 1.8V analog domain for
+ VDDA_ADC_S_1V8    A10    1V8 Supply
+                                     switched circuitry (referenced to GNDA_ADC_S_1V8)
+                                     Digital supply in 1.8V digital domain
+     VDDD_1V8      B20    1V8 Supply
+                                     (referenced to GNDD_1V8)
+                                     Analog supply for the ADC in the 3.3V analog domain
+     VDDA_3V3      B4     3V3 Supply
+                                     (referenced to GNDA_ADC_1V8)
+                   A36
+                                     Digital supply in 3.3V digital domain for the interface with
+     VDDD_3V3      B17    3V3 Supply
+                                     the 75023 (referenced to GNDD_1V8)
+                   B38
+                  B21                Supply pin for interface to application processor
+       VDD_IO               Supply
+                  B30                (1.8 or 3.3V) (referenced to GNDD_1V8)
+                                     1.8 or 3.3V supply for I2C interface
+       VDD_I2C    B12       Supply
+                                     (referenced to GNDD_1V8)
+     GNDA_1V8      A16       GND     Analog ground in the 1.8V domain for the PLL
+                   A5
+  GNDA_ADC_1V8               GND     Analog ADC ground for 1.8V
+                   B8
+                                     Analog ADC ground for the ADC in 1.8V analog domain
+ GNDA_ADC_S_1V8    B9        GND
+                                     switched
+     GNDD_1V8      A22       GND     Digital ground in 1.8V digital domain
+                   A8
+                   B15
+                   A18
+       GND_IO      A24       GND     Digital ground for the interface to application processor
+                   A33
+                   B33
+                   A41
+       TEST[6]     B10
+       TEST[5]     A11               Test pins reserved for Melexis purposes,
+       TEST[4]     B16               please connect to GND_IO. (version ABA-000)
+       TEST[3]     A17       GND
+       TEST[2]     B18               These pins will become general purpose outputs,
+       TEST[1]     B19               controlled via I2C, in version BAG-000
+       TEST[0]     A21
+                   A19
+         n.c.      A20               not connected
+                   A23
+        Table 4.2
+ Version V1.4                                                                                     Page 9 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+6. Absolute Maximum Ratings1
+                                     Parameter                         Min.     Typ.      Max.1          Unit
+                                3V3 supply voltage :
+                                                                       -0.2                   4            V
+                   VDDA_3V3, VDDD_3V3, VDD_IO, VDD_I2C
+                                1V8 supply voltage :
+                           VDDA_1V8, VDDA_ADC_1V8,                     -0.2                  2.3           V
+                          VDDA_ADC_S_1V8, VDDD_1V8
+                                Analog input voltage
+                                                                       -0.2           VDDA_3V3 + 0.2       V
+                        A_IN[3], A_IN[2], A_IN[1], A_IN[0]
+                         Digital IO voltage for MLX75023 :
+                       COL[x], ROW[x], DMIX[x], LATCH_EN,              -0.2           VDDD_3V3 + 0.2       V
+                             SHUT, ARRAY_RST, FLUSH
+                                Digital IO voltage I2C                 -0.2            VDD_I2C + 0.2       V
+                      Digital IO voltage for video Interface :
+                     HSYNC, VSYNC, FSYNC, PIXCLK, PIXD[x],             -0.2            VDD_IO + 0.2        V
+                                CLK, TRIGGER, RSTB
+                          Operating junction temperature               -40                  125            °C
+                               Storage temperature                     -40                  150            °C
+                             ESD : Human Body Model                                           2           kV
+                                                 Table 5 : Absolute Maximum Ratings
+       1
+Note : Absolute maximum ratings should never be exceeded to avoid permanent hardware failure.
+7. Electrical Specifications
+7.1. Crystal Oscillator Requirements
+The clock input requires an accurate and clean input signal. It’s recommended to use a crystal oscillator with the following
+specifications towards this purpose. The clock input ESD protection circuit limits the max. amplitude to VDD_IO+0.2V.
+This requirement excludes the combination of a 3V3 clock generator together with 1V8 for VDD_IO. The oscillator drift is a
+less significant parameter and will not impact MLX75123 behaviour because all timing related parameters scale directly with
+this clock.
+                            Parameter                Symbol        Min.       Typ.      Max.           Unit
+                   Clock frequency                                  40                    80           MHz
+                   Positive clock threshold            VTH+          1               VDD_IO + 0.2        V
+                   Negative clock threshold            VTH-                              0.6             V
+                   Jitter                                                      30         60            ps
+                                                  Table 6 : Input clock requirements
+  Version V1.4                                                                                                     Page 10 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+7.2. Operating Conditions
+The operation conditions of MLX75123 are highly dependent on the configuration of the device.
+                                                                             1
+Values listed in the Table 7 are measured at typical application conditions :
+     80 MHz input clock
+     20 MHz modulation frequency
+     250 us integration time
+     Four phase acquisition
+     50 distance FPS (= 200 raw frames)
+     ± 5pF load on all output buffers
+                                                              Typ.       Typ.      Typ.
+                    Parameter                     Min.                                        Peak3    Max.6     Unit
+                                                            -40 °C2     25 °C2    105 °C2
+             1V8 analog supply voltage             1.7         1.8        1.8                             2        V
+             VDDA_1V8 supply current                          4.57       4.52      4.45                  tbd      mA
+                                           3
+         VDDA_ADC_1V8 supply current                          39.60      42.44     46.39       221       tbd      mA
+                                              3
+        VDDA_ADC_S_1V8 supply current                         9.58       10.25     11.05        58       tbd      mA
+             1V8 digital supply voltage            1.7         1.8        1.8       1.8                   2        V
+             VDDD_1V8 supply current                           8.5       8.61      8.84                  tbd      mA
+                                                                              4
+         VDDD_I2C supply current @1V8                                    n/A                             tbd      mA
+                                          3, 5
+        VDDD_IO supply current @1V8                            16        16.18     16.43        39       tbd      mA
+             3V3 analog supply voltage              3          3.3        3.3       3.3                  3.6       V
+             VDDA_3V3 supply current                                     0.001                           tbd      mA
+             3V3 digital supply voltage             3          3.3        3.3       3.3                  3.6       V
+                                        3
+            VDDD_3V3 supply current                           1.29       1.28      1.29        7.85      tbd      mA
+                                                                              4
+         VDDD_I2C supply current @3V3                                    n/A                             tbd      mA
+                                          3, 5
+        VDDD_IO supply current @3V3                           37.09      36.47     37.34        37       tbd      mA
+                                                 Table 7 : Power requirements
+      1
+Note : A power calculator that simulates the power consumption at different application parameters is available on request
+      2
+Note : Temperatures listed in Table 7 are ambient temperatures
+      3
+Note : Some power domains only work for a specific time (for example during sensor read out). The overall (or average)
+power consumption thus depends on the duty cycle of that domain, but the peak current determines the power supply
+requirements and decouple techniques. Please refer to chapter 14 for more information.
+      4
+Note : The power consumption of VDDD_I2C depends on the amount of communication between MLX75123 and the host
+controller. When the device is only initialized once at start up no further power will be consumed.
+      5
+Note : The average power consumption of VDDD_IO depends on the actual data content that is being transmitted.
+Values in Table 7 are considered worst case conditions because in our setup the PIXD lines are toggling heavily.
+      6
+Note : The max. current consumption measured at the max. supply voltage incl. process & temperature variation for typical
+application conditions.
+  Version V1.4                                                                                                   Page 11 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+                                        Parameter                 Min.         Max.          Unit
+                                         VDDD_1V8
+                                                               1.3 - 1.45   1.45 - 1.55        V
+                                   power on reset (POR)
+                                   POR on/off hysteresis          100                         mV
+                                                Table 8 : Power on reset behaviour
+When VDDD_1V8 drops under its lower threshold the device will reset. To avoid unwanted behaviour on noisy power
+supplies the device will only turn on again when VDDD_1V8 reaches its upper threshold voltage level.
+A hysteresis of min. 100mV over temperature variation is guaranteed.
+                               Parameter                         Symbol       Min.       Typ.       Max.     Unit
+                Junction to ambient thermal resistance              JA                  22.18               °C/W
+                                                      1
+                   Junction to package resistance                 JC, JB                1.19               °C/W
+                                                      2
+                   Moisture sensitivity level (MSL)                                         3
+                                               Table 9 : Package thermal behaviour
+      1
+Note : For an AQFN package incl. thermal pad the thermal resistance junction-board is equal to resistance junction-package
+      2
+Note : According to IPC/JEDEC J-STD-020E moisture/reflow sensitivity classification
+                                     Parameter                      Min.       Typ.        Max.       Unit
+                               Modulation frequency                    12                    40       MHz
+                         Modulation frequency duty cycle             12.5        50         87.5       %
+                      Modulation frequency phase accuracy                                     1        %
+                        Modulation frequency settling time                       20         100        us
+                                           Table 10 : Modulation frequency parameters
+                                         Parameter                          Min.      Typ.      Max.    Unit
+                                 Input frequency clock (FIN)                 40        80         80    MHz
+                               Pixel clock frequency (PIXCLK)                          Fin              MHz
+                                      2
+                                     I C frequency (SCL)                     20                  400     kHz
+                                    2
+                                   I C sink strength (SDA)                    3                          mA
+                                                             3
+                               VDD_IO buffer sink strength
+                                                                             8.2      17.2       118     mA
+                                   (measured @ 200mV)
+                                                               3
+                              VDD_IO buffer source strength
+                                                                            5.03      9.37        40     mA
+                              (measured @ VDD_IO - 200mV)
+                              VDDD_3V3 buffer sink strength
+                                                                            16.2      26.9       37.2    mA
+                                   (measured @ 200mV)
+                             VDDD_3V3 buffer source strength
+                                                                            10.6       17        24.8    mA
+                            (measured @ VDDD_3V3 - 200mV)
+                                                Table 11 : IO interface description
+      3
+Note : Measured at VDD_IO = 1V8, the values depend on the selection of VIDEO_DRIVE .
+VIDEO_DRIVE can be selected in register CONFIG (0x1004) as explained in section 13.1.
+Typical values are with VIDEO_DRIVE at low drive strength, max. values are for high VIDEO_DRIVE setting.
+  Version V1.4                                                                                                    Page 12 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+                                     Parameter                           Min.        Typ.     Max.      Unit
+                    LVDS mode : recommended load impedance                            100               Ohm
+                            LVDS mode : output current                                3.5               mA
+                        LVDS mode : common mode voltage                               1.2                 V
+                                 Single ended mode :
+                              LEDP buffer sink strength                   16.2       26.9     37.2      mA
+                                (measured @ 200mV)
+                                 Single ended mode :
+                            LEDP buffer source strength                   10.6         17     24.8      mA
+                         (measured @ VDDD_3V3 - 200mV)
+                                       Table 12 : LED_P & LED_N electrical description
+7.3. ADC Characteristics
+MLX75123 has four single, general purpose analog to digital converters. All ADCs are used in a single ended configuration
+and independently from each other convert one analog output from MLX75023. Each pipelined ADC consists of a
+concurrently operating series of stages, isolated by a sample-hold buffer. For sampling rates > 25 MSPS it is needed to
+optimize the sample point with register ADC_DELAY_FT as explained in section 13.1
+                                   Parameter                        Min.        Typ.      Max.       Unit
+                                  ADC resolution                                 12                   bit
+                                 ADC input range                     0.2                   1.9         V
+                               ADC sampling rate                     20         Fin/2      40        MSPS
+                              ADC conversion gain                               500                 uV/LSB
+                           ADC to ADC gain mismatch                               2         5          %
+                          Analog input capacitance DC                             5                    pF
+                        ADC delay line number of steps                           32
+                            ADC delay line step size                              1         3          ns
+                                                Table 13 : ADC Characteristics
+  Version V1.4                                                                                                     Page 13 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+8. Power Consumption
+MLX75123 requires eight different voltage domains, each connected to either 1V8 or 3V3.
+An overview of the different types can be found here:
+                                     Supply Domain         Voltage (V)      Power (mW)
+                                       VDDA_1V8                1.8              8.12
+                                     VDDA_ADC_1V8              1.8              77.05
+                                    VDDA_ADC_S_1V8             1.8              18.53
+                                       VDDD_1V8                1.8              15.57
+                                     VDD_IO (at 1V8)           1.8              29.16
+                                        VDD_I2C                3.3               n/A
+                                       VDDA_3V3                3.3              0.01
+                                       VDDD_3V3                3.3              4.24
+                                                                                      1
+                                                              TOTAL          153 mW
+                                           Table 14 : Typical power consumption
+       1
+Note : Calculations are based on typical application parameters listed in chapter 11.
+       1
+Note : Calculations are based on the average power consumption of each domain incl. temperature variation.
+VDD_I2C and VDD_IO can be connected to 1V8 or 3V3 depending on the microprocessor. For EMC performance and a
+reduction in power consumption we strongly suggest to connect VDD_IO to 1V8.
+We recommend to use independent regulators on each supply, however if from system point of view this is not desirable
+one could consider three regulators only. In this scenario we suggest to connect certain domains to each other with good
+decoupling techniques.
+1V8 : VDDD_1V8, VDD_IO, VDD_I2C
+1V8_Clean : VDDA_1V8, VDDA_ADC_1V8, VDDA_ADC_S_1V8
+3V3 : VDDA_3V3, VDDD_3V3
+In combination with MLX75023 or MLX75024 an extra MIXH regulator, 3V3_clean and negative ARRAYBIAS supply is
+required.
+8.1. Power Up & Down Sequence
+To guarantee a proper operation of MLX75123 it’s considered mandatory to apply 1V8 prior to the 3V3 supply voltage.
+Reversely it’s also recommended to disconnect 3V3 before 1V8 on power down. Both conditions are visualized in Figure 4.
+It’s mandatory to keep both supplies within 500mV (V) range of each other during start-up and power down sequences.
+When 1V8 ramps up too fast, compared to 3V3, a diode will be reversed biased which could lead to permanent HW damage,
+if 3V3 ramps up too fast, compared to 1V8, internal circuitry could be destroyed because of undefined currents. This
+sequence can be achieved by a Schottky diode (like PMEG2010) between both domains in combination with digital enable
+control of the 1V8 and 3V3 regulators.
+                                                          VDDD_3V3
+                                  3.3V
+                                  1.8V
+                                                          VDDD_1V8
+                                              V                             V
+                                                                                       time
+                                       Figure 4 : Voltage domains startup sequence
+   Version V1.4                                                                                                  Page 14 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+9. Output Modes
+MLX75123 has six different data output modes. The output mode can be changed via register Tx_Py_SETTINGS as described
+in section 13.2.8 and can change per phase.
+One Depthsense pixel has two outputs, known as tap A and tap B, each in counterphase of one other. To reduce the
+calculation time from raw to depth information the data output already combines the information from both taps, either as
+a sum, or as a subtraction. Each pixel output A or B is a 12 bit value in range of 0 - 4095. The error bit in Mode #0 and Mode
+#2 is used to indicate if this pixel value before the sum or subtraction of A, or B, is between Tx_UPPER_LIMIT and
+Tx_LOWER_LIMIT thresholds as defined in the registers in section 13.2.5 and 13.2.6. If both tap A and tap B are between
+these limits this statistics bit will be high, if one of these outputs fails these criteria it will be set to 0. The MLX75023 test
+rows and ADC test row values are not evaluated against these thresholds, for these pixels the error bit is always 1.
+9.1. Mode#0: 11bit A-B + error bit
+  PIXD[11]     PIXD[10] PIXD[9]       PIXD[8]    PIXD[7]   PIXD[6]   PIXD[5]    PIXD[4]   PIXD[3]     PIXD[2]    PIXD[1]  PIXD[0]
+  error bit                                                    11bit A-B pixel data
+The 13bit result of this subtraction is internally truncated to a 11bit value which corresponds to (A-B)/4.
+9.2. Mode#1: 12bit A-B
+  PIXD[11]     PIXD[10] PIXD[9]       PIXD[8]    PIXD[7]   PIXD[6]   PIXD[5]    PIXD[4]   PIXD[3]     PIXD[2]    PIXD[1]  PIXD[0]
+                                                         12bit A-B pixel data
+The 13bit result of this subtraction is internally truncated to a 12bit value which corresponds to (A-B)/2.
+9.3. Mode#2: 11bit A+B + error bit
+  PIXD[11]     PIXD[10] PIXD[9]       PIXD[8]    PIXD[7]   PIXD[6]   PIXD[5]    PIXD[4]   PIXD[3]     PIXD[2]    PIXD[1]  PIXD[0]
+  error bit                                                    11bit A+B pixel data
+The 13bit result of this sum is internally truncated to a 11bit value which corresponds to (A+B)/4.
+9.4. Mode#3: 12bit A+B
+  PIXD[11]     PIXD[10] PIXD[9]       PIXD[8]    PIXD[7]   PIXD[6]   PIXD[5]    PIXD[4]   PIXD[3]     PIXD[2]    PIXD[1]  PIXD[0]
+                                                         12bit A+B pixel data
+The 13bit result of this sum is internally truncated to a 12bit value which corresponds to (A+B)/2.
+  Version V1.4                                                                                                           Page 15 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+9.5. Mode#4: Raw A
+ PIXD[11]     PIXD[10] PIXD[9] PIXD[8] PIXD[7]  PIXD[6]   PIXD[5] PIXD[4] PIXD[3] PIXD[2] PIXD[1]  PIXD[0]
+                                               12bit A pixel data
+9.6. Mode#5: Raw B
+ PIXD[11]     PIXD[10] PIXD[9] PIXD[8] PIXD[7]  PIXD[6]   PIXD[5] PIXD[4] PIXD[3] PIXD[2] PIXD[1]  PIXD[0]
+                                               12bit B pixel data
+ Version V1.4                                                                                     Page 16 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+10. Parallel Output Sequence & Timing
+The complete output data interface consists out of 16 parallel lines:
+     1 bit PIXCLK  uses same frequency as input CLK
+     1 bit FSYNC  indicates start of a new frame (one pulse per frame start)
+     1 bit VSYNC  indicates start of a new phase (one pulse per phase start, typically 4 pulses per frame)
+     1 bit HSYNC  indicates start of a new row (one pulse for each row start, typically 240 pulses per phase)
+     12 bit pixel data PIXD[11:0]
+                                                                                          1
+                                          Figure 5 : FSYNC, VSYNC & HSYNC timing diagram
+      1
+Note : The length of HSYNC, VSYNC and FSYNC is one input clock pulse and is not programmable.
+The sequential pixel output per row when used in combination with MLX75023 looks like 0, 8, 1, 9, …, 310, 318, 311, 319.
+This means that the pixels should be re-ordered on the microcontroller to reconstruct a presentable distance map.
+This pixel re-ordering can be done on the individual phase data or on the calculated distance map.
+The serial output order can be simulated with this Matlab example code:
+         for x = 0:1:159
+                 y = mod(x,8) + 16*floor(x/8);
+                 z = mod(x,8) + 16*floor(x/8) + 8;
+                 fprintf('%d, %d, ', y, z);
+         end
+On a timing diagram, without ROI, it would look like :
+            md0, md1, md2, md3, … = MetaData
+            p0, p8, p1, p9, … , p319 = PixelData / row
+During a phase the maximum # of rows is limited to 251, depending on the features that are enabled or disabled.
+          0              46            83            316 317 318 319
+        0 MetaData1*         0 0 0 0 0 0 0 0 0 0 0
+        1 MLX75023 Row1                                                    1x MetaData1 line (optional)
+          MLX75023 Row2
+                                                                           240x Pixel row data
+          MLX75023 Row3
+          …
+                                                                           8x MLX75023 Test Rows (optional)
+                                                                           1x ADC Test Row (optional)
+     240 MLX75023 Row240                                                   1x MetaData2 line (optional)
+     241
+          MLX75023 Test Rows
+     248
+     249 ADC Test Row
+     250 MetaData2*                        0 0 0      0   0   0   0
+  Version V1.4                                                                                                  Page 17 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+11. Distance Calculation
+The distance data per pixel [in mm] can be calculated by the following formulas: (Matlab code)
+        phase0, phase180, phase90, phase270 is the raw QVGA A-B data from the sensor at different phase intervals
+        TwoComp is a local function that converts the unsigned data from Mode#1 A-B for each of the raw phases
+        UnAmbigiousRange is the maximum range determined by the system modulation frequency
+         (at modulation frequency of 20MHz this would be ~7.5m, at 40MHz it will be ~3.75m)
+        coef_rad is a conversion coefficient from radians to degree
+        AbsoluteDistanceOffset is a negative value obtained after calibration to measure the absolute distance
+         (default value = 0)
+        The while loop avoids negative distance values after the absolute distance calibration
+  Version V1.4                                                                                               Page 18 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+12. I2C Commands
+                                                                                                                                                       2
+MLX75123 features a standard (up to 400kHz) inter-integrated circuit communication interface, also known as I C.
+                              2
+This device acts as a I C slave with address 0x0067. This address can be reprogrammed via register I2C_ADDRESS.
+                                          2
+More information on custom I C addresses can be found in chapter 13.1 .
+The size of both the register addresses & register data is 16bit.
+ 2
+I C follows a strict timing sequence, the master device will initiate all communication, it’s in control of the SCL line,
+                                                                                      2
+data will be transmitted via SDA line. Each slave monitors the I C bus and will respond to the master when needed.
+The following sections describe these timings for each of the individual commands.
+Legend:
+     AK SDA = 0             R  SDA = 1                 SDA                               SDA
+                                                  S
+     NK SDA = 1             W  SDA = 0                                              P
+                                                 Sr
+                                                        SCL                              SCL
+12.1. I2C_READ
+This command allows you to read the registers listed in chapter 13. Normally it will read 1x register only, but the slave will
+continue to transmit data of sequential register addresses until the master terminates the communication.
+     #bit         1   2  3  4   5 6   7 8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
+     Master   S     I2C Slave Address   W      MSByte Start Address       LSByte Start Address
+     Slave                                AK                         AK                          AK
+     #bit     28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55
+     Master   Sr    I2C Slave Address   R                            AK                          AK   NK P
+     Slave                                AK      MSByte Data 1              LSByte Data 1
+                                                   (optional)  Master                            AK                        AK
+                                                   (optional)  Slave         MSByte Data x              LSByte Data x
+12.2. I2C_WRITE
+This command allows you to write the registers listed in chapter 13. Normally you write 1x register only, but optionally the
+master can continue to transmit data of sequential register addresses to reduce the communication time when a lot of
+registers should be written.
+                                                                              (optional)   Master       MSByte Data x              LSByte Data x
+                                                                              (optional)   Slave                           AK                         AK
+     #bit         1   2  3  4   5 6   7 8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+     Master   S     I2C Slave Address   W      MSByte Start Address       LSByte Start Address          MSByte Data 1              LSByte Data 1          P
+     Slave                                AK                         AK                          AK                        AK                         AK
+   Version V1.4                                                                                                                                          Page 19 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+12.3. I2C_RESET
+This command will reset only MLX75123.
+     #bit      1   2   3   4  5 6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+     Master S    I2C Slave Address   W              0x00                       0x06                       0x00                       0x06              P
+     Slave                              AK                         AK                         AK                         AK                         AK
+12.4. I2C_GLOBAL_RESET
+                                     2
+This command will reset all I C devices on the bus which support this standardized, but optional, command.
+     #bit      1   2   3   4  5 6  7  8  9 10 11 12 13 14 15 16 17 18
+     Master S            0x00        W              0x06              P
+     Slave                              AK                         AK
+12.5. I2C_SAVEREGMAP
+On MLX75123 start-up all registers will be copied from the non-volatile memory into the volatile RAM, where they can be
+                       2
+changed via the I C communication. When the device is restarted it will load all default values from the EEPROM again. It’s
+possible to save your own custom register map into the EEPROM with the following I2C command sequence:
+     #bit      1   2   3   4  5 6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+     Master S    I2C Slave Address   W              0x00                       0x06                       0x55                       0x4C              P
+     Slave                              AK                         AK                         AK                         AK                         AK
+                     2
+followed by an I C_WRITE of register 0x0000 with value 0x0100. When a copy into NVRAM is completed the register value
+will change from 0x0100 to 0x0000 (= self-clearing bit). It is advised to poll the register until it has value 0 before continuing
+                                                                                     2
+any other communication to the device. Please note that an I C_READ of register 0x0000 is only possible after the above
+mentioned I2C command sequence. A full write cycle lasts about ±11 milliseconds. It’s very important that during this time
+the device operation is not interrupted by either a HW or a SW reset, as this can lead to memory corruption.
+                                                                                              2
+For long term reliability of the NVRAM there’s a maximum defined of I C_SAVEREGMAP cycles possible. The limit depends on
+the junction temperature and operating conditions:
+      Max.100000 store cycles at 25°C
+      Max.10000 store cycles at 125°C
+  Version V1.4                                                                                                                                          Page 20 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13. Registers
+MLX75123 has internal memory that is used to store the default register values and that can be used to store customer
+specific parameters like unique module no. identifiers. On start up this EEPROM is loaded into the RAM where it can be
+accessed during normal operation. Commands to read/write custom RAM settings into the EEPROM are available.
+The complete memory map can be found here, it’s strongly linked to values that can be read out from the metadata.
+               Memory                                                     Memory
+                                  Description                                               Description
+               Address                                                     Address
+                0x1000                                                      0x1094
+                                 Configuration
+                   …                                                          …          Table 2 Properties
+                                  Parameters I
+                0x1010                                                     0x10A4
+                0x1012                                                     0x10A6
+                   …           Table 1 Properties                             …           T2_P0_SETTINGS
+                0x1022                                                      0x10B2
+                0x1024                                                      0x10B4
+                   …            T1_P0_SETTINGS                                …           T2_P1_SETTINGS
+                0x1030                                                      0x10C0
+                0x1032                                                      0x10C2
+                   …            T1_P1_SETTINGS                                …           T2_P2_SETTINGS
+                0x103E                                                      0x10CE
+                0x1040                                                     0x10D0
+                   …            T1_P2_SETTINGS                                …           T2_P3_SETTINGS
+                0x104C                                                     0x10DC
+                0x104E                                                     0x10DE
+                   …            T1_P3_SETTINGS                                …           T2_P4_SETTINGS
+                0x105A                                                     0x10EA
+                0x105C                                                      0x10EC
+                   …            T1_P4_SETTINGS                                …           T2_P5_SETTINGS
+                0x1068                                                      0x10F8
+                0x106A                                                      0x10FA
+                   …            T1_P5_SETTINGS                                …           T2_P6_SETTINGS
+                0x1076                                                      0x1106
+                0x1078                                                      0x1108
+                   …            T1_P6_SETTINGS                                …           T2_P7_SETTINGS
+                0x1084                                                      0x1114
+                0x1086                                                      0x1116          Configuration
+                   …            T1_P7_SETTINGS                              0x1118          Parameters II
+                0x1092                                                     0x111A
+                                                                            0x111C         USER DEFINED
+                                                                                         (these can be read out
+                                                                            0x111E           in MetaData1)
+                                                                            0x1120
+                                                                            0x1122
+                                                                              …            USER DEFINED
+                                                                            0x1198
+  Version V1.4                                                                                                   Page 21 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.1. Configuration Parameters Registers
+General parameters that influence the behaviour of MLX75123 can be changed in the following registers.
+         2
+Name : I C_ADDRESS
+Address : 0x1000
+Default Value : 0x0067
+Bit    15      14       13      12      11       10       9     8       7        6       5       4     3     2       1        0
+                                                                                                2
+        -       -        -       -       -        -       -      -       -                     I C_ADDRESS [6:0]
+         2                                     2
+        I C_ADDRESS : Programmable 7bit I C slave address.
+        A change of this register should be followed by a I2C_SAVEREGMAP operation (section 12.5) and a device reset
+        before this new address will be active. Address 0x0032 should not be used.
+Name : START_DELAY
+Address : 0x1002
+Default Value : 0x00FF
+Bit    15      14       13      12      11       10       9     8       7        6       5       4     3     2       1        0
+        -       -        -       -       -        -       -                               START_DELAY
+        START_DELAY : Defines the time between the NVRAM to EEPROM copy and the 3V3_READY signals are available
+        and the start of the digital block for the first frame acquisition. It ranges from 0 - 5.12ms at 80MHz input clock, in
+        steps of 9 bit.
+Name : CONFIG
+Address : 0x1004
+Default Value : 0x0000
+Bit         15              14              13              12              11              10             9             8
+             -               -               -               -               -               -             -             -
+Bit          7               6               5               4               3               2             1             0
+                                         VIDEO_
+             -               -                         LED_MODE              -               -             -             -
+                                           DRIVE
+        VIDEO_DRIVE : Select the drive strength of the video output buffers
+                  0 : low drive strength
+                  1 : high drive strength
+                  By default the drive strength is set high for board debug processes, however the low drive strength is
+                  advised to reduce noise & EMC impact to a minimum in application conditions.
+        LED_MODE : Select single ended or differential LED control signals
+                  0 : LED_P in single ended output mode (with LED_N connected to ground)
+                  1 : LED_P and LED_N in LVDS mode
+        Changing this register should be followed by an I2C_SAVEREGMAP operation (section 12.5)
+        and a device reset before the changes to become active.
+ Version V1.4                                                                                                        Page 22 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+ Name : Bx_LATCH
+ Address : 0x1006
+ Default Value : 0xFF11 (in configuration with sensor MLX75023)
+ Bit    15      14       13    12      11      10       9       8      7       6      5       4        3      2       1      0
+                             BxCOL_LATCH                                                   BxROW_LATCH
+         BxCOL_LATCH : Pattern to be applied to BxCOL[7:0] bits at initialization/power-up phase of the MLX75023.
+         BxROW_LATCH : Pattern to be applied to BxROW[7:0] bits at initialization/power-up phase of the MLX75023
+                  0x11 : BxROW_LATCH pattern to apply for MLX75023 in application mode
+                  0x13 : BxROW_LATCH pattern to apply for MLX75023 with 4 test columns enabled
+Note : Bx_LATCH is only applied once during startup, for change(s) during operation the value has to be copied to NVRAM
+(see section 12.5) and a MLX75123 reset has to be applied.
+Note : For a configuration with MLX75024 this register value HAS to change to 0x0000.
+ Name : PIXEL1
+ Address : 0x1008
+ Default Value : 0xF39D
+ Bit    15      14       13    12      11      10       9       8      7       6      5       4        3      2       1      0
+                               PIXEL1_Y                                                       PIXEL1_X
+         MLX75123 offers the functionality to read out any pixel in addition to the normal read-out sequence. This feature
+         can be used to read out single pixels or test structures from the sensor array. This register hold the X & Y
+         coordinates of one pixel. This pixel will be read out only once per frame, at the start of each frame and the result
+         (available in the metadata) will be constant for all phase frames. PIXEL1_Y and PIXEL2_Y should be from 2
+         neighbouring rows
+ Name : PIXEL2
+ Address : 0x100A
+ Default Value : 0xF39C
+ Bit    15      14       13    12      11      10       9       8      7       6      5       4        3      2       1      0
+                               PIXEL2_Y                                                       PIXEL2_X
+         MLX75123 offers the functionality to read out any pixel in addition to the normal read-out sequence. This feature
+         can be used to read out single pixels or test structures from the sensor array. This register hold the X & Y
+         coordinates of one pixel. This pixel will be read out only once per frame, at the start of each frame and the result
+         (available in the metadata) will be constant for all phase frames. PIXEL1_Y and PIXEL2_Y should be from 2
+         neighbouring rows
+  Version V1.4                                                                                                        Page 23 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+Name : ADC_DELAY_FT
+Address : 0x1010
+Default Value : 0x0000
+Bit         15             14              13              12               11               10            9          8
+             -              -               -               -                -                -             -          -
+Bit          7              6               5               4                3               2             1          0
+                                                                                                                   FRAME_
+             -              -                                         PROG_DELAY
+                                                                                                                    TABLE
+        PROG_DELAY : The setting for the delay line that shall be applied during a full frame (0 = default sampling point)
+                 This setting is not being applied during the automatic delay line sweep.
+                 This register using GRAY coding : 0, 1, 3, 2, 6, 7, 5, 4, 12, 13, 15, 14, 10, 11, 9, 8,
+                 24, 25, 27, 26, 30, 31, 29, 28, 20, 21, 23, 22, 18, 19, 17, 16 (listed in order of magnitude)
+                 For increasing values, a delay is added, thus the sample point occurs later in time.
+Note : Operation at non optimized PROG_DELAY settings can cause vertical stripe image artefacts in the image.
+More information on this effect and the optimization procedure is available upon request.
+        FRAME_TABLE : Selection of the Frame Table to be used.
+                 0 : Frame Definition Table 1 is used to generate the frames
+                 1 : Frame Definition Table 2 is used to generate the frames
+                 A definition of these tables can be found in registers 0x1012 and 0x1094
+Name : DELAY_CONFIG
+Address : 0x1116
+Default Value : 0x0000
+Bit         15             14              13              12               11               10            9          8
+        MOD_INV                                      ADC_LATENCY                                            -          -
+Bit          7              6               5               4                3               2             1          0
+             -              -               -               -                -                -             -          -
+        MOD_INV : Inverts the sensor (DMIX0/1) modulation signal
+        ADC_LATENCY : Changes the digital sampling point of the ADCs. Results in a full column shift of the image.
+                           Changes to ADC_LATENCY should be programmed into NVRAM (see section 12.5) and are only
+                           applied after sensor reset.
+ Version V1.4                                                                                                      Page 24 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+ Name : BxROW_IDLE
+ Address : 0x1118
+ Default Value : 0x00F4
+ Bit     15     14     13     12     11      10     9      8       7       6       5       4      3      2       1       0
+          -      -      -      -      -       -     -       -                           BxROW_IDLE
+         BxROW_IDLE : Pattern to be applied to BxROW[7:0] bits during reset, integration & sampling phases
+13.2. FrameTable & Phase Registers
+MLX75123 has two different FrameTable definitions. Each table consists of eight individual configurable phases as indicated
+in Table 15. The FrameTable used to capture the frames can be selected register 0x1010 ADC_DELAY_FT.
+                            FrameTable Definition              Phase Definition
+                            T1_SETTINGS                        T1_P0_SETTINGS
+                            T1_IDLETIME                        T1_P0_INTEGRATION
+                            T1_MODE                            T1_P0_PREHEAT
+                            T1_FRAMECOUNT                      T1_P0_PREMIX
+                            T1_UPPER_LIMIT                     T1_P0_IDLE
+                            T1_LOWER_LIMIT                     T1_P0_SETUP
+                            T1_ROI_START & T1_ROI_SIZE         … Phase1
+                                                               … Phase2
+                                                               … Phase3
+                                                               … Phase4
+                                                               … Phase5
+                                                               … Phase6
+                                                               … Phase7
+                            T2_SETTINGS                        T2_P0_SETTINGS
+                            T2_IDLETIME                        T2_P0_INTEGRATION
+                            T2_MODE                            T2_P0_PREHEAT
+                            T2_FRAMECOUNT                      T2_P0_PREMIX
+                            T2_UPPER_LIMIT                     T2_P0_IDLE
+                            T2_LOWER_LIMIT                     T2_P0_SETUP
+                            T2_ROI_START & T2_ROI_SIZE         … Phase1
+                                                               … Phase2
+                                                               … Phase3
+                                                               … Phase4
+                                                               … Phase5
+                                                               … Phase6
+                                                               … Phase7
+                                          Table 15 : Frametable configuration
+  Version V1.4                                                                                                   Page 25 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.1. Frame : Tx_SETTINGS
+                                 Memory Address          Default Value
+                                        0x1012               0x0C03          T1_SETTINGS
+                                        0x1094               0x0000          T2_SETTINGS
+Bit         15              14             13             12             11          10            9             8
+                         Tx_EN_          Tx_EN_                       Tx_EN_       Tx_EN_
+             -                                             -                                       -              -
+                       TEST_ADC        TEST_ROW                       META2        META1
+Bit          7               6              5              4              3           2            1             0
+            Tx_FLIP_MIRROR                     Tx_QUIET                   -                 Tx_PHASE_COUNT
+        Tx_EN_TEST_ADC : One additional row of pixel data will connected to a known voltage reference (on/off)
+                 The data of this row can only be evaluated in Mode #4 or Mode #5 (from section 9)
+                 This known voltage reference per pixel changes with BxCOL[4:3] column addresses.
+                 00 : ADC inputs connected to sensor
+                 01 : ADC inputs connected 0V
+                 10 : ADC inputs connected to +Vref
+                 11 : ADC inputs connected to -Vref
+                                     Figure 6 : EN_TEST_ADC row for Mode #4 (12bit A)
+        Tx_EN_TEST_ROW : Enable the eight MLX75023 test rows (on/off)
+        Tx_EN_META2 : Enable/disable Metadata2 line (on/off)
+        Tx_EN_META1 : Enable/disable Metadata1 line (on/off)
+        Tx_FLIP_MIRROR : Mirror the image along its horizontal and/or vertical central axis
+                 00 : default
+                 01 : Flip (along horizontal axis)
+                 10 : Mirror (along vertical axis)
+                 11 : Flip & mirror
+        Tx_QUIET : Select behaviour of the quiet pin
+                 00 : default, QUIET is not used
+                 01 : QUIET is high in reset + integration phase
+                 10 : QUIET is high in readout phase
+                 11 : QUIET is high in reset + integration + readout phase
+        Tx_PHASE_COUNT : # phases to be accumulated in one FrameTable (between 0-7)
+ Version V1.4                                                                                                 Page 26 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.2. Frame : Tx_IDLETIME
+After the eight phases it’s possible to define a frame idle time. This time can be used to fix the distance framerate.
+It’s defined in number of FMOD pulses and ranges from 0 - 4 294 967 296.
+                                  Memory Address          Default Value
+                                        0x1014                0x93E0            T1_IDLETIME0
+                                        0x1016                0x0004            T1_IDLETIME1
+                                        0x1096                0x0000            T2_IDLETIME0
+                                        0x1098                0x0000            T2_IDLETIME1
+ Bit      31     30     29      28      27      26     25      24       23     22     21       20      19     18     17     16
+                                                         Tx_IDLETIME1 [31:16]
+ Bit      15     14     13      12      11      10      9       8        7      6      5        4       3      2     1       0
+                                                          Tx_IDLETIME0 [15:0]
+Tx_IDLETIME in Tmix pulses can be calculated as :
+                                             (    )        (     )
+For a typical application setup with Tint = 250us, FMOD = 20MHz and a distance framerate of 25 FPS the Tx_IDLETIME is 35ms.
+                                                                   0x 000A AE60 (hexadecimal)
+                                                             IDLETIME1        IDLETIME0
+Note : The default T1_IDLETIME has been set to 0x493E0 (dec. 300 000) which corresponds to 15ms @ FMOD = 20MHz
+   Version V1.4                                                                                                      Page 27 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.3. Frame : Tx_MODE
+                                Memory Address         Default Value
+                                       0x1018               0x6E80            T1_MODE
+                                       0x109A               0x0000            T2_MODE
+Bit         15             14             13             12             11             10             9              8
+                 Tx_MOD_DUTY_CYLE                         -                         Tx_RDIV                    Tx_NDIV [8]
+Bit          7              6              5              4              3             2              1              0
+              Tx_NDIV [7:6]            Tx_VSYNC     Tx_HSYNC        Tx_PIXCLK      Tx_FSYNC             Tx_TRIGGER
+        Tx_MOD_DUTY_CYLE : Duty cycle correction for the MOD signal
+                 0x000 : 12.5%
+                 0x001 : 25%
+                 0x010 : 37.5%
+                 0x011 : 50%
+                 0x100 : 62.5%
+                 0x101 : 75%
+                 0x110 : 87.5%
+        Tx_RDIV : PLL RDIV value (see chapter 17)
+        Tx_NDIV [8:6] : PLL NDIV value (see chapter 17)
+        Tx_VSYNC : 0: default / 1: VSYNC inverted
+        Tx_HSYNC : 0: default / 1: HSYNC inverted
+        Tx_PIXCLK : 0: default / 1: PIXCLK inverted
+        Tx_FSYNC : 0: default / 1: FSYNC inverted
+        Tx_TRIGGER :
+                 0x00 : Continuous Mode :
+                 Once started, the system will execute the phase measurements according the configured sequence.
+                 0x01: Triggered Multi Frame Mode:
+                 In this mode the system will acquire a variable number of frames with a preset number of phases, after
+                 which time the system will return to idle state. The number of frames to be acquired can be set using
+                 register Tx_FRAME_COUNT.
+ Version V1.4                                                                                                    Page 28 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.4. Frame : Tx_FRAMECOUNT
+This register holds the amount of frames to be captured in triggered multi frame mode in the range of 0 - 65535.
+                                  Memory Address            Default Value
+                                         0x101A                 0x0000          T1_FRAMECOUNT
+                                         0x109C                 0x0000          T2_FRAMECOUNT
+ Bit     15     14      13       12      11      10       9       8      7       6       5      4      3     2       1      0
+                                                             Tx_FRAMECOUNT
+13.2.5. Frame : Tx_UPPER_LIMIT
+The value of this register is used as high threshold value. The amount of pixels that return a value higher than this threshold
+will be counted and will be available in the statistics. It can be used to indicate low confidence pixels.
+This threshold is also used for the error bit in Mode#0 (chapter 9.1) and Mode#2 (chapter 0) to indicate if either of the two
+raw values (A or B), before subtraction or sum, exceeds this limit.
+                                  Memory Address            Default Value
+                                         0x101C                 0x0CCC          T1_UPPER_LIMIT
+                                         0x109E                 0x0000          T2_UPPER_LIMIT
+ Bit     15     14      13       12      11      10       9       8      7       6       5      4      3     2       1      0
+                                                              Tx_UPPER_LIMIT
+13.2.6. Frame : Tx_LOWER_LIMIT
+The value of this register is used as low threshold value. The amount of pixels that return a value lower than this threshold
+will be counted and will be available in the statistics. It can be used to indicate saturated pixels.
+This threshold is also used for the error bit in Mode#0 (chapter 9.1) and Mode#2 (chapter 0) to indicate if either of the two
+raw values (A or B), before subtraction or sum, exceeds this limit.
+                                  Memory Address            Default Value
+                                         0x101E                 0x0333          T1_LOWER_LIMIT
+                                         0x10A0                 0x0000          T2_LOWER_LIMIT
+ Bit     15     14      13       12      11      10       9       8      7       6       5      4      3     2       1      0
+                                                             Tx_LOWER_LIMIT
+  Version V1.4                                                                                                       Page 29 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.7. Frame : Tx_ROI_START & Tx_ROI_SIZE
+The Region Of Intrest (ROI) registers enable you to read out only part of the complete MLX75023 pixel array.
+This region is defined by its start location and its size.
+Rows (vertical orientation) are defined by a multiplier of 1, columns (horizontal orientation) are multipliers of 16.
+                                                                      1                                                         320
+                                                                    1
+        Memory             Default
+        Address              Value
+         0x1020             0x0000           T1_ROI_START
+                                                                                    COL_START
+         0x1022             0xF014            T1_ROI_SIZE
+         0x10A2             0x0000           T2_ROI_START                 ROW_START
+         0x10A4             0x0000            T2_ROI_SIZE                                                     ROW_SIZE
+                                                                                                 COL_SIZE
+                                                                  240
+ Bit    15       14     13       12      11     10         9    8       7        6        5        4      3     2      1      0
+                          Tx_ROI_ROW_START                                                  Tx_ROI_COL_START
+ Bit    15       14     13       12      11     10         9    8       7        6        5        4      3     2      1      0
+                            Tx_ROI_ROW_SIZE                                                   Tx_ROI_COL_SIZE
+         Tx_ROI_ROW_START : Start coordinate in vertical direction (ROW_START on the graph)
+         Tx_ROI_COL_START : Start coordinate in horizontal direction (COL_START on the graph)
+         Tx_ROI_ROW_SIZE : Size in vertical direction (ROW_SIZE on the graph)
+         Tx_ROI_COL_SIZE : Size in horizontal direction (COL_SIZE on the graph)
+  Version V1.4                                                                                                         Page 30 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.8. Phase : Tx_Py_SETTINGS
+Each phase frame has its own phase configuration parameters.
+                Memory         Default                                Memory        Default
+                                           FRAMETABLE 1                                          FRAMETABLE 2
+                Address         Value                                  Address        Value
+                0x1024         0x00C0      T1_P0_SETTINGS              0x10A6        0x0000      T2_P0_SETTINGS
+                0x1032         0x00C4      T1_P1_SETTINGS              0x10B4        0x0000      T2_P1_SETTINGS
+                0x1040         0x00C2      T1_P2_SETTINGS              0x10C2        0x0000      T2_P2_SETTINGS
+                0x104E         0x00C6      T1_P3_SETTINGS              0x10D0        0x0000      T2_P3_SETTINGS
+                0x105C         0x0000      T1_P4_SETTINGS              0x10DE        0x0000      T2_P4_SETTINGS
+                0x106A         0x0000      T1_P5_SETTINGS              0x10EC        0x0000      T2_P5_SETTINGS
+                0x1078         0x0000      T1_P6_SETTINGS              0x10FA        0x0000      T2_P6_SETTINGS
+                0x1086         0x0000      T1_P7_SETTINGS              0x1108        0x0000      T2_P7_SETTINGS
+ Bit         15             14             13              12              11             10           9            8
+                                                                                                                 Tx_Py_
+              -              -              -               -                  Tx_Py_OUTPUT_MODE
+                                                                                                                 STATIC
+ Bit          7              6              5               4               3             2            1            0
+          Tx_Py_                                        Tx_Py_
+                             1              -                                           Tx_Py_PHASE_SHIFT
+           DMIX                                          LIGHT
+         Tx_Py_OUTPUT_MODE : Define the output mode per phase
+                  0x000 : Mode #0 : 11bit (A-B)/4 data + 1bit statistics
+                  0x001 : Mode #1 : 12bit (A-B)/2 data
+                  0x010 : Mode #2 : 11bit (A+B)/4 data + 1bit statistics
+                  0x011 : Mode #3 : 12bit (A+B)/2 data
+                  0x100 : Mode #4 : 12bit A
+                  0x101 : Mode #5 : 12bit B
+         Tx_Py_STATIC : Only evaluated if Tx_Py_DMIX = 1
+                  0x0 : static level on DMIX[1:0] during integration is 2'b10
+                  0x1 : static level on DMIX[1:0] during integration is 2'b01
+         Tx_Py_DMIX : Enable (0) / disable (1) MIX pulses during the integration time
+         When disabled DMIX[1] and DMIX[0] signal levels are defined by Tx_Py_STATIC
+         Tx_Py_LIGHT : Enable (1) / disable (0) the illumination pulses during the integration time
+         Tx_Py_PHASE_SHIFT [3:0] : Selects the phase shift between MOD and DMIX[0] signals.
+         DMIX[1] is always 180° shift compared to DMIX[0] (except during reset phase)
+                  0x000 : 0°
+                  0x001 : 45°
+                  0x010 : 90°
+                  0x011 : 135°
+                  0x100 : 180°
+                  0x101 : 225°
+                  0x110 : 270°
+                  0x111 : 315°
+  Version V1.4                                                                                                  Page 31 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.9. Phase : Tx_Py_INTEGRATION
+These registers are used to define the integration times for each of the different phases.
+It ranges from 0 - 4 294 967 295 FMOD periods.
+               Memory       Default                                    Memory        Default
+                                         FRAMETABLE 1                                            FRAMETABLE 2
+                Address      Value                                     Address         Value
+                0x1026      0x1388         T1_P0_INT0                   0x10A8       0x0000         T2_P0_INT0
+                0x1028      0x0000         T1_P0_INT1                   0x10AA       0x0000         T2_P0_INT1
+                0x1034      0x1388         T1_P1_INT0                   0x10B6       0x0000         T2_P1_INT0
+                0x1036      0x0000         T1_P1_INT1                   0x10B8       0x0000         T2_P1_INT1
+                0x1042      0x1388         T1_P2_INT0                   0x10C4       0x0000         T2_P2_INT0
+                0x1044      0x0000         T1_P2_INT1                   0x10C6       0x0000         T2_P2_INT1
+                0x1050      0x1388         T1_P3_INT0                   0x10D2       0x0000         T2_P3_INT0
+                0x1052      0x0000         T1_P3_INT1                   0x10D4       0x0000         T2_P3_INT1
+                0x105E      0x0000         T1_P4_INT0                   0x10E0       0x0000         T2_P4_INT0
+                0x1060      0x0000         T1_P4_INT1                   0x10E2       0x0000         T2_P4_INT1
+                0x106C      0x0000         T1_P5_INT0                   0x10EE       0x0000         T2_P5_INT0
+                0x106E      0x0000         T1_P5_INT1                   0x10F0       0x0000         T2_P5_INT1
+                0x107A      0x0000         T1_P6_INT0                   0x10FC       0x0000         T2_P6_INT0
+                0x107C      0x0000         T1_P6_INT1                   0x10FE       0x0000         T2_P6_INT1
+                0x1088      0x0000         T1_P7_INT0                   0x110A       0x0000         T2_P7_INT0
+                0x108A      0x0000         T1_P7_INT1                   0x110C       0x0000         T2_P7_INT1
+ Bit     31       30    29     28      27     26      25      24      23      22     21      20    19     18   17     16
+                                                         Tx_Py_INT1 [31:16]
+ Bit     15       14    13     12      11     10       9       8       7       6      5      4      3     2    1       0
+                                                          Tx_Py_INT0 [15:0]
+The integration time can be calculated in a similar way as the Tx_IDLETIME time in section 13.2.2.
+Example : Tint 250us (= 0.25ms) with FMOD 20MHz
+                                                                0x 0000 1388 (hexadecimal)
+                                                          Tx_Py_INT1        Tx_Py_INT0
+   Version V1.4                                                                                                Page 32 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.10. Phase : Tx_Py_PREHEAT
+Illumination preheating can be used to avoid IU waveform transients at the beginning of each pulse train.
+It defines the amount of light pulses before the actual integration time is started.
+It ranges from 0 - 65535 FMOD periods.
+                Memory        Default                                 Memory         Default
+                                           FRAMETABLE 1                                        FRAMETABLE 2
+                Address        Value                                  Address         Value
+                0x102A        0x0000       T1_P0_PREHEAT              0x10AC         0x0000    T2_P0_PREHEAT
+                0x1038        0x0000       T1_P1_PREHEAT              0x10BA         0x0000    T2_P1_PREHEAT
+                0x1046        0x0000       T1_P2_PREHEAT              0x10C8         0x0000    T2_P2_PREHEAT
+                0x1054        0x0000       T1_P3_PREHEAT              0x10D6         0x0000    T2_P3_PREHEAT
+                0x1062        0x0000       T1_P4_PREHEAT              0x10E4         0x0000    T2_P4_PREHEAT
+                0x1070        0x0000       T1_P5_PREHEAT               0x10F2        0x0000    T2_P5_PREHEAT
+                0x107E        0x0000       T1_P6_PREHEAT              0x1100         0x0000    T2_P6_PREHEAT
+                0x108C        0x0000       T1_P7_PREHEAT              0x110E         0x0000    T2_P7_PREHEAT
+ Bit     15      14     13      12     11      10      9       8       7       6      5      4    3       2  1      0
+                                                           Tx_Py_PREHEAT
+   Version V1.4                                                                                              Page 33 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.11. Phase : Tx_Py_PREMIX
+Sensor premixing can be used to avoid temperature transients at the beginning of each integration time.
+It ranges from 0 - 65535 FMOD periods.
+               Memory      Default                                 Memory         Default
+                                       FRAMETABLE 1                                            FRAMETABLE 2
+                Address     Value                                  Address         Value
+                0x102C     0x0000       T1_P0_PREMIX                0x10AE        0x0000        T2_P0_PREMIX
+                0x103A     0x0000       T1_P1_PREMIX                0x10BC        0x0000        T2_P1_PREMIX
+                0x1048     0x0000       T1_P2_PREMIX                0x10CA        0x0000        T2_P2_PREMIX
+                0x1056     0x0000       T1_P3_PREMIX                0x10D8        0x0000        T2_P3_PREMIX
+                0x1064     0x0000       T1_P4_PREMIX                0x10E6        0x0000        T2_P4_PREMIX
+                0x1072     0x0000       T1_P5_PREMIX                0x10F4        0x0000        T2_P5_PREMIX
+                0x1080     0x0000       T1_P6_PREMIX                0x1102        0x0000        T2_P6_PREMIX
+                0x108E     0x0000       T1_P7_PREMIX                0x1110        0x0000        T2_P7_PREMIX
+ Bit     15       14    13    12     11     10      9      8       7      6       5       4      3      2    1      0
+                                                        Tx_Py_PREMIX
+   Version V1.4                                                                                              Page 34 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.2.12. Phase : Tx_Py_IDLE
+Increasing PHASE_IDLE time will have impact on motion robustness, ideally keep to 0.
+              Memory         Default                                  Memory     Default
+                                          FRAMETABLE 1                                        FRAMETABLE 1
+               Address        Value                                   Address      Value
+               0x102E        0x0000          T1_P0_IDLE                0x10B0     0x0000        T2_P0_IDLE
+               0x103C        0x0000          T1_P1_IDLE                0x10BE     0x0000        T2_P1_IDLE
+               0x104A        0x0000          T1_P2_IDLE                0x10CC     0x0000        T2_P2_IDLE
+               0x1058        0x0000          T1_P3_IDLE               0x10DA      0x0000        T2_P3_IDLE
+               0x1066        0x0000          T1_P4_IDLE                0x10E8     0x0000        T2_P4_IDLE
+               0x1074        0x0000          T1_P5_IDLE                0x10F6     0x0000        T2_P5_IDLE
+               0x1082        0x0000          T1_P6_IDLE                0x1104     0x0000        T2_P6_IDLE
+               0x1090        0x0000          T1_P7_IDLE                0x1112     0x0000        T2_P7_IDLE
+ Bit     15      14     13      12      11     10        9      8     7      6    5      4      3      2   1      0
+                                                              Tx_Py_IDLE
+13.2.13. Phase : READOUT
+The time needed to read a single phase frame is not configurable and mainly depends on the input clock
+as described in section 7.1. It can be calculated as following:
+                            (                    )
+                                                                            (       )
+A full QVGA image readout with a maximum input clock of 80MHz is 960 µs.
+  Version V1.4                                                                                             Page 35 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+13.3. USER Registers
+                    Memory         Default                            Memory         Default
+                    Address         Value                             Address         Value
+                    0x111A         0x0000         USER0               0x115A         0x0020       USER32
+                    0x111C         0x0001         USER1                0x115C        0x0021       USER33
+                    0x111E         0x0002         USER2                0x115E        0x0022       USER34
+                    0x1120         0x0003         USER3                0x1160        0x0023       USER35
+                    0x1122         0x0004         USER4                0x1162        0x0024       USER36
+                    0x1124         0x0005         USER5                0x1164        0x0025       USER37
+                    0x1126         0x0006         USER6                0x1166        0x0026       USER38
+                    0x1128         0x0007         USER7                0x1168        0x0027       USER39
+                    0x112A         0x0008         USER8               0x116A         0x0028       USER40
+                    0x112C         0x0009         USER9                0x116C        0x0029       USER41
+                    0x112E         0x000A        USER10                0x116E        0x002A       USER42
+                    0x1130         0x000B        USER11                0x1170        0x002B       USER43
+                    0x1132         0x000C        USER12                0x1172        0x002C       USER44
+                    0x1134         0x000D        USER13                0x1174        0x002D       USER45
+                    0x1136         0x000E        USER14                0x1176        0x002E       USER46
+                    0x1138         0x000F        USER15                0x1178        0x002F       USER47
+                    0x113A         0x0010        USER16               0x117A         0x0030       USER48
+                    0x113C         0x0011        USER17                0x117C        0x0031       USER49
+                    0x113E         0x0012        USER18                0x117E        0x0032       USER50
+                    0x1140         0x0013        USER19                0x1180        0x0033       USER51
+                    0x1142         0x0014        USER20                0x1182        0x0034       USER52
+                    0x1144         0x0015        USER21                0x1184        0x0035       USER53
+                    0x1146         0x0016        USER22                0x1186        0x0036       USER54
+                    0x1148         0x0017        USER23                0x1188        0x0037       USER55
+                    0x114A         0x0018        USER24               0x118A         0x0038       USER56
+                    0x114C         0x0019        USER25                0x118C        0x0039       USER57
+                    0x114E         0x001A        USER26                0x118E        0x003A       USER58
+                    0x1150         0x001B        USER27                0x1190        0x003B       USER59
+                    0x1152         0x001C        USER28                0x1192        0x003C       USER60
+                    0x1154         0x001D        USER29                0x1194        0x003D       USER61
+                    0x1156         0x001E        USER30                0x1196        0x003E       USER62
+                    0x1158         0x001F        USER31                0x1198        0x003F       USER63
+Bit    15      14      13      12      11     10      9      8       7        6      5       4     3     2 1      0
+                                                              USERx
+        USER : These registers can be used to program any customer specific data.
+        USER0, USER1, USER2, USER3 can be read out via MetaData1.
+        Typically these registers are used to store module identifiers like production batch no./date, …
+ Version V1.4                                                                                              Page 36 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+14. MetaData
+       PIXD      PIXD PIXD     PIXD    PIXD     PIXD  PIXD  PIXD PIXD
+                                                                                                  Description
+        [11]     [10]  [9]      [8]     [7]      [6]   [5]   [4] [3:0]
+                                                                                              Value can change on each phase frame = P
+    #                             MetaData1                                                                            Value is constant = C
+                                                                                                     Value can change on each frame = F
+    0                       DIAGNOSTICS [15:8]                   0000
+                                                                       Diagnostics of the PREVIOUS phase                                   P
+    1                        DIAGNOSTICS [7:0]                   0000
+    2                          FIXED_VALUE                       0000  FIXED_VALUE : 0x4D = “M”                                            C
+                                                                       in Continuous Mode :
+    3                     FRAME_NUMBER [15:8]                    0000  FRAME_NUMBER increments every frame, starting from 0
+                                                                                                                                           F
+    4                      FRAME_NUMBER [7:0]                    0000  in Triggered Multi Frame Mode :
+                                                                       FRAME_NUMBER increments every frame, resets at new trigger
+                                                                       PHASE_NUMBER :
+    5     -        -     PHASE_NUMBER             -     -     -  0000                                                                      P
+                                                                       Phase number from 0 to PHASE_COUNT
+    6                            PIXEL1_X                        0000  PIXEL1_X = column number, PIXEL1_Y = row number
+                                                                       This pixel will be read out after a full array read out,            C
+    7                            PIXEL1_Y                        0000  the pixel value can be found in MetaData2
+    8                            PIXEL2_X                        0000  PIXEL2_X = column number, PIXEL2_Y = row number
+                                                                       This pixel will be read out after a full array read out,            C
+    9                            PIXEL2_Y                        0000  the pixel value can be found in MetaData2
+                                                                       EN_DELAY : Disabled/enabled ADC delay lines
+                 EN_                                       FRAME
+   10     -                         PROG_DELAY             TABLE
+                                                                 0000  PROG_DELAY : Settings of the ADC delay line                         F
+                DELAY
+                                                                       FRAMETABLE : Selected FrameTable 1 or 2
+                                                                       EN_TESTADC :
+                                                                       Disabled/enabled ADC test mode
+                                                                       EN_TESTROW :
+                 EN_  EN_              EN_      EN_                    Disabled/enabled MLX75023 test rows
+   11     -      TEST TEST       -    METAD METAD       -     -  0000                                                                      F
+                 ADC  ROW              ATA2 ATA1                       EN_METADATA2 :
+                                                                       Disabled/enabled Metadata2
+                                                                       EN_METADATA1 :
+                                                                       Disabled/enabled Metadata1
+                                                                       FLIR_MIRROR :
+                                                                       - 0x00: no FLIP, no MIRROR
+                                                                       - 0x01: Vertical FLIP
+                                                                       - 0x10: Horizontal MIRROR
+                                                                       - 0x11: FLIP & MIRROR
+            FLIP_        QUIET_                                        QUIET_DEFINE :
+   12                                          PHASE_COUNT       0000                                                                      F
+           MIRROR        DEFINE                                        - 00 : QUIET is not used
+                                                                       - 01 : QUIET is high in reset + integration phase
+                                                                       - 10 : QUIET is high in readout phase
+                                                                       - 11 : QUIET is high in reset + integration + readout phase
+                                                                       PHASE_COUNT :
+                                                                       Total numbers of phase frames to be captured
+         Table 16.1 : MetaData1
+ Version V1.4                                                                                                                      Page 37 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+       PIXD       PIXD  PIXD      PIXD  PIXD    PIXD   PIXD    PIXD  PIXD
+                                                                                                      Description
+        [11]       [10]  [9]       [8]   [7]      [6]   [5]     [4]  [3:0]
+                                                                                                   Value can change on each phase frame = P
+    #                                MetaData1                                                                          Value is constant = C
+                                                                                                         Value can change on each frame = F
+   13                       FRAME_IDLETIME [15:8]                    0000
+   14                        FRAME_IDLETIME [7:0]                    0000
+                                                                           FRAME_IDLETIME : 32 bit value                                    F
+   15                      FRAME_IDLETIME [31:24]                    0000
+   16                      FRAME_IDLETIME [23:16]                    0000
+                                                                           MOD_DUTY_CYLE :
+                                                                           - 0x000 : 12.5 %
+                                                                           - 0x001 : 25 %
+                                                                           - 0x010 : 37.5 %
+                                                                           - 0x011 : 50 %
+                                                                           - 0x100 : 62.5 %
+                                                                           - 0x101 : 75 %
+                                                               PLL_
+                                                                           - 0x110 : 87.5 %
+   17    MOD_DUTY_CYCLE             -         PLL_RDIV        NDIV   0000                                                                   F
+                                                                [2]
+                                                                           PLL_RDIV :
+                                                                           Parameter used to calculate FMOD
+                                                                           More information can be found in section 17
+                                                                           PLL_NDIV [2] :
+                                                                           Parameter used to calculate FMOD
+                                                                           More information can be found in section 17
+                                                                           PLL_NDIV [1:0] :
+                                                                           Parameter used to calculate FMOD
+                                                                           More information can be found in section 17
+                                                                           FSYNC : 0x0 (active high) or 0x1 (= active low)
+                                    P
+                          F               H        V
+                                    I
+                          S               S        S                       PIXCLK : 0x0 (active high) or 0x1 (= active low)
+          PLL_NDIV                  X
+   18                     Y               Y        Y     TRIGGER     0000                                                                   F
+             [1:0]                  C
+                          N               N        N                       HSYNC : 0x0 (active high) or 0x1 (= active low)
+                                    L
+                          C               C        C
+                                    K
+                                                                           VSYNC : 0x0 (active high) or 0x1 (= active low)
+                                                                           TRIGGER :
+                                                                           - 0x00: Continuous Mode
+                                                                           - 0x01: Triggered Multi Frame Mode
+   19                        FRAME_COUNT [15:8]                      0000  FRAMECOUNT : Total number of frames to be
+                                                                                                                                            F
+   20                         FRAME_COUNT [7:0]                      0000  captured in triggered multi-frame mode
+                                                                           ROI_START_Y : Y coordinate of ROI start position
+   21                         FRAME_ROI_START_Y                      0000                                                                   F
+                                                                           More information can be found in chapter 13.2.7
+                                                                           ROI_START_X : X coordinate of ROI start position
+   22                        FRAME_ROI_START_X                       0000                                                                   F
+                                                                           More information can be found in chapter 13.2.7
+                                                                           ROI_SIZE_Y : Y size of ROI
+   23                          FRAME_ROI_SIZE_Y                      0000                                                                   F
+                                                                           More information can be found in chapter 13.2.7
+                                                                           ROI_SIZE_X : X size of ROI
+   24                          FRAME_ROI_SZIE_X                      0000                                                                   F
+                                                                           More information can be found in chapter 13.2.7
+                                                                           OUTPUT_MODE :
+                                                                           - 0x000 : Mode #0 : 11b (A-B)/4 + 1b
+                                                                           - 0x001 : Mode #1 : 12b (A-B)/2
+                                                                           - 0x010 : Mode #2 : 11b (A+B)/4 + 1b
+                                                                           - 0x011 : Mode #3 : 12b (A+B)/2
+                                                                EN_
+                                                                           - 0x100 : Mode #4 : 12b A
+   25     -          -    -         -       OUTPUT_MODE        DMIX  0000                                                                   P
+                                                              STATIC       - 0x101 : Mode #5 : 12b B
+                                                                           EN_DMIXSTATIC :
+                                                                           (Value is only valid if DMIX_DISABLE = 1)
+                                                                           - 0x0: Both DMIX pins are LOW during integration
+                                                                           - 0x1: Both DMIX pins are HIGH during integration
+         Table 16.2 : MetaData1
+ Version V1.4                                                                                                                       Page 38 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+        PIXD   PIXD   PIXD      PIXD   PIXD    PIXD   PIXD PIXD PIXD
+                                                                                                Description
+        [11]   [10]    [9]       [8]    [7]     [6]    [5]  [4] [3:0]
+                                                                                            Value can change on each phase frame = P
+    #                              MetaData1                                                                      Value is constant = C
+                                                                                                   Value can change on each frame = F
+                                                                      DMIX_DISABLE :
+                                                                      - 0x0: DMIX pulses are enabled during integration time
+                                                                      - 0x1: EN_DMIXSTATIC is enabled
+                                                                      EN_LIGHT :
+                                                                      - 0x0: LED pulses are disabled during integration time
+                                                                      - 0x1: LED pulses are enabled during integration time
+                                                                      PHASE_SHIFT : Shift between MOD and DMIX[0]
+       DMIX_                    EN_
+   26  DISABLE
+                 -      -                      PHASE_SHIFT      0000  (DMIX[1] is always 180° shifted compared to DMIX[0],            P
+                               LIGHT
+                                                                      except during reset phase)
+                                                                      - 0x000: 0°
+                                                                      - 0x001: 45°
+                                                                      - 0x010: 90°
+                                                                      - 0x011: 135°
+                                                                      - 0x100: 180°
+                                                                      - 0x101: 225°
+                                                                      - 0x110: 270°
+                                                                      - 0x111: 315°
+   27                  PHASE_INTEGRATION [15:8]                 0000
+   28                   PHASE_INTEGRATION [7:0]                 0000
+                                                                      Integration Time (32-bit)                                       P
+   29                  PHASE_INTEGRATION [31:24]                0000
+   30                  PHASE_INTEGRATION [23:16]                0000
+   31                     PHASE_PREHEAT [15:8]                  0000
+                                                                      Number of LED pulses before sensor integration                  P
+   32                      PHASE_PREHEAT [7:0]                  0000
+   33                      PHASE_PREMIX [15:8]                  0000
+                                                                      Number of DMIX pulses before sensor integration                 P
+   34                       PHASE_PREMIX [7:0]                  0000
+   35                        PHASE_IDLE [15:8]                  0000
+                                                                      Phase idle time at the end of each phase read out               P
+   36                         PHASE_IDLE [7:0]                  0000
+   37                       PHASE_SETUP [15:8]                  0000
+                                                                      Setup time before integration                                   P
+   38                        PHASE_SETUP [7:0]                  0000
+   39                      USER_DEFINED0 [15:8]                 0000  Readout of USER_DEFINED0 16bit register value
+                                                                                                                                      C
+   40                      USER_DEFINED0 [7:0]                  0000  This can be used to program unique a device identifier
+   41                      USER_DEFINED1 [15:8]                 0000  Readout of USER_DEFINED1 16bit register value
+                                                                                                                                      C
+   42                      USER_DEFINED1 [7:0]                  0000  This can be used to program unique a device identifier
+   43                      USER_DEFINED2 [15:8]                 0000  Readout of USER_DEFINED2 16bit register value
+                                                                                                                                      C
+   44                      USER_DEFINED2 [7:0]                  0000  This can be used to program unique a device identifier
+   45                      USER_DEFINED3 [15:8]                 0000  Readout of a USER_DEFINED3 16bit register value
+                                                                                                                                      C
+   46                      USER_DEFINED3 [7:0]                  0000  This can be used to program unique a device identifier
+         *The length of MetaData1 can be truncated depending on ROI settings
+         Table 16.3 : MetaData1
+ Version V1.4                                                                                                                 Page 39 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+       PIXD     PIXD   PIXD      PIXD   PIXD     PIXD   PIXD     PIXD PIXD
+                                                                                                      Description
+        [11]    [10]    [9]       [8]    [7]      [6]    [5]      [4] [3:0]
+                                                                                                  Value can change on each phase frame = P
+    #                               MetaData2                                                                          Value is constant = C
+                                                                                                        Value can change on each frame = F
+    0                        DIAGNOSTICS [15:8]                       0000
+                                                                            Diagnostics of the CURRENT phase                               P
+    1                        DIAGNOSTICS [7:0]                        0000
+    2     -       -      -            NR_PIXELS_ABOVE [20:16]         0000
+                                                                            # ADC readings above the threshold defined in register
+    3                     NR_PIXELS_ABOVE [15:8]                      0000                                                                 P
+                                                                            Tx_UPPER_LIMIT, see chapter 13.2.5 for more information
+    4                      NR_PIXELS_ABOVE [7:0]                      0000
+    5     -       -      -            NR_PIXELS_BELOW [20:16]         0000
+                                                                            # ADC readings above the threshold defined in register
+    6                     NR_PIXELS_BELOW [15:8]                      0000                                                                 P
+                                                                            Tx_LOWER_LIMIT, see chapter 13.2.6 for more information
+    7                      NR_PIXELS_BELOW [7:0]                      0000
+    8                         PIXEL1_CH0 [11:4]                       0000
+                                                                            Returns the ADC values from PIXEL1 with coordinates defined
+    9         PIXEL1_CH0 [3:0]                 PIXEL1_CH1 [11:8]      0000  in register 0x1008. See chapter 13.1 for more information.
+   10                          PIXEL1_CH1 [7:0]                       0000
+                                                                            PIXEL1_CH0 : 12bit data from tap A                             P
+   11                         PIXEL1_CH2 [11:4]                       0000  PIXEL1_CH1 : 12bit data from tap B
+   12         PIXEL1_CH2 [3:0]                 PIXEL1_CH3 [11:8]      0000  PIXEL1_CH2 : 12bit data from tap A
+                                                                            PIXEL1_CH3 : 12bit data from tap B
+   13                          PIXEL1_CH3 [7:0]                       0000
+   14                         PIXEL2_CH0 [11:4]                       0000
+                                                                            Returns the ADC values from PIXEL2 with coordinates defined
+   15         PIXEL2_CH0 [3:0]                 PIXEL2_CH1 [11:8]      0000  in register 0x100A. See chapter 13.1 for more information.
+   16                          PIXEL2_CH1 [7:0]                       0000
+                                                                            PIXEL2_CH0 : 12bit data from tap A                             P
+   17                         PIXEL2_CH2 [11:4]                       0000  PIXEL2_CH1 : 12bit data from tap B
+   18         PIXEL2_CH2 [3:0]                 PIXEL2_CH3 [11:8]      0000  PIXEL2_CH2 : 12bit data from tap A
+                                                                            PIXEL2_CH3 : 12bit data from tap B
+   19                          PIXEL2_CH3 [7:0]                       0000
+   20                        DELAY_LINE_PIXEL0                        0000
+   21                        DELAY_LINE_PIXEL1                        0000
+   22                        DELAY_LINE_PIXEL2                        0000
+   23                        DELAY_LINE_PIXEL3                        0000
+   24                        DELAY_LINE_PIXEL4                        0000
+   25                        DELAY_LINE_PIXEL5                        0000
+   26                        DELAY_LINE_PIXEL6                        0000
+   27                        DELAY_LINE_PIXEL7                        0000
+   28                        DELAY_LINE_PIXEL8                        0000
+   29                        DELAY_LINE_PIXEL9                        0000  Values of the delay line sweep
+                                                                                                                                           P
+   30                       DELAY_LINE_PIXEL10                        0000  This feature can be used to optimize the ADC sampling point
+   31                       DELAY_LINE_PIXEL11                        0000
+   32                       DELAY_LINE_PIXEL12                        0000
+   33                       DELAY_LINE_PIXEL13                        0000
+   34                       DELAY_LINE_PIXEL14                        0000
+   35                       DELAY_LINE_PIXEL15                        0000
+   36                       DELAY_LINE_PIXEL16                        0000
+   37                       DELAY_LINE_PIXEL17                        0000
+   38                       DELAY_LINE_PIXEL18                        0000
+   39                       DELAY_LINE_PIXEL19                        0000
+         Table 17.1 : MetaData2
+ Version V1.4                                                                                                                      Page 40 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+       PIXD    PIXD   PIXD    PIXD   PIXD     PIXD PIXD PIXD PIXD
+                                                                                             Description
+        [11]   [10]    [9]     [8]    [7]      [6]  [5]  [4] [3:0]
+                                                                                         Value can change on each phase frame = P
+    #                            MetaData2                                                                    Value is constant = C
+                                                                                               Value can change on each frame = F
+   40                      DELAY_LINE_PIXEL20                0000
+   41                      DELAY_LINE_PIXEL21                0000
+   42                      DELAY_LINE_PIXEL22                0000
+   43                      DELAY_LINE_PIXEL23                0000
+   44                      DELAY_LINE_PIXEL24                0000
+   45                      DELAY_LINE_PIXEL25                0000
+   46                      DELAY_LINE_PIXEL26                0000
+   47                      DELAY_LINE_PIXEL27                0000
+   48                      DELAY_LINE_PIXEL28                0000
+   49                      DELAY_LINE_PIXEL29                0000
+   50                      DELAY_LINE_PIXEL30                0000
+   51                      DELAY_LINE_PIXEL31                0000
+   52                      DELAY_LINE_PIXEL32                0000
+   53                      DELAY_LINE_PIXEL33                0000
+   54                      DELAY_LINE_PIXEL34                0000
+   55                      DELAY_LINE_PIXEL35                0000
+   56                      DELAY_LINE_PIXEL36                0000
+   57                      DELAY_LINE_PIXEL37                0000
+                                                                   Values of the delay line sweep
+   58                      DELAY_LINE_PIXEL38                0000                                                                 P
+                                                                   This feature can be used to optimize the ADC sampling point
+   59                      DELAY_LINE_PIXEL39                0000
+   60                      DELAY_LINE_PIXEL40                0000
+   61                      DELAY_LINE_PIXEL41                0000
+   62                      DELAY_LINE_PIXEL42                0000
+   63                      DELAY_LINE_PIXEL43                0000
+   64                      DELAY_LINE_PIXEL44                0000
+   65                      DELAY_LINE_PIXEL45                0000
+   66                      DELAY_LINE_PIXEL46                0000
+   67                      DELAY_LINE_PIXEL47                0000
+   68                      DELAY_LINE_PIXEL48                0000
+   69                      DELAY_LINE_PIXEL49                0000
+   70                      DELAY_LINE_PIXEL50                0000
+   71                      DELAY_LINE_PIXEL51                0000
+   72                      DELAY_LINE_PIXEL52                0000
+   73                      DELAY_LINE_PIXEL53                0000
+   74                      DELAY_LINE_PIXEL54                0000
+   75                      DELAY_LINE_PIXEL55                0000
+   76                      DELAY_LINE_PIXEL56                0000
+         Table 17.2 : MetaData2
+ Version V1.4                                                                                                             Page 41 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+        PIXD    PIXD    PIXD     PIXD  PIXD     PIXD PIXD   PIXD   PIXD
+                                                                                                   Description
+        [11]    [10]     [9]      [8]   [7]      [6]  [5]    [4]   [3:0]
+                                                                                               Value can change on each phase frame = P
+     #                              MetaData2                                                                       Value is constant = C
+                                                                                                     Value can change on each frame = F
+    77                       DELAY_LINE_PIXEL57                    0000
+    78                       DELAY_LINE_PIXEL58                    0000
+    79                       DELAY_LINE_PIXEL59                    0000
+                                                                         Values of the delay line sweep
+    80                       DELAY_LINE_PIXEL60                    0000                                                                 P
+                                                                         This feature can be used to optimize the ADC sampling point
+    81                       DELAY_LINE_PIXEL61                    0000
+    82                       DELAY_LINE_PIXEL62                    0000
+    83                       DELAY_LINE_PIXEL63                    0000
+         Table 17.3 : MetaData2
+15. Diagnostics
+On top of the Metadata lines there’s one extra register that holds information about the device status.
+Name : DIAGNOSTICS
+Address : 0x0002
+Default Value : 0x0005
+Bit          15               14              13            12             11                  10                9                  8
+       ROI_ERROR        SEC_ERROR       DED_ERROR       SEC_LATCH      DED_LATCH                -                 -                 -
+Bit           7                6               5             4              3                   2                1                  0
+              -                -               -             -              -           3V3_READY                 -            PLL_LOCK
+         ROI_ERROR : This bit is set high when an incorrect ROI is set via registers Frame : Tx_ROI_START & Tx_ROI_SIZE
+                   When a ROI error occurs, the video output stops. It can only be corrected by setting a valid ROI.
+         SEC_ERROR : Selfclearing bit that indicates single error correction from NVRAM.
+                   The bit gets cleared as soon as the information is shared via the MetaData.
+         DED_ERROR : Selfclearing bit that indicate when a double error is detected inside the NVRAM.
+                   The bit gets cleared as soon as the information is shared via the MetaData.
+         SEC_LATCH : This bit is set high as soon as a SEC occurred, and will stay high until it get’s cleared.
+                   This bit needs to be actively cleared by the user by writing register 0x0000 with value 0x0004.
+         DED_LATCH : This bit is set high as soon as a SEC occurred, and will stay high until it get’s cleared.
+                   This bit needs to be actively cleared by the user by writing register 0x0000 with value 0x0008.
+         3V3_READY : This bit is set high when the VDDD_3V3 voltage level is higher than 2.8V.
+         PLL_LOCK : This bit is set high when the PLL is locked at the correct modulation frequency.
+ Version V1.4                                                                                                                   Page 42 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+16. Sleep Mode(s)
+MLX75123 features 1 register that can be used to enable/disable some internal blocks to reduce the power consumption.
+                                                  2
+In normal operation all blocks are enabled. The I C communication is always active. This register is not part of the NVRAM
+and it’s not possible to save its value with I2C_SAVEREGMAP as explained in section 12.5.
+ Name : BLOCK_DISABLE
+ Address : 0x0004
+ Default Value : 0x0000
+ Bit         15             14              13           12             11             10                9               8
+              -              -                -           -              -              -                -               -
+ Bit          7              6               5            4              3              2                1               0
+                                                                   DIS_VIDEO_     DIS_75023_
+      DIS_ADC_REF DIS_ADC_BG                  -           -                                          DIS_PLL          DIS_BG
+                                                                     BUFFERS        BUFFERS
+          DIS_ADC_REF : Enable/disable the input test references for the ADC
+          DIS_ADC_BG : Enable/disable the internal ADC band gap (incl. ADC reference voltages)
+          DIS_VIDEO_BUFFERS : Enable/disable the video output buffers
+          DIS_75023_BUFFERS : Enable/disable the MLX75023 control buffers
+          DIS_PLL : Enable/disable the FMOD Generator
+          DIS_BG : Enable/disable the internal bandgap block
+  Version V1.4                                                                                                       Page 43 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+17. FMOD Generator
+MLX75123 features a built in timing generator. This block generates all the timings, and phase shifts, for the sensor and
+illumination. This is often referred to as the modulation frequency. The output frequency changes in function on the input
+clock frequency, RDIV & NDIV values.
+The output modulation frequency is given by                    (in MHz) limited between 12-40 MHz.
+This frequency can change every frame and can be used to minimize interference between one or more TOF cameras
+operating in the same environment.
+The value of RDIV has to be selected in a way that
+Examples :
+          CLKIN = 80MHz             RDIV = CLKIN / 8 MHz = 10
+                          NDIV           3        4        5         6        7       8       9         10
+                      Fmod (MHz)         12      16       20        24       28      32       36        40
+          CLKIN = 62MHz             RDIV = CLKIN / 8 MHz = 7.75  8
+                          NDIV           3        4        5         6        7       8       9         10
+                                          1
+                      Fmod (MHz)                15.5    19.38      23.25   27.13     31     34.88     38.75
+          CLKIN = 42MHz             RDIV = CLKIN / 8 MHz = 5.25  5
+                          NDIV           3        4        5         6        7       8       9         10
+                                                                                                         1
+                      Fmod (MHz)        12.6    16.8      21       25.2     29.4    33.6     37.8
+          CLKIN = 40MHz             RDIV = CLKIN / 8 MHz = 5
+                          NDIV           3        4        5         6        7       8       9         10
+                      Fmod (MHz)         12      16       20        24       28      32       36        40
+       1
+Note : Not a valid setting, the modulation frequency should be in range 12-40MHz.
+The corresponding RDIV & NDIV values to be written into the registers from section 13.2.3 can be found here :
+            RDIV or NDIV value     Hexadecimal
+                      3                0x000
+                      4                0x001
+                      5                0x010
+                      6                0x011
+                      7                0x100
+                      8                0x101
+                      9                0x110
+                     10                0x111
+   Version V1.4                                                                                                     Page 44 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+18. Package Dimensions
+                                  Figure 7 : Package dimensions
+ Version V1.4                                                   Page 45 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+19. Layout & Solder Recommendations
+19.1. PCB Footprint Design
+The design of a printed circuit board for MLX75123 requires special attention to assure a good solder quality
+during PCB assembly. This chapter describes best practises based on Melexis experiences.
+                               0.5           2.775                 2.775           0.5
+   (dimensions in millimeter)
+                       4.6
+                                                                                               3.275
+              2.775                                                                       0.25
+                                                                                           0.5
+              2.775                                                                            3.275
+                                                                                          0.3
+                          0.7                                                        0.3
+                                                           4.6
+                                 Figure 8 : PCB footprint recommendation (top layer)
+Pad size = 0.3 x 0.3 mm (rounded rectangle)
+Pad solder mask expansion = 0.35 x 0.35 mm (= NSMD pads)
+Pad solder paste = 0.27 x 0.27 mm (rounded rectangle)
+The exposed thermal pad has to be connected to a big internal plane (like GND) for good heat dissipation.
+Exposed pad size = 4.6 x 4.6 mm (rounded rectangle)
+Exposed pad solder paste = 4x 1.5mm dots
+Exposed pad via size(s) = 1mm with 0.5mm hole (central via) & 0.7mm with 0.3mm hole (outer eight vias)
+Tented or plugged vias are not allowed inside the thermal pad.
+Applying more paste to the full thermal pad could cause device tilting
+because of the excessive amount of solder paste. We suggest applying
+merely four individual dots of paste solder quality issues. This is
+shown in the figure on the right, which represents the top paste layer.
+ Version V1.4                                                                                        Page 46 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+Connecting the inner row of pads can be done with small through-hole vias (0.3mm size with 0.15mm hole).
+We recommend placing them next to the pads without violating other design rules like shown in Figure 9.
+                            Figure 9 : Suggested through hole via placement of the inner pads
+The vias in the yellow marked areas are placed to allow a wide connection of the inner layers for good heat
+distribution. If your PCB manufacturer does not support small through-hole vias or there’s a chance of
+wicking, these vias have to be replaced by via in pad (= active pads) or plugged via technology.
+For PCB assembly we recommend using a laser cut nickel plated stencil with a thickness of 100µm. It is
+mandatory to have smooth stencil aperture walls to improve the solder paste distribution within the cavities
+and to increase the paste release onto the pads. Using a type 5 solder paste (with a sma ll particle size)
+further improves this behaviour. (for example Alpha OM-353 or CVP-390)
+19.2. Solder Profile
+We recommend a vapor phase soldering process (with linear temperature profile and a melting point of
+218degC) for increased solder quality or reflow soldering according to JEDEC-J-STD-020D.
+                                                                                        Temperature       Temperature
+                                                                       Heating Zone
+                                                                                         (minimum)         (maximum)
+                                                                             1              350               350
+                                                                             2              240               240
+                                                                             3              350               350
+                                                                             4              340               340
+                                                                           Table 18 : Temperature setting / zone
+                Figure 10 : Reflow solder profile
+  Version V1.4                                                                                               Page 47 of 48
+
+
+MLX75123 Time-of-Flight Companion Chip
+Datasheet
+Disclaimer
+Devices sold by Melexis are covered by the warranty and patent indemnification provisions appearing in its Term of Sale.
+Melexis makes no warranty, express, statutory, implied, or by description regarding the information set forth herein or
+regarding the freedom of the described devices from patent infringement. Melexis reserves the right to change specifications
+and prices at any time and without notice. Therefore, prior to designing this product into a system, it is necessary to check
+with Melexis for current information. This product is intended for use in normal commercial applications. Applications
+requiring extended temperature range, unusual environmental requirements, or high reliability applications, such as military,
+medical life-support or life-sustaining equipment are specifically not recommended without additional processing by Melexis
+for each application. The information furnished by Melexis is believed to be correct and accurate. However, Melexis shall not
+be liable to recipient or any third party for any damages, including but not limited to personal injury, property damage, loss
+of profits, loss of use, interrupt of business or indirect, special incidental or consequential damages, of any kind, in connection
+with or arising out of the furnishing, performance or use of the technical data herein. No obligation or liability to recipient or
+any third party shall arise or flow out of Melexis’ rendering of technical or other services.
+© 2013 Melexis NV. All rights reserved.
+www.melexis.com
+  Version V1.4                                                                                                           Page 48 of 48
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Melexis:
+ MLX75123SLA-AAA-000-RE MLX75123RLA-AAA-000-SP MLX75123RLA-AAA-000-RE MLX75123RLA-ABA-000-SP
+ MLX75123SLA-ABA-000-RE MLX75123RLA-ABA-000-RE MLX75123SLA-BAG-000-RE

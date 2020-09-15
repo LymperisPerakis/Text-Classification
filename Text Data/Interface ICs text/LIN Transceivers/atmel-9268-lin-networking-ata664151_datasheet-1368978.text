@@ -1,0 +1,2159 @@
+                                                                  ATA664151
+                LIN System Basis Chip with LIN Transceiver, 5V
+         Regulator, Watchdog, 8-channel High Voltage Switch
+    Interface with High Voltage Current Sources, 16-bit SPI
+                                                                      DATASHEET
+Features
+● 8-channel HV switch interface with HV current sources
+● Linear low-drop voltage regulator, up to 80mA current capability, VCC = 5.0V ±2%
+● Fulfills the OEM “Hardware Requirements for LIN in Automotive Applications
+  Rev.1.3”
+● LIN master and slave operation possible
+● Supply voltage up to 40V
+● Operating voltage VS = 5V to 27V
+● Internal voltage divider for VBattery sensing (±2%)
+● 16-bit serial interface (daisy-chain-capable) for configuration and diagnosis
+● Typically 8µA supply current during sleep mode
+● Typically 35µA supply current in active low-power mode
+● VCC-undervoltage detection (4ms reset time) and watchdog reset logical
+  combined at NRES open drain output
+● LIN high-speed mode up to 200kBit/s
+● Adjustable watchdog timer via external resistor
+● Negative trigger input for watchdog
+● LIN physical layer complies with LIN 2.1 specification and SAE J2602-2
+● Wake-up capability via LIN bus and CL15
+● Bus pin is overtemperature and short-circuit protected versus GND and battery
+● Advanced EMC and ESD performance
+● Package: QFN32 5x5mm
+                                                                      9268I-AUTO-04/15
+
+
+1. Description
+   The Atmel® ATA664151 is a system basis chip with an eight-channel high voltage switch interface, a LIN 2.1 and
+   SAEJ2602-2-compliant LIN transceiver, low-drop voltage regulator, and an adjustable window watchdog. The Atmel
+   ATA664151 provides 5V output voltage with up to 80mA current capability. This chip combination makes it possible to
+   develop inexpensive, simple, yet powerful slave and master nodes for LIN bus systems. The Atmel ATA664151 is especially
+   designed for LIN switch applications and includes almost the entire LIN node. They are designed to handle low data-rate
+   communication in vehicles (such as in convenience electronics). Improved slope control at the LIN driver ensures secure
+   data communication up to 20kBaud. Sleep Mode and Active Low-power Mode guarantee minimal current consumption even
+   in the case of a floating bus line or a short circuit on the LIN bus to GND.
+   Figure 1-1. Block Diagram
+                                              RXD TXD            LIN                             VS
+              NCS
+                            16-bit Serial
+              SCK
+                            Programming                      LIN Physical Layer  Internal      Voltage
+                                                                                                                VCC
+             MOSI             Interface                             Interface    Supplies     Regulator
+                                (SPI)
+             MISO
+                                                                                                                VBATT
+             CL15             HV Input
+                                                             Control Logic                     VBATT
+             NIRQ                                                                              Voltage          VDIV
+                                                               Int. Oscillator
+                                                                                               Divider
+                                                                                HV Switch                       PWM1
+            NRES            Window Watchdog                                     Interface
+                               WD-Oscillator                                       (8x)                         PWM2
+                                                                                                                PWM3
+                           NTRIG     WDOSC AGND      GND   IREF CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8
+2  ATA664151 [DATASHEET]
+   9268I–AUTO–04/15
+
+
+2. Pin Configuration
+   Figure 2-1. Pinning QFN32, 5x5mm
+                                                  32 31 30 29 28 27 26 25
+                                            1                                  24
+                                            2                                  23
+                                            3                                  22
+                                            4                                  21
+                                            5
+                                                        ATA664151              20
+                                            6                                  19
+                                            7                                  18
+                                            8                                  17
+                                                  9  10 11 12 13 14 15 16
+   Table 2-1.  Pinning
+        Pin          Name       Function
+         1             TXD      LIN-bus logic data in from microcontroller
+         2            RXD       LIN-bus logic data out to microcontroller
+         3           NRES       Watchdog and VCC undervoltage Reset Output pin (active low, open drain)
+         4           NIRQ       Interrupt request output to microcontroller (active low, open drain)
+         5           MISO       SPI Master-In-Slave-Out output pin to microcontroller
+         6           MOSI       SPI Master-Out-Slave-In input pin from microcontroller
+         7            SCK       SPI clock input from microcontroller
+         8            NCS       SPI chip select logic input from microcontroller (active low)
+         9           PWM1       PWM control input port from microcontroller for first CS pin group
+        10           PWM2       PWM control input port from microcontroller for second CS pin group
+        11           PWM3       PWM control input port from microcontroller for third CS pin group
+        12          WDOSC       Connection for external resistor to set watchdog frequency
+        13            VDIV      Voltage divider output / watchdog disable input pin
+        14            IREF      Reference current adjustment pin
+        15             CS1      High-voltage current sink/source and switch I/O pin no. 1
+        16             CS2      High-voltage current sink/source and switch I/O pin no. 2
+        17             CS3      High-voltage current sink/source and switch I/O pin no. 3
+        18            CL15      Wake-up on ignition high-voltage input pin
+        19           VBATT      Battery voltage input for voltage divider
+        20            GND       Ground connection
+        21             LIN      LIN-bus connection
+        22            GND       Ground connection
+        23            GND       Ground connection
+        24             CS4      High-voltage current source and switch I/O pin no. 4
+        25             CS5      High-voltage current source and switch I/O pin no. 5
+        26             CS6      High-voltage current source and switch I/O pin no. 6
+        27             CS7      High-voltage current source and switch I/O pin no. 7
+                                                                                     ATA664151 [DATASHEET]           3
+                                                                                                    9268I–AUTO–04/15
+
+
+  Table 2-1.    Pinning (Continued)
+        Pin           Name       Function
+         28            CS8       High-voltage current source and switch I/O pin no. 8
+         29             VS       Supply input pin
+         30           AGND       Analog reference ground
+         31            VCC       5V Voltage regulator output pin
+         32           NTRIG      Watchdog trigger input from microcontroller
+     Backside          GND       Back Side Heat Slug, internally connected to GND
+4 ATA664151 [DATASHEET]
+  9268I–AUTO–04/15
+
+
+3.  Pin and Functional Description
+3.1 Physical Layer Compatibility
+    Since the LIN physical layer is independent of higher LIN layers (such as the LIN protocol layer), all nodes with a LIN
+    physical layer as per release version 2.1 can be mixed with LIN physical layer nodes found in older versions (i.e., LIN 1.0,
+    LIN 1.1, LIN 1.2, LIN 1.3, LIN 2.0), without any restrictions.
+3.2 Supply Pin (VS)
+    The operating voltage is VS = 5V to 27V. An undervoltage detection is implemented to disable data transmission via the
+    LIN bus and the switch interface if VVS falls below VVSth in order to avoid false bus messages. After switching on VS, the IC
+    starts in active mode (see also Section 4.1 “Active Mode” on page 9), with the VCC voltage regulator and the window
+    watchdog switched on (the latter depends on the VDIV pin, see Section 10. “Watchdog” on page 28).
+3.3 Ground Pins GND and AGND
+    The IC is neutral on the LIN pin in the event of GND disconnection. It can handle a ground shift of up to 11.5% of VS.
+    Note:           Please note that pin AGND is used for internal reference generation. This should be considered when design-
+                    ing the PCB in order to minimize the effect on the voltage thresholds.
+3.4 Voltage Regulator Output Pin (VCC)
+    The internal 5V voltage regulator is capable of driving loads up to 80mA for supplying the microcontroller and other loads on
+    the PCB. It is protected against overloads by means of current limitation and overtemperature shutdown. In addition, the
+    output voltage is monitored and will cause a reset signal at the NRES output pin if it drops below a defined threshold
+    VVCCthun.
+    A safe operating area (SOA) is defined for the voltage regulator, because the power dissipation caused by this block might
+    exceed the system’s thermal budget.
+3.5 Bus Pin (LIN)
+    A low-side driver with internal current limitation, thermal shutdown and an internal pull-up resistor in compliance with the
+    LIN 2.1 specification are implemented. The allowed voltage range is from –30V to +40V. Reverse currents from the LIN bus
+    to VS are suppressed, even in the event of GND shifts or battery disconnection. The LIN receiver thresholds are compatible
+    with the LIN protocol specification. The fall time from recessive to dominant bus state and the rise time from dominant to
+    recessive bus state are slope-controlled.
+    For higher bit rates the slope control can be switched off by setting the SPI-bit LSME. Then the slope time of the LIN falling
+    edge is < 2µs. The slope time of the rising edge strongly depends on the capacitive load and the pull-up resistance at the
+    LIN-line. To achieve a high bit rate it is recommended to use a small external pull-up resistor (500) and a small capacitor.
+    This allows very fast data transmission up to 200Kbit/s, e.g., for electronic control tests of the ECU, microcontroller
+    programming or data download. In this High-speed Mode a superior EMC performance is not guaranteed.
+    Note:           The internal pull-up resistor is only switched on in active mode and when the LIN transceiver is activated by the
+                    LINE-bit (active mode with LIN bus transceiver).
+3.6 Bus Logic Level Input Pin (TXD)
+    The TXD pin is the microcontroller interface for controlling the state of the LIN output. TXD must be pulled to ground in order
+    to keep the LIN bus in the dominant state. If TXD is high or not connected (internal pull-up resistor), the LIN output transistor
+    is turned off and the bus is in recessive state.
+    If configured, an internal timer prevents the bus line from being constantly driven in the dominant state. If TXD is forced to
+    low for longer than tDOM, the LIN bus driver is switched back to recessive state. TXD has to be switched to high for at least
+    tTOrel to reactivate the LIN bus driver (by resetting the time-out timer).
+    As mentioned above, this time-out function can be disabled via the SPI configuration register in order to achieve any long
+    dominant state on the connected line (such as PWM transmission, or low bit rates).
+                                                                                            ATA664151 [DATASHEET]                   5
+                                                                                                           9268I–AUTO–04/15
+
+
+3.7  Bus Logic Level Output Pin (RXD)
+     This output pin reports the state of the LIN bus to the microcontroller. LIN high (recessive state) is reported by a high level,
+     LIN low (dominant state) is reported by a low level at RXD. The output has push-pull characteristics meaning no external
+     time defining measures are required. During states of disabled LIN-PHY (configuration bit “LINE” = 0), pin RXD is at high
+     level. Please note that the signal on the RXD pin is not valid for a certain period of time upon activation of the LIN transceiver
+     (tRXDinvalid).
+     Figure 3-1. RXD Timing upon Transceiver Enable
+                               NCS                SPI word with LINE = 1
+                                                                                            LIN bus state
+                               RXD                                              X
+                                                                                        0 = DOM --- 1 = REC
+                                                                            tRXDinvalid
+     RXD is switched off in sleep- and unpowered mode.
+3.8  CL15 Pin
+     The CL15 pin is a high-voltage input that can be used to wake up the device from sleep mode. It is an edge-sensitive pin
+     (low-to-high transition). Thus, even if CL15 pin is at high voltage (VCL15 > VCL15th), it is possible to switch into sleep mode. It
+     is usually connected to the ignition for generating a local wake-up in the application if the ignition is switched on. The CL15
+     pin should be tied directly to ground if not needed. A debounce timer with a value tdebCL15 of typically 160µs is implemented.
+     The pin state (CL15 ON or OFF) can be read out through the SPI interface.
+3.9  Reset Output Pin (NRES)
+     The reset output pin is an open drain output and switches to low during a VCC undervoltage event or a watchdog timing
+     window failure. Please note the reset hold time of typically 4ms after the undervoltage condition has disappeared.
+3.10 Interrupt Request Output Pin (NIRQ)
+     The interrupt request output pin is an open drain output and switches to low whenever a chip-internal event occurs that is set
+     up to trigger an interrupt. A power-up, a wake-up over LIN bus, a change in a switch state or an overtemperature condition
+     are examples of such events. The pin remains at ground until the end of the next SPI command, where the interrupt source
+     is passed to the SPI master (bits IRQS, see also Section 7. “Serial Programming Interface (SPI)” on page 17).
+3.11 WDOSC Output Pin
+     The WDOSC output pin provides a typical voltage of 1.2V intended to supply an external resistor with values between 34K
+     and 120K. The value of the resistor and with it the pin output current adjusts the watchdog oscillator frequency to provide a
+     certain range of time windows.
+     If the watchdog is disabled, the output voltage is switched off and the pin can either be tied to VCC or left open.
+3.12 NTRIG Input Pin
+     The NTRIG input pin is the trigger input for the Window Watchdog. A pull-up resistor is implemented. A falling edge triggers
+     the watchdog. The trigger signal (low) must exceed a minimum time ttrigmin to generate a watchdog trigger and avoid false
+     triggers caused by transients. The NTRIG pin should be tied directly to VCC if not needed.
+3.13 VBATT Input Pin
+     The VBATT is a high voltage input pin for measurement purposes by means of a voltage divider. The latter provides a low-
+     voltage signal at the VDIV pin that is linearly dependent on the input voltage. In an application with battery voltage
+     monitoring, this pin is connected to VBattery via a 51 resistor in series and a 10nF capacitor to GND. The divider ratio is 1:4.
+     This results in maximum output voltages on pin VDIV when reaching 20V at the input. The VBATT pin can be tied directly to
+     ground or left open if not needed.
+6    ATA664151 [DATASHEET]
+     9268I–AUTO–04/15
+
+
+3.14 VDIV Input/Output Pin
+     This pin handles two different functions. During the VCC startup and watchdog reset phase (pin NRES driven to LOW), the
+     pin acts as input and determines the setting of the “WDD” bit within the SPI configuration register (see Figure 3-2). In other
+     words, if the window watchdog operation shall be disabled directly after power-up (e.g., for microcontroller programming or
+     debugging purposes), pin VDIV must be tied to HIGH level until the reset phase ends (pin NRES has a positive slope from
+     LOW to HIGH). In other cases, such as when pin VDIV is not driven actively by the application, the signal is assessed as
+     LOW and the WDD bit (watchdog disable) is thus also low and the window watchdog is operational (see Figure 3-2).
+     Figure 3-2. WDD Configuration Bit Setup During VCC Startup
+                                            NRES             “LOW” from VCC startup
+                         VDIV (driven externally)                    Logic Level “A”                  Z (high imp.)
+                            WDD config bit state                        X                          Logic Level “A”
+     During normal operation this pin provides a low-voltage signal for the ADC such as for a microcontroller. It is sourced either
+     by the VBATT pin or one of the switch input pins CS1 to CS8. An external ceramic capacitor is recommended for low-pass
+     filtering of this signal. If selected in the configuration register of the SPI, this pin guarantees a voltage- and temperature-
+     stable output ratio of the selected test input and is available in all modes except sleep mode. Please note that the current
+     consumption values in the active low-power mode of Atmel® ATA664151 given in the electrical characteristics lose their
+     validity if the VDIV output pin is being used in this low-power mode. The voltage on this pin is actively clamped to VCC if the
+     input value would lead to higher values.
+3.15 IREF Output Pin
+     This pin is the connection for an external resistor towards ground. It provides a regulated voltage which will cause a resistor-
+     dependent current used as reference for the current sources in the switch interface I/O ports. The resistor should be placed
+     closely to the pin without any additional capacitor. A fail-safe circuitry detects if the resistor is missing or if there is a short
+     towards ground or VCC on this pin. An internal fail-safe current is generated in this event. Please see also Section 8. “Switch
+     Interface Unit” on page 22 for further details.
+3.16 CS1 to CS8 High-voltage Input/Output Pins
+     These pins are intended for contact monitoring and/or constant current sourcing. A total of eight I/Os (pins CS1 through
+     CS8) are available, of which three (CS1, CS2 and CS3) can be configured either as current sources (such as for switches
+     towards ground) or as current sinks (such as for switches towards battery). The other five pins (CS4 to CS8) have only
+     current sourcing capability. Apart from a high voltage (HV) comparator for simple switches, the I/Os are also equipped with a
+     voltage divider to enable analog voltage measurements on HV pins by using the ADC of the application’s microcontroller
+     (see Section 3.14 “VDIV Input/Output Pin” on page 7 for further details). Also, each input can trigger an interrupt upon state
+     change even during Active Low-power Mode. If one or more CSx pins are not needed, can be left open or directly connected
+     to VS.
+     Note:            Unused CSx-pins should be connected directly to VS.
+3.17 PWM1..3 Input Pins
+     These pins can be used to control the switch interface current sources directly, such as for pulse width-modulated load
+     control or for pulsed switch scanning. They accept logic level signals from the microcontroller and are equipped with pull-
+     down structures so in case of an open connection, the input is well defined. For more information see Section 8. “Switch
+     Interface Unit” on page 22.
+     The assignment of the current sources to the three PWM input pins is described in Section 8.1 “Current Sources” on page
+     22.
+                                                                                                 ATA664151 [DATASHEET]                    7
+                                                                                                                 9268I–AUTO–04/15
+
+
+4. Operating Modes
+   There are two primary modes of operation available with the Atmel® ATA664151.
+     ● Active mode:
+          In this mode the VCC voltage regulator is active and the SPI is ready for operation. In addition, all other peripherals
+          can be enabled or disabled by configuration via SPI. After power-up the watchdog is enabled (dependent on the VDIV
+          pin only, see Section 3.14 “VDIV Input/Output Pin” on page 7), whereas the LIN transceiver and the switch interface
+          unit are switched off.
+     ●    Sleep mode:
+          All peripherals are switched off (including the VCC voltage regulator), a wake-up is only possible via the LIN bus or
+          the CL15 pin. In this mode the IC has the lowest possible current consumption.
+   Figure 4-1. State Diagram
+                                                              Unpowered Mode
+                                                               All circuitry OFF
+                                                      VVS < 3.3V                VVS > 3.5V
+                                                                   Config Init
+                                                           Load WDD bit dependent
+                                                              on VDIV input level
+                                                                  Active Mode
+                                               VVS < 3.3V
+                                                                    VCC: ON
+                                                              All other peripherals
+                                                               config dependent
+                                                   SLEEP bit = 1                LIN Wake up or
+                                                                                CL15 Wake up
+                                                                  Sleep Mode
+                                                                                       VVS < 3.3V
+                                                                    VCC: OFF
+                                                             All other peripherals:
+                                                                       OFF
+8  ATA664151 [DATASHEET]
+   9268I–AUTO–04/15
+
+
+4.1 Active Mode
+    If sufficient voltage is applied to the IC at the VS pin, the configuration register is initialized and the chip changes to active
+    mode. In this mode different states of power consumption are possible, depending on the configuration selected for the chip
+    and activity on the SPI. The following table lists all power states (except unpowered) for the Atmel® ATA664151.
+    Table 4-1.        State and Current Consumption vs. Enabled Periphery
+        State and VS Pin               LIN bus        Voltage       VCC Voltage                            SPI Data         Current
+     Current Consumption            Transceiver        Divider       Regulator         Watchdog             Comm.           Sources
+                 Sleep
+                                         Off             Off              Off               Off               Off               Off
+             IVS = IVSsleep
+                                                                                                                         Off or standby
+         Active low-power                Off             Off                                Off               Off        (CSEx=X and
+                                                                          On
+            IVS = IVSact_lp           (LINE=0)       (VDIVE=0)                          (WDD=1)            (NCS=1)        CSCx=0 and
+                                                                                                                           PWMy=0)
+         Active SPI comm.                Off             Off                                Off               On                Off
+                                                                          On
+           IVS = IVSact_spi           (LINE=0)       (VDIVE=0)                          (WDD=1)            (NCS=0)         (CSEx=0)
+       Active with watchdog              Off             Off                                On                                  Off
+                                                                          On                              do not care
+           IVS = IVSact_wd            (LINE=0)       (VDIVE=0)                          (WDD=0)                            (CSEx=0)
+        Active with LIN-bus
+                                         On              Off                                Off                                 Off
+              transceiver                                                 On                              do not care
+                                      (LINE=1)       (VDIVE=0)                          (WDD=1)                            (CSEx=0)
+            IVS = IVSact_lin
+                                                                                                                                On
+        Active with current
+                                         Off             Off                                Off
+                sources                                                   On                              do not care    (CSEx=1 and
+                                      (LINE=0)       (VDIVE=0)                          (WDD=1)
+            IVS = IVSact_cs                                                                                               (CSCx=1 or
+                                                                                                                           PWMy=1))
+        Active with voltage
+                                         Off             On                                 Off                                 Off
+                 divider                                                  On                              do not care
+                                      (LINE=0)       (VDIVE=1)                          (WDD=1)                            (CSEx=0)
+             IVS = Iact_vdiv
+     Note:            Legend:
+                      0 = bit is programmed 0
+                      1 = bit is programmed 1,
+                      X = Disregards
+    The descriptions in brackets below the peripherals refer to the configuration register of Atmel ATA664151, accessible via
+    SPI.
+    Please note that the table above only lists the active mode states with just one extra peripheral enabled. Except for active
+    low-power, any combination of the states above and thus also the current consumption is possible - for example, the parallel
+    operation of the LIN bus transceiver and the current sources. The required supply current is then at least the sum of the
+    values given above.
+                                                                                                ATA664151 [DATASHEET]                  9
+                                                                                                               9268I–AUTO–04/15
+
+
+4.2   Sleep Mode
+      This mode must be initialized via the SPI configuration register. All peripherals, i.e., the LIN transceiver, the watchdog, the
+      voltage dividers, the switch interface Unit and the VCC voltage regulator are switched off. The overall supply current on pin
+      VS is then reduced to a minimum.
+      Two wake-up mechanisms are possible to leave sleep mode again: wake-up via LIN and wake-up via CL15.
+4.2.1 Wake-up from Sleep Mode via LIN
+      A voltage below the LIN pre-wake threshold on the LIN pin activates a wake-up detection phase.
+      A falling edge at the LIN pin followed by a dominant bus level maintained for a time period of at least tbus and the following
+      rising edge at the LIN pin (see Figure 4-2) results in a remote wake-up request. The device switches from sleep mode to
+      active-low power mode (VCC regulator enabled), but the LIN transceiver is still deactivated. Only the internal LIN slave
+      termination resistor is switched on. The remote wake-up request is indicated by a low level at the NIRQ pin to interrupt the
+      microcontroller (see Figure 4-2). In addition, the wake-up source is stated in the chip status register which can be read out
+      via SPI. Configuring the chip via SPI must be used to enable the LIN transceiver and allow data to be send and/or
+      transmitted via the LIN bus. Note that this can only be done after the LOW level at the NRES pin has been eliminated (after
+      VCC ramp-up and the stabilization phase).
+      Figure 4-2. LIN Wake-up from Sleep Mode
+                             LIN Bus
+                                 VCC
+                               NRES
+                               NIRQ
+                          SPI Comm.
+                                                                                                 Init IC/ Read Status
+                     Watchdog State                    Watchdog off          VCC     Startup     Start Watchdog Lead Time
+                                                     tbus = 90μs typ        tnres = 4ms typ
+      With the initialization of the configuration register by the microcontroller, the status word of Atmel® ATA664151 is transmitted
+      back, including the wake-up source. In other words, the two status bits “IRQS1” and “IRQS0” both read back as '1'. For more
+      information see Section 7. “Serial Programming Interface (SPI)” on page 17.
+10    ATA664151 [DATASHEET]
+      9268I–AUTO–04/15
+
+
+4.2.2 Wake-up from Sleep Mode via CL15
+      Voltage above VCL15H at pin CL15 activates a CL15 wake-up detection phase. This state must persist for at least tCLdeb in
+      order to detect a wake-up. If the pulse is too short, the IC remains in Sleep Mode.
+      When leaving sleep mode first the VCC voltage regulator is activated to enable the microcontroller supply. Then as soon as
+      the VCC level reaches valid levels, the VCC startup timer is started. During this time, the NRES pin is kept low in order to
+      keep the microcontroller from running. This ensures a proper voltage supply and signal stabilization in the application. With
+      the rising edge at NRES, the SPI is ready for communication and the Atmel® ATA664151 can be initialized.
+      Figure 4-3. CL15 Wake-up from Sleep Mode
+                               CL15
+                               VCC
+                              NRES
+                              NIRQ
+                         SPI Comm.
+                                                                                            Init IC/ Read Status
+                     Watchdog State                 Watchdog off           VCC     Startup   Start Watchdog Lead Time
+                                                tCL15deb = 160μs typ      tnres = 4ms typ
+      The wake-up behavior is analogous to a wake-up via the LIN bus as seen above. One difference is that no negative edge is
+      required to start the wake-up procedure as is the case for LIN wake-ups. After the VCC startup time tWDnres has elapsed,
+      NRES is released and therefore pulled up, either by the internal or additional external resistors. The microcontroller can then
+      configure the Atmel ATA664151 and thus be notified about the actual status including the wake-up source. Here, the two
+      status bits “IRQS1” and “IRQS0” read back as '10'.
+                                                                                            ATA664151 [DATASHEET]                  11
+                                                                                                               9268I–AUTO–04/15
+
+
+4.2.3 Sleep Mode: Behavior at a Floating LIN bus or a Short-circuited LIN to GND
+      In sleep mode the device has very low current consumption even during short-circuits or floating conditions on the bus. A
+      floating bus can arise if the master pull-up resistor is missing, such as when it is switched off while the LIN master is in sleep
+      mode or even if the power supply of the master node is switched off.
+      In order to minimize the current consumption IVS in sleep mode during voltage levels on the LIN pin below the LIN pre-wake
+      threshold, the receiver is activated only for a specific time tmon. If tmon elapses while the voltage at the bus is lower than
+      pre-wake detection low (VLINL) or higher than the LIN dominant level, the receiver is switched off again and the circuit
+      changes back to sleep mode. The current consumption is then IVSsleep_short (typ. 10µA more than IVSsleep). If a dominant state
+      is reached on the bus, no wake-up occurs. Even if the voltage rises above the pre-wake detection high (VLINH), the IC will
+      stay in sleep mode.
+      This means the LIN bus must be above the pre-wake detection threshold VLINH for a few microseconds before a new LIN
+      wake-up is possible.
+      Figure 4-4. Floating LIN Bus During Sleep Mode
+                                                                                                                       LIN Pre-wake
+                              VLINL
+            LIN BUS
+                                                                                                                 LIN dominant state
+                              VBUSdom
+                                                                      tmon
+                                                                                               IVSsleep_short
+                                                                     IVSfail
+                 IVS
+                              IVSsleep                                                                          IVSsleep
+            Mode of
+           operation         Sleep Mode               Wake-up Detection Phase                           Sleep Mode
+         Int. Pull-up
+           Resistor                                              off (disabled)
+             RLIN
+      If the Atmel® ATA664151 is in Sleep Mode and the voltage level at the LIN bus is in dominant state (VLIN < VBUSdom) for a
+      period exceeding tmon (during a short circuit at LIN, for example), the IC switches back to sleep Mode. The VS current
+      consumption is then IVSsleep_short (typ. 10µA more than IVSsleep). After a positive edge at the LIN pin the IC switches directly to
+      active mode.
+12    ATA664151 [DATASHEET]
+      9268I–AUTO–04/15
+
+
+    Figure 4-5. Short Circuit to GND on the LIN Bus During Sleep Mode
+                                                                                                                   LIN Pre-wake
+                             VLINL
+           LIN BUS
+                                                                                                            LIN dominant state
+                             VBUSdom
+                                                                           tmon
+                                                                  tmon
+                                                                                     IVSsleep_short
+                                                                 IVSfail
+               IVS
+                              IVSsleep
+          Mode of
+         operation           Sleep Mode             Wake-up Detection Phase          Sleep Mode             Active Mode
+       Int. Pull-up
+         Resistor                                     off (disabled)                                      on (enabled)
+           RLIN
+4.3 Active Low-power Mode
+    In this mode, the VCC voltage regulator is active and can therefore supply the application’s microcontroller.
+    All other functions of the Atmel® ATA664151 are disabled in the configuration register respectively inhibited by the PWM pins
+    for the CSx pin current sources. This reduces the current consumption of the chip itself to a low-power range of typically
+    below 50µA. Note that this is only valid if the chip select input of the SPI, NCS, is also kept at a high level. If it is pulled to
+    ground, SPI communication is enabled, causing a higher current consumption.
+    If the LIN transceiver is disabled, the bus is monitored for a wake-up event, initialized with a voltage level below the LIN
+    pre-wake threshold at the LIN pin.
+                                                                                            ATA664151 [DATASHEET]                       13
+                                                                                                            9268I–AUTO–04/15
+
+
+   Figure 4-6. LIN Wake-up from Active Low-power Mode
+               LIN Bus
+                   VCC
+                 NRES
+                 NIRQ
+           SPI Comm.                                                     Enable WD/ Read Status
+       Watchdog State                                     Watchdog off                             Start Watchdog Lead Time
+                                          tbus = 90μs typ
+   The negative edge on the NIRQ pin indicates a change of conditions, in this case a wake-up request at the LIN bus. The
+   microcontroller can check the IRQ source by assessing the “IRQS1” and “IRQS0” bits in the status register. Note that if a
+   watchdog operation is desired, it must be enabled via the configuration register.
+   The behavior can be transferred to a wake-up over CL15 pin from active low-power mode.
+   Figure 4-7. CL15 Wake-up from Active Low-power Mode
+                   CL15
+                   VCC
+                 NRES
+                  NIRQ
+            SPI Comm.                                                   Enable WD/ Read Status
+        Watchdog State                                     Watchdog off                           Start Watchdog Lead Time
+                                       tCL15deb = 160μs typ
+   Apart from the LIN transceiver and the CL15 input, the high-voltage I/O ports CS1 to CS8 can also be used to generate
+   interrupts while in active low-power Mode. This can be done by enabling the current sources so that they can generate an
+   interrupt with the corresponding CSEx- and CSIEx bits in the configuration register. As long as the current source is not
+   enabled (CSCx='0' and PWMy low), the IC stays in active low-power mode (if all other conditions are met, such as disabled
+   watchdog). The PWMy pin has to be set to high by the microcontroller, for example, controlled via a PWM timer unit, in order
+   to check the condition of the connected switch. Because the switch interface unit is enabled, current consumption increases
+   drastically. This “switch scanning phase” can be short compared to the interceding idle time so the mean current
+   consumption of the IC remains close to the active low-power Mode current consumption. For more information, see Section
+   8.1 “Current Sources” on page 22 and Section 8.2 “Switch Inputs” on page 24 for further details.
+14 ATA664151 [DATASHEET]
+   9268I–AUTO–04/15
+
+
+4.4   Behavior under Low Supply Voltage Conditions
+      When connected to the car battery, the voltage at the VS pin increases according to the blocking capacitor (see Figure 4-8).
+      As soon as VVS exceeds its undervoltage threshold VVSthO, the Switch Interface Unit and the LIN transceiver can be used.
+      The IC is in active mode after power-up with the VCC voltage regulator and the window watchdog enabled – the latter
+      depends on the state of the pin VDIV. The VCC output voltage reaches its nominal value after tVCC. This time depends on the
+      externally applied VCC capacitor and the load.
+      The NRES is low for the reset time delay treset. During this time treset, no SPI communication and thus no configuration
+      changes or status checks are possible.
+      Figure 4-8. VCC versus VS
+                                  7.0
+                                  6.5
+                                  6.0
+                                  5.5
+                                  5.0
+                                  4.5                   Regulator drop voltage VD
+                                  4.0                                                                          LIN
+                                  3.5
+                         V in V   3.0
+                                  2.5                      VS
+                                  2.0                                                           NRES
+                                  1.5
+                                  1.0                                         VCC
+                                  0.5
+                                   0
+                                        0   0.5   1.0     1.5    2.0   2.5   3.0    3.5   4.0     4.5   5.0    5.5   6.0   6.5   7.0
+                                                                        VS in V
+      Please note that upper graph is only valid if the VS ramp-up time is much slower than the VCC ramp-up time tVCC and the
+      NRES delay time treset.
+      If during active mode the voltage level of VS drops below the undervoltage detection threshold VVSthU, an interrupt is
+      indicated to the microcontroller by means of a low-signal at the NIRQ pin. Furthermore, both the switch interface unit and the
+      LIN transceiver are shut down in order to avoid malfunctions or false bus messages. This shutdown is achieved by simply
+      inhibiting the functions internally. The corresponding bits in the configuration register are not cleared. This means the
+      functionality resumes if enabled after the supply voltage exceeds above VVSthO again.
+      If during sleep mode the voltage level of VS drops below the undervoltage detection threshold VVSthU, no change of mode or
+      any other activity by the Atmel® ATA664151 occurs as long as the level does not drop below the minimum operation value
+      VVSopmin.
+                                                                                                              ATA664151 [DATASHEET]             15
+                                                                                                                             9268I–AUTO–04/15
+
+
+5.  Wake-up Scenarios from Sleep Mode
+5.1 Remote Wake-up via the LIN Bus
+    A voltage lower than the LIN Pre-wake detection VLINL at the LIN pin activates the internal LIN receiver.
+    A falling edge at the LIN pin followed by a dominant bus level VBUSdom of at least tBUS and a rising edge at pin LIN results in a
+    remote wake-up request. The device switches from sleep mode to active mode. The VCC voltage regulator is activated and
+    the internal slave termination resistor is switched on. The remote wake-up request is indicated by a low level at the NIRQ
+    pin. this generates an interrupt for the microcontroller and a corresponding flag in the SPI register.
+5.2 Local Wake-up via Pin CL15
+    A positive edge at pin CL15 followed by a high voltage level for a given time period (> tCL15deb) results in a local wake-up
+    request. The device switches to active mode. The debouncing time ensures that no transients at CL15 create a wake-up.
+    The local wake-up request is indicated by a low level at the NIRQ pin, generating an interrupt for the microcontroller. During
+    high-level voltage at the CL15 pin, it is possible to switch to sleep mode via an SPI command. In this case the voltage at the
+    CL15 pin has to be switched to low for at least tCL15deb before the positive edge at this pin starts a new local wake-up request.
+    Note that this time can be extended by adapting the external circuitry.
+5.3 Wake-up Source Recognition
+    The device can distinguish between different wake-up sources.
+    The source for the wake-up event can be read out of the SPI diagnosis register.
+6.  Wake-up Scenarios from Active Low-power Mode
+    Generally the active low-power mode is only possible if all clock-dependent peripherals such as the LIN transceiver and the
+    watchdog are disabled. In addition, no SPI communication is allowed to take place to minimize current consumption.
+6.1 Wake-up from CSx Pins
+    The switch input pins can each be used to generate an interrupt request while in active low-power mode. A state change
+    detection circuitry is implemented for this functionality (see Section 8.2 “Switch Inputs” on page 24). For this functionality, the
+    respective current source needs to be configured so that it is controlled via the dedicated PWMy pin. A rising edge on this pin
+    enables the current source, allowing a stable switch readback signal to be delivered at the CSx pin. The switch state is
+    updated with a falling edge at the PWMy pin. If a change of state is monitored, an interrupt request is generated if the CSIE
+    bit of the affected current source is set to '1' in the configuration register. If no wake-up should occur on a certain switch -
+    either because there is no application demand for this or a failure such as a hanging switch or a connection line short-circuit
+    is present - it can be prevented by disabling the current source in the SPI configuration register.
+6.2 Wake-up from LIN Bus
+    If during active low-power mode (i.e., the LIN transceiver is disabled) the LIN bus is tied to ground for at least tbus. This
+    wake-up request is indicated by a negative edge at the NIRQ pin. Please note that the Atmel® ATA664151 stays in active
+    low-power mode for as long as no SPI communication occurs or configuration changes are made. Current consumption is
+    only higher during the LIN bus assessment, in other words as long as the voltage on the LIN bus is below VLIN,preL.
+    Regardless of the LIN bus state, this assessment phase ends after tLIN_wudet at the latest. This ensures a low current
+    consumption even during shorts on the LIN bus or when there are floating bus levels.
+6.3 Wake-up from CL15
+    If during active low-power mode the voltage on the CL15 pin exceeds VCL15H for at least tCL15deb, an interrupt request is
+    triggered to indicate a change of state at the CL15 pin. Please note that after the tCL15deb has elapsed, the Atmel ATA664151
+    stays in active low-power mode for as long as no SPI communication occurs or configuration changes are made.
+16  ATA664151 [DATASHEET]
+    9268I–AUTO–04/15
+
+
+6.4 Wake-up from SPI
+    If during active low-power mode the chip select input NCS is tied to ground, Atmel® ATA664151 leaves the active low-power
+    mode in order to complete a data communication with the SPI master. The operating mode of the IC is adapted in
+    accordance with the configuration register update. If no change in configuration has taken place – for example, because only
+    the actual status was polled or another bus member connected via daisy chaining was addressed – Atmel ATA664151 goes
+    back to active low-power mode as soon as NCS returns to high level.
+7.  Serial Programming Interface (SPI)
+    Most features of the IC are configured via SPI. Diagnostics are carried out using this interface also. It can be used in active
+    mode as long as there is no undervoltage condition at the VCC pin.
+    The Atmel ATA664151 SPI features both POL = 0 / PHA = 0 and POL = 1 / PHA = 1 operating modes.
+    Figure 7-1. POL = 0 / PHA = 0 Setup
+                                   Sample
+             NCS                         Setup
+            MOSI       X        MSB           14      13        12                     2          1         LSB       X      X
+             SCK
+            MISO        Z       MSB           14      13        12                     2          1         LSB      MOSI    Z
+                                                                                                                     MSB
+    Figure 7-2. POL = 1 / PHA = 1 Setup
+                                  Setup
+            NCS                         Sample
+           MOSI        X      X          MSB       14        13                   3             2         1         LSB      X
+            SCK
+           MISO        Z      X       MSB          14        13                   3             2         1         LSB      X
+    The interface contains four pins.
+       ● NCS (chip select pin, active low)
+       ●    SCK (serial data clock)
+       ●    MOSI (master-out-slave-in serial data port input from master)
+       ●    MISO (master-in-slave-out serial data port output from SBC; this pin is tri-state if NCS is high)
+    No data is loaded from MOSI on SCK edges or provided at MISO if chip select is not active. The output pin MISO is not
+    actively driven (tri-state) during these phases.
+                                                                                            ATA664151 [DATASHEET]                 17
+                                                                                                            9268I–AUTO–04/15
+
+
+   The data transfer scheme (bit order) is MSB first, meaning the first bit that is transferred is the most significant bit of the
+   register, with the transfer ending with the least significant bit. These bits are listed on the next pages. The MOSI bits 15 to 0
+   refer to the configuration register. This means the configuration register is updated with each SPI communication. At the
+   same time the MISO word is built from the status register bits 15 to 0. Note that changes in the configuration are only visible
+   in the next status query. This means, for example, that if you enable the watchdog with an SPI command, the status
+   “Watchdog Active” is not reported in this data transmission but in the next one.
+   In order to load any data into the chip, the chip select signal must be removed (i.e., set to high) after the 16 SCK clock
+   periods. A minimum data evaluation time tSPIeval,min has to transpire before the next data transfer can start. Please note also
+   that any change in configuration of the IC requires this time to go into effect.
+   Figure 7-3. SPI Configuration Timing
+                                   NCS
+                            MOSI Data                     Config Data
+                    Chip Configuration                      Previous Config                          New Config
+                                                                                 tSPIeval_min
+   The following table lists the bits of the configuration register in the Atmel® ATA664151.
+   Table 7-1.     SPI ConfIguration Register
+                                                                               Programmed
+        #     Bit Name          Description                Default ('0')       with '1'              Remark
+       15                       Enable LIN-bus
+              LSME                                         Normal              High-speed            See LIN transceiver description
+     MSB                        High-speed mode
+                                                                                                     See Section 3.6 “Bus Logic
+                                Disable TxD time-out
+       14     TTTD                                         Enabled             Disabled              Level Input Pin (TXD)” on page
+                                timer
+                                                                                                     5
+                                                                                                     See Section 8. “Switch Interface
+       13     IMUL              IREF multiplier value      x100                x50
+                                                                                                     Unit” on page 22
+       12     LINE              Enable LIN transceiver Disabled                Enabled               See LIN transceiver description
+                                                           Stay in active      Enable sleep          See Section 4. “Operating
+       11     SLEEP             Go to sleep
+                                                           mode                mode                  Modes” on page 8
+                                                                               VDIV on (selected See Section 8.2.2 on page 26
+                                                           VDIV off
+       10     VDIVE             Enable VDIV as output                          voltage divider       and Section 8. “Switch Interface
+                                                           (high-ohmic)
+                                                                               active)               Unit” on page 22
+                                                                                                     See Section 8.2.2 on page 26
+                                Programming VDIV           VDIV shows          VDIV shows one
+        9     VDIVP                                                                                  and Section 8. “Switch Interface
+                                output source              VBATT divider       CS divider output
+                                                                                                     Unit” on page 22
+18 ATA664151 [DATASHEET]
+   9268I–AUTO–04/15
+
+
+Table 7-1.   SPI ConfIguration Register (Continued)
+                                                               Programmed
+   #     Bit Name       Description              Default ('0') with '1'           Remark
+                        Enable switch interface                                   See Section 8. “Switch Interface
+   8     CSPE                                    Disabled      Enabled
+                        unit programming                                          Unit” on page 22
+                                                                                  Used as selector for VDIV
+                        Address bit 2 (MSB) for
+   7     CSA2                                    0             1                  and for programming of one
+                        switch input
+                                                                                  current source
+                                                                                  Used as selector for VDIV
+                        Address bit 1 for switch
+   6     CSA1                                    0             1                  and for programming of one
+                        input
+                                                                                  current source
+                                                                                  Used as selector for VDIV
+                        Address bit 0 (LSB) for
+   5     CSA0                                    0             1                  and for programming of one
+                        switch input
+                                                                                  current source
+                        Enable addressed                                          See Section 8. “Switch Interface
+   4     CSE                                     Disabled      Enabled
+                        current source                                            Unit” on page 22
+                                                 Source mode
+                        Switch between                         Sink mode          Sink mode is only possible for
+   3     CSSSM                                   selected
+                        source/sink mode                       selected (lowside) switch interfaces 1-3
+                                                 (highside)
+                        Control of addressed     External (CSE Internal           See Section 8. “Switch Interface
+   2     CSC
+                        current source           and PWMy)     (CSE only)         Unit” on page 22
+                                                                                  CSIE will be altered if CSPE
+                        Enable interrupt
+         CSIE                                                                     of the SPI word is '1'.
+                        from addressed switch    Disabled      Enabled
+         (CSPE=1)                                                                 See Section 8. “Switch Interface
+                        input
+                                                                                  Unit” on page 22
+   1
+                                                                                  CSSCD will be altered if CSPE
+         CSSCD          CS port current source                                    of the SPI word is '0'.
+                                                 Enabled       Disabled
+         (CSPE=0)       slope control                                             See Section 8. “Switch Interface
+                                                                                  Unit” on page 22
+                                                 Enabled
+   0                                                                              See Section 10. “Watchdog” on
+         WDD            Disable watchdog         (if pin VDIV  Disabled
+  LSB                                                                             page 28
+                                                 on low level)
+                                                                            ATA664151 [DATASHEET]                19
+                                                                                          9268I–AUTO–04/15
+
+
+   The following table lists the bits of the status register in Atmel® ATA664151.
+   Figure 7-4. SPI Status Register
+        #    Bit Name         Description                       Result = “0”     Result = “1”  Remark
+                              Overtemperature prewarning                                       See Section 9. on page 27; only
+             OTVCC                                              Temperature      Temperature
+                              from VCC regulator temp                                          valid if VDIVE of prev. command
+       15    (VDIVE=0)                                          not critical     critical
+                              sensor                                                           was '0'
+     MSB
+             MVBATT                                             VBATT not        VBATT visible Only valid if VDIVE of prev.
+                              VBATT voltage monitor
+             (VDIVE=1)                                          visible on VDIV on VDIV        command was '1'
+                                                                                               See Section 3.5 on page 5; only
+             OTLIN            Overtemperature signal from no Over-               Over-
+                                                                                               valid if VDIVE of prev. command
+             (VDIVE=0)        LIN driver temp sensor            temperature      temperature
+                                                                                               was '0'
+       14
+                                                                MRDIV2..0 indicate the address
+             MRDIV2           CS port voltage monitor,                                         This bit is only shown if VDIVE of
+                                                                of the CS port volt. monitor
+             (VDIVE=1)        address bit 2 (MSB)                                              previous command was '1'
+                                                                visible on VDIV
+                                                                                               See Section 8. on page 22; only
+             OTCS             Overtemperature signal from no Over-               Over-
+                                                                                               valid if VDIVE of prev. command
+             (VDIVE=0)        current sources temp sensor temperature            temperature
+                                                                                               was '0'
+       13
+                                                                MRDIV2..0 indicate the address
+             MRDIV1           CS port voltage monitor,                                         This bit is only shown if VDIVE of
+                                                                of the CS port volt. monitor
+             (VDIVE=1)        address bit 1                                                    previous command was '1'
+                                                                visible on VDIV
+                                                                                               See Section 11. on page 30; only
+             CL15S
+                              CL15 pin status                   VCL15 < VCL15H VCL15 ≥ VCL15H  valid if VDIVE of prev. command
+             (VDIVE=0)
+                                                                                               was '0'
+       12
+                                                                MRDIV2..0 indicate the address
+             MRDIV0           CS port voltage monitor,                                         This bit is only shown if VDIVE of
+                                                                of the CS port volt. monitor
+             (VDIVE=1)        address bit 0 (LSB)                                              previous command was '1'
+                                                                visible on VDIV
+                                                                Watchdog         Watchdog      See Section 10. “Watchdog” on
+       11    WDS              Watchdog status
+                                                                disabled         enabled       page 28
+       10    VSS              VS voltage level status           VS voltage OK VS undervoltage See Section 4.4 on page 15
+        9    IRQS1                                               “00”    PowerUp
+                                                                 “01”    CS change             Information will be cleared after
+                              Interrupt request source
+        8    IRQS0                                               “10”    CL15 wake-up          status register readout via SPI
+                                                                 “11”    LIN wake-up
+                              Switch interface 8                                               See Section 8. “Switch Interface
+        7    CS8CS                                              VCS8 < VCSxth    VCS8 > VCSxth
+                              comparator status                                                Unit” on page 22
+                              Switch interface 7                                               See Section 8. “Switch Interface
+        6    CS7CS                                              VCS7 < VCSxth    VCS7 > VCSxth
+                              comparator status                                                Unit” on page 22
+                              Switch interface 6                                               See Section 8. “Switch Interface
+        5    CS6CS                                              VCS6 < VCSxth    VCS6 > VCSxth
+                              comparator status                                                Unit” on page 22
+                              Switch interface 5                                               See Section 8. “Switch Interface
+        4    CS5CS                                              VCS5 < VCSxth    VCS5 > VCSxth
+                              comparator status                                                Unit” on page 22
+                              Switch interface 4                                               See Section 8. “Switch Interface
+        3    CS4CS                                              VCS4 < VCSxth    VCS4 > VCSxth
+                              comparator status                                                Unit” on page 22
+                              Switch interface 3                                               See Section 8. “Switch Interface
+        2    CS3CS                                              VCS3 < VCSxth    VCS3 > VCSxth
+                              comparator status                                                Unit” on page 22
+                              Switch interface 2                                               See Section 8. “Switch Interface
+        1    CS2CS                                              VCS2 < VCSxth    VCS2 > VCSxth
+                              comparator status                                                Unit” on page 22
+        0                     Switch interface 1                                               See Section 8. “Switch Interface
+             CS1CS                                              VCS1 < VCSxth    VCS1 > VCSxth
+      LSB                     comparator status                                                Unit” on page 22
+20 ATA664151 [DATASHEET]
+   9268I–AUTO–04/15
+
+
+The SPI is capable of daisy chaining as well. In other words, if other ICs with a daisy-chaining-enabled SPI are to be used in
+the application, they can simply be interconnected one after the other (see Figure 7-5).
+Figure 7-5. Daisy Chaining Configuration
+                                                   NCS                       NCS
+                                                   SCK                       SCK
+                               Microcontroller                                     ATA664151
+                                                  MOSI                       MOSI
+                                                  MISO                       MISO
+                                                                             NCS
+                                                                                      Other
+                                                                             SCK
+                                                                                       SPI
+                                                                             MOSI    Member
+                                                                             MISO
+It can be seen that the data output of Atmel® ATA664151 is not connected to the data input of the master but of another SPI
+member which is also capable of daisy chaining. In order to transmit data, the microcontroller has to send the sum of clock
+pulses for all bus members. In the example above, if the other SPI member also features 16 bits, the microcontroller has to
+perform 32 clock cycles with NCS kept low to completely move the data. The first 16 bits of such a transmission are initially
+fed into the Atmel ATA664151. But when NCS stays low, the data is not loaded into its configuration register but instead
+shifted out again with the next 16 bits. At the same time the status register of Atmel ATA664151 is first fed into the other SPI
+bus member which then needs to transfer the data over to the microcontroller with the second 16 bits.
+In summary, the daisy chaining is one way to have multiple bus members connected to a single master. Because not all
+devices support these operating modes, the Atmel ATA664151 still supports the direct addressing mode using the NCS pin.
+If NCS is not pulled to ground, all data traffic on the SPI is disregarded by the Atmel ATA664151.
+                                                                                       ATA664151 [DATASHEET]                  21
+                                                                                                     9268I–AUTO–04/15
+
+
+8.    Switch Interface Unit
+      A total of eight high-side current sources with high voltage comparators and voltage dividers are available for switch
+      scanning or for example, LED driving purposes. Note that three of them (CS1, CS2, and CS3) can also be switched to
+      low-side current sinks in the configuration register via the SPI. System wake-up from active low-power mode is possible
+      through state change monitoring. Please see Figure 8-1 for an overview of the interface structure.
+      Figure 8-1. Principle Schematic of a High-Side-Only Switch Interface (CS4 - CS5)
+                          VS                                                                      CSE [1..8]
+                                 IIREF × rlCS
+                                                                                                                   PWMy
+                                                                                                  CSC [1..8]
+                                                                                  State
+                                                                                 change           d_statechange
+                                                                                 detector
+                                                                                                  VCSxth (4V DC)
+                                                                          HV
+                                                                          comp                    dout_cs_x
+                         CSx
+                                                                MUX
+                                                                                                  CSA [2..0]
+                                           3R                                                                      VBATT
+                         VDIV                                                                     VDIVP
+                                            R
+                                            AGND
+                                                                                                  VDIVE
+      The control signals CSE and CSC are configuration register bits, and unique for each of the eight interfaces. The output
+      signal dout_cs of the comparator can be probed via the SPI status register bit CSxCS.
+8.1   Current Sources
+      The current sources are available in Active Mode. They deliver a current level derived from a reference value measured at
+      the IREF pin. This pin is voltage-stabilized (VIREF = 1.23V typ.) so that the reference current is directly dependent on the
+      externally applied resistor connected between IREF pin and ground. The resulting current at the CSx- pins is
+      (1.23V/RIref)  rICS. For example, with a 12K resistor between IREF and GND the value of the current at the CSx-pins is
+      10mA (assumed IMUL = '0' => rICS_H = 100). For fail-safe reasons, both a missing and a short-circuited resistor are detected.
+      In this case, an internally generated reference current IIREFfs is used instead to maintain a certain functionality.
+      The current sources of I/Os 1-3 (CS1..CS3) can be configured either as high-sides (current sources) or low-sides (current
+      sinks). This selection is done by the CSSSM bit of the configuration register. The default value of '0' enables the high-side
+      source whereas a '1' enables the low-side sink.
+      The output current level can be divided by 2 with the IMUL bit in the configuration register. With the default setting of
+      IMUL = '0', the ratio between the output current ICSx and the reference current IIREF is rICS_H (typ. 100). If set to '1', the ratio
+      reduces to rICS_L (typ. 50).
+22    ATA664151 [DATASHEET]
+      9268I–AUTO–04/15
+
+
+If a current source is enabled by the configuration register (set to ready state, bit CSE = '1'), it supports two different
+operating modes.
+   ● Directly controlled by the configuration register - bit CSC = '1'
+   ●    Externally gated (inhibited with the PWMy pin) - bit CSC = '0' (default)
+These modes can be selected independently for each current source via the configuration register. While the current source
+is permanently on with CSC = '1' it is controlled externally by the logic level input pins PWMy with CSC = '0' for switch
+scanning or LED driving (external PWM control). The following truth table summarizes all setup variants.
+Table 8-1.       CS Port Configuration Table
+                                                                                                            Active Low-power
+      CSEx               CSCx          CSSSM            PWMy                CS1..3          CS4..8            Mode Possible
+         0                X                X                X                 Off             Off                   Yes
+         1                 0               X                0                 Off             Off                   Yes
+         1                 1               0                X                  1              1                     No
+         1                 1               1                X                  0              1                     No
+         1                 0               0                1                  1              1                     No
+         1                 0               1                1                  0              1                     No
+ Legend:
+ 0 -> Bit = '0' for CSEx, CSCx and CSSSM; logic low for PWMy; LS current source active for CS1..3
+ 1 -> Bit = '1' for CSEx, CSCx and CSSSM; logic high for PWMy; HS current source active for CS1..8
+ X -> Do not care for CSEx, CSCx, CSSM and PWMy
+ Off -> Current source disabled
+Please see Table 8-2 for the assignment between the three available PWM control ports PWM1..3 and the eight current
+source outputs CS1..8.
+Table 8-2.       Assignment of Current Sources to the PWMy Ports
+     PWM
+      Port           CS1           CS2          CS3              CS4            CS5          CS6            CS7           CS8
+     PWM1             X             -             -                -              -            -              X             X
+     PWM2              -            X             -                -              X           X               -             -
+     PWM3              -            -             X                X              -            -              -             -
+There is one common control bit for all current sources, the bit “CSSCD”. With this bit, the slope control of all eight sources
+can be disabled. By default, the slope control is activated and all currents are switched on and off smoothly (see also
+parameter dUCSx,rise and dUCSx,fall). When setting this bit to '1', the current sources are enabled and disabled without
+transition times.
+                                                                                         ATA664151 [DATASHEET]                23
+                                                                                                         9268I–AUTO–04/15
+
+
+      In order to change the configuration of a certain current source via SPI, it must be addressed and the current source
+      programming bit CSPE must be set to '1'. Please see Table 8-3 for the eight available current sources.
+      Table 8-3.     CS Port Addressing Table
+       Current Source on Pin                                  Bit CSA0                   Bit CSA1                    Bit CSA2
+       CS1, high- or lowside                                      0                            0                          0
+       CS2, high- or lowside                                      1                            0                          0
+       CS3, high- or lowside                                      0                            1                          0
+       CS4, highside only                                         1                            1                          0
+       CS5, highside only                                         0                            0                          1
+       CS6, highside only                                         1                            0                          1
+       CS7, highside only                                         0                            1                          1
+       CS8, highside only                                         1                            1                          1
+      That is, if any of the following configuration bits (CSE, CSSSM, CSIE, and CSC) of a certain I/O port shall be changed, the
+      required data word for the SPI must contain the desired I/O number (bits CSA0..2) and the programming enable bit CSPE
+      must be '1'. Only in this case, the corresponding bits in the SPI data word are loaded into the configuration register of the
+      selected switch interface. For the global current source configuration bit CSSCD (slope control for current sources), the
+      CSPE bit must be '0' in order to be changed via an SPI command. That is, either the four individual configuration bits (CSE,
+      CSSSM, CSIE and CSC) or the global configuration bit (CSSCD) can be changed with one SPI command word.
+      Dependent on the selected current, the supply voltage, the externally applied load and the number of current sources
+      activated, a not neglectable amount of power will be dissipated in Atmel® ATA664151. In order to protect the IC from
+      damage, the current sources are equipped with thermal monitors. If the temperature in one of the monitors exceeds Tjsd, all
+      current sources will be shut down and an interrupt will be generated. Note that the current source enabled bits (CSE) in the
+      configuration register are not cleared by this event. That is, the current sources will be enabled after a certain cooling time.
+8.2   Switch Inputs
+8.2.1 Voltage Comparators
+      Each switch input has a high voltage comparator, a state-change-detection register for wake-up and interrupt request
+      generation and a voltage divider with a low-voltage output that can be fed through to the measurement pin VDIV.
+      In sleep mode, the HV comparators and the voltage dividers of each input are switched off. In active mode, the comparator
+      of a channel is activated together with its current source. It has a threshold of VCSxth. The output signal dout_csx of the
+      comparator is debounced with a delay of tCSdeb. A voltage above the threshold will generate a logical '1' in the status register
+      bit CSxCS whereas a voltage below will lead to a '0'.
+      The comparator output signal is also fed into a state change detection logic that can be used to generate wake-up events in
+      form of an interrupt request, signalized on pin NIRQ. Please see Figure 8-2 on page 25 for an overview of the state change
+      detection unit.
+24    ATA664151 [DATASHEET]
+      9268I–AUTO–04/15
+
+
+Figure 8-2. State Change Detection Circuitry
+                                                                                                          d_statechange_x
+              CSx                    HV     dout_cs
+                                     comp              D     Q               D     Q
+                        VCSxth
+                       (4V VDC)                         D-FF                  D-FF
+                                                          R                     R
+                      CSC_x
+            PWMy
+                      CSE_x
+As can be seen in Figure 8-2, the data from the comparator is latched with the falling edge of either the PWMy pin or the
+CSC bit. That is, the data is latched in the same moment when the current source is switched off. This ensures that the
+comparator signal was already stable when its output is evaluated. The output signal d_statechange is evaluated by the
+main control logic. If the interrupt enable bit CSIE is set in the configuration register and d_statechange is '1', an interrupt is
+generated and reported by a low level on pin NIRQ. Please see Figure 8-3 for an example of the state change detection
+system.
+Figure 8-3. Interrupt Generation upon State Change
+                                          tCSdeb
+                                                               Signal sample point                     Signal sample point
+                           CSE
+                   PWMy/ CSC
+                           CSx
+                     dout_cs_x
+                 sampled state
+              d_statechange_x
+                          NIRQ
+                                                                                             tNIRQtrig
+The output state of the HV comparator is sampled with each falling edge of the PWMy or CSC signal. As soon as the
+sampled state changes, an interrupt request is given.
+In order to have minimum power consumption also for switch scanning applications, Atmel® ATA664151 is able to switch to
+active low-power Mode even if current sources are enabled with the CSEx bit in the configuration register. As long as the
+current source is inhibited (for example, by having CSCx programmed to 0 and PWMy also at low level), the IC can be in
+active low-power mode (dependent on the other peripherals, see also Table 4-1 on page 9). The current source is then in a
+kind of stand-by situation. As soon as the PWMy pin is raised, the IC switches to active mode with the defined current
+sources on.
+                                                                                          ATA664151 [DATASHEET]                 25
+                                                                                                           9268I–AUTO–04/15
+
+
+8.2.2 Voltage Dividers
+      A voltage divider (division by 4) is included for each of the eight CS port channels. Please note that the divider is always
+      referred to local ground (pin AGND), regardless of the respective current source/sink configuration. As there is only one
+      output available for all voltage dividers of the chip, only one of them can be active at a time. The SPI data word must contain
+      the following information in order to activate the voltage divider of a certain switch interface.
+        ● The voltage divider enable bit VDIVE must be '1'.
+        ●     The VDIV programming source bit VDIVP must be '1'.
+        ●     The desired channel must be coded in the three address bits CSA0..2.
+      Please see Table 8-4 for a list of all voltage divider programming inputs and their corresponding VDIV output state.
+      Table 8-4.      Voltage Divider Addressing Table
+              VDIVE                 VDIVP                  CSA2                 CSA1                 CSA0                 VDIV
+                 0                     X                     X                    X                     X                  Off
+                 1                     0                     X                    X                     X              VBATT / 4
+                 1                     1                      0                   0                     0               CS1 / 4
+                 1                     1                      0                   0                     1               CS2 / 4
+                 1                     1                      0                   1                     0               CS3 / 4
+                 1                     1                      0                   1                     1               CS4 / 4
+                 1                     1                      1                   0                     0               CS5 / 4
+                 1                     1                      1                   0                     1               CS6 / 4
+                 1                     1                      1                   1                     0               CS7 / 4
+                 1                     1                      1                   1                     1               CS8 / 4
+       Legend:
+       0 -> Bit = '0'
+       1 -> Bit = '1'
+       X -> Do not care
+26    ATA664151 [DATASHEET]
+      9268I–AUTO–04/15
+
+
+9.   Voltage Regulator
+     The VCC voltage regulator in Atmel® ATA664151 is a linear low-drop regulator and requires an external capacitor for
+     compensation and for smoothing the disturbances in the microcontroller. It is mandatory to use a capacitor with C > 1.8µF
+     and ESR of below 5. An additional ceramic capacitor with C = 100nF is recommended for EMI suppression. The values of
+     these capacitors can be varied depending on the application.
+     Figure 9-1. VCC Voltage Regulator: Ramp-up and Undervoltage Detection
+                                VS
+                                12V
+                               5.5V
+                                                                                                                                          t
+                               VCC
+                                  5V
+                               Vthun
+                                                                      TVCC                                                                t
+                                                                                  TReset                                         Tres_f
+                             NRES
+                                 5V
+                                                                                                                                          t
+     The VCC output transistor is contributing to the ICs total power dissipation – defined by the voltage drop over the transistor
+     and the output current IVCC. In the figure below, the safe operating area of Atmel ATA664151 is shown. To avoid a thermal
+     shutdown of the VCC output, the maximum load current decreases with rising ambient temperature and/or battery supply
+     voltage. Please note also that the current sources contribute to power dissipation.
+     Figure 9-2. Power Dissipation: Safe Operating Area (SOA) of VCC Output Current versus Supply Voltages VS at
+                 Different Ambient Temperatures, Rthja = 40K/W and No Current Source (Pins CSx) Active
+                                                             90
+                                                             80
+                                                             70
+                                       Output Current (mA)
+                                                             60
+                                                             50
+                                                             40                  Ta = 85°C
+                                                                                 Ta = 105°C
+                                                             30                  Ta = 125°C
+                                                             20
+                                                             10
+                                                              0
+                                                                  4   6      8   10   12      14   16   18   20   22   24   26   28
+                                                                                       VS [V] (V_VCC = 5V)
+                                                                                                                            ATA664151 [DATASHEET]                27
+                                                                                                                                              9268I–AUTO–04/15
+
+
+     Because the VCC voltage generation is usually fundamental to system operation, there is a thermal prewarning
+     implemented in the Atmel® ATA664151. The thermal monitor of the VCC output transistor can indicate a critical temperature
+     condition of TVCCprew by means of an interrupt and the status bit OTVCC in the status register of the chip. The microcontroller
+     can thus react to these events by shutting down external loads that use the VCC or reducing its own power consumption in
+     order to avoid a thermal shutdown.
+     Nevertheless, if the junction temperature of the output transistor exceeds the shutdown threshold Tjsd, the transistor as well
+     as the VCC are shut down until the temperature has decreased at least by Tjsdhyst. After this cooling-down period, the
+     regulator starts again in the same way as when powering up or for a wake-up from sleep mode.
+     For microcontroller programming, it may be necessary to supply the VCC output via an external power supply. It is then
+     mandatory to disconnect pin VS of the system basis chip, and an operation of Atmel ATA664151 is not possible.
+10.  Watchdog
+     The watchdog expects a trigger signal from the microcontroller at the NTRIG (negative edge) input within a time window of
+     twd. The trigger signal must exceed a minimum time ttrigmin > 7µs. If a triggering signal is not received, a reset signal will be
+     generated at output NRES. The timing basis of the watchdog is provided by the internal watchdog oscillator. Its time period,
+     tWDosc, is adjustable via the external resistor Rwd_osc (34k to 120k).
+     During sleep mode the watchdog is switched off to reduce current consumption. In order to enter active low-power mode, the
+     watchdog also needs to be disabled via the configuration register. In order to avoid false watchdog disabling, this
+     configuration bit (WDD) needs to be written twice, i.e., with two consecutive SPI words in order to be altered to '1'.
+     In order to disable the watchdog right from the start (i.e., after external power-up or after sleep mode), pin VDIV has to be
+     tied to VCC until the startup time treset of typ. 4ms has elapsed (see Section 3.14 “VDIV Input/Output Pin” on page 7).
+     The minimum time for the first watchdog pulse is required after the undervoltage reset at NRES disappears. It is defined as
+     lead time td. After wake-up from sleep mode, the lead time td starts with the positive edge of the NRES output.
+10.1 Typical Timing Sequence with RWD_OSC = 51k
+     The trigger signal Twd is adjustable between 20ms and 64ms using the external resistor RWD_OSC.
+     For example, with an external resistor of RWD_OSC = 51k ± 1%, the typical parameters of the watchdog are as follows.
+     tosc = 0.782  RWD_OSC + 1.7  10-6  (RWD_OSC)2          [RWD_OSC in k; tosc in µs]
+     tOSC = 39.9µs due to 51k
+     td = 3948 39.9µs = 157.5ms
+     t1 = 553  39.9µs = 22.1ms
+     t2 = 527  39.9µs = 21ms
+     tnres = constant = 4ms
+     After ramping up the battery voltage, the VCC regulator is switched on. The reset output NRES stays low for the time treset
+     (typically 4ms), then it switches to high, and the watchdog waits for the trigger sequence from the microcontroller. The lead
+     time, td, follows the reset and td = 155ms. In this time, the first watchdog pulse from the microcontroller is required. If the
+     trigger pulse NTRIG occurs during this time, the time t1 starts immediately. If no trigger signal occurs during the time td, a
+     watchdog reset with treset = 4ms resets the microcontroller after td = 155ms. The times t1 and t2 have a fixed relationship. A
+     triggering signal from the microcontroller is anticipated within the time frame of t2 = 21.6ms. To avoid false triggering from
+     glitches, the trigger pulse must be longer than tTRIG,min > 7µs. This slope restarts the watchdog sequence. If the triggering
+     signal fails in this open window t2, the NRES output is drawn to ground. A triggering signal during the closed window t1
+     immediately switches NRES to low.
+28   ATA664151 [DATASHEET]
+     9268I–AUTO–04/15
+
+
+     Figure 10-1. Timing Sequence with RWD_OSC = 51k
+                   VCC
+                     5V
+                               Undervoltage Reset                                                           Watchdog Reset
+                                treset = 4ms                                                                    tnres = 4ms
+                  NRES
+                                                      td = 155ms                             t1        t2
+                                                                   t1 = 20.6ms     t2 = 21ms
+                                                                               twd
+                 NTRIG
+                                                             ttrig > 7μs
+10.2 Worst Case Calculation with RWD_OSC = 51k
+     The internal oscillator has a tolerance of 20%. This means that t1 and t2 can also vary by 20%. The worst-case calculation for
+     the watchdog period twd is as follows.
+     The ideal watchdog time twd is between the maximum t1 and the minimum t1 plus the minimum t2.
+     t1,min = 0.8 t1 = 16.8ms, t1,max = 1.2  t1 = 25.2ms
+     t2,min = 0.8 t2 = 17.7ms, t2,max = 1.2 t2 = 26.5ms
+     twdmax = t1min + t2min = 16.8ms + 17.7ms = 34.5ms
+     twdmin = t1max = 25.2ms
+     twd = 29.9ms ±4.6ms (±15%)
+     A microcontroller with an oscillator tolerance of ±15% is sufficient to supply the trigger inputs correctly.
+     Table 10-1. Typical Watchdog Timings
+                          Oscillator         Lead         Closed
+         RWD_OSC            Period           Time        Window                 Open Window      Trigger Period from        Reset Time
+             k             tosc/µs          td/ms         t1/ms                    t2/ms       Microcontroller twd/ms       tnres/ms
+             34               26.6            105           14.0                     14.7                20.13                   4
+             51               39.9           157.5            21                     22.1                29.85                   4
+             91               71.2            281           37.5                     39.4                53.27                   4
+            120               93.9           370.6          49.5                     51.9                70.26                   4
+     Note that in the case of a missing or shorted resistor on pin WDOSC, the watchdog oscillator period will be well below or
+     above the reachable values listed above. In other words, if not disabled after startup by using the VDIV pin or during
+     operation with the SPI configuration, a watchdog reset will be generated all the time for fail-safe reasons.
+                                                                                                ATA664151 [DATASHEET]                 29
+                                                                                                               9268I–AUTO–04/15
+
+
+11. CL15 HV Input
+    The CL15 pin can be used as ignition state detection and wake-up input. It has a weak internal pull-down structure, so if no
+    voltage is connected to this pin, it is at ground level, the passive state of this input. In order to generate an interrupt request
+    or to wake-up from sleep mode, a certain voltage needs to be applied to this pin.
+    The input voltage threshold can be adjusted by varying the external resistor due to the input current ICL_15. To protect this pin
+    against voltage transients, a serial resistor of 10k and a ceramic capacitor of 47nF are recommended. With this RC
+    combination you can increase the wake-up time tCL15deb as well as enhance sensitivity against transients when ignition of the
+    CL15 pin occurs.
+    You can also increase the wake-up time using external capacitors with higher values. In Figure 11-1, the reaction of the
+    Atmel® ATA664151 to a signal at the CL15 pin is shown. Note that the pin is connected via an R/C low-pass filter.
+    Figure 11-1. Timing for CL15 Debouncing
+                                         CL15
+                                      cl15_int
+                                        NIRQ
+                                                                tRC              tCL15deb
+    In the diagram above, the voltage at the CL15 pin is shown. Due to the R/C filter, the voltage does not immediately increase
+    but instead slowly over time. As soon as the voltage exceeds approximately 3V, the internal debouncing time tCL15deb starts.
+    After this elapses, a wake-up is indicated by a falling edge on the NIRQ pin.
+12. Fail-safe Features
+      ●     During a short-circuit at LIN to VBattery, the output current is limited to IBUS_lim. Due to power dissipation, the chip
+            temperature might exceed TLINoff, causing a shutdown of the LIN output transistor. That in turn starts the chip cooling
+            phase, and after a hysteresis of Thys the output can be switched on again with TXD = 0. During shutdown, RXD
+            indicates the LIN bus state, which is typically recessive because the output transistor is off. Please note that the VCC
+            voltage regulator works independently from the LIN output transistor temperature monitor because it is equipped with
+            its own monitor.
+      ●     During a short-circuit at LIN to GND, the IC can be switched to sleep mode. If the short-circuit disappears, the IC
+            starts with a remote wake-up.
+      ●     The reverse current is very low < 2µA at the LIN pin during loss of VBatt. This is optimal behavior for bus systems
+            where some slave nodes are supplied from battery or ignition.
+      ●     During a short circuit at VCC, the output limits the output current to IVCClim. Because of undervoltage, NRES switches
+            to low and can therefore reset the connected microcontroller. If the chip temperature of the VCC output transistor
+            exceeds the value TVCCoff, the VCC output switches off. The chip cools down and after a hysteresis of Thys, the output
+            is reactivated.
+      ●     The NCS pin provides a pull-up resistor to force the SPI output into tri-state mode if NCS is disconnected
+      ●     The TXD pin provides a pull-up resistor to force the transceiver into recessive mode if TXD is disconnected.
+      ●     If the WDOSC pin has a short-circuit to GND or the resistor is disconnected, the watchdog runs with an internal
+            oscillator and ensures a reset takes place.
+      ●     If there is no NTRIG signal and short circuit at WDOSC, the NRES switches to low after tWDOfshi. For an open circuit
+            (no resistor) at WDOSC it switches to low after tWDOfslo.
+      ●     The watchdog disable bit WDD in the configuration register needs to be written twice in order to take effect. This
+            avoids unwanted watchdog shutdowns due to data misinterpretation caused by EMI.
+      ●     If the IREF pin has a short-circuit to GND or the resistor is disconnected/shorted to VCC, the current sources run with
+            an internal reference current which guarantees basic functionality of the application.
+30  ATA664151 [DATASHEET]
+    9268I–AUTO–04/15
+
+
+13.      Absolute Maximum Ratings
+Stresses beyond those listed under “Absolute Maximum Ratings” may cause permanent damage to the device. This is a stress rating
+only and functional operation of the device at these or any other conditions beyond those indicated in the operational sections of this
+specification is not implied. Exposure to absolute maximum rating conditions for extended periods may affect device reliability.
+Parameters                                         Symbol             Min.             Typ.              Max.               Unit
+Maximum voltage on supply pin VS1)                 Vsup,Stby          –0.4                                +40                 V
+Operating supply voltage (load dump)
+Pulse time ≤ 500ms
+                                                  Vsup,ldump                                              +40                 V
+Ta = 25°C
+VCC output current IVCC ≤ 50mA1)
+Operating supply voltage (jump start)
+Pulse time ≤ 2min
+                                                   Vsup,jstart                                             27                 V
+Ta = 25°C
+Output current IVCC ≤ 50mA1)
+Voltage levels on pins
+- CS1-8
+- CL15 (with 10k/47nF)
+-> DC voltage1)                                                        –2                                 +40                 V
+-> Transient voltage due to ISO7637                                  –150                                +100                 V
+   (coupling via 1nF)
+Voltage levels on pins1)
+- LIN
+                                                                      –27                                 +40                 V
+- VBATT (with 51/10nF)
+-> DC voltage
+Voltage levels on logic/low-voltage pins:
+RXD, TXD, NRES, NTRIG, WDOSC,
+                                                                      –0.4                            VVCC + 0.4V             V
+PWMy, VDIV, NCS, SCK,
+MOSI, MISO
+Voltage levels on pin VCC                           VVCC              –0.4                                +5.5                V
+ESD according to IBEE LIN EMC
+Test spec. 1.0 following IEC 61000-4-2
+- Pin VS (100nF) to GND
+- Pin LIN (220pF) to GND                                               ±6                                                    kV
+- Pin CL15 (10k, 47nF) to GND
+- Pin VBATT (10nF) to GND
+- Pins CSx (10nF) to GND
+HBM ESD according to
+ANSI/ESD-STM5.1
+JESD22-A114                                                            ±2                                                    kV
+AEC-Q100 (002)
+MIL-STD-883 (M3015.7)
+CDM ESD according to STM 5.3.1                                       ±750                                                     V
+MM ESD according to
+EIA/JESD22-A115
+                                                                     ±200                                                     V
+ESD STM5.2
+AEC-Q100 (002)
+ESD HBM following STM5.1
+with 1.5k, 150pF                                                      ±8                                                    kV
+- Pins VS, LIN, CL15 to GND
+Junction temperature                                  Tj              –40                                +150                °C
+Storage temperature                                   Ts              –55                                +150                °C
+Note:     1. Voltage between any of following pins must not exceed 40V: VS, VBATT, CL15, CSx, LIN
+                                                                                             ATA664151 [DATASHEET]                   31
+                                                                                                             9268I–AUTO–04/15
+
+
+14.     Thermal Characteristics
+Parameters                               Symbol    Min. Typ. Max. Unit
+Thermal resistance junction to heat slug   Rthjc         10       K/W
+Thermal resistance junction to ambient,
+where heat slug is soldered to PCB         Rthja         35       K/W
+according to Jedec
+Thermal prewarning threshold of VCC
+                                         TVCCPreW  120       140   °C
+regulator temperature monitor
+Thermal shutdown threshold of all
+                                           Tjsd    150  165  185   °C
+temperature monitors
+Thermal shutdown hysteresis               Tjsdhyst  10   17   25    K
+32      ATA664151 [DATASHEET]
+        9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters               Test Conditions                  Pin        Symbol         Min.      Typ.      Max.     Unit  Type*
+   1   VS Pin
+       Nominal DC voltage
+  1.1                                                             VS             VS          5                   27       V     B
+       range for full operation
+                                VLIN > VS – 0.5V
+                                                                  VS          IVSsleep       4         8         12      µA     B
+                                VS ≤ 14V (Tj = 25°C)
+       Supply current in Sleep  VLIN > VS – 0.5V
+  1.2                                                             VS          IVSsleep       4        11         18      µA     A
+       Mode                     VS ≤ 14V (Tj = 125°C)
+                                Sleep mode
+                                                                  VS      IVSsleep_short              20         35      µA     A
+                                Bus shorted to GND
+                                VLIN > VS – 0.5V
+                                VS ≤ 14V (Tj = 25°C)              VS          IVSact_lp               33         45      µA     B
+                                Without load at VCC
+       Supply current in active
+  1.3  low-power mode, all      VLIN > VS – 0.5V
+       peripherals off          VS ≤ 14V (Tj = 125°C)             VS         IVSact_lpt               40         55      µA     A
+                                Without load at VCC
+                                LIN-bus shorted to GND            VS      IVSact_lp_short             55         80      µA     B
+       Supply current in active
+                                VLIN > VS – 0.5V
+  1.4  mode after startup (WD                                     VS         IVSact_wd               120        200      µA     A
+                                VVS ≤ 14V
+       active), no VCC load
+       Supply current in active Bus recessive
+  1.5  mode after startup (WD VVS = 14V                           VS           IVSdom      45.1                  46      mA     A
+       active), high VCC load IVCC = –45mA
+                                Bus recessive                                IVSact_wd               185
+       Supply current in        VVS = 14V                                    IVSact_lin              300
+ 1.10                                                             VS                                                     µA     D
+       different active modes   IVCC = 0                                     IVSact_cs              2600
+                                R_IREF = 5.6k                              IVSact_vdiv              300
+       VS undervoltage          Status bit VSS = 1                VS           VVSthU       4.0                 4.4       V     A
+  1.7
+       thresholds               Status bit VSS = 0                VS           VVSthO       4.3                 4.95      V     A
+       VS undervoltage
+  1.8                           VVSthO – VVsthU                   VS        VVSth_hyst     0.19       0.4       0.65      V     A
+       threshold hysteresis
+       Minimum VS operation     VCC active,
+  1.9                                                             VS        VVSopmin                            3.8       V     A
+       voltage                  SPI operational
+   2   RXD Output Pin
+       Low-level output sink
+  2.1                           IRXD = 2mA                      RXD          VRXDsink                           0.4       V     A
+       capability
+       High-level output source                                                           VVCC –
+  2.2                           IRXD = –2mA                     RXD        VRXDsource                                     V     A
+       capability                                                                          0.4V
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                               ATA664151 [DATASHEET]             33
+                                                                                                             9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters                Test Conditions                 Pin        Symbol       Min.        Typ.      Max.     Unit Type*
+   3   TXD Input Pin
+       Maximum voltage level                                                                                   0.33 x
+  3.1                                                            TXD       VTXDL,max                                      V    A
+       for logic “low”                                                                                          VVCC
+       Minimum voltage-level                                                            0.66 x
+  3.2                                                            TXD        VTXDH,min                                     V    A
+       for logic “high”                                                                  VVCC
+  3.3  Pull-up resistor          VTXD = 0V, VVCC = 5V            TXD          RTXD        40          90        140      k    A
+  3.4  Input leakage current     VTXD = VVCC                     TXD        ITXDleakH                            +1      µA    A
+   4   NIRQ Output Pin (Open Drain)
+       Low-level output sink
+  4.1                            IIRQ = 2mA                     NIRQ         VIRQsink                            0.4      V    A
+       capability
+       High-level input leakage
+  4.2                            VNIRQ = VVCC                   NIRQ       INIRQleak,H                            1      µA    A
+       current
+       NIRQ pin pull-up resistor
+  4.3                            VNIRQ = 0V                     NIRQ          RNIRQ       60         100        200      k    A
+       value
+   5   NTRIG Watchdog Input Pin
+       Maximum voltage level                                                                                  0.33 
+  5.1                                                         NTRIG       VNTRIGL,max                                     V    A
+       for logic “low”                                                                                          VVCC
+       Minimum voltage-level                                                            0.66 
+  5.2                                                         NTRIG       VNTRIGH,min                                     V    A
+       for logic “high”                                                                  VVCC
+  5.3  Pull-up resistor          VNTRIG = 0V, VVCC = 5V       NTRIG          RNTRIG       40          90        140      k    A
+  5.4  Input leakage current     VNTRIG = VCC                 NTRIG        INTRIGleakH                           +1      µA    A
+       Minimum NTRIG pulse
+  5.5  width for watchdog                                     NTRIG            ttrig       7                             µs    B
+       trigger
+   7   LIN-bus Driver
+       Driver recessive output
+  7.1                            External LIN pull-up ≤ 1k      LIN         VBUSrec   0.9  VS                  VS       V    B
+       voltage
+                                 VVS = 7V                                  VBUSLoSUP,
+  7.2  Driver dominant voltage                                   LIN                                             1.2      V    A
+                                 RBus = 500                                   max
+                                 VVS = 18V                               VBUSHiSUP,ma
+  7.3  Driver dominant voltage                                   LIN                                              2       V    A
+                                 RBus = 500                                     x
+                                 VVS = 7.0V                               VBUSLoSUP,mi
+  7.4  Driver dominant voltage                                   LIN                      0.6                             V    A
+                                 Rload = 1000                                   n
+                                 VVS = 18V
+  7.5  Driver dominant voltage                                   LIN     VBUSHiSUP,min    0.8                             V    A
+                                 Rload = 1000
+       Internal pull-up resistor Resistor has a serial
+  7.6                                                            LIN          RLIN        20          30         47      k    A
+       to VS                     rectifier diode
+       Voltage drop at the       In pull-up path with Rslave
+  7.7                                                            LIN        VSerDiode     0.4                    1.0      V    D
+       serial diodes             ISerDiode = 10mA
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+34       ATA664151 [DATASHEET]
+         9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters                 Test Conditions                Pin         Symbol        Min.      Typ.      Max.     Unit  Type*
+       LIN current limitation
+  7.8                                                            LIN          IBUS_LIM      70        120       200      mA     A
+       VBUS = VBatt_max
+                                  Module-GND disconnected
+       Leakage current at loss
+  7.9             (1)             VS = VBAT = 0V                 LIN       IBUS_No_Gnd     –20                  +20      µA     A
+       of ground
+                                  VLIN = –18V
+                                  Battery disconnected
+       Leakage current at loss
+ 7.10            (1)              VS = VBAT = 0V                 LIN        IBUS_No_VS                            2      µA     A
+       of battery
+                                  0V ≤ VLIN ≤ 18V
+       Note:     1. Bus communication must not be affected if the module gets disconnected from ground or from battery.
+                      Parameters 7.9 and 7.10 cover these LIN specification topics.
+   8   LIN bus Receiver
+                                  VBUS_CNT =
+       Center of receiver                                                                0.475      0.5    0.525 
+  8.1                             (Vth_dom + Vth_rec)/2          LIN         VBUS_CNT                                     V     A
+       threshold                                                                            VS        VS         VS
+                                  7V ≤ VS ≤ 27V
+       Maximum allowed bus
+       voltage to be detected
+  8.2                                                            LIN      VBUS_dom,max                       0.4  VS     V     A
+       as dominant state by
+       receiver
+       Minimum allowed bus
+       voltage to be detected
+  8.3                                                            LIN       VBUSr_ec,min 0.6  VS                          V     A
+       as recessive state by
+       receiver
+       Receiver input                                                                    0.028              0.175 
+  8.4                             Vhys = Vth_rec – Vth_dom       LIN         VBUS_hys              0.1  VS               V     A
+       hysteresis                                                                           VS                   VS
+                                  Input leakage current
+       Dominant state receiver Driver off
+  8.5                                                            LIN      IBUS_PAS_dom      –1      –0.35       –0.2     mA     A
+       input current              VBUS = 0V
+                                  VS = 12V
+                                  Driver off (recessive state)
+       Recessive state receiver VBatt = 18V
+  8.6                                                            LIN                                                     µA
+       input current              VBUS = 18V                              IBUS_PAS_rec1                          11             B
+                                  VBUS = 40V                              IBUS_PAS_rec2                          25             A
+       LIN Pre-wake detection                                                                                   VS +
+  8.7                                                            LIN         VLIN_preH   VS – 2V                          V     A
+       High-level input voltage                                                                                 0.3V
+       LIN Pre-wake detection                                                                                   VS –
+  8.8                             Activates the LIN receiver     LIN         VLIN_preL     –27                            V     A
+       Low-level input voltage                                                                                  3.3V
+       LIN Receiver enabling      Time between rising edge
+  8.9                                                           RXD          tRXDinvalid                         15      µs     D
+       time                       on NCS and receiver ready
+   9   Internal Timers
+       Dominant time for wake-
+  9.1                             VLIN = 0V                      LIN             tbus       70        90        150      µs     B
+       up via LIN-bus
+       Time delay for LIN TRx
+                                  Delta between NCS high        CSN
+  9.2  enable from active mode                                                  tnorm      2.5                   10      µs     D
+                                  and TXD/RXD transparent       RXD
+       via SPI
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                              ATA664151 [DATASHEET]              35
+                                                                                                             9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters                Test Conditions                 Pin        Symbol       Min.        Typ.      Max.     Unit Type*
+       Time delay for mode
+       change from active        Delta between NCS high         CSN
+  9.3                                                                         tsleep      2.5                    10      µs    D
+       mode to sleep mode via and LIN-TRx offline               RXD
+       SPI
+       TXD dominant time-out
+  9.4                                                            TXD           tdom       30          40         56      ms    B
+       timer
+       Time delay for mode
+       change from active low- Delta between CSN high           CSN
+  9.5                                                                          ts_n       2.5          6         15      µs    D
+       power mode into normal and TXD/RXD transparent           RXD
+       mode via SPI
+                                 Time for which TXD must
+       TXD time-out timer        be at least at high level
+ 9.11                                                            TXD          tTOrel      10                             µs    B
+       release time              after a dominant state
+                                 time-out
+       Monitoring time for
+ 9.12                                                            LIN           tmon        8                     14      ms    A
+       wake-up via LIN bus
+       LIN-bus Driver AC Parameters with Different Bus Loads
+       Load 1 (small): 1nF, 1k
+       Load 2 (large): 10nF, 500; CRXD = 20pF;
+       Load 3 (medium): 6.8nF, 660 characterized on samples; 9.6 and 9.7 specifies the timing parameters for proper operation of
+       20Kbit/s, 9.8 and 9.9 at 10.4Kbit/s
+                                 THRec(max) = 0.744  VS
+                                 THDom(max) = 0.581  VS
+  9.6  Duty cycle 1              VS = 7V to 18V                  LIN            D1      0.396                                  B
+                                 tBit = 50µs
+                                 D1 = tbus_rec(min)/(2  tBit)
+                                 THRec(min) = 0.422  VS
+                                 THDom(min) = 0.284  VS
+  9.7  Duty cycle 2              VS = 7.6V to 18V                LIN            D2                             0.581           B
+                                 tBit = 50µs
+                                 D2 = tbus_rec(max)/(2  tBit)
+                                 THRec(max) = 0.778  VS
+                                 THDom(max) = 0.616  VS
+  9.8  Duty cycle 3              VS = 7.0V to 18V                LIN            D3      0.417                                  B
+                                 tBit = 96µs
+                                 D3 = tbus_rec(min)/(2  tBit)
+                                 THRec(min) = 0.389  VS
+                                 THDom(min) = 0.251  VS
+  9.9  Duty cycle 4              VS = 7.6V to 18V                LIN            D4                             0.590           B
+                                 tBit = 96µs
+                                 D4 = tbus_rec(max)/(2  tBit)
+       Slope time falling and                                              tSLOPE_fall
+ 9.10                            VS = 7V                         LIN                      3.5                   22.5     µs    A
+       rising edge at LIN                                                  tSLOPE_rise
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+36       ATA664151 [DATASHEET]
+         9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters               Test Conditions                  Pin        Symbol       Min.        Typ.      Max.     Unit  Type*
+       Receiver Electrical AC Parameters of the LIN Physical Layer
+  10
+       LIN Receiver, RXD Load Conditions (CRXD): 20pF
+                                VS = 7.0V to 18V
+       Max propagation delay
+ 10.1                           trx_pd = max(trx_pdrise,        RXD            trx_pd                             6      µs     A
+       of receiver
+                                trx_pdfall)
+       Symmetry of receiver
+                                V = 7.0V to 18V
+ 10.2 propagation delay rising S                                RXD           trx_sym      –2                    +2      µs     A
+                                t        =t     –t
+       edge minus falling edge rx_sym rx_pdr rx_pdf
+  11   NRES Open Drain Output Pin
+       Low-level output sink
+ 11.1                           INRES = 2mA                    NRES         VNRESsink                           0.4       V     A
+       capability
+                                VVCC = 2.5V
+ 11.2 Low-level at low VCC                                     NRES          VNRESLL                            0.4       V     A
+                                INRES = 500µA
+       VCC power-up reset       VS ≥ 5.5V
+ 11.3                                                          NRES           tUVreset      2         4           6      ms     B
+       time                     CNRES = 20pF
+       Reset debounce time for VS ≥ 5.5V
+ 11.4                                                          NRES          tNRESfall    1.5                    10      µs     A
+       falling edge at VCC      CNRES = 20pF
+       High level input leakage
+ 11.5                           VNRES = VVCC                   NRES        INRESLeakH                             1      µA     A
+       current
+       NRES pin pull-up
+ 11.6                           VNRES = 0                      NRES           RNRES        60        100        200      k     A
+       resistor value
+  12   Watchdog Oscillator
+       Voltage at WDOSC in
+                                34k ≤ RWDOSC ≤ 120k
+ 12.1 Active Mode, WDO                                        WDOSC          VWDOSC      1.13        1.23       1.33      V     A
+                                VVS ≥ 4V
+       enabled
+                                dVWDOSC =
+ 12.2 WDOSC load regulation                                   WDOSC         dVWDOSC       –20                   +20      mV     A
+                                VWDOSC,34k – VWDOSC,120k
+ 12.3 Oscillator period         ROSC = 34k                                tWDOSC,low    21.3        26.6       31.9     µs     A
+ 12.4 Oscillator period         ROSC = 120k                                tWDOSC,hi    75.1        93.9       102      µs     A
+       Watchdog oscillator      WDOSC = 0V                                   tWDOfshi     4.5                    18
+ 12.5                                                                                                                    µs     D
+       fail-safe periods        WDOSC = open                                 tWDOfslo     104                   200
+  13   Watchdog Window and Reset Timing
+       Watchdog lead time       Cycles are relative to
+ 13.1                                                                         tWDlead               3948               cycles   B
+       after reset              tWDOSC
+       Watchdog closed          Cycles are relative to
+ 13.2                                                                        tWDclose                527               cycles   B
+       window                   tWDOSC
+                                Cycles are relative to
+ 13.3 Watchdog open window                                                   tWDopen                 553               cycles   B
+                                tWDOSC
+       Watchdog reset time
+ 13.4                                                          NRES           tWDnres       3         4           6      ms     B
+       NRES
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                              ATA664151 [DATASHEET]              37
+                                                                                                             9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters                Test Conditions                 Pin        Symbol       Min.        Typ.      Max.     Unit Type*
+   14  CL15 Pin
+       High-level input voltage SPI status bit ‘CL15S’
+  14.1                                                          CL15         VCL15H       4.5                             V    A
+       threshold                 readback as ‘1’
+       Low-level input voltage   SPI status bit ‘CL15S’
+  14.2                                                          CL15         VCL15L                               2       V    A
+       threshold                 readback as ‘0’
+                                 VS ≤ 27V
+  14.3 CL15 pull-down current                                   CL15          ICL15                   50        100      µA    A
+                                 VCL15 = 27V
+  14.4 Internal debounce time    Without external capacitor     CL15        tCL15deb       80        160        250      µs    B
+       Hysteresis of input
+  14.5                           VCL15H – VCL15L                CL15        VCL15hsyt     0.5          1        1.5       V    A
+       voltage comparator
+   17  VCC Voltage Regulator in Active Mode
+                                 5.5V < VS < 18V
+                                                                VCC         VVCCnor       4.9                   5.1       V    A
+                                 (0mA to 50mA)
+  17.1 Output voltage VCC
+                                 6.5V < VS < 18V
+                                                                VCC         VVCCnor       4.9                   5.1       V    C
+                                 (0mA to 80mA)
+       Output voltage VCC at
+  17.2                           3V < VS < 5.5V                 VCC         VVCClow       2.3                   5.1       V    A
+       low VS
+                                 VS > 4V
+       Regulator drop voltage
+  17.3                           IVCC = –20mA                VS, VCC       VVCCdrop1                            250     mV     A
+       for medium load
+                                 VVCCdrop = VVS – VVCC
+                                 VS > 4V
+       Regulator drop voltage
+  17.4                           IVCC = –50mA                VS, VCC       VVCCdrop2                 400        600     mV     A
+       for high load
+                                 VVCCdrop = VVS – VVCC
+  17.6 Line regulation           5.5V < VS < 18V                VCC         VCCline                             0,8      %     B
+                                 5mA < IVCC < 50mA
+  17.7 Load regulation                                          VCC         VCCload                   0.2       0.8      %     B
+                                 100kHz
+  17.8 Output current limitation VS > 5.5V                      VCC          IVCClim     –240       –120        -80     mA     A
+  17.9 External load capacity    ESR < 5 at f = 100kHz         VCC          VthunN       1.8         2.2                µF    D
+       VCC undervoltage          Referred to VCC
+ 17.10                                                          VCC          VVCCuv       2.7                   3.1       V    A
+       threshold                 VS > 5.5V
+       Hysteresis of             Referred to VCC
+ 17.11                                                          VCC        VVCCuv_hys     120        160        300     mV     A
+       undervoltage threshold    VS > 5.5V
+       Ramp-up time VS > 5.5V CVCC = 2.2µF
+ 17.12                                                          VCC           tVCC                   400        700      µs    A
+       to VCC = 5V               Iload = –5mA at VCC
+   18  Battery Voltage Divider
+  18.1 Divider ratio                                            VDIV         rdiv_5V                 1:4                       D
+  18.2 Divider precision         VVBATT = 6 to 19V              VDIV         pVBATT        –2                    +2      %     A
+  18.3 Divider resistance        VVBATT = 12V                 VBATT          RVBATT        44                   120      k    A
+       Input leakage current
+  18.4                           VVBATT ≤ 27V                 VBATT        IVBATTleak                 0.1         1      µA    A
+       with disabled divider
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+38       ATA664151 [DATASHEET]
+         9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters                Test Conditions                 Pin        Symbol       Min.        Typ.      Max.     Unit   Type*
+   19  LIN Driver in High-speed Mode (All Tests Using RLIN = 500, CLIN = 600pF)
+  19.1 Transmission bit rate     VVS = 7V to 18V                 LIN            SP        200                           kBit/s   C
+       Slope time LIN falling
+  19.2                           VVS = 7V to 18V                 LIN       tHSslope_fall  0.3          1          2      µs      A
+       edge
+       Slope time LIN rising
+  19.3 edge, depending on        VVS = 7V to 18V                 LIN      tHSslope_rise   0.5          2          3      µs      A
+       RC-load
+   20  Switch Interface Unit (CS1-8, IREF)
+                                 VVS – VCSx ≥ 2.6V
+       Maximum highside
+  20.1                           VVS ≥ 7V                        CSx        ICSx,maxH     –35                   –20      mA      A
+       output current
+                                 IIREF = –300µA
+                                 VCSx ≥ 2.6V
+       Maximum lowside
+  20.2                           VVS ≥ 7V                        CSx        ICSx,maxL      20                    35      mA      A
+       output current
+                                 IIREF = –300µA
+       Current source multiplier VVS ≥ 7V
+  20.3 from reference current VCSx,HS = VVS – 2.6V               CSx          rICS_H       95        100        105              A
+       IIREF, IMUL=100           IIREF = –200µA
+       Current source multiplier VVS ≥ 7V
+  20.4 from reference current VCSx,HS = VVS – 2.6V               CSx          rICS_L     47.5         50        52.5             A
+       IIREF, IMUL=50            IIREF = –200µA
+       Switch input comparator
+  20.5                                                           CSx          VCSxth      3.6                   4.4       V      A
+       threshold
+       Switch input comparator
+  20.6                                                           CSx         VCSxhyst     200        300        500      mV      A
+       hysteresis
+                                 VVS = 14V
+       Current source rising     IIREF = 100µA
+  20.7                                                           CSx       dUCSx,rise     0.7                     8     V/µs     C
+       voltage slope             RCSx = 1k
+                                 25% to 90%
+                                 VVS = 14V
+       Current source falling    IIREF = 100µA
+  20.8                                                           CSx        dUCSx,fall    0.7                     8     V/µs     C
+       voltage slope             VCSx = 0V
+                                 90% to 25%
+                                 VVS = 14V
+       Current source rising     IIREF = 10µA
+ 20.22 voltage slope, slope      RCSx = 1k                      CSx     dUCSx0,risefast  6.5                    22     V/µs     C
+       control disabled          25% to 90%
+                                 CSSCD = 1
+                                 VVS = 14V
+       Current source falling    IIREF = 100µA
+ 20.23 voltage slope, slope      VCSx = 0V                       CSx      dUCSx,fallfast  6.5                    30     V/µs     C
+       control disabled          90% to 25%
+                                 CSSCD = 1
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                             ATA664151 [DATASHEET]                39
+                                                                                                             9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters                Test Conditions                 Pin        Symbol       Min.        Typ.      Max.     Unit Type*
+                                 VVS ≥ 7V
+       Output voltage on IREF 10µA ≤ IIREF ≤ 250µA
+  20.9                                                          IREF           VIREF     1.19        1.23       1.27      V    A
+       pin                       At least one current source
+                                 active
+       Internally generated
+       IREF fail-safe current in VIREF = 0V                                               60                    140
+ 20.10                                                          IREF           IIREFfs                                   µA    A
+       case of open or shorted IIREF = 0µA                                                60                    140
+       IREF pin
+                                 Time from voltage level
+       Switch input debouncing change on pin CSx to
+ 20.11                                                           CSx          tCSxdeb      2                     13      µs    B
+       time                      signal state change visible
+                                 in SPI register
+                                 Current source and voltage
+       Switch input leakage      divider off
+ 20.12                                                           CSx         ICSx,leak                                   µA    A
+       current                   VCSx = 0 V                                               –3
+                                 VCSx = VVS                                                                      +3
+                                 VVS = 14V
+                                 V     = 0V(H)/VCSx = 14V(L)
+       Current source enabling CSx
+ 20.13                           IIREF = 100µA                   CSx           tCSxon      3                     10      µs    A
+       time
+                                 Test time until
+                                 abs(ICSx) ≥ 9.5mA
+                                 VVS = 14V
+                                 VCSx = 0V(H)/VCSx = 14V(L)
+       Current source
+ 20.14                           IIREF = 100µA                   CSx          tCSx,off     3                     12      µs    A
+       shutdown time
+                                 Test time until
+                                 abs(ICSx) ≤ 0.5mA
+       Voltage divider
+ 20.15                           VCSx = 4V                       CSx         RCSxdiv      50          95        150      k    A
+       resistance
+ 20.16 Voltage divider precision VCSx = 4V                       CSx          pCSxdiv     –3                     +3      %     A
+       Maximum current source
+ 20.17                                                           CSx       fCSx,max                              20     kHz    D
+       switching frequency
+       Maximum voltage level
+ 20.18                                                       PWM1..3       VPWML,max                            0.33    VVCC   A
+       for logic “low”
+       Minimum voltage-level
+ 20.19                                                       PWM1..3       VPWMH,min     0.66                           VVCC   A
+       for logic “high”
+       PWM input leakage
+ 20.20                           VPWMy = 0                   PWM1..3        IPWMleakL     –1                             µA    A
+       current, low level
+       PWM input pull-down
+ 20.21                           VPWMy = VVCC                PWM1..3           RPWM       60         100        220      k    A
+       resistor value
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+40       ATA664151 [DATASHEET]
+         9268I–AUTO–04/15
+
+
+15.      Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C, chip configuration as default, unless otherwise specified. All values refer to GND pins
+  No.  Parameters                 Test Conditions                Pin        Symbol       Min.        Typ.      Max.     Unit  Type*
+   21  Serial Programming Interface and Control Logic (SPI)
+       Maximum input clock        fSPI = 1/TSCK
+  21.1                                                           SCK         fSPI,max                             4     MHz     D
+       frequency                  C_MISO ≤ 140pF (external)
+                                                                MOSI
+       Maximum input signal                                                                                    0.33 x
+  21.2                                                           SCK        VSPIL,max                                     V     A
+       low level threshold                                                                                      VVCC
+                                                                NCS
+                                                                MOSI
+       Minimum input signal                                                             0.66 x
+  21.3                                                           SCK        VSPIH,min                                     V     A
+       high level threshold                                                              VVCC
+                                                                NCS
+                                  VMOSI = VSCK = VNCS = VVCC    MOSI          ILeak,H                            +1
+                                                                 SCK                                             +1
+  21.4 Input pin leakage current                                NCS                                              +1      µA     A
+                                  VMOSI = VSCK = 0              MOSI           ILeakL     –1
+                                                                 SCK                      –1
+  21.5 NCS pin pull-up resistor VNCS = 0; VVCC = 5V             NCS            RNCS       60         120        200      k     A
+       Output low level sink
+  21.6                            IMISO = 2mA                   MISO        VMISOsink                            0.4      V     A
+       capability
+       Output high level source                                                         VVCC –
+  21.7                            IMISO = –2mA                  MISO      VMISOsource                                     V     A
+       capability                                                                         0.4
+       MISO pin tristate input    VNCS = VVCC
+  21.8                                                          MISO        IMISOleak     –1                     +1      µA     A
+       leakage current            VMISO = VVCC/2
+       Chip select minimum
+  21.9 setup time (-> earliest                                  NCS       tSPIsetup,min                         250      ns     D
+       time to start clocking)
+       Chip select minimum
+       hold time (-> earliest
+ 21.10                                                          NCS        tSPIhold,min                         250      ns     D
+       time after clocking to
+       release chip select)
+       Minimum SPI data
+       evaluation time
+       (-> minimum time
+ 21.11                                                          NCS        tSPIeval,min    8                     14      µs     D
+       between positive and
+       negative edge of chip
+       select)
+ 21.12 Interrupt triggering delay                               NIRQ         tNIRQtrig     2                      7      µs     B
+       SPI clock duty cycle
+ 21.13                            tSCK_H/TSCK                    SCK           dSCK       0.4                    0.6            D
+       limits
+       Propagation delay from
+                                                                 SCK
+ 21.14 SPI clock to MISO data     C_MISO ≤ 140pF (external)                tCLK2DATA      10                    120      ns     A
+                                                                MISO
+       output
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                             ATA664151 [DATASHEET]               41
+                                                                                                             9268I–AUTO–04/15
+
+
+16. Application Information
+    Figure 16-1. Definition of Bus Timing Characteristics
+                                                      tBit                         tBit                 tBit
+                          TXD
+             (input to transmitting node)
+                                                              tBus_dom(max)             tBus_rec(min)
+                                                                                                              Thresholds of
+                                    THRec(max)
+                                                                                                             receiving node1
+                  VS                THDom(max)
+        (Transceiver supply
+        of transmitting node)                              LIN Bus Signal
+                                                                                                              Thresholds of
+                                     THRec(min)                                                              receiving node2
+                                    THDom(min)
+                                                             tBus_dom(min)                tBus_rec(max)
+                        RXD
+          (output of receiving node1)
+                                           trx_pdf(1)                                    trx_pdr(1)
+                        RXD
+          (output of receiving node2)
+                                                                        trx_pdr(2)                              trx_pdf(2)
+42  ATA664151 [DATASHEET]
+    9268I–AUTO–04/15
+
+
+Figure 16-2. Application Example 1: LIN Slave with Different External Circuitry at the CSx-pins
+                                                                         +
+                                                                                                                                                               VBAT
+                                                                 22μF
+                                                                 100nF
+                                        +
+                   100nF                     2.2μF
+               VCC
+                         10kΩ         10kΩ 32
+                                                          VCC
+                                                                  AGND
+                                              NTRIG                          VS      CS8     CS7    CS6    CS5
+                                        1                                                                              24
+                                            TXD                                                                  CS4
+                                            RXD                                                                  GND
+                                            NRES                                                          GND-LIN
+                                                                    Atmel
+                                            NIRQ
+                                                                  ATA664151                                      LIN                                           LIN
+                                            MISO                           QFN32                                 GND          10nF
+                                                                                                                                                     220pF
+                                                                         5mm x 5mm                                                   51Ω
+      Microcontroller
+                                            MOSI                                                           VBATT
+                                            SCK                                                              CL15                                              CL15
+                                                                                                                                     10kΩ
+                                                                             WDOSC
+                                            NCS                                                                  CS3
+                                                   PWM1   PWM2    PWM3
+                                                                                                                              47nF
+                                                                                     VDIV
+                                                                                                                                                               GND
+                                                                                             IREF
+                                        8
+                                                                                                    CS1    CS2
+                                                                                                                 16
+                                                                                                                                                VS
+                                                                         51kΩ               12kΩ
+            GND
+                                                                         10nF
+                                                                                                                 VS
+                                      DEBUG(1)
+     (1)
+     Note: If the Watchdog shall be disabled directly after power-up (e.g. for
+     microcontroller programming or debugging purposes) the pin VDIV must
+     be tied to High Level until the Reset phase ends (Positive slope at pin NRES).
+                                                                                                                            ATA664151 [DATASHEET]                     43
+                                                                                                                                            9268I–AUTO–04/15
+
+
+     Figure 16-3. Application Example 2: LIN Slave for RGB-LED-Control
+                                                                              +
+                                                                                                                                                          VBAT
+                                                                      22μF
+                                                                                                                                 R
+                                                                      100nF
+                                                                                                                                 G
+                                             +
+                        100nF                     2.2μF
+                    VCC                                                                                                          B
+                               10kΩ         10kΩ 32
+                                                               VCC
+                                                                       AGND
+                                                   NTRIG                          VS      CS8     CS7    CS6    CS5
+                                             1                                                                              24
+                                                 TXD                                                                  CS4
+                                                 RXD                                                                  GND
+                                                 NRES                                                          GND-LIN
+                                                                         Atmel
+                                                 NIRQ
+                                                                       ATA664151                                      LIN                                 LIN
+                                                 MISO                           QFN32                                 GND                         220pF
+                                                                              5mm x 5mm                                                     51Ω
+           Microcontroller
+                                                 MOSI                                                           VBATT
+                                                 SCK                                                              CL15               10nF
+                                                                                  WDOSC
+                                                 NCS                                                                  CS3
+                                                        PWM1   PWM2    PWM3               VDIV
+                                                                                                                                                          GND
+                                                                                                  IREF
+                                             8
+                                                                                                         CS1    CS2
+                                                                                                                      16
+                                  PWM1
+                                  PWM2
+                                  PWM3                                                                   VS VS
+                                                                              51kΩ               12kΩ
+                 GND
+                                                                              10nF
+                                           DEBUG(1)
+            (1)
+            Note: If the Watchdog shall be disabled directly after power-up (e.g. for
+            microcontroller programming or debugging purposes) the pin VDIV must
+            be tied to High Level until the Reset phase ends (Positive slope at pin NRES).
+44   ATA664151 [DATASHEET]
+     9268I–AUTO–04/15
+
+
+Figure 16-4. Application Example 3: LIN Slave for H-bridge Control of Small DC-motors
+                                                                                                                                                                           VBAT
+                                                                                                                                          P1       P2
+                                                                                                                  51Ω                          M
+                                                                  +
+                                                          22μF
+                                                                                                                                          N1       N2
+                                                          100nF
+                                 +
+            100nF                     2.2μF
+         VCC
+                   10kΩ         10kΩ 32                                                                                                                          Vsh
+                                                                                                                                                    (opt)
+                                                   VCC
+                                                           AGND
+                                       NTRIG                          VS      CS8     CS7     CS6    CS5
+                                 1                                                                               24
+                                     TXD                                                                   CS4                        Shunt
+                                                                                                                      VS
+                                     RXD                                                                   GND
+                                     NRES                                                           GND-LIN
+                                                             Atmel                                                                                                         LIN
+                                     NIRQ                                                                  LIN
+                                                           ATA664151
+                                     MISO                           QFN32                                  GND                    220pF
+ Microcontroller                                                  5mm x 5mm
+                                     MOSI                                                            VBATT
+                                                                                                                           10nF
+                                     SCK                                                               CL15
+                                                                      WDOSC
+                                     NCS                                                                   CS3
+                                            PWM1   PWM2    PWM3               VDIV
+                                                                                                                      VS
+                                                                                       IREF
+                                 8
+                                                                                              CS1    CS2
+                                                                                                           16
+                                                                                                                                                                           GND
+                                                                  51kΩ               5.6kΩ
+                                                                  10nF
+      GND                     Vsh
+                                        DEBUG(1)
+      (1)
+      Note: If the Watchdog shall be disabled directly after power-up (e.g. for
+      microcontroller programming or debugging purposes) the pin VDIV must
+      be tied to High Level until the Reset phase ends (Positive slope at pin NRES).
+                                                                                                                                   ATA664151 [DATASHEET]                    45
+                                                                                                                                                        9268I–AUTO–04/15
+
+
+Figure 16-5. Application Example 4: LIN Slave Relay Driver
+                                                                                                                                            VBAT
+                                                                                                                                M
+                                                                   +
+                                                           22μF
+                                                           100nF
+                                                                                                                   51Ω
+                                  +
+             100nF                     2.2μF
+          VCC
+                    10kΩ        10kΩ 32
+                                                    VCC
+                                                            AGND
+                                        NTRIG                          VS      CS8     CS7     CS6    CS5
+                                  1                                                                               24
+                                      TXD                                                                   CS4
+                                      RXD                                                                   GND
+                                      NRES                                                           GND-LIN
+                                                              Atmel                                                                         LIN
+                                      NIRQ                                                                  LIN
+                                                            ATA664151
+                                      MISO                           QFN32                                  GND                     220pF
+  Microcontroller                                                  5mm x 5mm
+                                      MOSI                                                            VBATT
+                                                                                                                         10nF
+                                      SCK                                                               CL15
+                                                                       WDOSC
+                                      NCS                                                                   CS3
+                                             PWM1   PWM2    PWM3               VDIV     IREF
+                                  8
+                                                                                               CS1    CS2
+                                                                                                            16
+                                                                                                                                            GND
+                                                                   51kΩ               5.6kΩ
+                                                                   10nF
+       GND
+                                      DEBUG(1)
+             (1)
+             Note: If the Watchdog shall be disabled directly after power-up (e.g. for
+             microcontroller programming or debugging purposes) the pin VDIV must
+             be tied to High Level until the Reset phase ends (Positive slope at pin NRES).
+46        ATA664151 [DATASHEET]
+          9268I–AUTO–04/15
+
+
+17.   Ordering Information
+      Extended Type Number                                    Package    Remarks
+       ATA664151-WNQW-1                                  QFN32 5x5mm     VCC = 5V, Voltage Divider, VVCCuv = 2.9V, 6k
+18.   Package Information
+                               Top View
+                                  D
+                        32
+                   1
+                                                                                    technical drawings
+                                                                                    according to DIN
+                                                    E                               specifications
+        PIN 1 ID
+                   8                                                              Dimensions in mm
+                                                                             Two Step Singulation process
+                                                    A1   A3
+                               Side View
+                                                               A
+                                Partially Plated Surface
+                        Bottom View
+                                 D2
+                       9                   16
+                                             17
+                   8                                                                COMMON DIMENSIONS
+                                                                                     (Unit of Measure = mm)
+                                                E2
+                                                                         SYMBOL      MIN        NOM          MAX      NOTE
+                   1                           24                            A        0.8       0.85         0.9
+                                       25                                    A1       0        0.035         0.05
+                        32
+              Z                    e                                         A3      0.16       0.21         0.26
+                                                                             D        4.9         5          5.1
+                                                                             D2       3.5        3.6         3.7
+                                                                             E        4.9         5          5.1
+                                                                             E2       3.5        3.6         3.7
+                       Z 10:1
+                                                                             L       0.35        0.4         0.45
+                                           L                                 b        0.2       0.25         0.3
+                                                                             e                   0.5
+                           b
+                                                                                                                                 10/18/13
+                                                    TITLE                                              GPC         DRAWING NO.         REV.
+            Package Drawing Contact:                 Package: VQFN_5x5_32L
+            packagedrawings@atmel.com                                                                          6.543-5124.03-4          1
+                                                     Exposed pad 3.6x3.6
+                                                                                               ATA664151 [DATASHEET]                          47
+                                                                                                                    9268I–AUTO–04/15
+
+
+19.  Errata
+19.1 Atmel ATA664151
+       1.   The current sources, pins CS1 to CS8, may show unexpected behavior when not initialized correctly thus resulting
+            in small amounts of current to be provided.
+            Problem Fix/Workaround
+            The current sources can be brought into a defined status by disabling the Slope control for the CS-Ports when initial-
+            izing the device. This can be achieved using the SPI bit CSSCD. The slope control can be turned off 10µs after it was
+            enabled.
+48   ATA664151 [DATASHEET]
+     9268I–AUTO–04/15
+
+
+20. Revision History
+    Please note that the following page numbers referred to in this section refer to the specific revision mentioned, not to this
+    document.
+     Revision No.               History
+                                 Number 17.11 in Section 15 “Electrical Characteristics” on page 38 updated
+     9268I-AUTO-04/15            Section 17 “Ordering Information” on page 47 updated
+                                 Section 18 “Package Information” on page 47 updated
+     9268H-AUTO-08/14            Put datasheet in the latest template
+     9268G-AUTO-12/13            Section 13 “Absolute Maximum Ratings” on pages 31 to 32 updated
+                                 Section 13 “Absolute Maximum Ratings” on pages 31 to 32 updated
+                                 Section 14 “Thermal Characteristics” on page 32 updated
+     9268F-AUTO-07/13
+                                 Section 15 “Electrical Characteristics” numbers 3.3, 5.3, 14.3, 20.3, 20.4 and 20.16 on pages
+                                  33 to 41 updated
+                                 Section 10.1 “Typical Timing Sequence with RWD_OSC = 51k” on page 28 updated
+                                 Section 10.2 “Worst Case Calculation with RWD_OSC = 51k” on page 29 updated
+     9268E-AUTO-07/13            Section 15 “Electrical Characteristics” numbers 1.7, 1.8, 1.9, 4.3, 11.6, 13.1, 13.2, 13.3, 17.12,
+                                  18.3, 20.11, 20.13, 20.14, and 21.5 on pages 33 to 41 updated
+                                 Section 19 “Errata” on page 48 added
+                                 Section 3.12 “NTRIG Input Pin” on page 6 updated
+     9268D-AUTO-11/12            Section 3.13 “VBATT Input Pin” on page 6 updated
+                                 Section 3.16 “CS1 to CS8 High-voltage Input/Output Pins” on page 7 updated
+                                 ATA664131 and ATA664154 removed
+     9268C-AUTO-09/12
+                                 Section 17 “Ordering Information” on page 47 updated
+                                 Section 15 “Electrical Characteristics” numbers 20.7, 20.8, 20.22 and 20.23 on page 40
+     9268B-AUTO-05/12
+                                  updated
+                                                                                          ATA664151 [DATASHEET]                   49
+                                                                                                           9268I–AUTO–04/15
+
+
+                                                                                                                                             XXXXXX
+Atmel Corporation              1600 Technology Drive, San Jose, CA 95110 USA                   T: (+1)(408) 441.0311          F: (+1)(408) 436.4200           |      www.atmel.com
+© 2015 Atmel Corporation. / Rev.: 9268I–AUTO–04/15
+Atmel®, Atmel logo and combinations thereof, Enabling Unlimited Possibilities®, and others are registered trademarks or trademarks of Atmel Corporation in U.S. and
+other countries. Other terms and product names may be trademarks of others.
+DISCLAIMER: The information in this document is provided in connection with Atmel products. No license, express or implied, by estoppel or otherwise, to any intellectual property right
+is granted by this document or in connection with the sale of Atmel products. EXCEPT AS SET FORTH IN THE ATMEL TERMS AND CONDITIONS OF SALES LOCATED ON THE
+ATMEL WEBSITE, ATMEL ASSUMES NO LIABILITY WHATSOEVER AND DISCLAIMS ANY EXPRESS, IMPLIED OR STATUTORY WARRANTY RELATING TO ITS PRODUCTS
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. IN NO EVENT
+SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT, CONSEQUENTIAL, PUNITIVE, SPECIAL OR INCIDENTAL DAMAGES (INCLUDING, WITHOUT LIMITATION, DAMAGES
+FOR LOSS AND PROFITS, BUSINESS INTERRUPTION, OR LOSS OF INFORMATION) ARISING OUT OF THE USE OR INABILITY TO USE THIS DOCUMENT, EVEN IF ATMEL HAS
+BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. Atmel makes no representations or warranties with respect to the accuracy or completeness of the contents of this
+document and reserves the right to make changes to specifications and products descriptions at any time without notice. Atmel does not make any commitment to update the information
+contained herein. Unless specifically provided otherwise, Atmel products are not suitable for, and shall not be used in, automotive applications. Atmel products are not intended,
+authorized, or warranted for use as components in applications intended to support or sustain life.
+SAFETY-CRITICAL, MILITARY, AND AUTOMOTIVE APPLICATIONS DISCLAIMER: Atmel products are not designed for and will not be used in connection with any applications where
+the failure of such products would reasonably be expected to result in significant personal injury or death (“Safety-Critical Applications”) without an Atmel officer's specific written
+consent. Safety-Critical Applications include, without limitation, life support devices and systems, equipment or systems for the operation of nuclear facilities and weapons systems.
+Atmel products are not designed nor intended for use in military or aerospace applications or environments unless specifically designated by Atmel as military-grade. Atmel products are
+not designed nor intended for use in automotive applications unless specifically designated by Atmel as automotive-grade.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ ATA664151-WNQW ATA664151-WNQW-1

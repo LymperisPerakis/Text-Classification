@@ -1,0 +1,620 @@
+                                                                                CMX602B
+                   CML Microcircuits                        Calling Line Identifier
+ COMMUNICATION SEMICONDUCTORS                        plus Call Waiting (Type II)
+D/602B/2 September 2003
+Features                                                  Applications
+• CLI and CIDCW System Operation                          • CLI and CIDCW Adjunct Boxes
+• Low Power Operation 0.5mA at 2.7V                       • CLI and CIDCW Feature Phones
+• Zero-Power Ring or Line Reversal                        • Bellcore, ETSI, British Telecom and
+    Detector                                                 Mercury Systems
+• FSK Demodulator with Data Retiming                      • Computer Telephone Integration
+• High Sensitivity CAS Tone Detection                     • Call Logging Systems
+• Low CAS Tone Falsing in CIDCW Mode                      • Voice-Mail Equipment
+1.1      Brief Description
+The CMX602B is a low power CMOS integrated circuit for the reception of the physical layer signals used
+in BT's Calling Line Identification Service (CLIP), Bellcore's Calling Identity Delivery System (CID), the
+Cable Communications Association's Caller Display Services (CDS), and similar evolving systems. It also
+meets the requirements of emerging Caller Identity with Call Waiting services (CIDCW).
+The device includes a 'zero-power' ring or line reversal detector, a dual-tone (2130Hz plus 2750Hz) Tone
+Alert Signal and a 1200-baud FSK V23/Bell202 compatible asynchronous data demodulator with a data
+retiming circuit which removes the need for a UART in the associated µController.
+It is suitable for use in systems to BT specifications SIN227 and SIN242, Bellcore GR-30-CORE and
+SR-TSV-002476, CCA TW/P&E/312, ETSI ETS 300 659 parts 1 and 2, ETS 300 778 parts 1 and 2 and
+Mercury Communications MNR 19.
+ 2003 CML Microsystems Plc
+
+
+Calling Line Identifier                                                                                                          CMX602B
+                                                            CONTENTS
+        Section                                                                                                             Page
+           1.1        Brief Description ............................................................................... 1
+           1.2        Block Diagram .................................................................................... 3
+           1.3        Signal List ............................................................................................ 4
+           1.4        External Components ..................................................................... 6
+           1.5        General Description ......................................................................... 7
+                      1.5.1  Mode Control Logic ................................................................... 7
+                      1.5.2  Input Signal Amplifier ................................................................ 7
+                      1.5.3  Bandpass Filter .......................................................................... 8
+                      1.5.4  Level Detector ............................................................................ 8
+                      1.5.5  FSK Demodulator....................................................................... 9
+                      1.5.6  FSK Data Retiming..................................................................... 9
+                      1.5.7  Tone Alert Detector.................................................................. 10
+                      1.5.8  Ring or Line Polarity Reversal Detector ................................ 11
+                      1.5.9  Xtal Osc and Clock Dividers ................................................... 13
+           1.6        Application Notes ........................................................................... 14
+                      1.6.1  'On-Hook' Operation ................................................................ 14
+                      1.6.2  'Off-Hook' Operation ................................................................ 17
+           1.7        Performance Specification ......................................................... 19
+                      1.7.1  Electrical Performance ............................................................ 19
+                      1.7.2  Packaging ................................................................................. 23
+ 2003 CML Microsystems Plc                                          2                                                           D/602B/2
+
+
+Calling Line Identifier                            CMX602B
+1.2        Block Diagram
+                            Figure 1 Block Diagram
+ 2003 CML Microsystems Plc            3           D/602B/2
+
+
+Calling Line Identifier                                                                           CMX602B
+1.3        Signal List
+            Packages
+                                  Signal                               Description
+            D4/P3/E4
+              Pin No.        Name          Type
+                  1      XTALN           O/P       The output of the on-chip Xtal oscillator inverter.
+                  2      XTAL            I/P       The input to the on-chip Xtal oscillator inverter.
+                  3      RD              I/P (S)   Input to the Ring or Line Polarity Reversal
+                                                   Detector.
+                  4      RT              BI        Open-drain output and Schmitt trigger input
+                                                   forming part of the Ring or Line Polarity Reversal
+                                                   detector. An external resistor to VDD and a
+                                                   capacitor to VSS should be connected to RT to
+                                                   filter and extend the RD input signal.
+                  5      AOP             BI        The output of the on-chip Input Signal Amplifier
+                                                   and the input to the Bandpass Filter.
+                  6      INV             I/P       The inverting input to the on-chip Input Signal
+                                                   Amplifier.
+                  7      NINV            I/P       The non-inverting input to the on-chip Input
+                                                   Signal Amplifier.
+                  8      VSS             Power     Negative supply rail (signal ground).
+                  9      VBIAS           O/P       Internally generated bias voltage, held at VDD/2
+                                                   when the device is not in 'Zero-Power' mode.
+                                                   Should be decoupled to VSS by a capacitor
+                                                   mounted close to the device pins.
+                 10      MODE            I/P (S)   Input used to select the operating mode. See
+                                                   section 1.5.1.
+                 11      ZP              I/P (S)   A high level on this input selects 'Zero-Power'
+                                                   mode, a low level enables the VBIAS supply, the
+                                                   Input Signal Amplifier, the Bandpass Filter and
+                                                   either the FSK or the Tone Alert circuits
+                                                   depending on the MODE input.
+ 2003 CML Microsystems Plc                      4                                                D/602B/2
+
+
+Calling Line Identifier                                                                                   CMX602B
+            Packages
+                                     Signal                                    Description
+            D4/P3/E4
+              Pin No.           Name            Type
+                 12          IRQN             O/P          An open-drain active low output that may be
+                                                           used as an Interrupt Request / Wake-up input to
+                                                           the associated µC. An external pull-up resistor
+                                                           should be connected between this output and
+                                                           VDD.
+                 13          DET              O/P          A logic level output driven by the Ring or Line
+                                                           Polarity Reversal Detector, the Tone Alert
+                                                           Detector or the FSK Level detect circuits,
+                                                           depending on the operating mode. See section
+                                                           1.5.1.
+                 14          RXCK             I/P (S)      An input which may be used to clock received
+                                                           data bits out of the FSK Data Retiming block.
+                 15          RXD              O/P          A logic level output carrying either the raw output
+                                                           of the FSK Demodulator or re-timed 8-bit
+                                                           characters depending on the state of the RXCK
+                                                           input. See section 1.5.6
+                 16          VDD              Power        The positive supply rail. Levels and thresholds
+                                                           within the device are proportional to this voltage.
+                                                           Should be decoupled to VSS by a capacitor
+                                                           mounted close to the device pins.
+             Notes: I/P          = Input
+                        I/P (S)  = Schmitt trigger input
+                        O/P      = Output
+                        BI       = Bidirectional
+ 2003 CML Microsystems Plc                              5                                                D/602B/2
+
+
+Calling Line Identifier                                                                        CMX602B
+1.4        External Components
+                R1              470kΩ
+                R2              See section 1.5.8                    C1, C2       18pF
+                R3, R4, R5      470kΩ                                C3, C4       0.1µF
+                R6, R7          470kΩ                                C5           0.33µF
+                R8              470kΩ for VDD = 3.3V                 C6, C7       680pF
+                                680kΩ for VDD = 5.0V                 C8,C9        0.1µF
+                                (See section 1.5.2)
+                R9              240kΩ for VDD = 3.3V
+                                200kΩ for VDD = 5.0V
+                                (See section 1.5.2)
+                R10             160kΩ                                X1           3.579545MHz
+                R11             100kΩ ±20%                           D1 - D4      1N4004
+                              Resistors ±1%, capacitors ±20% unless otherwise stated.
+                      Figure 2 Recommended External Components for Typical Application
+It is recommended that the printed circuit board is laid out with a ground plane in the CMX602B area to
+provide a low impedance ground connection to the VSS pin and to the decoupling capacitors C8 and C9.
+ 2003 CML Microsystems Plc                              6                                     D/602B/2
+
+
+Calling Line Identifier                                                                              CMX602B
+1.5        General Description
+1.5.1      Mode Control Logic
+The CMX602B's operating mode and the source of the DET and IRQN outputs are determined by the logic
+levels applied to the MODE and ZP input pins:
+             ZP        MODE              Mode                  DET o/p from             IRQN o/p from
+              0           0      Tone Alert Detect       Tone Alert Signal        Valid ‘off-hook’ CAS.
+                                                         Detection                Ring or Line Polarity
+                                                                                  Reversal Detector.
+              0           1      FSK Receive             FSK Level Detector       FSK Data Retiming [1].
+                                                                                  Ring or Line Polarity
+                                                                                  Reversal Detector.
+              1           0      'Zero-Power'            Ring or Line Polarity    Ring or Line Polarity
+                                                         Reversal Detector.       Reversal Detector.
+              1           1      'Zero-Power'            Ring or Line Polarity                  -
+                                                         Reversal Detector.
+                      [1] If enabled.
+In the 'Zero-Power' modes, power is removed from all of the internal circuitry except for the Ring or Line
+Polarity Reversal Detector and the DET and IRQN outputs.
+1.5.2      Input Signal Amplifier
+This amplifier is used to convert the balanced FSK and Tone Alert signals received over the telephone line
+to an unbalanced signal of the correct amplitude for the FSK receiver and Tone Alert Detector circuits.
+                         Figure 3a : Input Signal Amplifier, balanced input configuration
+The design equations for this circuit are;
+                     Differential voltage gain VAOP / V(b-a) = R8/R6
+                     R6 = R7 = 470kΩ
+                     R10 = 160kΩ
+                     R9 = R8 x R10 / (R8 - R10)
+The target differential voltage gain depends on the expected signal levels between the A and B wires and
+the CMX602B's internal threshold levels, which are proportional to the supply voltage.
+ 2003 CML Microsystems Plc                               7                                          D/602B/2
+
+
+Calling Line Identifier                                                                                CMX602B
+The CMX602B has been designed to meet the applicable specifications with R8 = 430kΩ at VDD = 3.0V
+nominal, rising to 680kΩ at VDD = 5.0V, and R9 should be 240kΩ at VDD = 3.0V and 200kΩ at VDD = 5.0V
+as shown in section 1.4 and Fig 3c.
+The Input Signal Amplifier may also be used with an unbalanced signal source as shown in Figure 3b. The
+values of R6 and R8 are as for the balanced input case.
+                          Figure 3b : Input Signal Amplifier, unbalanced input configuration
+                                                        1000
+                                                        900
+                                                        800
+                                   R8 and R9 : k ohms
+                                                        700
+                                                                           R8
+                                                        600
+                                                        500
+                                                        400
+                                                        300
+                                                                                        R9
+                                                        200
+                                                        100
+                                                          0
+                                                               3   3.5              4        4.5   5
+                                                                         Nominal VDD
+                    Figure 3c : Input Signal Amplifier, optimum values of R8 and R9 vs VDD
+1.5.3      Bandpass Filter
+Is used to attenuate out of band noise and interfering signals which might otherwise reach the FSK
+Demodulator, Tone Alert Detector and Level Detector circuits. The characteristics of this filter differ in FSK
+and Tone Alert modes. Most of the filtering is provided by Switched Capacitor stages clocked at 57.7kHz.
+1.5.4      Level Detector
+This block operates by measuring the level of the signal at the output of the Bandpass Filter, and
+comparing it against a threshold which depends on whether FSK Receive or Tone Alert Detect mode has
+been selected.
+In Tone Alert Detect mode the output of the Level Detector block provides an input to the Tone Alert Signal
+Detector.
+ 2003 CML Microsystems Plc                                                     8                      D/602B/2
+
+
+Calling Line Identifier                                                                               CMX602B
+In FSK Receive mode the CMX602B DET output will be set high when the level has exceeded the
+threshold for sufficient time. Amplitude and time hysteresis are used to reduce chattering of the DET
+output in marginal conditions.
+Note that in FSK Receive mode this circuit may also respond to non-FSK signals such as speech.
+                                   See section 1.7.1 for definitions of Teon and Teoff
+                                 Figure 4 : FSK Level Detector operation
+1.5.5      FSK Demodulator
+This block converts the 1200 baud FSK input signal to a logic level received data signal which is output via
+the RXD pin as long as the Data Retiming function is not enabled (see section 1.5.6). This output does not
+depend on the state of the FSK Level Detector output.
+Note that in the absence of a valid FSK signal, the demodulator may falsely interpret speech or other
+extraneous signals as data.
+1.5.6      FSK Data Retiming
+The Data Retiming block extracts the 8 data bits of each character from the received asynchronous data
+stream, and presents them to the µC under the control of strobe pulses applied to the RXCK input. The
+timing of these pulses is not critical and they may easily be generated by a simple software loop. This
+facility removes the need for a UART in the µC without incurring an excessive software overhead.
+The block operates on a character by character basis by first looking for the mark to space transition which
+signals the beginning of the start bit, then, using this as a timing reference, sampling the output of the FSK
+Demodulator in the middle of each of the following 8 received data bits, storing the results in an internal 8-
+bit shift register.
+When the eighth data bit has been clocked into the internal shift register, the CMX602B examines the
+RXCK input. If this is low then the IRQN output will be pulled low and the first of the stored data bits put
+onto the RXD output pin. On detecting that the IRQN output has gone low, the µC should pulse the RXCK
+pin high 8 times. The high to low transition at the end of the first 7 of these pulses will be used by the
+CMX602B to shift the next data bit from the shift register onto the RXD output. At the end of the eighth
+pulse the FSK Demodulator output will be reconnected to the RXD output pin. The IRQN output will be
+cleared the first time the RXCK input goes high.
+Thus to use the Data Retiming function, the RXCK input should be kept low until the IRQN output goes
+low; if the Data Retiming function is not required the RXCK input should be kept high.
+The only restrictions on the timing of the RXCK waveform are those shown in Figure 5a and the need to
+complete the transfer of all eight bits into the µC within 8.3ms (the time of a complete character at 1200
+baud).
+ 2003 CML Microsystems Plc                                 9                                         D/602B/2
+
+
+Calling Line Identifier                                                                                    CMX602B
+           td = Internal CMX602B delay; max. 1µS tclo = RXCK low time; min 1µS tchi = RXCK high time; min 1µS
+                                  Figure 5a : FSK Operation With Data Retiming
+Note that, if enabled, the Data Retiming block will interpret the FSK Channel Seizure signal (a sequence of
+alternating mark and space bits) as valid received characters, with values of 55 (hex). Similarly it may
+interpret speech or other signals as random characters.
+If the Data Retiming facility is not required, the RXCK input to the CMX602B should be kept high. The
+asynchronous data from the FSK Demodulator will then be connected directly to the RXD output pin, and
+the IRQN output will not be activated by the FSK signal. This case is illustrated in Figure 5b.
+                     Figure 5b : FSK Operation Without Data Retiming (RXCK always high)
+1.5.7      Tone Alert Detector
+This block is enabled when the CMX602B is set to Tone Alert Detect mode. It will then monitor the
+received signal for the presence of simultaneous 2130 and 2750Hz tones of sufficient level and duration.
+Two digital bandpass filters, centred around 2130Hz and 2750Hz, are used within the block to give
+additional rejection of interfering signals.
+The CMX602B DET output will be set high while a Tone Alert signal is detected.
+When the DET output goes low at the end of the Tone Alert signal, then if the DET output had been high
+for a time within the CAS qualifying time TqCAS limits (see 1.7.1) , then the IRQN output will be pulled low
+and will remain low until the CMX602B is switched out of Tone Alert Detect mode. Note that the TqCAS
+timing has been optimised for the detection of 75 to 85ms Tone Alert (CAS) signals used in off-hook
+ 2003 CML Microsystems Plc                                10                                              D/602B/2
+
+
+Calling Line Identifier                                                                            CMX602B
+applications, the longer (88 to 110ms) Tone Alert signal employed by BT for on-hook applications will not
+necessarily cause IRQN to go low.
+                                 See section 1.7.1 for definitions of Tton, Ttoff and TqCAS
+                                   Figure 6 : Tone Alert Detector operation
+1.5.8      Ring or Line Polarity Reversal Detector
+These circuits are used to detect the Line Polarity Reversal and Ringing signals associated with the Calling
+Line Identification protocol.
+Figure 7 illustrates their use in a typical application.
+                             Figure 7 : Ring or Line Polarity Reversal operation
+ 2003 CML Microsystems Plc                                   11                                   D/602B/2
+
+
+Calling Line Identifier                                                                               CMX602B
+When no signal is present on the telephone line, RD will be at VSS and RT pulled to VDD by R5 so the
+output of the Schmitt trigger 'B' will be low.
+The ring signal is usually applied at the subscriber's exchange as an ac voltage inserted in series with one
+of the telephone wires and will pass through either C3 and R3 or C4 and R4 to appear at the top end of R1
+(point X in Figure 7) in a rectified and attenuated form.
+The signal at point X will be further attenuated by the potential divider formed by R1 and R2 before being
+applied to the CMX602B input RD . If the amplitude of the signal appearing at RD is greater than the input
+threshold (Vthi) of Schmitt trigger 'A' then the N transistor connected to RT will be turned on, pulling the
+voltage at RT to VSS by discharging the external capacitor C5. The output of the Schmitt trigger 'B' will
+then go high, activating the DET and/or IRQN outputs depending on the states of the MODE and ZP
+inputs.
+The minimum amplitude ringing signal that is certain to be detected is
+                               ( 0.7 + Vthi x [R1 + R2 + R3] / R2 ) x 0.707 Vrms
+where Vthi is the high-going threshold voltage of the Schmitt trigger A (see section 1.7).
+With R1, R3 and R4 all 470kΩ as Figure 2, then setting R2 to 68kΩ will guarantee detection of ringing
+signals of 40Vrms and above for VDD over the range 2.7 to 5.5V.
+A line polarity reversal may be detected using the same circuit but there will be only one pulse at RD. The
+BT specification SIN242 says that the circuit must detect a +15V to -15V reversal between the two lines
+slewing in 30ms. For a linearly changing voltage at the input to C3 (or C4), then the voltage appearing at
+the RD pin will be
+                                        dV/dt x C3 x [ 1 - exp(-t/T) ] x R2
+where T = C3 x (R1 + R2 + R3) and dV/dt is the input slew rate.
+For dV/dt = 500V/sec (15V in 30ms), R1, R3 and R4 all 470kΩ and C3, C4 both 0.1µF as Figure 2, then
+setting R2 to 390kΩ will guarantee detection at VDD = 5.5V.
+If the time constant of R5 and C5 is large enough then the voltage on RT will remain below the threshold of
+the 'B' Schmitt trigger keeping the DET and/or IRQN outputs active for the duration of a ring cycle
+The time for the voltage on RT to charge from VSS towards VDD can be derived from the formula
+                                       VRT = VDD x [1 - exp(-t/(R5 x C5)) ]
+As the Schmitt trigger high-going input threshold voltage (Vthi) has a minimum value of 0.56 x VDD , then
+the Schmitt trigger B output will remain high for a time of at least 0.821 x R5 x C5 following a pulse at RD.
+Using the values given in Figure 2 (470kΩ and 0.33µF) gives a minimum time of 100 ms (independent of
+VDD ), which is adequate for ring frequencies of 10Hz or above.
+If necessary, the µC can distinguish between a ring and a reversal by timing the length of the IRQN or DET
+output.
+ 2003 CML Microsystems Plc                             12                                            D/602B/2
+
+
+Calling Line Identifier                                                                              CMX602B
+1.5.9      Xtal Osc and Clock Dividers
+Frequency and timing accuracy of the CMX602B is determined by a 3.579545MHz clock present at the
+XTAL pin. This may be generated by the on-chip oscillator inverter using the external components C1, C2
+and X1 of Figure 2, or may be supplied from an external source to the XTAL input, in which case C1, C2
+and X1 should not be fitted.
+The oscillator is turned off in the 'Zero-Power' modes.
+If the clock is provided by an external source which is not always running, then the ZP input must be set
+high when the clock is not available. Failure to observe this rule may cause a significant rise in the supply
+current drawn by CMX602B as well as generating undefined states of the RXD, DET and IRQN outputs.
+ 2003 CML Microsystems Plc                          13                                              D/602B/2
+
+
+Calling Line Identifier                                                                             CMX602B
+1.6        Application Notes
+1.6.1      'On-Hook' Operation
+The systems described in this section operate when the telephone set is not in use (on-hook) to display
+the number of a calling party before the call is answered.
+British Telecom System
+Figure 8a illustrates the line signalling and CMX602B I/O signals for the BT on-hook Calling Line ID
+system as defined in BT specifications SIN227 and SIN242 part 1. A similar system is described in ETS
+300 659-1 section 6.1.2c.
+The Tone Alert signal consists of simultaneous 2130Hz and 2750Hz tones, the 'Chan Seize' signal is a
+'1010..' FSK bit sequence. Not shown are the requirements for AC and DC loads, including a short initial
+Current Wetting Pulse, to be applied to the line 20ms after the end of the Tone Alert signal and to be
+maintained during reception of the FSK signal. Note that, for simplicity of presentation, the Data Retiming
+function is not used in Figure 8a (RXCK is kept high).
+                                   Figure 8a : BT On-hook System Signals
+Bellcore System
+Figure 8b illustrates the line signalling and CMX602B I/O signals for the Bellcore on-hook Caller ID system
+as defined in Bellcore documents GR-30-CORE and SR-TSV-002476 and also in ETS 300 659-1 section
+6.1.1.
+As for the BT system, the 'Chan Seize' signal is a '1010..' FSK bit sequence. The Bellcore specifications
+do not require AC or DC line terminations while the FSK data is being received, however ETS 300 659-1
+allows for the possibility of an AC termination being applied. Note that, for simplicity of presentation, the
+Data Retiming function is not used in Figure 8b (RXCK is kept high).
+ 2003 CML Microsystems Plc                           14                                            D/602B/2
+
+
+Calling Line Identifier                                                                               CMX602B
+                               Figure 8b : Bellcore On-hook System Signals
+Other On-hook Systems
+ETS 300 659-1 also allows for systems where the FSK transmission is preceded by a Dual Tone Alerting
+signal similar to that used by BT but without a line reversal (section 6.1.2a) or by a Ringing Pulse Alerting
+Signal (section 6.1.2b).
+The U.K. CCA (Cable Communications Association) specification TW/P&E/312 precedes the FSK signals
+by a 200 to 450ms ring burst. AC and DC line terminations during FSK reception are optional.
+Mercury Communications Ltd. specification MNR 19 allows for either the BT system or that specified by
+CCA.
+As these are all slight variants on the BT and Bellcore systems, they can also be handled by the
+CMX602B.
+ 2003 CML Microsystems Plc                            15                                             D/602B/2
+
+
+Calling Line Identifier                                                         CMX602B
+                        Figure 8c : Flow Chart for On-hook Operation of CMX602B
+ 2003 CML Microsystems Plc                         16                          D/602B/2
+
+
+Calling Line Identifier                                                                                CMX602B
+1.6.2      'Off-Hook' Operation
+The CIDCW (Calling Identity on Call Waiting) system described in this section operates when the
+telephone set is in use (off-hook) to display the number of a waiting caller without interrupting the current
+call.
+Bellcore documents GR-30-CORE and SR-TSV-002476, BT specifications SIN227 and SIN242 Part 2 and
+ETS 300-659-2 all describe similar systems in which a successful CIDCW transaction consists of a
+sequence of actions between the CPE (Customer Premises Equipment - e.g. a telephone) and the Central
+Office as indicated in Figure 9a.
+           A.         Normal conversation with both near and far end voice present.
+           B.         Central Office mutes far end voice, sends CAS and becomes silent.
+           C.         CPE recognises CIDCW initiation and mutes near end voice and keypad.
+           D.         CPE sends dtmf ACK to Central Office to signal its readiness to receive FSK data.
+           E.         Central Office recognises ACK and sends FSK Caller ID data to CPE.
+           F.         CIDCW transaction is complete. CPE unmutes near end voice and the Central Office
+                      unmutes far end voice, returning to normal conversation.
+                        Figure 9a : CIDCW Transaction from Near End CPE Perspective
+The CAS signal is transmitted by the Central Office to initiate a CIDCW transaction and consists of a 80ms
+burst of simultaneous 2130Hz and 2750Hz tones.
+CAS detection is very important because a “missed” signal causes Caller ID information to be lost and a
+false signal detection produces a disruptive tone which is heard by the far end caller. Because the CAS
+signals must be detected in the presence of conversations which both mask and masquerade as the tone
+signals, this function is difficult to accomplish correctly.
+Because the numbers of false responses (Talk-offs) and missed signals (Talk-downs) are related to the
+speech levels at the CMX602B input, and because the level of near end speech from the local handset is
+normally greater than that of far end speech coming from the Central Office, a further improvement in
+overall performance can be obtained by taking the CMX602B’s audio input from the receive side of the
+telephone set hybrid where this is possible.
+The internal algorithms used by the CMX602B to drive the DET and IRQN outputs in Tone Alert Detect
+mode have been optimised for the detection of off-hook CAS signals in the presence of speech when used
+according to the following principles:
+1.         If it is possible to mute the local speech from the microphone rapidly (within 0.5ms) without
+           introducing noise (i.e. where the CIDCW equipment is built into the telephone set) then this should
+           be done whenever the CMX602B is in Tone Detect mode and the DET output is high. Doing this
+           will markedly reduce the number of false responses generated by local (near end) speech. Note
+           that the DET output is not used for any other purpose in an off-hook application when the
+           CMX602B is set to Tone Alert Detect mode.
+ 2003 CML Microsystems Plc                               17                                           D/602B/2
+
+
+Calling Line Identifier                                                                           CMX602B
+2.         The IRQN output going low when in Tone Alert Detect mode indicates that a CAS has been
+           detected. The local handset and keypad should then be muted as required by the Bellcore
+           specification and the CMX602B switched to FSK Receive mode to be ready to receive the FSK
+           data, doing this will also clear the IRQN output.
+3.         The CMX602B’s DET output should be monitored for a period of 50ms after changing to FSK
+           Receive mode, before sending the ACK signal, and the transaction abandoned if the DET output
+           goes high during this time, which would be the case if a false CAS detect had been caused by far
+           end speech.
+                         Figure 9b : Flow Chart for Off-hook Operation of CMX602B
+ 2003 CML Microsystems Plc                              18                                       D/602B/2
+
+
+Calling Line Identifier                                                                             CMX602B
+1.7        Performance Specification
+1.7.1      Electrical Performance
+Absolute Maximum Ratings
+Exceeding these maximum ratings can result in damage to the device.
+                                                                   Min.           Max.          Units
+ Supply (VDD - VSS)                                                -0.3           7.0           V
+ Voltage on any pin to VSS                                         -0.3           VDD + 0.3     V
+ Current into or out of VDD and VSS pins                           -30            +30           mA
+ Current into or out of any other pin                              -20            +20           mA
+D4 / P3 Packages                                                   Min.           Max.          Units
+ Total Allowable Power Dissipation at Tamb = 25°C                                 800           mW
+           ... Derating                                                            13           mW/°C
+ Storage Temperature                                               -55            +125          °C
+ Operating Temperature                                             -40            +85           °C
+E4 Package                                                         Min.           Max.          Units
+ Total Allowable Power Dissipation at Tamb = 25°C                                 300           mW
+           ... Derating                                                            5            mW/°C
+ Storage Temperature                                               -55            +125          °C
+ Operating Temperature                                             -40            +85           °C
+Operating Limits
+Correct operation of the device outside these limits is not implied.
+                                                      Notes        Min.           Max.          Units
+ Supply (VDD - VSS)                                                2.7            5.5           V
+ Operating Temperature                                2            -40            +85           °C
+ Xtal frequency                                       1            3.575965       3.583125      MHz
+Notes:       1.    An Xtal frequency of 3.579545MHz ±0.1% is required for correct Tone Alert and FSK
+                   detection.
+             2.    Operating temperature range -10°C to +60°C at VDD < 3.0V.
+ 2003 CML Microsystems Plc                            19                                          D/602B/2
+
+
+Calling Line Identifier                                                                      CMX602B
+Operating Characteristics
+For the following conditions unless otherwise specified:
+           VDD = 2.7V at Tamb = -10 to +60°C and VDD = 3.3V to 5.5V at Tamb = -40 to +85°C,
+           Xtal Frequency = 3.579545MHz ± 0.1%
+           0dBV corresponds to 1.0Vrms
+                                                         Notes   Min.      Typ.        Max.   Units
+ DC Parameters
+   IDD (ZP input high) at VDD = 5.0V                      1,2              0.02          1.0   µA
+   IDD (ZP input low) at VDD = 3.0V                        1                0.5          1.0   mA
+   IDD (ZP input low) at VDD = 5.0V                        1                1.0         2.0    mA
+   Logic '1' input level (RXCK and XTAL inputs)                  70%                           VDD
+   Logic '0' input level (RXCK and XTAL inputs)                                        30%     VDD
+   Logic input leakage current (Vin = 0 to VDD)                   -1.0                 +1.0    µA
+       excluding XTAL input
+   Output logic '1' level (lOH = 360µA)                        VDD - 0.4                        V
+   Output logic '0' level (lOL = 360µA)                                                 0.4     V
+   IRQN o/p 'off' state current (Vout = VDD)                                            1.0    µA
+   Schmitt Trigger input thresholds, see fig 10
+              High going (Vthi)                                0.56VDD               0.56VDD    V
+                                                                                      + 0.6V
+              Low going (Vtlo)                                 0.44VDD               0.44VDD    V
+                                                                - 0.6V
+ Tone Alert Detector
+   'Low' tone nominal frequency                                            2130                 Hz
+   'High' tone nominal frequency                                           2750                 Hz
+   Start of Tone Alert signal to DET high time                             55.0                ms
+        (Fig. 6 Tton)
+   End of Tone Alert signal to DET and IRQN low
+        time (Fig 6 Ttoff)                                         0.5                 10.0    ms
+   DET high time to ensure IRQN goes low                           8.0                 45.0    ms
+        (Fig 6 TqCAS)
+        To ensure detection:                               3
+              'Low' tone frequency tolerance                                            ±0.5    %
+              'High' tone frequency tolerance                                           ±0.5    %
+              Level (per tone)                             4     -40.0                  -2.2  dBV
+              2750Hz tone level wrt
+                        2130Hz tone level                         -6.0                 +6.0    dB
+              Signal to Noise ratio                        5      20.0                         dB
+              Dual tone burst duration for DET output              75                          ms
+               Dual tone burst duration to ensure                  75                    85    ms
+               IRQN goes low
+        To ensure non-detection:                           6
+              'Low' tone frequency tolerance                      ±75                           Hz
+              'High' tone frequency tolerance                     ±95                          Hz
+              Level (total)                                4                           -46.0  dBV
+              Dual tone burst duration                                                 45.0    ms
+ 2003 CML Microsystems Plc                           20                                     D/602B/2
+
+
+Calling Line Identifier                                                                                     CMX602B
+                                                               Notes       Min.       Typ.        Max.       Units
+ FSK Receiver
+   Transmission rate                                                       1188       1200        1212       Baud
+   V23 Mark (logical 1) frequency                                          1280       1300        1320         Hz
+   V23 Space (logical 0) frequency                                         2068       2100        2132         Hz
+   Bell202 Mark (logical 1) frequency                                      1188       1200        1212         Hz
+   Bell202 Space (logical 0) frequency                                     2178       2200        2222         Hz
+   Valid input level range                                       4         -40.0                   -8.0       dBV
+   Acceptable twist (mark level wrt space level)
+            V23                                                             -6.0                   +6.0        dB
+            Bell202                                                        -10.0                  +10.0        dB
+   Acceptable Signal to Noise ratio
+            V23                                                  5         20.0                                dB
+            Bell202                                              5         30.0                                dB
+   Level Detector 'on' threshold level                           4                                -40.0       dBV
+   Level Detector 'off' to 'on' time (Fig 4 Teon)                                                  25.0       ms
+   Level Detector 'on' to 'off' time (Fig 4 Teoff)                           8.0                              ms
+ Input Signal Amplifier
+   Input impedance                                               7         10.0                               MΩ
+   Voltage gain                                                                        500                    V/V
+ XTAL Input
+   'High' pulse width                                            8          100                                ns
+   'Low' pulse width                                             8          100                                ns
+Notes:          1. At 25°C, not including any current drawn from the CMX602B pins by external circuitry
+                      other than X1, C1 and C2.
+                2. RD, MODE, RXCK inputs at VSS, ZP input at VDD. See also Figure 11.
+                3. All conditions must be met to ensure detection.
+                4. For VDD = 3.3V with equal level tones and with the input signal amplifier external
+                      components as section 1.4. The internal threshold levels are proportional to VDD. To
+                      cater for other supply voltages or different signal level ranges the voltage gain of the input
+                      signal amplifier should be adjusted by selecting the appropriate external components as
+                      described in section 1.5
+                5. Flat noise in 300 - 3400Hz band for V23, 200 - 3200Hz for Bell202.
+                6. Meeting any of these conditions will ensure non-detection.
+                7. Open loop, small signal low frequency measurements.
+                8. Timing for an external input to the CLOCK/XTAL pin.
+ 2003 CML Microsystems Plc                                 21                                              D/602B/2
+
+
+Calling Line Identifier                                                                                                       CMX602B
+                                       4
+                                    3.5
+                                       3                                Vthi
+                                    2.5
+                             Vin       2
+                                    1.5
+                                                                                        Vtlo
+                                       1
+                                    0.5
+                                       0
+                                            3             3.5            4                   4.5         5              5.5
+                                                                                    VDD
+                          Figure 10 : Schmitt Trigger typical input voltage thresholds vs. VDD
+                                      10
+                                       1
+                                      0.1
+                              µA
+                                     0.01
+                                    0.001
+                                   0.0001
+                                            -40   -30   -20   -10   0    10      20    30      40   50   60   70   80
+                                                                               Temperature
+                           Figure 11 : Typical 'Zero Power' IDD vs. Temperature (VDD = 5.0V)
+ 2003 CML Microsystems Plc                                                    22                                             D/602B/2
+
+
+Calling Line Identifier                                                                                                      CMX602B
+                Figure 14 : 16-pin TSSOP Mechanical Outline: Order as part no. CMX602BE4
+    Handling precautions: This product includes input protection, however, precautions should be taken to prevent device
+    damage from electro-static discharge. CML does not assume any responsibility for the use of any circuitry described. No
+    IPR or circuit patent licences are implied. CML reserves the right at any time without notice to change the said circuitry and
+    this product specification. CML has a policy of testing every product shipped using calibrated test equipment to ensure
+    compliance with this product specification. Specific testing of all circuit parameters is not necessarily performed.
+                                              www.cmlmicro.com
+     For FAQs see: www.cmlmicro.com/products/faqs/
+     For a full data sheet listing see: www.cmlmicro.com/products/datasheets/download.htm
+     For detailed application notes: www.cmlmicro.com/products/applications/
+   Oval Park, Langford,              4800 Bethania Station Road,        No 2 Kallang Pudding           No. 218, Tian Mu Road
+   Maldon, Essex,                    Winston-Salem,                     Road, #09 to 05/06             West, Tower 1, Unit 1008,
+   CM9 6WG - England.                NC 27105 - USA.                    Mactech Industrial Building,   Shanghai Kerry Everbright
+                                                                        Singapore 349307               City, Zhabei,
+                                                                                                       Shanghai 200070,
+                                                                                                       China.
+   Tel: +44 (0)1621 875500           Tel: +1 336 744 5050,              Tel: +65 6745 0426             Tel: +86 21 6317 4107
+                                             800 638 5577                                                     +86 21 6317 8916
+   Fax: +44 (0)1621 875600           Fax: +1 336 744 5054               Fax: +65 6745 2917             Fax: +86 21 6317 0243
+   Sales:                            Sales:                             Sales:                         Sales:
+   sales@cmlmicro.com                us.sales@cmlmicro.com              sg.sales@cmlmicro.com          cn.sales@cmlmicro.com.cn
+   Technical Support:                Technical Support:                 Technical Support:             Technical Support:
+   techsupport@cmlmicro.com          us.techsupport@cmlmicro.com        sg.techsupport@cmlmicro.com    sg.techsupport@cmlmicro.com
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+CML Microcircuits:
+ CMX602BE4 CMX602BP3 CMX602BD4 CMX602BE4-REEL CMX602BD4-REEL

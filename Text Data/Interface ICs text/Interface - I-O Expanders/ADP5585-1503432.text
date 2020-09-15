@@ -1,0 +1,2028 @@
+                                                                                                     Keypad Decoder and I/O Expansion
+Data Sheet                                                                                                                   ADP5585
+FEATURES                                                                                                                 FUNCTIONAL BLOCK DIAGRAM
+                                                                                                                                     VDD                        GND
+16-element FIFO for event recording
+10 configurable I/Os allowing functions such as                                                                        ADP5585
+   Key pad decoding for a matrix of up to 5 × 5                                                             RST/R5
+                                                                                                                                    UVLO
+                                                                                                                                                   OSCILLATOR
+                                                                                                                                    POR
+      11 GPIOs (5 × 6) with ADP5585ACxZ-01-R7 models
+                                                                                                              SDA
+   Key press/release interrupts                                                                                                   I2C INTERFACE
+                                                                                                               SCL
+   GPIO functions                                                                                                                                                            INT
+   GPI with selectable interrupt level
+   100 kΩ or 300 kΩ pull-up resistors                                                                           R0
+                                                                                                                                           KEY SCAN
+                                                                                                                                              AND
+   300 kΩ pull-down resistors                                                                                   R1
+                                                                                                                                            DECODE
+   GPO with push-pull or open-drain                                                                             R2                         GPI SCAN
+                                                                                                                                             AND           REGISTERS
+   Programmable logic block                                                                                     R3                         DECODE
+   PWM generator                                                                                                R4         I/O
+                                                                                                                         CONFIG             LOGIC
+      Internal PWM generation                                                                                   C0
+      External PWM with internal PWM AND function                                                               C1                           PWM
+   Reset generators                                                                                             C2
+                                                                                                                                           RESET1
+                                                                                                                C3
+I2C interface with fast mode plus (Fm+) support of up to 1 MHz                                                                              GEN
+                                                                                                                C4
+Open-drain interrupt output                                                                                                                RESET2
+                                                                                                                                                                                   09841-001
+                                                                                                                                            GEN
+16-ball WLCSP, 1.59 mm × 1.59 mm
+                                                                                                                                            Figure 1.
+16-lead LFCSP, 3 mm × 3 mm
+APPLICATIONS
+Keypad entries and input/output expansion capabilities
+Smart phones, remote controls, and cameras
+Healthcare, industrial, and instrumentation
+GENERAL DESCRIPTION
+The ADP5585 is a 10 input/output port expander with a built in                                              as events via the FIFO, eliminating the need to monitor different
+keypad matrix decoder, programmable logic, reset generator, and                                             registers for event changes. The ADP5585 is equipped with a
+PWM generator. Input/output expander ICs are used in portable                                               FIFO to store up to 16 events. Events can be read back by the
+devices (phones, remote controls, and cameras) and nonportable                                              processor via an I2C-compatible interface.
+applications (healthcare, industrial, and instrumentation). I/O                                             The ADP5585 frees up the main processor from having to
+expanders can be used to increase the number of I/Os available                                              monitor the keypad, thereby reducing power consumption
+to a processor or to reduce the number of I/Os required through                                             and/or increasing processor bandwidth for performing other
+interface connectors for front panel designs.                                                               functions.
+The ADP5585 handles all key scanning and decoding and can                                                   The programmable logic functions allow common logic require-
+flag the main processor via an interrupt line that new key events                                           ments to be integrated as part of the GPIO expander, thus saving
+have occurred. GPI changes and logic changes can also be tracked                                            board area and cost.
+Rev. C                                                                     Document Feedback
+Information furnished by Analog Devices is believed to be accurate and reliable. However, no
+responsibility is assumed by Analog Devices for its use, nor for any infringements of patents or other
+rights of third parties that may result from its use. Specifications subject to change without notice. No   One Technology Way, P.O. Box 9106, Norwood, MA 02062-9106, U.S.A.
+license is granted by implication or otherwise under any patent or patent rights of Analog Devices.         Tel: 781.329.4700 ©2011–2013 Analog Devices, Inc. All rights reserved.
+Trademarks and registered trademarks are the property of their respective owners.                           Technical Support                                  www.analog.com
+
+
+ADP5585                                                                                                                                                                                      Data Sheet
+TABLE OF CONTENTS
+Features .............................................................................................. 1            Functional Description .....................................................................9
+Applications ....................................................................................... 1                  Event FIFO .....................................................................................9
+Functional Block Diagram .............................................................. 1                               Key Scan Control ...........................................................................9
+General Description ......................................................................... 1                         GPI Input ..................................................................................... 12
+Revision History ............................................................................... 2                      GPO Output ................................................................................ 12
+Specifications..................................................................................... 3                   Logic Blocks ................................................................................ 12
+  Timing Diagram ........................................................................... 4                          PWM Block ................................................................................. 13
+Absolute Maximum Ratings ............................................................ 5                                 Reset Blocks ................................................................................ 14
+  Thermal Resistance ...................................................................... 5                        Register Interface ............................................................................ 15
+  ESD Caution .................................................................................. 5                   Register Map ................................................................................... 17
+Pin Configurations and Function Descriptions ........................... 6                                              Detailed Register Descriptions ................................................. 19
+Theory of Operation ........................................................................ 7                       Applications Diagram .................................................................... 36
+  Device Enable ................................................................................ 8                   Outline Dimensions ....................................................................... 37
+  Device Overview .......................................................................... 8                          Ordering Guide .......................................................................... 38
+REVISION HISTORY
+1/13—Rev. B to Rev. C                                                                                                10/11—Rev. Sp0 to Rev. A
+Changes to Detailed Register Description Section .................... 19                                             Added 16-Lead LFCSP_WQ Package .............................. Universal
+Changes to Table 31 and Table 32 ................................................ 24                                 Changes to Features Section ............................................................1
+Changes to Table 33, Table 34, and Table 35 ............................... 25                                       Added Figure 4; Renumbered Sequentially ...................................6
+Changes to Table 37 ........................................................................ 26                      Changes to Table 4.............................................................................6
+Changes to Table 39 ........................................................................ 27                      Changes to Device Enable Section and Table 5 .............................8
+Changes to Table 41 and Table 43 ................................................ 28                                 Change to General Section ............................................................ 11
+Changes to Table 45 ........................................................................ 29                      Changes to Logic Blocks Section .................................................. 12
+Changes to Table 47 ........................................................................ 30                      Changes to PWM Block Section .................................................. 13
+Changes to Table 64 ........................................................................ 34                      Changes to Interrupts Section ...................................................... 14
+Changes to Figure 27 ...................................................................... 36                       Changes to Register Interface Section ......................................... 15
+                                                                                                                     Changes to Figure 27...................................................................... 35
+7/12—Rev. A to Rev B                                                                                                 Updated Outline Dimensions ....................................................... 36
+Changes to Table 5 ............................................................................ 8                    Changes to Ordering Guide .......................................................... 38
+Updated Outline Dimensions ....................................................... 36
+Changes to Ordering Guide .......................................................... 37                              5/11—Revision Sp0: Initial Version
+                                                                                                    Rev. C | Page 2 of 40
+
+
+Data Sheet                                                                                                          ADP5585
+SPECIFICATIONS
+VDD = 1.8 V to 3.3 V, TA = TJ = −40°C to +85°C, unless otherwise noted 1.
+Table 1.
+Parameter                                        Symbol     Test Conditions/Comments                  Min     Typ  Max     Unit
+SUPPLY VOLTAGE
+  VDD Input Voltage Range                        VDD                                                  1.65         3.6     V
+  Undervoltage Lockout Threshold                 UVLOVDD    UVLO active, VDD falling                  1.2     1.3          V
+                                                            UVLO inactive, VDD rising                         1.4  1.6     V
+SUPPLY CURRENT
+  Standby Current                                ISTNBY     VDD = 1.65 V                                      1    4       μA
+                                                            VDD = 3.3 V                                       1    10      µA
+  Operating Current (One Key Press)              ISCAN1     Scan = 10 ms, CORE_FREQ = 50 kHz,                 30   40      µA
+                                                            scan active, 300 kΩ pull-up, VDD = 1.65 V
+                                                 ISCAN2     Scan = 10 ms, CORE_FREQ = 50 kHz,                 35   45      µA
+                                                            scan active, 100 kΩ pull-up, VDD = 1.65 V
+                                                 ISCAN3     Scan = 10 ms, CORE_FREQ = 50 kHz,                 75   85      μA
+                                                            scan active, 300 kΩ pull-up, VDD = 3.3 V
+                                                 ISCAN4     Scan = 10 ms, CORE_FREQ = 50 kHz,                 80   90      μA
+                                                            scan active, 100 kΩ pull-up, VDD = 3.3 V
+PULL-UP, PULL-DOWN RESISTANCE
+  Pull-Up
+     Option 1                                                                                         50      100  150     kΩ
+     Option 2                                                                                         150     300  450     kΩ
+  Pull-Down                                                                                           150     300  450     kΩ
+INPUT LOGIC LEVEL (RST, SCL, SDA, R0, R1, R2,
+  R3, R4, R5, C0, C1, C2, C3, C4)
+  Input Voltage
+     Logic Low                                   VIL                                                               0.3 VDD V
+     Logic High                                  VIH                                                  0.7 VDD              V
+  Input Leakage Current (Per Pin)                VI-Leak                                                      0.1  1       µA
+PUSH-PULL OUTPUT LOGIC LEVEL (R0, R1, R2, R3,
+  R4, R5, C0, C1, C2, C3, C4)
+  Output Voltage
+     Logic Low                                   VOL1       Sink current = 10 mA, maximum of five                  0.4     V
+                                                            GPIOs active simultaneously
+                                                 VOL2       Sink current = 10 mA, all GPIOs active                 0.5     V
+                                                            simultaneously
+     Logic High                                  VOH        Source current = 5 mA                     0.7 VDD              V
+  Logic High Leakage Current (Per Pin)           VOH-Leak                                                     0.1  1       µA
+OPEN-DRAIN OUTPUT LOGIC LEVEL (INT, SDA)
+  Output Voltage
+     Logic Low
+       INT                                       VOL3       ISINK = 10 mA                                          0.4     V
+       SDA                                       VOL4       ISINK = 20 mA                                          0.4     V
+  Logic High Leakage Current (Per Pin)           VOH-Leak                                                     0.1  1       µA
+  Logic Propagation Delay                                                                                     125  300     ns
+  FF Hold Time 2                                                                                              0            ns
+  FF Setup Time2                                                                                              175          ns
+  GPIO Debounce2                                                                                                   70      µs
+  Internal Oscillator Frequency 3                OSCFREQ                                              900     1000 1100    kHz
+                                                           Rev. C | Page 3 of 40
+
+
+ADP5585                                                                                                                                                             Data Sheet
+Parameter                                                                Symbol        Test Conditions/Comments                                   Min         Typ    Max         Unit
+I2C TIMING SPECIFICATIONS
+   Delay from UVLO/Reset Inactive to I2C Access                                                                                                                      60          μs
+   SCL Clock Frequency                                                   fSCL                                                                     0                  1000        kHz
+   SCL High Time                                                         tHIGH                                                                    0.26                           μs
+   SCL Low Time                                                          tLOW                                                                     0.5                            μs
+   Data Setup Time                                                       tSU; DAT                                                                 50                             ns
+   Data Hold Time                                                        tHD; DAT                                                                 0                              μs
+   Setup Time for Repeated Start                                         tSU; STA                                                                 0.26                           μs
+   Hold Time for Start/Repeated Start                                    tHD; STA                                                                 0.26                           μs
+   Bus Free Time for Stop and Start Condition                            tBUF                                                                     0.5                            μs
+   Setup Time for Stop Condition                                         tSU; STO                                                                 0.26                           μs
+   Data Valid Time                                                       tVD; DAT                                                                                    0.45        μs
+   Data Valid Acknowledge                                                tVD; ACK                                                                                    0.45        μs
+   Rise Time for SCL and SDA                                             tR                                                                                          120         ns
+   Fall Time for SCL and SDA                                             tF                                                                                          120         ns
+   Pulse Width of Suppressed Spike                                       tSP                                                                      0                  50          ns
+   Capacitive Load for Each Bus Line                                     CB4                                                                                         550         pF
+1
+  All limits at temperature extremes are guaranteed via correlation using standard statistical quality control (SQC). Typical values are at TA = 25°C, VDD = 1.8 V.
+2
+  Guaranteed by design.
+3
+  All timers are referenced from the base oscillator and have the same ±10% accuracy.
+4
+  CB is the total capacitance of one bus line in picofarads.
+TIMING DIAGRAM
+                                      tF               tR                  tSU; DAT
+                                70%                                70%
+                      SDA
+                                 30%                               30%
+                                                                                                                                tVD; DAT
+                                           tF           tHD; DAT
+                                                                                                                 tHIGH
+                                                                                       tR
+                                                70%                  70%                    70%                          70%
+                       SCL                                                                   30%
+                                                 30%                  30%                                                 30%
+                                                 tHD; STA                                          tLOW                                               NINTH CLOCK
+                                  S                1/fSCL
+                                            FIRST CLOCK CYCLE
+                                                                                                                                       tBUF
+                      SDA
+                                                             tHD; STA                              tVD; ACK
+                             tSU; STA                                    tSP                                  tSU; STO
+                                                                                        70%
+                       SCL
+                                                                                         30%
+                                                 Sr                                                                              P            S
+                                                                                                   NINTH CLOCK
+                                                                                                                                                                     09841-002
+                 VIL = 0.3VDD
+                 VIH = 0.7VDD
+                                                                           Figure 2. I2C Interface Timing Diagram
+                                                                                      Rev. C | Page 4 of 40
+
+
+Data Sheet                                                                                                                                         ADP5585
+ABSOLUTE MAXIMUM RATINGS
+Table 2.                                                                                      Stresses above those listed under Absolute Maximum Ratings
+Parameter                                               Rating                                may cause permanent damage to the device. This is a stress
+VDD to GND                                              −0.3 V to +4 V                        rating only; functional operation of the device at these or any
+SCL, SDA, RST, INT, R0, R1, R2, R3, R4,                 −0.3 V to (VDD + 0.3 V)               other conditions above those indicated in the operational
+    C0, C1, C2, C3, C4 to GND                                                                 section of this specification is not implied. Exposure to absolute
+Temperature Range                                                                             maximum rating conditions for extended periods may affect
+    Operating (Ambient)                                 −40°C to +85°C1                       device reliability.
+    Operating (Junction)                                −40°C to +125°C
+                                                                                              Absolute maximum ratings apply individually only, not in
+    Storage                                             −65°C to +150°C
+                                                                                              combination. Unless otherwise specified, all other voltages are
+1
+  In applications where high power dissipation and poor thermal resistance                    referenced to GND.
+  are present, the maximum ambient temperature may need to be derated.
+  Maximum ambient temperature (TA (MAX)) is dependent on the maximum                          THERMAL RESISTANCE
+  operating junction temperature (TJ (MAXOP) = 125°C), the maximum power
+  dissipation of the device (PD (MAX)), and the junction-to-ambient thermal                   θJA is specified for the worst-case conditions, that is, a device
+  resistance of the device/package in the application (θJA), using the following              soldered in a printed circuit board (PCB) for surface-mount
+  equation: TA (MAX) = TJ (MAXOP) − (θJA × PD (MAX)).
+                                                                                              packages.
+                                                                                              Table 3.
+                                                                                              Thermal Resistance                               θJA        Unit
+                                                                                              16-Ball WLCSP                                    62         °C/W
+                                                                                              Maximum Power Dissipation                        70         mW
+                                                                                              16-Lead LFCSP                                    67.154     °C/W
+                                                                                              Maximum Power Dissipation                        70         mW
+                                                                                              ESD CAUTION
+                                                                             Rev. C | Page 5 of 40
+
+
+ADP5585                                                                                                                                                Data Sheet
+PIN CONFIGURATIONS AND FUNCTION DESCRIPTIONS
+                                                                                                      16 INT   15 SCL   14 SDA   13 GND
+                      BALL A1
+                      CORNER
+                           1       2       3      4                                          R4 1                                         12 VDD
+                                                                                             R3 2                                         11 RST(R5)
+                  A
+                                                                                             R2 3                                         10 C4
+                        VDD       SDA     SCL     GND
+                                                                                             R1 4                                         9   C3
+                  B
+                        R0         INT   RST/R5   C0
+                  C                                                                                   R0 5     C0 6     C1 7     C2 8
+                        R2         R1      C1     C2
+                                                                                                         TOP VIEW
+                  D                                                                                     Not to Scale
+                        R4         R3     C3      C4                                         NOTES
+                                                                                             1. THE EXPOSED PAD IS NOT CONNECTED.
+                                   TOP VIEW
+                                                        09841-003                                                                                       09841-027
+                                                                                                IT IS RECOMMENDED TO CONNECT THE
+                               (BALL SIDE DOWN)                                                 EXPOSED PAD TO GROUND FOR THERMAL
+                                  Not to Scale                                                  DISSIPATION.
+                 Figure 3. WLCSP Pin Configuration                                                  Figure 4. LFCSP Pin Configuration
+Table 4. Pin Function Descriptions
+    Pin No.
+WLCSP     LFCSP       Mnemonic                  Description
+D1        1           R4                        GPIO 5 (GPIO Alternate Function: RESET1). This pin functions as Row 4 when used as a keypad.
+D2        2           R3                        GPIO 4 (GPIO Alternate Function: Logic Block Input LC, PWM_OUT). This pin functions as Row 3
+                                                when used as a keypad.
+C1          3         R2                        GPIO 3 (GPIO Alternate Function: Logic Block Input LB). This pin functions as Row 2 when used as a
+                                                keypad.
+C2          4         R1                        GPIO 2 (GPIO Alternate Function: Logic Block Input LA). This pin functions as Row 1 when used as a
+                                                keypad.
+B1          5         R0                        GPIO 1 (GPIO Alternate Function: Logic Block Output LY). This pin functions as Row 0 when used as a
+                                                keypad.
+B4          6         C0                        GPIO 7. This pin functions as Column 0 when used as a keypad.
+C3          7         C1                        GPIO 8. This pin functions as Column 1 when used as a keypad.
+C4          8         C2                        GPIO 9. This pin functions as Column 2 when used as a keypad.
+D3          9         C3                        GPIO 10 (GPIO Alternate Function: PWM_IN). This pin functions as Column 3 when used as a keypad.
+D4          10        C4                        GPIO 11 (GPIO Alternate Function: RESET2). This pin functions as Column 4 when used as a keypad.
+B3          11        RST/R5                    Input Reset Signal. To expand the keypad matrix, select the ADP5585ACBZ-01-R7 or the
+                                                ADP5585ACPZ-01-R7 device model for this pin to function as GPIO 6/Row 5.
+A1          12        VDD                       Supply Voltage Input.
+A4          13        GND                       Ground.
+A2          14        SDA                       I2C Data Input/Output.
+A3          15        SCL                       I2C Clock Input.
+B2          16        INT                       Open-Drain Interrupt Output.
+            EP        EP                        Exposed Pad. The exposed pad is not connected. It is recommended to connect the exposed pad to
+                                                ground for thermal dissipation.
+                                                                     Rev. C | Page 6 of 40
+
+
+Data Sheet                                                                                                                              ADP5585
+THEORY OF OPERATION
+                                     VDD                                                        GND
+                   ADP5585
+        RST/R5                       UVLO
+                                                             OSCILLATOR
+                                     POR
+          SDA
+                                                          I2C INTERFACE                                               INT
+          SCL
+                                                                                I2C BUSY?
+             R0
+                                                                               KEY EVENT          FIFO
+                                  (R0)        ROW 0
+                                                                                GPI EVENT        UPDATE
+             R1                   (R1)        ROW 1
+                                  (R2)        ROW 2
+                                  (R3)
+                                                                             LOGIC EVENT
+                                              ROW 3
+             R2                   (R4)        ROW 4
+                                  (RST/R5)    ROW 5           KEY SCAN
+                                  (C0)            COL 0          AND
+             R3                   (C1)            COL 1        DECODE
+                                  (C2)            COL 2
+                                  (C3)            COL 3
+             R4                   (C4)            COL 4
+             C0                   (R0)        GPIO 1
+                                  (R1)        GPIO 2                                                      REGISTERS
+                                  (R2)        GPIO 3
+             C1                   (R3)        GPIO 4
+                                  (R4)        GPIO 5
+                                  (RST/R5)    GPIO 6
+                                                              GPI SCAN
+             C2                   (C0)        GPIO 7            AND
+                                  (C1)        GPIO 8          DECODE
+                                  (C2)        GPIO 9
+             C3
+                                  (C3)
+                        I/O                  GPIO 10
+                                  (C4)       GPIO 11
+                  CONFIGURATION
+             C4
+                                  (R1)       LA
+                                  (R2)       LB
+                                  (R3)       LC                 LOGIC
+                                  (R0)       LY
+                                  (C3)       PWM_IN
+                                  (R3)       PWM_OUT            PWM
+                                  (R4)       RESET1            RESET1
+                                                                GEN
+                                                                               RST (R5)
+                                  (C4)       RESET2            RESET2
+                                                                GEN
+                                                                                                                            09841-004
+                                                             Figure 5. Internal Block Diagram
+                                                                   Rev. C | Page 7 of 40
+
+
+ADP5585                                                                                                                                           Data Sheet
+DEVICE ENABLE                                                                        Each I/O can be pulled up with a 100 kΩ or 300 kΩ resistor or
+                                                                                     pulled down with a 300 kΩ resistor. For logic output drive, each
+When sufficient voltage is applied to VDD and the RST pin is
+                                                                                     I/O has a 5 mA PMOS source and a 10 mA NMOS sink for a push-
+driven with a logic high level, the ADP5585 starts up in standby
+                                                                                     pull type output. For open-drain output situations, the 5 mA
+mode with all settings at default. The user can configure the
+                                                                                     PMOS source is not enabled. For logic input applications, each
+device via the I2C interface. When the RST pin is low, the
+                                                                                     I/O can be sampled directly or, alternatively, sampled through a
+ADP5585 enters a reset state and all settings return to default.
+                                                                                     debounce filter.
+The RST pin features a debounce filter.
+                                                                                     The I/O structure shown in Figure 6 allows for all GPI and GPO
+If using the ADP5585ACBZ-01-R7 or ADP5585ACPZ-01-R7                                  functions, as well as PWM and clock divide functions. For key
+device model, the RST pin acts as an extra row pin. Without a                        matrix scan and decode, the scanning circuit uses the 100 kΩ or
+reset pin, the only method to reset the device is by bringing                        300 kΩ resistor for pulling up keypad row pins and the 10 mA
+VDD below the UVLO threshold.                                                        NMOS sinks for grounding keypad column pins (see the Key
+DEVICE OVERVIEW                                                                      Scan Control section for details about key decoding).
+The ADP5585 contains 10 multiconfigurable input/output pins.                         Configuration of the device is carried out by programming an
+Each pin can be programmed to enable the device to carry out                         array of internal registers via the I2C interface. Feedback of
+its various functions, as follows:                                                   device status and pending interrupts can be flagged to an
+                                                                                     external processor by using the INT pin.
+•   Keypad matrix decoding (five-column by five-row matrix
+    maximum).                                                                        The ADP5585 is offered with three feature sets. Table 5 lists the
+•   General-purpose I/O expansion (up to 10 inputs/outputs).                         options that are available for each model of the ADP5585.
+•   PWM generation.
+                                                                                     Table 5. Matrix Options by Device Model
+•   Logic function building blocks (up to three inputs and one
+                                                                                     Model                             Description
+    output).
+                                                                                     ADP5585ACBZ-00-R7                 GPIO pull up (default option)
+•   Two reset generators.
+                                                                                                                       5-row × 5-column matrix
+All 10 input/output pins have an I/O structure as shown in                           ADP5585ACBZ-01-R7                 Row 5 added to GPIOs
+Figure 6.                                                                                                              6-row × 5-column matrix
+                   VDD                                                               ADP5585ACBZ-02-R7                 No pull-up resistors to special function
+                                                                                                                       pins 1
+                            100kΩ    300kΩ
+                                                                                                                       5-row × 5-column matrix
+                                                                                     ADP5585ACBZ-04-R7                 Pull-down resistors to all GPIO pins on
+                                                                                                                       start-up
+                                                   I/O
+                                                                                                                       5-row × 5-column matrix
+            I/O
+           DRIVE                                                                     ADP5585ACPZ-00-R7                 GPIO pull up (default option)
+                                     300kΩ
+                                                                                                                       5-row × 5-column matrix
+                                                                                     ADP5585ACPZ-01-R7                 Row 5 added to GPIOs
+                                                                                                                       6-row × 5-column matrix
+                                                                                     ADP5585ACPZ-03-R7                 Alternate I2C address (0x30)
+                                                         09841-005                                                     5-row × 5-column matrix
+                            DEBOUNCE
+                         Figure 6. I/O Structure                                     1
+                                                                                         Special function pins are defined as R0, R3, R4, and C4. See Table 4 for
+                                                                                         details.
+                                                                     Rev. C | Page 8 of 40
+
+
+Data Sheet                                                                                                                                            ADP5585
+FUNCTIONAL DESCRIPTION
+EVENT FIFO                                                                                   FIRST
+                                                                                                          EC = 3
+                                                                                                      KEY 3 PRESSED
+Before going into detail on the various ADP5585 blocks, it is                                READ
+                                                                                                      KEY 3 RELEASED
+important to understand the function of the event FIFO. The                                            GPI 7 ACTIVE
+ADP5585 features an event FIFO that can record as many as 16
+events. By default, the FIFO primarily records key events, such as                                                         EC = 2
+key press and key release. However, it is possible to configure                                        SECOND
+                                                                                                         READ
+                                                                                                                      KEY 3 RELEASED
+the general-purpose input (GPI) and logic activity to generate                                                          GPI 7 ACTIVE
+event information on the FIFO as well. An event count, EC[4:0],
+is composed of five bits and works in tandem with the FIFO so
+                                                                                                                                          EC = 1
+that the user knows how much of the FIFO must be read back at                                                            THIRD
+                                                                                                                                       GPI 7 ACTIVE
+                                                                                                                         READ
+any given time.
+The FIFO is composed of 16 eight-bit sections that the user
+accesses by reading the FIFO_x registers. The actual FIFO is
+                                                                                                                                                      EC = 0
+not in user accessible registers until a read occurs. The FIFO
+can be thought of as a “first in first out” buffer that is used to
+                                                                                                                                                               09841-007
+fill Register 0x03 to Register 0x12.
+The event FIFO is made up of 16 eight-bit registers. In each                                                          Figure 8. FIFO Operation
+register, Bits[6:0] hold the event identifier, and Bit 7 holds the
+event state. With seven bits, 127 different events can be identified.                       The FIFO registers (0x03 to 0x12) always point to the top of the
+See Table 11 for event decoding.                                                            FIFO (that is, the location of EVENT1[7:0]). If the user tries to
+                                      OVRFLOW_INT                                           read back from any location in a FIFO, data is always obtained
+                                                                                            from the top of that FIFO. This ensures that events can only be
+KEY EVENTS
+                    FIFO                                                                    read back in the order in which they occurred, thus ensuring
+                                        EC[4:0]
+GPI EVENTS
+LOGIC EVENTS
+                   UPDATE                                                                   the integrity of the FIFO system.
+                                                                                            As stated above, some of the onboard functions of ADP5585
+               EVENT1[7:0]                                                                  can be programmed to generate events on the FIFO. A FIFO
+               EVENT2[7:0]                                                                  update control block manages updates to the FIFO. If an I2C
+               EVENT3[7:0]                                                                  transaction is accessing any of the FIFO address locations,
+               EVENT4[7:0]                                                                  updates are paused until the I2C transaction has completed.
+               EVENT5[7:0]                                                                  A FIFO overflow event occurs when more than 16 events are
+               EVENT6[7:0]                                                                  generated prior to an external processor reading a FIFO and
+               EVENT7[7:0]                                                                  clearing it.
+               EVENT8[7:0]                7   6   5   4     3   2   1   0
+                                                                                            If an overflow condition occurs, the overflow status bit is set.
+               EVENT9[7:0]
+                                                                                            An interrupt is generated if overflow interrupt is enabled,
+               EVENT10[7:0]
+                                                                                            signaling to the processor that more than 16 events have
+               EVENT11[7:0]
+                                              EVENT8_IDENTIFIER[6:0]                        occurred.
+               EVENT12[7:0]
+               EVENT13[7:0]                                                                 KEY SCAN CONTROL
+               EVENT14[7:0]        EVENT8_STATE                                             General
+               EVENT15[7:0]
+                                                                              09841-006
+                                                                                            The 10 input/output pins can be configured to decode a keypad
+               EVENT16[7:0]
+                                                                                            matrix up to a maximum size of 25 switches (5 × 5 matrix). Smaller
+                  Figure 7. Breakdown of Eventx[7:0] Bits                                   matrices can also be configured, freeing up the unused row and
+When events are available on the FIFO, the user should first                                column pins for other I/O functions.
+read back the event count, EC[4:0], to determine how many                                   The R0 through R4 I/O pins comprise the rows of the keypad
+events must be read back. Events can be read from the top of                                matrix. The C0 through C4 I/O pins comprise the columns of
+the FIFO only. When an event is read back, all remaining events                             the keypad matrix. Pins used as rows are pulled up via the internal
+in the FIFO are shifted up one location, and the EC[4:0] count                              300 kΩ (or 100 kΩ) resistors. Pins used as columns are driven
+is decremented.                                                                             low via the internal NMOS current sink.
+                                                                            Rev. C | Page 9 of 40
+
+
+ADP5585                                                                                                                                                               Data Sheet
+                                          VDD                                                                low and sensing whether a row pin is low or not. All row/column
+                                                                                                             pairs are scanned; therefore, if multiple keys are pressed, they
+                                                                                                             are detected.
+                                        KEY
+                                       SCAN
+                                     CONTROL
+                                                                                                             To prevent glitches or narrow press times being registered as a
+                                                                                                             valid key press, the key scanner requires the key be pressed for
+                                                                                                             two scan cycles. The key scanner has a wait time between each
+        C0       C1         C2                        R0        R1         R2                                scan cycle; therefore, the key must be pressed and held for at
+                                                                                                             least this wait time to register as being pressed. If the key is
+                                                                                                             continuously pressed, the key scanner continues to scan, wait,
+             1         2         3                                                                           scan, wait, and so forth.
+             4         5         6                                                                           If Switch 6 is released, the connection between R1 and C2
+                                                                                                             breaks, and R1 is pulled up high. The key scanner requires that
+             7         8         9                                                                           the key be released for two scan cycles because the release of a
+                                                                                                             key is not necessarily in sync with the key scanner, it may take
+                                                                                                             up to two full wait/scan cycles for a key to register as released.
+                                                                                                             When the key is registered as released, and no other keys are
+                                                                                                             pressed, the key scanner returns to idle mode.
+                                                                                09841-008
+                                                                                                             For the remainder of this document, the press/release status of a
+                                      3 × 3 KEYPAD MATRIX
+                                                                                                             key is represented as simply a logic signal in the figures. A logic
+                      Figure 9. Simplified Key Scan Block                                                    high level represents the key status as pressed, and a logic low
+Figure 9 shows a simplified representation of the key scan block                                             represents released. This eliminates the need to draw individual
+using three row and three column pins connected to a small 3 × 3,                                            row/column signals when describing key events.
+nine-switch keypad matrix. When the key scanner is idle, the                                                                                    KEY PRESSED
+                                                                                                                                                                                  09841-009
+row pins are pulled high and the column pins are driven low.
+                                                                                                                    KEY x   KEY RELEASED                           KEY RELEASED
+The key scanner operates by checking the row pins to see if they
+                                                                                                                            Figure 10. Logic Low: Released, Logic High: Pressed
+are low.
+If Switch 6 in the matrix is pressed, R1 connects to C2. The key                                             Figure 11 shows a detailed representation of the key scan block
+scan circuit senses that one of the row pins has been pulled low,                                            and its associated control and status signals. When all row and
+and a key scan cycle begins. Key scanning involves driving all                                               column pins are used, a matrix of 25 unique keys can be
+column pins high, then driving each column pin, one at a time,                                               scanned.
+                                           PIN_CONFIG_A[7:0]
+                                           PIN_CONFIG_B[7:0]
+                                           PIN_CONFIG_C[7:0]
+                                        RESET_TRIG_TIME[2:0]                                             RESET 1_INITIATE
+                                        RESET1_EVENT_A[7:0]                                              RESET 2_INITIATE
+                                        RESET1_EVENT_B[7:0]
+                                        RESET1_EVENT_C[7:0]                     KEY SCAN
+                                        RESET2_EVENT_A[7:0]                     CONTROL
+                                        RESET2_EVENT_B[7:0]                                              EVENT_INT
+                                                                                                                                    OVRFLOW_INT
+                                                                                                        I2C BUSY?
+                                                                                                      KEY EVENT                      EC[4:0]
+                                                                                                                       FIFO
+                                                                                                       GPI EVENT      UPDATE
+                                                                                                    LOGIC EVENT
+                                                                                                                                      FIFO
+                                                                       COLUMN                    ROW
+                                                                     SINK ON/OFF                SENSE
+                                                                    I/O CONFIGURATION
+                                                           C0 C1 C2 C3 C4 R0 R1 R2 R3 R4 R5
+                                                 31        1    2      3   4    5
+                                                 32        6    7      8   9    10
+                                                 33        11   12    13   14   15
+                                                 34        16   17    18   19   20
+                                                 35        21   22    23   24   25
+                                                                                                                                                   09841-010
+                                                 36        26   27    28   29   30
+                                                                           Figure 11. Detailed Key Scan Block
+                                                                                            Rev. C | Page 10 of 40
+
+
+Data Sheet                                                                                                                                     ADP5585
+                                                                                       KEY 3
+Use Registers PIN_CONFIG_A[7:0] and PIN_CONFIG_B[7:0]
+to configure I/Os for keypad decoding. The number label on                      KEY SCAN
+each key switch represents the event identifier that is recorded
+                                                                                                                         EVENT_INT CLEARED
+if that switch was pressed. If all row/column pins are config-                 EVENT_INT
+ured, it is possible to observe all 25 key identifiers on the
+                                                                                     EC[4:0]                 1                     0                          1
+FIFO. A larger 6 × 5 matrix can be configured by using the
+ADP5585ACBZ-01-R7 or the ADP5585ACPZ-01-R7.
+                                                                                                      FIFO               FIFO                    FIFO
+                                                                                        KEY 3 PRESS   1 3                0 0      KEY 32 RELEASE 0 3
+If a smaller 2 × 2 matrix is configured, for example, by using the                                    0 0                0 0                     0 0
+                                                                                                                                                                  09841-012
+C2 and C3 column pins and the R1 and R2 row pins, only the                                            0 0        FIFO    0 0                     0 0
+                                                                                                      0 0        READ    0 0                     0 0
+four event identifiers (8, 9, 13, and 14) can possibly be observed                      Figure 13. Asserting the EVENT_INT Interrupt Key Pad Extension
+on the FIFO, as shown in Figure 11.
+                                                                               As shown in Figure 11, the keypad can be extended if each row
+By default, ADP5585 records key presses and releases on the
+                                                                               is connected directly to ground by a switch. If the switch placed
+FIFO. Figure 12 illustrates what happens when a single key is
+                                                                               between R0 and ground is pressed, the entire row is grounded.
+pressed and released. Initially, the key scanner is idle. When
+                                                                               When the key scanner completes scanning, it normally detects
+Key 3 is pressed, the scanner begins scanning through all
+                                                                               Key 1 to Key 5 as being pressed; however, this unique condition
+configured row/column pairs. After the scan wait time, the
+                                                                               is decoded by the ADP5585, and Key Event 31 is assigned to it.
+scanner again scans through all configured row/column pairs
+                                                                               Up to eight more key event assignments are possible, allowing the
+and detects that Key 3 has remained pressed, which sets the
+                                                                               keypad size to extend up to 30. However, if one of the extended
+EVENT_INT interrupt. The event counter, EC[4:0], is incre-
+                                                                               keys is pressed, none of the keys on that row is detectable.
+mented to 1, EVENT1_IDENTIFIER[6:0] of the FIFO is
+                                                                               Activation of a ground key causes all other keys sharing that
+updated with its event identifier set to 3, and its
+                                                                               row to be undetectable.
+EVENT1_STATE bit is set to 1, indicating a press.
+                                                                               Ghosting
+    KEY 3
+                                                                               Ghosting is an occurrence where, given certain key press com-
+ KEY SCAN                                                                      binations on a keypad matrix, a false positive reading of an
+                                                                               additional key is detected. Ghosting is created when three or
+EVENT_INT                                                                      more keys are pressed simultaneously on multiple rows or
+                                                                               columns (see Figure 14). Key combinations that form a right
+   EC[4:0]                       1                     2                       angle on the keypad matrix can cause ghosting.
+                                                                               The solution to ghosting is to select a keypad matrix layout that
+                            FIFO                                               takes into account three key combinations that are most likely
+                KEY 3 PRESS 1 3
+              KEY 3 RELEASE 0 3                                                to be pressed together. Multiple keys pressed across one row or
+                                                                 09841-011
+                            0 0
+                            0 0                                                across one column do not cause ghosting. Staggering keys so that
+                  Figure 12. Press and Release Event                           they do not share a column also avoids ghosting. The most
+                                                                               common practice is to place keys that are likely to be pressed
+The key scanner continues the scan/wait cycles while the key                   together in the same row or column. Some examples of keys
+remains pressed. If the scanner detects that the key has been                  that are likely to be pressed together are as follows:
+released for two consecutive scan cycles, the event counter,
+EC[4:0], is incremented to 2, and EVENT2_IDENTIFIER[6:0]                              The navigation keys in combination with Select.
+of the FIFO is updated with its event identifier set to 3. Its                        The navigation keys in combination with the space bar.
+EVENT2_STATE bit is set to 0, indicating a release. The key                           The reset combination keys, such as CTRL + ALT + DEL.
+scanner returns to idle mode because no other keys are pressed.                                                   COL0          COL1       COL2
+The EVENT_INT interrupt can be triggered by both press and                                               PRESS                         PRESS
+release key events. As shown in Figure 14, if Key 3 is pressed,                                ROW0
+EVENT_INT is asserted, EC[4:0] is updated, and the FIFO is
+updated. During the time that the key remains pressed, it is
+                                                                                               ROW1
+possible for the FIFO to be read, the event counter decremented
+to 0, and EVENT_INT cleared. When the key is finally released,
+EVENT_INT is asserted, the event counter is incremented, and                                   ROW2
+                                                                                                         GHOST                         PRESS
+                                                                                                                                                  09841-013
+the FIFO is updated with the release event information.
+                                                                                               ROW3
+                                                                                   Figure 14. COL0: ROW3 is a Ghost Key Due to a Short Among ROW0, COL0,
+                                                                                                      COL2, and ROW3 During Key Press
+                                                              Rev. C | Page 11 of 40
+
+
+ADP5585                                                                                                                                                              Data Sheet
+GPI INPUT                                                                                                  GPI 7
+Each of the 10 input/output lines can be configured as a                                                   GPI 4
+general-purpose logic input line. Figure 15 shows a detailed                                               GPI 2
+representation of the GPI scan and detect block and its
+associated control and status signals.                                                                     GPI SCAN
+       PIN_CONFIG_A[7:0]
+       PIN_CONFIG_B[7:0]                                                                                   EVENT_INT
+  GPIO_DIRECTION_A[7:0]                               EVENT_INT
+  GPIO_DIRECTION_B[7:0]                               GPI_INT                                              EC[4:0]
+    GPI_INT_LEVEL_A[7:0]                              GPI_INT_STAT_A[5:0]
+                                                                                                                               1             2       3      4         5    6
+    GPI_INT_LEVEL_B[7:0]                              GPI_INT_STAT_B[4:0]
+GPI_INTERRUPT_EN_A[7:0]                               GPI_STATUS_A[5:0]
+GPI_INTERRUPT_EN_B[7:0]                               GPI_STATUS_B[4:0]
+    GPI_EVENT_EN_A[7:0]                                                                                                        FIFO
+    GPI_EVENT_EN_B[7:0]                                                                                       GPI 2 ACTIVE    1 38
+    RESET_TRIG_TIME[2:0]                                                                                      GPI 7 ACTIVE    1 43
+    RESET1_EVENT_A[7:0]                                                                                       GPI 4 ACTIVE    1 40
+                                                                                                             GPI 4 INACTIVE   0 40
+                                                                                                                                                                               09841-016
+    RESET1_EVENT_B[7:0]            GPI SCAN
+                                   CONTROL                                                                   GPI 7 INACTIVE   0 43
+    RESET1_EVENT_C[7:0]
+                                                                                                             GPI 2 INACTIVE   0 38
+    RESET2_EVENT_A[7:0]
+    RESET2_EVENT_B[7:0]                                                                                                            Figure 17. Multiple GPI Example
+                                                 I2C BUSY
+            (R0)    GPIO 1
+            (R1)    GPIO 2                                            OVRFLOW_INT                          The GPI scanner is idle until it detects a level transition. It scans
+            (R2)
+            (R3)
+                    GPIO 3
+                    GPIO 4                                                    EC[4:0]
+                                                                                                           the GPI inputs and updates accordingly. It then returns to idle
+                                              KEY EVENT
+            (R4)    GPIO 5                                    FIFO                                         immediately, it does not scan/wait, like the key scanner. As
+        RST/(R5)    GPIO 6                     GPI EVENT     UPDATE
+            (C0)    GPIO 7
+                                              LOGIC EVENT
+                                                                                                           such, the GPI scanner can detect narrow pulses once they get
+            (C1)
+            (C2)
+                    GPIO 8
+                    GPIO 9
+                                                                                                           past the 50 μs input debounce filter.
+                                                                            FIFO1:FIFO16
+                                                                                           09841-014
+            (C3) GPIO 10
+            (C4) GPIO 11                                                                                   GPO OUTPUT
+                                                                                                           Each of the 10 input/output lines can be configured as a general-
+                           Figure 15. GPI Scan and Detect Block
+                                                                                                           purpose output (GPO) line. Figure 6 shows a detailed diagram
+The current input state of each GPI can be read back using the                                             of the I/O structure. See the Detailed Register Descriptions
+GPI_STATUS_x registers. Each GPI can be programmed to                                                      section for GPO configuration and usage.
+generate an interrupt via the GPI_INTERRUPT_EN_x registers.
+The interrupt status is stored in the GPI_INT_STAT_x registers.                                            LOGIC BLOCKS
+GPI interrupts can be programmed to trigger on the positive or                                             Several of the ADP5585 input/output lines can be used as inputs
+negative edge by configuring the GPI_INT_LEVEL_x registers.                                                and outputs for implementing some common logic functions.
+If any of the GPI interrupts is triggered, the master GPI_INT                                              The R1, R2, and R3 input/output pins can be used as inputs,
+interrupt is also triggered. Figure 16 shows a single GPI and                                              and the R0 input/output pin can be used as an output for the
+how it affects its corresponding status and interrupt status bits.                                         logic block.
+                   GPI 3
+                                                                                                           The outputs from the logic blocks can be configured to generate
+   GPI_INT_LEVEL_A[3]                                                                                      interrupts. They can also be configured to generate events on
+GPI_INTERRUPT_EN_A[3]                                                                                      the FIFO.
+      GPI_STATUS_A[3]                                                                                      Figure 19 shows a detailed diagram of the internal make-up of
+    GPI_INT_STAT_A[3]
+                                                            CLEARED
+                                                            BY READ
+                                                                                                           the logic block, illustrating the possible logic functions that can
+                                                                                                           be implemented.
+                                                                                               09841-015
+                                                                  CLEARED
+               GPI_INT                                            BY WRITE ‘1’
+                              Figure 16. Single GPI Example
+GPIs can be programmed to generate FIFO events via the
+GPI_EVENT_EN_x registers. GPIs in this mode do not generate
+GPI_INT interrupts and instead generate EVENT_INT interrupts.
+Figure 17 shows several GPI lines and their effects on the FIFO
+and event count, EC[4:0].
+                                                                                        Rev. C | Page 12 of 40
+
+
+Data Sheet                                                                                                                                                                                           ADP5585
+                                                                                                                       PWM BLOCK
+                     LOGIC BLOCK
+         (R1) LA
+         (R2) LB
+                                                                                                                       The ADP5585 features a PWM generator whose output can be
+         (R3) LC                                                                                                       configured to drive out on the R3 I/O pin. PWM on/off times
+            LA_INV                                                                                                     are programmed via four 8-bit registers (see Figure 20). Each
+            LB_INV
+                                                 LY (R0)
+                                                                                                                       bit of the on or off time represents 1 µs. The highest frequency
+            LC_INV
+            LY_INV                                                                                                     obtainable from the PWM is performed by setting the least
+           FF_SET       SET                                                                                            significant bit of both the on and off time bit patterns, resulting
+           FF_CLR      D        Q
+                                                                                                                       in a 500 kHz signal with a 50% duty cycle.
+    LOGIC_SEL[2:0]      CLR
+R3_EXTEND_CFG[1:0]                                                                                                     The PWM block provides support for continuous PWM mode
+                                                                              OVRFLOW_INT
+                                                                                                                       as well as a one-shot mode (see Table 59). Additionally, an
+              LOGIC_INT_LEVEL                          I2C BUSY
+                                                                                   EC[4:0]
+                                                                                                                       external signal can be AND’ed with the internal PWM signal.
+              LOGIC_EVENT_EN                         KEY EVENT
+                                                                      FIFO                                             This option can be selected by writing a 1 to PWM_IN_AND
+          RESET_TRIG_TIME[2:0]                       GPI EVENT       UPDATE
+          RESET1_EVENT_A[7:0]                        LOGIC EVENT                                                       (PWM_CFG[2]). The input to the external AND is the C3 I/O
+                                       LOGIC
+          RESET1_EVENT_B[7:0]        EVENT/INT
+                                                                                    FIFO
+                                                                                                                       pin. C3 should be set to GPI. Note that the debounce for C3
+                                    GENERATOR
+          RESET1_EVENT_C[7:0]
+                                                                                                                       results in a delay of the AND’ing, and can be turned on or off
+          RESET2_EVENT_A[7:0]                            EVENT_INT
+                                                                                                 09841-017
+          RESET2_EVENT_B[7:0]
+                                                         LOGIC_INT                                                     using Register 0x21.
+                                                                                                                       Newly programmed values are not latched until the final byte,
+                           Figure 18. Logic Block Overview
+                                                                                                                       PWM_ONT_HIGH_BYTE (Register 0x32, Bits[7:0]), is written.
+                                     LA
+                                           0           IN_LA
+                           LA        LA         OUT
+                                           1
+                                               SEL
+                                                                   IN_LA
+                                                                              AND                            0           AND
+                                          LA_INV                   IN_LB                                          OUT
+                                                                                             AND             1
+                                                                   IN_LC                                         SEL                         MUX
+                                     LB
+                                          0            IN_LB                                                                      GND
+                           LB        LB        OUT                                                                                        000
+                                          1                        IN_LA                                                          AND
+                                              SEL                             OR                             0           OR               001
+                                                                   IN_LB                                          OUT
+                                                                                                                                   OR
+                                          LB_INV                                             OR              1                            010
+                                                                   IN_LC                                         SEL              XOR                    LY
+                                                                                                                                          011                 0                     LY
+                                    LC                                                                                                          OUT      LY                   OUT
+                                                                                                                                   FF
+                                          0           IN_LC        IN_LA                                                                  100                 1
+                        LC          LC         OUT                            XOR                            0                  IN_LA                               SEL
+                                                                                                                         XOR
+                                          1                        IN_LB                                          OUT                     101
+                                              SEL                                                            1                  IN_LB                         LY_INV
+                                                                                             XOR
+                                                                   IN_LC                                         SEL                      110
+                                          LC_INV                                                                                IN_LC
+                                                                                                                                          111
+                                                                               FF_SET                                                      SEL[2:0]
+                                                                                                                 SET
+                                                                   IN_LA                                     D         Q FF             LOGIC_SEL[2:0]
+                                                                   IN_LB
+                                                                                                                 CLR
+                                                                     FF_CLR            0
+                                                                                             OUT
+                                                                   IN_LC               1
+                                                                                           SEL
+                            R3_EXTEND_CFG[1:0] = 01                                                                                                                                      09841-018
+                                                                                       Figure 19. Logic Block
+                                                               PWM_EN
+                                                           PWM_MODE
+                                     PWM_OFFT_LOW_BYTE[7:0]                                                                                           (R3)
+                                     PWM_OFFT_HIGH_BYTE[7:0]                  OFF TIME[15:0]                                                          PWM_OUT
+                                                                                                                    PWM                     0
+                                      PWM_ONT_LOW_BYTE[7:0]                                                                                    OUT
+                                                                                                                 GENERATOR                  1
+                                      PWM_ONT_HIGH_BYTE[7:0]                  ON TIME[15:0]
+                                                                                                                                              SEL
+                                                 (C3) PWM_IN                                                                     AND
+                                                                                                                                                                  09841-019
+                                                PWM_IN_AND
+                                                                               Figure 20. PWM Block Diagram
+                                                                                        Rev. C | Page 13 of 40
+
+
+ADP5585                                                                                                                                    Data Sheet
+RESET BLOCKS                                                                          The reset generation signals are useful in situations where the
+ADP5585 features two reset blocks that can generate reset con-                        system processor has locked up and the system is unresponsive
+ditions if certain events are detected simultaneously. Up to three                    to input events. The user can press one of the reset event combi-
+reset trigger events can be programmed for RESET1. Up to two                          nations and initiate a system wide reset. This alleviates the need
+reset trigger events can be programmed for RESET2. The event                          for removing the battery from the system and doing a hard reset.
+scan control blocks monitor whether these events are present for                      It is not recommended to use the immediate trigger time (see
+the duration of RESET_TRIG_TIME[2:0] (Register 0x2E,                                  Table 54) because this setting may cause false triggering.
+Bits[4:2]). If they are, reset-initiate signals are sent to the reset                 Interrupts
+generator blocks. The generated reset signal pulse width is
+                                                                                      The INT pin can be asserted low if any of the internal interrupt
+programmable.
+                                                                                      sources is active. The user can select which internal interrupts
+                                         RST
+                             RST_PASSTHRU_EN                                          interact with the external interrupt pin in Register 0x3C (refer
+                                                                                      to Table 68). Register 0x3B allows the user to choose whether
+                                            RESET1_           (R4)
+RESET_TRIG_TIME[2:0]                        INITIATE RESET RESET1                     the external interrupt pin remains asserted, or deasserts for
+RESET1_EVENT_A[7:0]
+RESET1_EVENT_B[7:0]
+                                  KEY
+                                 SCAN
+                                                     GEN 1                            50 µs, then reasserts, in the case that there are multiple internal
+RESET1_EVENT_C[7:0]            CONTROL                                                interrupts asserted and one is cleared (refer to Table 67).
+RESET2_EVENT_A[7:0]
+RESET2_EVENT_B[7:0]
+                                                                                                        EVENT_INT
+                                              RESET_PULSE_WIDTH[1:0]                                    EVENT_IEN
+                                  GPI
+                                 SCAN
+                               CONTROL                                                                     GPI_INT
+                                                                                                          GPI_IEN
+                                                                  (C4)                                                     INT DRIVE      INT
+                                                               RESET2                                   LOGIC_INT
+                                                       RESET
+                                                       GEN 2                                            LOGIC_IEN
+                                LOGIC
+                                BLOCK
+                               CONTROL                                                               OVRFLOW_INT
+                                                                         09841-020
+                                            RESET2_                                                  OVRFLOW_IEN
+                                            INITIATE
+                        Figure 21. Reset Blocks                                                                                                 09841-021
+                                                                                                                 INT_CFG
+The Reset 1 signal uses the R4 I/O pin as its output. A pass                                               Figure 22. Asserting INT Low
+through mode allows the main RST pin to be output on the R4
+pin also. The Reset 2 signal uses the C4 I/O pin as its output.
+                                                                     Rev. C | Page 14 of 40
+
+
+Data Sheet                                                                                                                                                        ADP5585
+REGISTER INTERFACE
+Register access to the ADP5585 is acquired via its I2C-compatible                             line low. The address of the register to which data is to be written
+serial interface. The interface can support clock frequencies of                              is sent next. The ADP5585 acknowledges the register pointer
+up to 1 MHz. If the user is accessing the FIFO or key event                                   byte by pulling the data line low. The data byte to be written is
+counter (KEC), FIFO/KEC updates are paused. If the clock                                      sent next. The ADP5585 acknowledges the data byte by pulling
+frequency is very low, events may not be recorded in a timely                                 the data line low. The pointer address is then incremented to
+manner. FIFO or KEC updates can happen up to 23 μs after an                                   write the next data byte, until it finishes writing the n data byte.
+interrupt is asserted because of the number of I2C cycles required                            The ADP5585 pulls the data line low after every byte, and a stop
+to perform an I2C read or write. This delay should not present                                condition completes the sequence.
+an issue to the user.                                                                         Figure 25 shows a typical byte read sequence for reading inter-
+Figure 23 shows a typical write sequence for programming an                                   nal registers. The cycle begins with a start condition followed
+internal register. The cycle begins with a start condition, followed                          by the 7-bit device address (0x34 for all models except the
+by the hard coded 7-bit device address, which for the ADP5585                                 ADP5585ACPZ-03-R7, 0x30 for the ADP5585ACPZ-03-R7
+is 0x34, followed by the R/W bit set to 0 for a write cycle. The                              only), followed by the R/W bit set to 0 for a write cycle. The
+ADP5585 acknowledges the address byte by pulling the data                                     ADP5585 acknowledges the address byte by pulling the data line
+line low. The address of the register to which data is to be written                          low. The address of the register from which data is to be read is
+is sent next. The ADP5585 acknowledges the register pointer                                   sent next. The ADP5585 acknowledges the register pointer byte
+byte by pulling the data line low. The data byte to be written is                             by pulling the data line low. A start condition is repeated,
+sent next. The ADP5585 acknowledges the data byte by pulling                                  followed by the 7-bit device address (0x34 for all models except
+the data line low. A stop condition completes the sequence.                                   the ADP5585ACPZ-03-R7, 0x30 for the ADP5585ACPZ-03-R7
+Figure 24 shows a typical multibyte write sequence for program-                               only), followed by the R/W bit set to 1 for a read cycle. The
+ming internal registers. The cycle begins with a start condition                              ADP5585 acknowledges the address byte by pulling the data
+followed by the 7-bit device address (0x34 for all models except                              line low. The 8-bit data is then read. The host pulls the data line
+the ADP5585ACPZ-03-R7, 0x30 for the ADP5585ACPZ-03-R7                                         high (no acknowledge), and a stop condition completes the
+only), followed by the R/W bit set to 0 for a write cycle. The                                sequence.
+ADP5585 acknowledges the address byte by pulling the data
+                         START                           0 = WRITE                                                                      STOP
+                                  7-BIT DEVICE ADDRESS       0   0    8-BIT REGISTER POINTER       0        8-BIT WRITE DATA        0
+                                                                                                                                               09841-022
+                                                           ADP5585 ACK                        ADP5585 ACK                      ADP5585 ACK
+                                                                 Figure 23. I2C Single Byte Write Sequence
+     START                   0 = WRITE                                                                                                                                  STOP
+           7-BIT DEVICE ADDRESS     0   0       8-BIT REGISTER POINTER     0     WRITE BYTE 1      0   WRITE BYTE 2       0          0    WRITE BYTE n              0
+                                                                                                                                                                                      09841-023
+                                  ADP5585 ACK                        ADP5585 ACK              ADP5585 ACK        ADP5585 ACK      ADP5585 ACK               ADP5585 ACK
+                                                                 Figure 24. I2C Multibyte Write Sequence
+          START                     0 = WRITE                                  REPEAT START                    1 = READ                                          STOP
+               7-BIT DEVICE ADDRESS         0   0   8-BIT REGISTER POINTER       0      7-BIT DEVICE ADDRESS      1   0        8-BIT READ DATA               1
+                                                                                                                                                                          09841-024
+                                        ADP5585 ACK                       ADP5585 ACK                           ADP5585 ACK                                NO ACK
+                                                                 Figure 25. I2C Single Byte Read Sequence
+                                                                          Rev. C | Page 15 of 40
+
+
+ADP5585                                                                                                                                                         Data Sheet
+Figure 26 shows a typical multibyte read sequence for reading                                        ADP5585ACPZ-03-R7, 0x30 for the ADP5585ACPZ-03-R7
+internal registers. The cycle begins with a start condition, followed                                only), followed by the R/W bit set to 1 for a read cycle. The
+by the 7-bit device address (0x34 for all models except the                                          ADP5585 acknowledges the address byte by pulling the data
+ADP5585ACPZ-03-R7, 0x30 for the ADP5585ACPZ-03-R7                                                    line low. The 8-bit data is then read. The address pointer is then
+only), followed by the R/W bit set to 0 for a write cycle. The                                       incremented to read the next data byte, and the host continues to
+ADP5585 acknowledges the address byte by pulling the data                                            pull the data line low for each byte (master acknowledge) until
+line low. The address of the register from which data is to be read                                  the n data byte is read. The host pulls the data line high (no
+is sent next. The ADP5585 acknowledges the register pointer byte                                     acknowledge) after the last byte is read, and a stop condition
+by pulling the data line low. A start condition is repeated, followed                                completes the sequence.
+by the 7-bit device address (0x34 for all models except the
+    START                     0 = WRITE                          REPEAT START                   1 = READ                                                                    STOP
+            7-BIT DEVICE ADDRESS    0   0   8-BIT REGISTER POINTER   0       7-BIT DEVICE ADDRESS    1   0   READ BYTE 1   0   READ BYTE 2   0        0   READ BYTE n   1
+                                                                                                                                                                                   09841-025
+                                   ADP5585 ACK                 ADP5585 ACK                          ADP5585 ACK      MASTER ACK       MASTER ACK   MASTER ACK       NO ACK
+                                                                         Figure 26. I2C Multibyte Read Sequence
+                                                                                  Rev. C | Page 16 of 40
+
+
+ Data Sheet                                                                                                                        ADP5585
+ REGISTER MAP
+ Table 6.
+Reg   Reg
+Add   Name           R/W 1 Bit 7           Bit 6             Bit 5           Bit 4         Bit 3          Bit 2          Bit 1        Bit 0
+0x00  ID             R                              MAN_ID                                                           REV_ID
+0x01  INT_STATUS     R/W                     Reserved                         LOGIC_INT    Reserved        OVRFLOW_ GPI_INT           EVENT_INT
+                                                                                                           INT
+0x02  Status         R     Reserved          LOGIC_STAT      Reserved                                        EC[4:0]
+0x03  FIFO_1         R     EVENT1_STATE                                              EVENT1_IDENTIFIER[6:0]
+0x04  FIFO_2         R     EVENT2_STATE                                              EVENT2_IDENTIFIER[6:0]
+0x05  FIFO_3         R     EVENT3_STATE                                              EVENT3_IDENTIFIER[6:0]
+0x06  FIFO_4         R     EVENT4_STATE                                              EVENT4_IDENTIFIER[6:0]
+0x07  FIFO_5         R     EVENT5_STATE                                              EVENT5_IDENTIFIER[6:0]
+0x08  FIFO_6         R     EVENT6_STATE                                              EVENT6_IDENTIFIER[6:0]
+0x09  FIFO_7         R     EVENT7_STATE                                              EVENT7_IDENTIFIER[6:0]
+0x0A  FIFO_8         R     EVENT8_STATE                                              EVENT8_IDENTIFIER[6:0]
+0x0B  FIFO_9         R     EVENT9_STATE                                              EVENT9_IDENTIFIER[6:0]
+0x0C  FIFO_10        R     EVENT10_STATE                                            EVENT10_IDENTIFIER[6:0]
+0x0D  FIFO_11        R     EVENT11_STATE                                            EVENT11_IDENTIFIER[6:0]
+0x0E  FIFO_12        R     EVENT12_STATE                                            EVENT12_IDENTIFIER[6:0]
+0x0F  FIFO_13        R     EVENT13_STATE                                            EVENT13_IDENTIFIER[6:0]
+0x10  FIFO_14        R     EVENT14_STATE                                            EVENT14_IDENTIFIER[6:0]
+0x11  FIFO_15        R     EVENT15_STATE                                            EVENT15_IDENTIFIER[6:0]
+0x12  FIFO_16        R     EVENT16_STATE                                            EVENT16_IDENTIFIER[6:0]
+0x13  GPI_INT_       R                Reserved               GPI_6_INT       GPI_5_INT     GPI_4_INT       GPI_3_INT       GPI_2_INT   GPI_1_INT
+      STAT_A
+0x14  GPI_INT_       R                       Reserved                        GPI_11_INT    GPI_10_INT      GPI_9_INT       GPI_8_INT   GPI_7_INT
+      STAT_B
+0x15  GPI_STATUS_A   R                Reserved               GPI_6_STAT      GPI_5_STAT    GPI_4_STAT GPI_3_STAT          GPI_2_STAT GPI_1_STAT
+0x16  GPI_STATUS_B   R                       Reserved                        GPI_11_STAT   GPI_10_STAT GPI_9_STAT         GPI_8_STAT GPI_7_STAT
+0x17  R_PULL_        R/W   R3_PULL_CFG                       R2_PULL_CFG                   R1_PULL_CFG                    R0_PULL_CFG
+      CONFIG_A
+0x18  R_PULL_        R/W                            Reserved                               R5_PULL_CFG                    R4_PULL_CFG
+      CONFIG_B
+0x19  R_PULL_        R/W   C3_PULL_CFG                       C2_PULL_CFG                   C1_PULL_CFG                    C0_PULL_CFG
+      CONFIG_C
+0x1A  R_PULL_        R/W                                           Reserved                                               C4_PULL_CFG
+      CONFIG_D
+0x1B  GPI_INT_       R/W              Reserved               GPI_6_          GPI_5_        GPI_4_          GPI_3_         GPI_2_      GPI_1_
+      LEVEL_A                                                INT_LEVEL       INT_LEVEL     INT_LEVEL       INT_LEVEL      INT_LEVEL   INT_LEVEL
+0x1C  GPI_INT_       R/W                     Reserved                        GPI_11_       GPI_10_         GPI_9_         GPI_8_      GPI_7_
+      LEVEL_B                                                                INT_LEVEL     INT_LEVEL       INT_LEVEL      INT_LEVEL   INT_LEVEL
+0x1D  GPI_EVENT_EN_A R/W              Reserved               GPI_6_          GPI_5_        GPI_4_          GPI_3_         GPI_2_      GPI_1_
+                                                             EVENT_EN        EVENT_EN      EVENT_EN        EVENT_EN       EVENT_EN    EVENT_EN
+0x1E  GPI_EVENT_EN_B R/W                     Reserved                        GPI_11_       GPI_10_         GPI_9_         GPI_8_      GPI_7_
+                                                                             EVENT_EN      EVENT_EN        EVENT_EN       EVENT_EN    EVENT_EN
+0x1F  GPI_INTERRUPT_ R/W              Reserved               GPI_6_          GPI_5_        GPI_4_          GPI_3_         GPI_2_      GPI_1_
+      EN_A                                                   INT_EN          INT_EN        INT_EN          INT_EN         INT_EN      INT_EN
+0x20  GPI_INTERRUPT_ R/W                     Reserved                        GPI_11_       GPI_10_         GPI_9_         GPI_8_      GPI_7_
+      EN_B                                                                   INT_EN        INT_EN          INT_EN         INT_EN      INT_EN
+0x21  DEBOUNCE_      R/W              Reserved               GPI_6_          GPI_5_        GPI_4_          GPI_3_         GPI_2_      GPI_1_
+      DIS_A                                                  DEB_DIS         DEB_DIS       DEB_DIS         DEB_DIS        DEB_DIS     DEB_DIS
+0x22  DEBOUNCE_      R/W                     Reserved                        GPI_11_       GPI_10_         GPI_9_         GPI_8_      GPI_7_
+      DIS_B                                                                  DEB_DIS       DEB_DIS         DEB_DIS        DEB_DIS     DEB_DIS
+0x23  GPO_DATA_      R/W              Reserved               GPO_6_          GPO_5_        GPO_4_          GPO_3_         GPO_2_      GPO_1_
+      OUT_A                                                  DATA            DATA          DATA            DATA           DATA        DATA
+0x24  GPO_DATA_      R/W                     Reserved                        GPO_11_       GPO_10_         GPO_9_         GPO_8_      GPO_7_
+      OUT_B                                                                  DATA          DATA            DATA           DATA        DATA
+0x25  GPO_OUT_       R/W              Reserved               GPO_6_          GPO_5_        GPO_4_          GPO_3_         GPO_2_      GPO_1_
+      MODE_A                                                 OUT_MODE        OUT_MODE      OUT_MODE        OUT_MODE       OUT_MODE    OUT_MODE
+                                                          Rev. C | Page 17 of 40
+
+
+ ADP5585                                                                                                                              Data Sheet
+Reg     Reg
+Add     Name               R/W 1    Bit 7            Bit 6             Bit 5           Bit 4         Bit 3          Bit 2      Bit 1         Bit 0
+0x26    GPO_OUT_           R/W                          Reserved                       GPO_11_       GPO_10_        GPO_9_      GPO_8_        GPO_7_
+        MODE_B                                                                         OUT_MODE OUT_MODE            OUT_MODE    OUT_MODE      OUT_MODE
+0x27    GPIO_              R/W                  Reserved               GPO_6_          GPO_5_        GPO_4_         GPO_3_    GPO_2_         GPO_1_
+        DIRECTION_A                                                    DIR             DIR           DIR            DIR       DIR            DIR
+0x28    GPIO_              R/W                          Reserved                       GPO_11_       GPO_10_        GPO_9_    GPO_8_         GPO_7_
+        DIRECTION_B                                                                    DIR           DIR            DIR       DIR            DIR
+0x29    RESET1_EVENT_A     R/W      RESET1_                                                    RESET1_EVENT_A [6:0]
+                                    EVENT_
+                                    A_LEVEL
+0x2A    RESET1_EVENT_B     R/W      RESET1_                                                    RESET1_EVENT_B [6:0]
+                                    EVENT_
+                                    B_LEVEL
+0x2B    RESET1_EVENT_C     R/W      RESET1_                                                    RESET1_EVENT_C [6:0]
+                                    EVENT_
+                                    C_LEVEL
+0x2C    RESET2_EVENT_A     R/W      RESET2_                                                    RESET2_EVENT_A [6:0]
+                                    EVENT_
+                                    A_LEVEL
+0x2D    RESET2_EVENT_B     R/W      RESET2_                                                    RESET2_EVENT_B [6:0]
+                                    EVENT_
+                                    B_LEVEL
+0x2E    RESET2_CFG         R/W      RESET2_POL       RESET1_POL        RST_PASS                  RESET_TRIG_TIME[2:0]            RESET_PULSE_WIDTH[1:0]
+                                                                       THRU_EN
+0x2F    PWM_OFFT_LOW       R/W                                                     PWM_OFFT_LOW_BYTE[7:0]
+0x30    PWM_OFFT_HIGH      R/W                                                     PWM_OFFT_HIGH_BYTE[7:0]
+0x31    PWM_ONT_LOW        R/W                                                     PWM_ONT_LOW_BYTE[7:0]
+0x32    PWM_ONT_HIGH       R/W                                                     PWM_ONT_HIGH_BYTE[7:0]
+0x33    PWM_CFG            R/W                                       Reserved                                       PWM_IN_   PWM_MODE       PWM_EN
+                                                                                                                    AND
+0x34    LOGIC_CFG          R/W      Reserved         LY_INV            LC_INV         LB_INV         LA_INV                   LOGIC_SEL[2:0]
+0x35    LOGIC_FF_CFG       R/W                                               Reserved                                         FF_SET         FF_CLR
+0x36    LOGIC_INT_         R/W                                       Reserved                                       LY_DBNC_  LOGIC_         LOGIC_INT_
+        EVENT_EN                                                                                                    DIS       EVENT_EN       LEVEL
+0x37    POLL_TIME_CFG      R/W                                               Reserved                                               KEY_POLL_TIME[1:0]
+0x38    PIN_CONFIG_A       R/W                  Reserved               R5_CONFIG R4_CONFIG           R3_CONFIG      R2_CONFIG  R1_CONFIG     R0_CONFIG
+0x39    PIN_CONFIG_B       R/W                          Reserved                       C4_CONFIG     C3_CONFIG      C2_CONFIG  C1_CONFIG     C0_CONFIG
+0x3A    PIN_CONFIG_C       R/W      PULL_SELECT      C4_EXTEND_CFG     R4_EXTEND Reserved                R3_EXTEND_CFG[1:0]    Reserved      R0_EXTEND
+                                                                       _CFG                                                                  _CFG
+0x3B    GENERAL_CFG        R/W      OSC_EN                   CORE_FREQ[1:0]                           Reserved                 INT_CFG       RST_CFG
+0x3C    INT_EN             R/W                          Reserved                       LOGIC_IEN     Reserved       OVRFLOW_  GPI_IEN        EVENT_IEN
+                                                                                                                    IEN
+ 1
+   R means read, W means write, and R/W means read/write.
+                                                                    Rev. C | Page 18 of 40
+
+
+Data Sheet                                                                                                                                         ADP5585
+DETAILED REGISTER DESCRIPTIONS
+Note that N/A throughout this section means not applicable.
+Note: All register default to 0000 0000 unless otherwise specified.
+ID Register 0x00
+Table 7. ID Bit Descriptions
+Bit(s)              Bit Name                          Access                              Description
+7 to 4              MAN_ID                            Read only                           Manufacturer ID, default = 0010
+3 to 0              REV_ID                            Read only                           Rev ID
+INT_STATUS Register 0x01
+Table 8. INT_STATUS Bit Descriptions
+Bit(s)       Bit Name                           Access             Description 1
+7 to 5       N/A                                                   Reserved.
+4            LOGIC_INT                          Read/write         0 = no interrupt.
+                                                                   1 = interrupt due to a general logic condition.
+3            N/A                                                   Reserved.
+2            OVERFLOW_INT                       Read/write         0 = no interrupt.
+                                                                   1 = interrupt due to an overflow condition.
+1            GPI_INT                            Read/write         This bit is not set by a GPI that has been configured to update the FIFO and event count.
+                                                                   This bit cannot be cleared until all GPI_x_INT bits are cleared.
+                                                                   0 = no interrupt.
+                                                                   1 = interrupt due to a general GPI condition.
+0            EVENT_INT                          Read/write         0 = no interrupt.
+                                                                   1 = interrupt due to key event (press/release), GPI event (GPI programmed for FIFO
+                                                                   updates), or logic event (programmed for FIFO updates).
+1
+  Interrupt bits are cleared by writing a 1 to the flag; writing a 0 or reading the flag has no effect.
+Status Register 0x02
+Table 9. Status Bit Descriptions
+Bit(s)       Bit Name                           Access             Description
+7            N/A                                                   Reserved.
+6            LOGIC_STAT                         Read only          0 = output from logic block (LY) is low.
+                                                                   1 = output from logic block (LY) is high.
+5            N/A                                                   Reserved.
+4 to 0       EC[4:0]                            Read only          Event count value. Indicates how many events are currently stored on the FIFO.
+FIFO_1 Register 0x03
+Table 10. FIFO_1 Bit Descriptions
+Bit(s)       Bit Name                           Access             Description
+7            EVENT1_STATE                        Read only         This bit represents the state of the event that is recorded in the EVENT1_IDENTIFIER[6:0] bit.
+                                                                   For key events from Event 1 to Event 36, use the following settings:
+                                                                   1 = key is pressed.
+                                                                   0 = key is released.
+                                                                   For GPI and logic events from Event 37 to Event 48, use the following settings:
+                                                                   1 = GPI/logic is active.
+                                                                   0 = GPI/logic is inactive.
+                                                                   Active and inactive states for Event 37 to Event 48 are programmable.
+6 to 0       EVENT1_IDENTIFIER[6:0]             Read only          Contains the event identifier for the pin. Refer to Table 11.
+                                                                               Rev. C | Page 19 of 40
+
+
+ADP5585                                                                                                      Data Sheet
+Table 11. Event Decoding
+Event No.      Meaning              Event No. Meaning                     Event No. Meaning        Event No.    Meaning
+0              No event             32        Key 32 (R1, GND)            64        Unused         96           Unused
+1              Key 1 (R0, C0)       33        Key 33 (R2, GND)            65        Unused         97           Unused
+2              Key 2 (R0, C1)       34        Key 34 (R3, GND)            66        Unused         98           Unused
+3              Key 3 (R0, C2)       35        Key 35 (R4, GND)            67        Unused         99           Unused
+4              Key 4 (R0, C3)       36        Key 36 (R5, GND)            68        Unused         100          Unused
+5              Key 5 (R0, C4)       37        GPI 1 (R0)                  69        Unused         101          Unused
+6              Key 6 (R1, C0)       38        GPI 2 (R1)                  70        Unused         102          Unused
+7              Key 7 (R1, C1)       39        GPI 3 (R2)                  71        Unused         103          Unused
+8              Key 8 (R1, C2)       40        GPI 4 (R3)                  72        Unused         104          Unused
+9              Key 9 (R1, C3)       41        GPI 5 (R4)                  73        Unused         105          Unused
+10             Key 10 (R1, C4)      42        GPI 6 (R5)                  74        Unused         106          Unused
+11             Key 11 (R2, C0)      43        GPI 7 (C0)                  75        Unused         107          Unused
+12             Key 12 (R2, C1)      44        GPI 8 (C1)                  76        Unused         108          Unused
+13             Key 13 (R2, C2)      45        GPI 9 (C2)                  77        Unused         109          Unused
+14             Key 14 (R2, C3)      46        GPI 10 (C3)                 78        Unused         110          Unused
+15             Key 15 (R2, C4)      47        GPI 11 (C4)                 79        Unused         111          Unused
+16             Key 16 (R3, C0)      48        Logic                       80        Unused         112          Unused
+17             Key 17 (R3, C1)      49        Unused                      81        Unused         113          Unused
+18             Key 18 (R3, C2)      50        Unused                      82        Unused         114          Unused
+19             Key 19 (R3, C3)      51        Unused                      83        Unused         115          Unused
+20             Key 20 (R3, C4)      52        Unused                      84        Unused         116          Unused
+21             Key 21 (R4, C0)      53        Unused                      85        Unused         117          Unused
+22             Key 22 (R4, C1)      54        Unused                      86        Unused         118          Unused
+23             Key 23 (R4, C2)      55        Unused                      87        Unused         119          Unused
+24             Key 24 (R4, C3)      56        Unused                      88        Unused         120          Unused
+25             Key 25 (R4, C4)      57        Unused                      89        Unused         121          Unused
+26             Key 26 (R5, C0)      58        Unused                      90        Unused         122          Unused
+27             Key 27 (R5, C1)      59        Unused                      91        Unused         123          Unused
+28             Key 28 (R5, C2)      60        Unused                      92        Unused         124          Unused
+29             Key 29 (R5, C3)      61        Unused                      93        Unused         125          Unused
+30             Key 30 (R5, C4)      62        Unused                      94        Unused         126          Unused
+31             Key 31 (R0, GND)     63        Unused                      95        Unused         127          Unused
+FIFO_2 Register 0x04
+Table 12. FIFO_2 Bit Descriptions
+Bit(s)           Bit Name                                               Access        Description
+7                EVENT2_STATE                                           Read only     Refer to Table 10.
+6 to 0           EVENT2_IDENTIFIER[6:0]                                 Read only     Refer to Table 10.
+FIFO_3 Register 0x05
+Table 13. FIFO_3 Bit Descriptions
+Bit(s)           Bit Name                                               Access        Description
+7                EVENT3_STATE                                           Read only     Refer to Table 10.
+6 to 0           EVENT3_IDENTIFIER[6:0]                                 Read only     Refer to Table 10.
+FIFO_4 Register 0x06
+Table 14. FIFO_4 Bit Descriptions
+Bit(s)           Bit Name                                               Access        Description
+7                EVENT4_STATE                                           Read only     Refer to Table 10.
+6 to 0           EVENT4_IDENTIFIER[6:0]                                 Read only     Refer to Table 10.
+                                                   Rev. C | Page 20 of 40
+
+
+Data Sheet                                                                             ADP5585
+FIFO_5 Register 0x07
+Table 15. FIFO_5 Bit Descriptions
+Bit(s)         Bit Name                                Access      Description
+7              EVENT5_STATE                            Read only   Refer to Table 10.
+6 to 0         EVENT5_IDENTIFIER[6:0]                  Read only   Refer to Table 10.
+FIFO_6 Register 0x08
+Table 16. FIFO_6 Bit Descriptions
+Bit(s)         Bit Name                                Access      Description
+7              EVENT6_STATE                            Read only   Refer to Table 10.
+6 to 0         EVENT6_IDENTIFIER[6:0]                  Read only   Refer to Table 10.
+FIFO_7 Register 0x09
+Table 17. FIFO_7 Bit Descriptions
+Bit(s)         Bit Name                                Access      Description
+7              EVENT7_STATE                            Read only   Refer to Table 10.
+6 to 0         EVENT7_IDENTIFIER[6:0]                  Read only   Refer to Table 10.
+FIFO_8 Register 0x0A
+Table 18. FIFO_8 Bit Descriptions
+Bit(s)         Bit Name                                Access      Description
+7              EVENT8_STATE                            Read only   Refer to Table 10.
+6 to 0         EVENT8_IDENTIFIER[6:0]                  Read only   Refer to Table 10.
+FIFO_9 Register 0x0B
+Table 19. FIFO_9 Bit Descriptions
+Bit(s)         Bit Name                                Access      Description
+7              EVENT9_STATE                            Read only   Refer to Table 10.
+6 to 0         EVENT9_IDENTIFIER[6:0]                  Read only   Refer to Table 10.
+FIFO_10 Register 0x0C
+Table 20. FIFO_10 Bit Descriptions
+Bit(s)         Bit Name                                 Access      Description
+7              EVENT10_STATE                            Read only   Refer to Table 10.
+6 to 0         EVENT10_IDENTIFIER[6:0]                  Read only   Refer to Table 10.
+FIFO_11 Register 0x0D
+Table 21. FIFO_11 Bit Descriptions
+Bit(s)         Bit Name                                  Access     Description
+7              EVENT11_STATE                             Read only  Refer to Table 10.
+6 to 0         EVENT11_IDENTIFIER[6:0]                   Read only  Refer to Table 10.
+FIFO_12 Register 0x0E
+Table 22. FIFO_12 Bit Descriptions
+Bit(s)         Bit Name                                  Access     Description
+7              EVENT12_STATE                             Read only  Refer to Table 10.
+6 to 0         EVENT12_IDENTIFIER[6:0]                   Read only  Refer to Table 10.
+                                       Rev. C | Page 21 of 40
+
+
+ADP5585                                                                                                    Data Sheet
+FIFO_13 Register 0x0F
+Table 23. FIFO_13 Bit Descriptions
+Bit(s)          Bit Name                                        Access                  Description
+7               EVENT13_STATE                                   Read only               Refer to Table 10.
+6 to 0          EVENT13_IDENTIFIER[6:0]                         Read only               Refer to Table 10.
+FIFO_14 Register 0x10
+Table 24. FIFO_14 Bit Descriptions
+Bit(s)          Bit Name                                        Access                  Description
+7               EVENT14_STATE                                   Read only               Refer to Table 10.
+6 to 0          EVENT14_IDENTIFIER[6:0]                         Read only               Refer to Table 10.
+FIFO_15 Register 0x11
+Table 25. FIFO_15 Bit Descriptions
+Bit(s)          Bit Name                                        Access                  Description
+7               EVENT15_STATE                                   Read only               Refer to Table 10.
+6 to 0          EVENT15_IDENTIFIER[6:0]                         Read only               Refer to Table 10.
+FIFO_16 Register 0x12
+Table 26. FIFO_16 Bit Descriptions
+Bit(s)          Bit Name                                        Access                  Description
+7               EVENT16_STATE                                   Read only               Refer to Table 10.
+6 to 0          EVENT16_IDENTIFIER[6:0]                         Read only               Refer to Table 10.
+GPI_INT_STAT_A Register 0x13
+Table 27. GPI_INT_STAT_A Bit Descriptions
+Bit(s)      Bit Name           Access     Description
+7 to 6      N/A                           Reserved.
+5           GPI_6_INT          Read only  0 = no interrupt
+                                          1 = interrupt due to GPI_6 (R5 pin). Cleared on read.
+4           GPI_5_INT          Read only  0 = no interrupt
+                                          1 = interrupt due to GPI_5 (R4 pin). Cleared on read.
+3           GPI_4_INT          Read only  0 = no interrupt
+                                          1 = interrupt due to GPI_4 (R3 pin). Cleared on read.
+2           GPI_3_INT          Read only  0 = no interrupt
+                                          1 = interrupt due to GPI_3 (R2 pin). Cleared on read.
+1           GPI_2_INT          Read only  0 = no interrupt
+                                          1 = interrupt due to GPI_2 (R1 pin). Cleared on read.
+0           GPI_1_INT          Read only  0 = no interrupt
+                                          1 = interrupt due to GPI_1 (R0 pin). Cleared on read.
+GPI_INT_STAT_B Register 0x14
+Table 28. GPI_INT_STAT_B Bit Descriptions
+Bit(s)      Bit Name           Access     Description
+7 to 5      N/A                           Reserved.
+4           GPI_11_INT         Read only  0 = no interrupt.
+                                          1 = interrupt due to GPI_11 (C4 pin). Cleared on read.
+3           GPI_10_INT         Read only  0 = no interrupt.
+                                          1 = interrupt due to GPI_10 (C3 pin). Cleared on read.
+                                              Rev. C | Page 22 of 40
+
+
+Data Sheet                                                                                              ADP5585
+Bit(s)      Bit Name           Access             Description
+2           GPI_9_INT          Read only          0 = no interrupt.
+                                                  1 = interrupt due to GPI_9 (C2 pin). Cleared on read.
+1           GPI_8_INT          Read only          0 = no interrupt.
+                                                  1 = interrupt due to GPI_8 (C1 pin). Cleared on read.
+0           GPI_7_INT          Read only          0 = no interrupt.
+                                                  1 = interrupt due to GPI_7 (C0 pin). Cleared on read.
+GPI_STATUS_A Register 0x15
+Table 29. GPI_STATUS_A Bit Descriptions
+Bit(s)      Bit Name           Access             Description
+7 to 6      N/A                                   Reserved.
+5           GPI_6_STAT         Read only          0 = GPI_6 (R5 pin) is low.
+                                                  1 = GPI_6 (R5 pin) is high.
+4           GPI_5_STAT         Read only          0 = GPI_5 (R4 pin) is low.
+                                                  1 = GPI_5 (R4 pin) is high.
+3           GPI_4_STAT         Read only          0 = GPI_4 (R3 pin) is low.
+                                                  1 = GPI_4 (R3 pin) is high.
+2           GPI_3_STAT         Read only          0 = GPI_3 (R2 pin) is low.
+                                                  1 = GPI_3 (R2 pin) is high.
+1           GPI_2_STAT         Read only          0 = GPI_2 (R1 pin) is low.
+                                                  1 = GPI_2 (R1 pin) is high.
+0           GPI_1_STAT         Read only          0 = GPI_1 (R0 pin) is low.
+                                                  1 = GPI_1 (R0 pin) is high.
+GPI_STATUS_B Register 0x16
+Table 30. Register 0x16, GPI_STATUS_B Bit Descriptions
+Bit(s)      Bit Name           Access             Description
+7 to 5      N/A                                   Reserved.
+4           GPI_11_STAT        Read only          0 = GPI_11 (C4 pin) is low.
+                                                  1 = GPI_11 (C4 pin) is high.
+3           GPI_10_STAT        Read only          0 = GPI_10 (C3 pin) is low.
+                                                  1 = GPI_10 (C3 pin) is high.
+2           GPI_9_STAT         Read only          0 = GPI_9 (C2 pin) is low.
+                                                  1 = GPI_9 (C2 pin) is high.
+1           GPI_8_STAT         Read only          0 = GPI_8 (C1 pin) is low.
+                                                  1 = GPI_8 (C1 pin) is high.
+0           GPI_7_STAT         Read only          0 = GPI_7 (C0 pin) is low.
+                                                  1 = GPI_7 (C0 pin) is high.
+                                                      Rev. C | Page 23 of 40
+
+
+ADP5585                                                                                        Data Sheet
+RPULL_CONFIG_A Register 0x17
+Table 31. RPULL_CONFIG_A Bit Descriptions
+Bit(s)      Bit Name          Access           Description
+7 to 6      R3_PULL_CFG       Read/write       00 = enable 300 kΩ pull-up resistor.
+                                               01 = enable 300 kΩ pull-down resistor.
+                                               10 = enable 100 kΩ pull-up resistor.
+                                               11 = disable all pull-up/pull-down resistors.
+5 to 4      R2_PULL_CFG       Read/write       00 = enable 300 kΩ pull-up resistor.
+                                               01 = enable 300 kΩ pull-down resistor.
+                                               10 = enable 100 kΩ pull-up resistor.
+                                               11 = disable all pull-up/pull-down resistors.
+3 to 2      R1_PULL_CFG       Read/write       00 = enable 300 kΩ pull-up resistor.
+                                               01 = enable 300 kΩ pull-down resistor.
+                                               10 = enable 100 kΩ pull-up resistor.
+                                               11 = disable all pull-up/pull-down resistors.
+1 to 0      R0_PULL_CFG       Read/write       00 = enable 300 kΩ pull-up resistor.
+                                               01 = enable 300 kΩ pull-down resistor.
+                                               10 = enable 100 kΩ pull-up resistor.
+                                               11 = disable all pull-up/pull-down resistors.
+ADP5585AC_Z-00-R7, ADP5585AC_Z-01-R7, ADP5585ACPZ-03-R7 Default = 0000 0000
+ADP5585ACBZ-02-R7 Default = 1100 0011
+ADP5585ACBZ-04-R7 Default = 0101 0101
+RPULL_CONFIG_B Register 0x18
+Table 32. RPULL_CONFIG_B Bit Descriptions
+Bit(s)       Bit Name         Access           Description
+7 to 4       N/A                               Reserved.
+3 to 2       R5_PULL_CFG      Read/write       (Reserved except for ADP5585ACBZ-01-R7 options)
+                                               00 = enable 300 kΩ pull-up resistor.
+                                               01 = enable 300 kΩ pull-down resistor.
+                                               10 = enable 100 kΩ pull-up resistor.
+                                               11 = disable all pull-up/pull-down resistors.
+1 to 0       R4_PULL_CFG      Read/write       00 = enable 300 kΩ pull-up resistor.
+                                               01 = enable 300 kΩ pull-down resistor.
+                                               10 = enable 100 kΩ pull-up resistor.
+                                               11 = disable all pull-up/pull-down resistors.
+ADP5585AC_Z-00-R7, ADP5585AC_Z-01-R7, ADP5585ACPZ-03-R7 Default = 0000 0000
+ADP5585ACBZ-02-R7 Default = 0000 0011
+ADP5585ACBZ-04-R7 Default = 0000 0101
+                                                   Rev. C | Page 24 of 40
+
+
+Data Sheet                                                                                                         ADP5585
+RPULL_CONFIG_C Register 0x19
+Table 33. RPULL_CONFIG_C Bit Descriptions
+Bit(s)       Bit Name         Access             Description
+7 to 6       C3_PULL_CFG      Read/write         00 = enable 300 kΩ pull-up resistor.
+                                                 01 = enable 300 kΩ pull-down resistor.
+                                                 10 = enable 100 kΩ pull-up resistor.
+                                                 11 = disable all pull-up/pull-down resistors.
+5 to 4       C2_PULL_CFG      Read/write         00 = enable 300 kΩ pull-up resistor.
+                                                 01 = enable 300 kΩ pull-down resistor.
+                                                 10 = enable 100 kΩ pull-up resistor.
+                                                 11 = disable all pull-up/pull-down resistors.
+3 to 2       C1_PULL_CFG      Read/write         00 = enable 300 kΩ pull-up resistor.
+                                                 01 = enable 300 kΩ pull-down resistor.
+                                                 10 = enable 100 kΩ pull-up resistor.
+                                                 11 = disable all pull-up/pull-down resistors.
+1 to 0       C0_PULL_CFG      Read/write         00 = enable 300 kΩ pull-up resistor.
+                                                 01 = enable 300 kΩ pull-down resistor.
+                                                 10 = enable 100 kΩ pull-up resistor.
+                                                 11 = disable all pull-up/pull-down resistors.
+ADP5585AC_Z-00-R7, ADP5585AC_Z-01-R7, ADP5585ACBZ-02-R7 , ADP5585ACPZ-03-R7 Default = 0000 0000
+ADP5585ACBZ-04-R7 Default = 0101 0101
+RPULL_CONFIG_D Register 0x1A
+Table 34. RPULL_CONFIG_D Bit Descriptions
+Bit(s)       Bit Name         Access             Description
+7 to 2       N/A                                 Reserved.
+1 to 0       C4_PULL_CFG      Read/write         00 = enable 300 kΩ pull-up resistor.
+                                                 01 = enable 300 kΩ pull-down resistor.
+                                                 10 = enable 100 kΩ pull-up resistor.
+                                                 11 = disable all pull-up/pull-down resistors.
+ADP5585AC_Z-00-R7, ADP5585AC_Z-01-R7, ADP5585ACPZ-03-R7 Default = 0000 0000
+ADP5585ACBZ-02-R7 Default = 0000 0011
+ADP5585ACBZ-04-R7 Default = 0000 0001
+GPI_INT_LEVEL_A Register 0x1B
+Table 35. GPI_INT_LEVEL_A Bit Descriptions
+Bit(s)   Bit Name             Access      Description
+7 to 6   N/A                              Reserved.
+5        GPI_6_INT_LEVEL      Read/write  (Reserved except for ADP5585AC_Z-01-R7 options)
+                                          0 = GPI_6 interrupt is active low (GPI_6_INT sets whenever R5 is low).
+                                          1 = GPI_6 interrupt is active high (GPI_6_INT sets whenever R5 is high).
+4        GPI_5_INT_LEVEL      Read/write  0 = GPI_5 interrupt is active low (GPI_5_INT sets whenever R4 is low).
+                                          1 = GPI_5 interrupt is active high (GPI_5_INT sets whenever R4 is high).
+3        GPI_4_INT_LEVEL      Read/write  0 = GPI_4 interrupt is active low (GPI_4_INT sets whenever R3 is low).
+                                          1 = GPI_4 interrupt is active high (GPI_4_INT sets whenever R3 is high).
+2        GPI_3_INT_LEVEL      Read/write  0 = GPI_3 interrupt is active low (GPI_3_INT sets whenever R2 is low).
+                                          1 = GPI_3 interrupt is active high (GPI_3_INT sets whenever R2 is high).
+1        GPI_2_INT_LEVEL      Read/write  0 = GPI_2 interrupt is active low (GPI_2_INT sets whenever R1 is low).
+                                          1 = GPI_2 interrupt is active high (GPI_2_INT sets whenever R1 is high).
+0        GPI_1_INT_LEVEL      Read/write  0 = GPI_1 interrupt is active low (GPI_1_INT sets whenever R0 is low).
+                                          1 = GPI_1 interrupt is active high (GPI_1_INT sets whenever R0 is high).
+                                                     Rev. C | Page 25 of 40
+
+
+ADP5585                                                                                                                                            Data Sheet
+GPI_INT_LEVEL_B Register 0x1C
+Table 36. Register 0x1C, GPI_INT_LEVEL_B Bit Descriptions
+Bit(s)       Bit Name                    Access            Description
+7 to 5       N/A                                           Reserved.
+4            GPI_11_INT_LEVEL            Read/write        0 = GPI_11 interrupt is active low (GPI_11_INT sets whenever R10 is low).
+                                                           1 = GPI_11 interrupt is active high (GPI_11_INT sets whenever R10 is high).
+3            GPI_10_INT_LEVEL            Read/write        0 = GPI_10 interrupt is active low (GPI_10_INT sets whenever R9 is low).
+                                                           1 = GPI_10 interrupt is active high (GPI_10_INT sets whenever R9 is high).
+2            GPI_9_INT_LEVEL             Read/write        0 = GPI_9 interrupt is active low (GPI_9_INT sets whenever R8 is low).
+                                                           1 = GPI_9 interrupt is active high (GPI_9_INT sets whenever R8 is high).
+1            GPI_8_INT_LEVEL             Read/write        0 = GPI_8 interrupt is active low (GPI_8_INT sets whenever R7 is low).
+                                                           1 = GPI_8 interrupt is active high (GPI_8_INT sets whenever R7 is high).
+0            GPI_7_INT_LEVEL             Read/write        0 = GPI_7 interrupt is active low (GPI_7_INT sets whenever R6 is low).
+                                                           1 = GPI_7 interrupt is active high (GPI_7_INT sets whenever R6 is high).
+GPI_EVENT_EN_A Register 0x1D
+Table 37. GPI_EVENT_EN_A Bit Descriptions
+Bit(s)       Bit Name                    Access            Description
+7 to 6       N/A                                           Reserved.
+5            GPI_6_EVENT_EN              Read/write        (Reserved except for ADP5585AC_Z-01-R7 options)
+                                                           0 = disable GPI events from GPI 6.
+                                                           1 = allow GPI 6 activity to generate events on the FIFO 1.
+4            GPI_5_EVENT_EN              Read/write        0 = disable GPI events from GPI 5.
+                                                           1 = allow GPI 5 activity to generate events on the FIFO1.
+3            GPI_4_EVENT_EN              Read/write        0 = disable GPI events from GPI 4.
+                                                           1 = allow GPI 4 activity to generate events on the FIFO1.
+2            GPI_3_EVENT_EN              Read/write        0 = disable GPI events from GPI 3.
+                                                           1 = allow GPI 3 activity to generate events on the FIFO1.
+1            GPI_2_EVENT_EN              Read/write        0 = disable GPI events from GPI 2.
+                                                           1 = allow GPI 2 activity to generate events on the FIFO1.
+0            GPI_1_EVENT_EN              Read/write        0 = disable GPI events from GPI 1.
+                                                           1 = allow GPI 1 activity to generate events on the FIFO1.
+1
+  GPIs in this mode are considered FIFO events and can be used for unlock purposes. GPI activity in this mode causes EVENT_INT interrupts. GPIs in this mode do not
+  generate GPI_INT interrupts.
+GPI_EVENT_EN_B Register 0x1E
+Table 38. GPI_EVENT_EN_B Bit Descriptions
+Bit(s)          Bit Name                          Access                Description
+7 to 5          N/A                                                     Reserved.
+4               GPI_11_EVENT_EN                   Read/write            0 = disable GPI events from GPI 11.
+                                                                        1 = allow GPI 11 activity to generate events on the FIFO1.
+3               GPI_10_EVENT_EN                   Read/write            0 = disable GPI events from GPI 10.
+                                                                        1 = allow GPI 10 activity to generate events on the FIFO1.
+2               GPI_9_EVENT_EN                    Read/write            0 = disable GPI events from GPI 9.
+                                                                        1 = allow GPI 9 activity to generate events on the FIFO1.
+1               GPI_8_EVENT_EN                    Read/write            0 = disable GPI events from GPI 8.
+                                                                        1 = allow GPI 8activity to generate events on the FIFO1.
+0               GPI_7_EVENT_EN                    Read/write            0 = disable GPI events from GPI 7.
+                                                                        1 = allow GPI 7 activity to generate events on the FIFO1.
+1
+  GPIs in this mode are considered FIFO events and can be used for unlock purposes. GPI activity in this mode cause EVENT_INT interrupts. GPIs in this mode do not
+  generate GPI_INT interrupts.
+                                                                         Rev. C | Page 26 of 40
+
+
+Data Sheet                                                                                                     ADP5585
+GPI_EVENT_INTERRUPT_EN_A Register 0x1F
+Table 39. GPI_INTERRUPT_EN_A Bit Descriptions
+Bit(s)     Bit Name             Access        Description
+7 to 6     N/A                                Reserved.
+5          GPI_6_INT_EN         Read/write    (Reserved except for ADP5585AC_Z-01-R7 options)
+                                              0 = GPI_6_INT is disabled.
+                                              1 = GPI_6_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_6_INT is set and the GPI 6 interrupt condition is met.
+4          GPI_5_INT_EN         Read/write    0 = GPI_5_INT is disabled.
+                                              1 = GPI_5_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_5_INT is set and the GPI 5 interrupt condition is met.
+3          GPI_4_INT_EN         Read/write    0 = GPI_4_INT is disabled.
+                                              1 = GPI_4_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_4_INT is set and the GPI 4 interrupt condition is met.
+2          GPI_3_INT_EN         Read/write    0 = GPI_3_INT is disabled.
+                                              1 = GPI_3_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_3_INT is set and the GPI 3 interrupt condition is met.
+1          GPI_2_INT_EN         Read/write    0 = GPI_2_INT is disabled.
+                                              1 = GPI_2_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_2_INT is set and the GPI 2 interrupt condition is met.
+0          GPI_1_INT_EN         Read/write    0 = GPI_1_INT is disabled.
+                                              1 = GPI_1_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_1_INT is set and the GPI 1 interrupt condition is met.
+GPI_EVENT_INTERRUPT_EN_B Register 0x20
+Table 40. GPI_INTERRUPT_EN_B Bit Descriptions
+Bit(s)     Bit Name             Access        Description
+7 to 5     N/A                                Reserved.
+4          GPI_11_INT_EN        Read/write    0 = GPI_11_INT is disabled.
+                                              1 = GPI_11_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_11_INT is set and the GPI 11 interrupt condition is met.
+3          GPI_10_INT_EN        Read/write    0 = GPI_10_INT is disabled.
+                                              1 = GPI_10_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_10_INT is set and the GPI 10 interrupt condition is met.
+2          GPI_9_INT_EN         Read/write    0 = GPI_9_INT is disabled.
+                                              1 = GPI_9_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_9_INT is set and the GPI 9 interrupt condition is met.
+1          GPI_8_INT_EN         Read/write    0 = GPI_8_INT is disabled.
+                                              1 = GPI_8_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_8_INT is set and the GPI 8 interrupt condition is met.
+0          GPI_7_INT_EN         Read/write    0 = GPI_7_INT is disabled.
+                                              1 = GPI_7_INT enabled. Asserts the GPI_INT bit (Register 0x01, Bit 1) if
+                                              GPI_7_INT is set and the GPI 7 interrupt condition is met.
+                                              Rev. C | Page 27 of 40
+
+
+ADP5585                                                                                     Data Sheet
+DEBOUNCE_DIS_A Register 0x21
+Table 41. DEBOUNCE_DIS_A Bit Descriptions
+Bit(s)     Bit Name              Access     Description
+7 to 6     N/A                              Reserved.
+5          GPI_6_DEB_DIS         Read/write (Reserved except for ADP5585AC_Z-01-R7 options)
+                                            0 = debounce enabled on GPI 6.
+                                            1 = debounce disabled on GPI 6.
+4          GPI_5_DEB_DIS         Read/write 0 = debounce enabled on GPI 5.
+                                            1 = debounce disabled on GPI 5.
+3          GPI_4_DEB_DIS         Read/write 0 = debounce enabled on GPI 4.
+                                            1 = debounce disabled on GPI 4.
+2          GPI_3_DEB_DIS         Read/write 0 = debounce enabled on GPI 3.
+                                            1 = debounce disabled on GPI 3.
+1          GPI_2_DEB_DIS         Read/write 0 = debounce enabled on GPI 2.
+                                            1 = debounce disabled on GPI 2.
+0          GPI_1_DEB_DIS         Read/write 0 = debounce enabled on GPI 1.
+                                            1 = debounce disabled on GPI 1.
+DEBOUNCE_DIS_B Register 0x22
+Table 42. DEBOUNCE_DIS_B Bit Descriptions
+Bit(s)     Bit Name              Access     Description
+7 to 5     N/A                              Reserved.
+4          GPI_11_DEB_DIS        Read/write 0 = debounce enabled on GPI 11.
+                                            1 = debounce disabled on GPI 11.
+3          GPI_10_DEB_DIS        Read/write 0 = debounce enabled on GPI 10.
+                                            1 = debounce disabled on GPI 10.
+2          GPI_9_DEB_DIS         Read/write 0 = debounce enabled on GPI 9.
+                                            1 = debounce disabled on GPI 9.
+1          GPI_8_DEB_DIS         Read/write 0 = debounce enabled on GPI 8.
+                                            1 = debounce disabled on GPI 8.
+0          GPI_7_DEB_DIS         Read/write 0 = debounce enabled on GPI 7.
+                                            1 = debounce disabled on GPI 7.
+GPO_DATA_OUT_A Register 0x23
+Table 43. GPO_DATA_OUT_A Bit Descriptions
+Bit(s)     Bit Name              Access     Description
+7 to 6     N/A                              Reserved.
+5          GPO_6_DATA            Read/write (Reserved except for ADP5585AC_Z-01-R7 options)
+                                            0 = sets output low.
+                                            1 = sets output high.
+4          GPO_5_DATA            Read/write 0 = sets output low.
+                                            1 = sets output high.
+3          GPO_4_DATA            Read/write 0 = sets output low.
+                                            1 = sets output high.
+2          GPO_3_DATA            Read/write 0 = sets output low.
+                                            1 = sets output high.
+1          GPO_2_DATA            Read/write 0 = sets output low.
+                                            1 = sets output high.
+0          GPO_1_DATA            Read/write 0 = sets output low.
+                                            1 = sets output high.
+                                            Rev. C | Page 28 of 40
+
+
+Data Sheet                                                                                       ADP5585
+GPO_DATA_OUT_B Register 0x24
+Table 44. GPO_DATA_OUT_B Bit Descriptions
+Bit(s)     Bit Name               Access         Description
+7 to 5     N/A                                   Reserved.
+4          GPO_11_DATA            Read/write     0 = sets output low.
+                                                 1 = sets output high.
+3          GPO_10_DATA            Read/write     0 = sets output low.
+                                                 1 = sets output high.
+2          GPO_9_DATA             Read/write     0 = sets output low.
+                                                 1 = sets output high.
+1          GPO_8_DATA             Read/write     0 = sets output low.
+                                                 1 = sets output high.
+0          GPO_7_DATA             Read/write     0 = sets output low.
+                                                 1 = sets output high.
+GPO_OUT_MODE_A Register 0x25
+Table 45. Register 0x25, GPO_OUT_MODE_A Bit Descriptions
+Bit(s)     Bit Name               Access         Description
+7 to 6     N/A                                   Reserved.
+5          GPO_6_OUT_MODE         Read/write     (Reserved except for ADP5585AC_Z-01-R7 options)
+                                                 0 = push/pull.
+                                                 1 = open drain.
+4          GPO_5_OUT_MODE         Read/write     0 = push/pull.
+                                                 1 = open drain.
+3          GPO_4_OUT_MODE         Read/write     0 = push/pull.
+                                                 1 = open drain.
+2          GPO_3_ OUT_MODE        Read/write     0 = push/pull.
+                                                 1 = open drain.
+1          GPO_2_OUT_MODE         Read/write     0 = push/pull.
+                                                 1 = open drain.
+0          GPO_1_OUT_MODE         Read/write     0 = push/pull.
+                                                 1 = open drain.
+GPO_OUT_MODE_B Register 0x26
+Table 46. Register 0x26, GPO_OUT_MODE_B Bit Descriptions
+Bit(s)     Bit Name               Access         Description
+7 to 5     N/A                                   Reserved.
+4          GPO_11_OUT_MODE        Read/write     0 = push/pull.
+                                                 1 = open drain.
+3          GPO_10_OUT_MODE        Read/write     0 = push/pull.
+                                                 1 = open drain.
+2          GPO_9_OUT_MODE         Read/write     0 = push/pull.
+                                                 1 = open drain.
+1          GPO_8_OUT_MODE         Read/write     0 = push/pull.
+                                                 1 = open drain.
+0          GPO_7_OUT_MODE         Read/write     0 = push/pull.
+                                                 1 = open drain.
+                                                  Rev. C | Page 29 of 40
+
+
+ADP5585                                                                                                             Data Sheet
+GPIO_DIRECTION_A Register 0x27
+Table 47. GPIO_DIRECTION_A Bit Descriptions
+Bit(s)            Bit Name                 Access            Description
+7 to 6            N/A                                        Reserved.
+5                 GPIO_6_DIR               Read/write        (Reserved except for ADP5585AC_Z-01-R7 options)
+                                                             0 = GPIO 6 is an input.
+                                                             1 = GPIO 6 is an output.
+4                 GPIO_5_DIR               Read/write        0 = GPIO 5 is an input.
+                                                             1 = GPIO 5 is an output.
+3                 GPIO_4_DIR               Read/write        0 = GPIO 4 is an input.
+                                                             1 = GPIO 4 is an output.
+2                 GPIO_3_DIR               Read/write        0 = GPIO 3 is an input.
+                                                             1 = GPIO 3 is an output.
+1                 GPIO_2_DIR               Read/write        0 = GPIO 2 is an input.
+                                                             1 = GPIO 2 is an output.
+0                 GPIO_1_DIR               Read/write        0 = GPIO 1 is an input.
+                                                             1 = GPIO 1 is an output.
+GPIO_DIRECTION_B Register 0x28
+Table 48. Register 0x28, GPIO_DIRECTION_B Bit Descriptions
+Bit(s)           Bit Name                   Access           Description
+7 to 5           N/A                                         Reserved.
+4                GPIO_11_DIR                Read/write       0 = GPIO 11 is an input.
+                                                             1 = GPIO 11 is an output.
+3                GPIO_10_DIR                Read/write       0 = GPIO 10 is an input.
+                                                             1 = GPIO 10 is an output.
+2                GPIO_9_DIR                 Read/write       0 = GPIO 9 is an input.
+                                                             1 = GPIO 9 is an output.
+1                GPIO_8_DIR                 Read/write       0 = GPIO 8 is an input.
+                                                             1 = GPIO 8 is an output.
+0                GPIO_7_DIR                 Read/write       0 = GPIO 7 is an input.
+                                                             1 = GPIO 7 is an output.
+RESET1_EVENT_A Register 0x29
+Table 49. RESET1_EVENT_A Bit Descriptions
+Bit(s)           Bit Name                   Access           Description
+7                RESET1_EVENT_A_LEVEL       Read/write       Defines which level the first reset event should be to generate the
+                                                             RESET1 signal.
+                                                             For key events, use the following settings:
+                                                             0 = not applicable; releases not used for reset generation.
+                                                             1 = press is used as reset event.
+                                                             For GPIs and logic outputs configured for FIFO updates, use the
+                                                             following settings:
+                                                             0 = inactive event used as reset condition.
+                                                             1 = active event used as reset condition.
+6 to 0           RESET1_EVENT_A[6:0]        Read/write       Defines an event that can be used to generate the RESET1 signal. Up to
+                                                             three events can be defined for generating the RESET1 signal, using
+                                                             RESET1_EVENT_A[6:0], RESET1_EVENT_B[6:0], and
+                                                             RESET1_EVENT_C[6:0]. If one of the registers is 0, that register is not
+                                                             used for reset generation. All reset events must be detected at the
+                                                             same time to trigger the reset.
+                                                   Rev. C | Page 30 of 40
+
+
+Data Sheet                                                                                                              ADP5585
+RESET1_EVENT_B Register 0x2A
+Table 50. RESET1_EVENT_B Bit Descriptions
+Bit(s)     Bit Name                 Access     Description
+7          RESET1_EVENT_B_LEVEL     Read/write Defines which level the second reset event should be to generate the RESET1
+                                               signal. Refer to Table 49.
+6 to 0     RESET1_EVENT_B[6:0]      Read/write Defines an event that can be used to generate the RESET1 signal. Refer to Table 11.
+RESET1_EVENT_C Register 0x2B
+Table 51. RESET1_EVENT_C Bit Descriptions
+Bit(s)     Bit Name                 Access     Description
+7          RESET1_EVENT_C_LEVEL     Read/write Defines which level the second reset event should be to generate the RESET1
+                                               signal. Refer to Table 49.
+6 to 0     RESET1_EVENT_C[6:0]      Read/write Defines an event that can be used to generate the RESET1 signal. Refer to Table 11.
+RESET2_EVENT_A Register 0x2C
+Table 52. RESET2_EVENT_A Bit Descriptions
+Bit(s)     Bit Name                 Access     Description
+7          RESET2_EVENT_A_LEVEL     Read/write Defines which level the first reset event should be to generate the RESET2 signal.
+                                               For key events, use the following settings:
+                                               0 = not applicable; releases not used for reset generation.
+                                               1 = press is used as reset event.
+                                               For GPIs and logic outputs configured for FIFO updates, use the following settings:
+                                               0 = inactive event used as reset condition.
+                                               1 = active event used as reset condition.
+6 to 0     RESET2_EVENT_A[6:0]      Read/write Defines an event that can be used to generate the RESET2 signal. Up to two events
+                                               can be defined for generating the RESET2 signal, using RESET2_EVENT_A[6:0], and
+                                               RESET2_EVENT_B[6:0]. If one of the registers is 0, that register is not used for reset
+                                               generation. All reset events must be detected at the same time to trigger the reset.
+RESET2_EVENT_B Register 0x2D
+Table 53. RESET2_EVENT_B Bit Descriptions
+Bit(s)     Bit Name                 Access     Description
+7          RESET2_EVENT_B_LEVEL     Read/write Defines which level the second reset event should be to generate the RESET2
+                                               signal. Refer to Table 52.
+6 to 0     RESET2_EVENT_B[6:0]      Read/write Defines an event that can be used to generate the RESET2 signal. Refer to Table 11.
+RESET_CFG Register 0x2E
+Table 54. RESET_CFG Bit Descriptions
+Bit(s)     Bit Name                 Access     Description
+7          RESET2_POL               Read/write Sets the polarity of RESET2.
+                                               0 = RESET2 is active low.
+                                               1 = RESET2 is active high.
+6          RESET1_POL               Read/write Sets the polarity of RESET1.
+                                               0 = RESET1 is active low.
+                                               1 = RESET1 is active high.
+5          RST_PASSTHRU_EN          Read/write Allows the RST pin to override (OR with) the RESET1signal. This function not
+                                               applicable to RESET2.
+                                                    Rev. C | Page 31 of 40
+
+
+ADP5585                                                                                                              Data Sheet
+Bit(s)     Bit Name                Access      Description
+4 to 2     RESET_TRIG_TIME[2:0]    Read/write  Defines the length of time that the reset events must be active before a reset
+                                               signal is generated. All events must be active at the same time for the same
+                                               duration. RESET_TRIG_TIME[2:0] is common to both RESET1 and RESET2.
+                                               000 = immediate.
+                                               001 = 1.0 sec.
+                                               010 = 1.5 sec.
+                                               011 = 2.0 sec.
+                                               100 = 2.5 sec.
+                                               101 = 3.0 sec.
+                                               110 = 3.5 sec.
+                                               111 = 4.0 sec.
+1 to 0     RESET_PULSE_WIDTH[1:0]  Read/write  Defines the pulse width of the reset signals. RESET_PULSE_WIDTH[1:0] is common
+                                               to both RESET1 and RESET2.
+                                               00 = 500 µs.
+                                               01 = 1 ms.
+                                               10 = 2 ms.
+                                               11 = 10 ms.
+PWM_OFFT_LOW Register 0x2F
+Table 55. Register 0x2F, PWM_OFFT_LOW Bit Descriptions
+Bit(s)     Bit Name                                  Access                   Description
+7 to 0     PWM_OFFT_LOW_BYTE[7:0]                    Read/write               Lower eight bits of PWM off time.
+PWM_OFFT_HIGH Register 0x30
+Table 56. PWM_OFFT_HIGH Bit Descriptions
+Bit(s)     Bit Name                                  Access                   Description
+7 to 0     PWM_OFFT_HIGH_BYTE[7:0]                   Read/write               Upper eight bits of PWM off time.
+PWM_ONT_LOW Register 0x31
+Table 57. PWM_ONT_LOW Bit Descriptions
+Bit(s)     Bit Name                                   Access                   Description
+7 to 0     PWM_ONT_LOW_BYTE[7:0]                      Read/write               Lower eight bits of PWM on time.
+PWM_ONT_HIGH Register 0x32
+Table 58. PWM_ONT_HIGH Bit Descriptions
+Bit(s)     Bit Name                 Access     Description
+7 to 0     PWM_ONT_HIGH_BYTE[7:0]   Read/write Upper eight bits of PWM on time. Note that updated PWM times are not latched
+                                               until this byte is written to. PWM count times are referenced from the internal
+                                               oscillator. The fastest oscillator setting is 500 kHz (2 µs increments). Therefore, the
+                                               maximum period is
+                                                  2 µs × 216 = 131 ms
+                                               This gives PWM frequencies from 500 kHz down to 7.6 Hz.
+PWM_CFG Register 0x33
+Table 59. PWM_CFG Bit Descriptions
+Bit(s)     Bit Name                 Access     Description
+7 to 3     N/A                                 Reserved.
+2          PWM_IN_AND                          0 = no external AND’ing.
+                                               1 = PWM signal AND’ed with an externally supplied PWM signal (C3).
+1          PWM_MODE                 Read/write Defines PWM mode.
+                                               0 = continuous.
+                                               1 = executes one PWM period, then sets PWM_EN to 0.
+0          PWM_EN                   Read/write Enable PWM generator.
+                                                   Rev. C | Page 32 of 40
+
+
+Data Sheet                                                                                                            ADP5585
+LOGIC_CFG Register 0x34
+Table 60. LOGIC_CFG Bit Descriptions
+Bit(s)     Bit Name            Access       Description
+7          N/A                              Reserved.
+6          LY_INV              Read/write   0 = LY output not inverted before passing into logic block.
+                                            1 = inverts output LY from the logic block.
+5          LC_INV              Read/write   0 = LC input not inverted before passing into the logic block.
+                                            1 = inverts input LC before passing it into the logic block.
+4          LB_INV              R/W          0 = LB input not inverted before passing into the logic block.
+                                            1 = inverts input LB before passing it into the logic block.
+3          LA_INV              R/W          0 = LA input not inverted before passing into the logic block.
+                                            1 = inverts input LA before passing it into the logic block.
+2 to 0     LOGIC_SEL[2:0]      R/W          Configures the digital mux for the logic block. Refer to Figure 19.
+                                            000 = off/disable.
+                                            001 = AND.
+                                            010 = OR.
+                                            011 = XOR.
+                                            100 = FF.
+                                            101 = IN_LA.
+                                            110 = IN_LB.
+                                            111 = IN_LC.
+LOGIC_FF_CFG Register 0x35
+Table 61. LOGIC_FF_CFG Bit Descriptions
+Bit(s)     Bit Name            Access        Description
+7 to 2     N/A                 Read/write    Reserved.
+1          FF_SET              Read/write    0 = FF not set in the logic block. Refer to Figure 19.
+                                             1 = set FF in the logic block.
+0          FF_CLR              Read/write    0 = FF not cleared in the logic block. Refer to Figure 19.
+                                             1 = clear FF in the logic block.
+LOGIC_INT_EVENT_EN Register 0x36
+Table 62. LOGIC_INT_EVENT_EN Bit Descriptions
+Bit(s)     Bit Name           Access         Description
+7 to 3     N/A                               Reserved.
+2          LY_DBNC_DIS        Read/write     0 = output of the logic block is debounced before entering the event/interrupt block.
+                                             1 = output of the logic block is not debounced before entering the event/interrupt
+                                             block. Use with caution because glitches may generate interrupts prematurely.
+1          LOGIC_EVENT_EN     Read/write     0 = LY cannot generate interrupt.
+                                             1 = allow LY activity to generate events on the FIFO.
+0          LOGIC_INT_LEVEL    Read/write     Configure the logic level of LY that generates an interrupt.
+                                             0 = LY is active low.
+                                             1 = LY is active high.
+                                                   Rev. C | Page 33 of 40
+
+
+ADP5585                                                                                                              Data Sheet
+POLL_TIME_CFG Register 0x37
+Table 63. Register 0x37, POLL_TIME_CFG Bit Descriptions
+Bit(s)      Bit Name                    Access        Description
+7 to 2      N/A                                       Reserved.
+1 to 0      KEY_POLL_TIME[1:0]          Read/write    Configure time between consecutive scan cycles.
+                                                      00 = 10 ms.
+                                                      01 = 20 ms.
+                                                      10 = 30 ms.
+                                                      11 = 40 ms.
+PIN_CONFIG_A Register 0x38
+Table 64. PIN_CONFIG_A Bit Descriptions
+Bit(s)      Bit Name                    Access        Description
+7 to 6      N/A                                       Reserved.
+5           R5_CONFIG                   Read/write    Reserved except for ADP5585AC_Z-01-R7 options)
+                                                      0 = GPIO 6.
+                                                      1 = Row 5.
+4           R4_CONFIG                   Read/write    0 = GPIO 5 (see R4_EXTEND_CFG in Table 66 for alternate configuration, RESET1).
+                                                      1 = Row 4
+3           R3_CONFIG                   Read/write    0 = GPIO 4 (see R3_EXTEND_CFG[1:0] in Table 66 for alternate configuration,
+                                                      LC/PWM_OUT).
+                                                      1 = Row 3
+2           R2_CONFIG                   Read/write    0 = GPIO 3
+                                                      1 = Row 2
+1           R1_CONFIG                   Read/write    0 = GPIO 2
+                                                      1 = Row 1
+0           R0_CONFIG                   Read/write    0 = GPIO 1/LY (see R0_EXTEND_CFG in Table 66 for alternate configuration, LY).
+                                                      1 = Row 0
+PIN_CONFIG_B Register 0x39
+Table 65. PIN_CONFIG_B Bit Descriptions
+Bit(s)      Bit Name                    Access        Description
+7 to 5      N/A                                       Reserved.
+4           C4_CONFIG                   Read/write    0 = GPIO 11 (see C4_EXTEND_CFG in Table 66 for alternate configuration, RESET2).
+                                                      1 = Column 4.
+3           C3_CONFIG                   Read/write    0 = GPIO 10.
+                                                      1 = Column 3.
+2           C2_CONFIG                   Read/write    0 = GPIO 9.
+                                                      1 = Column 2.
+1           C1_CONFIG                   Read/write    0 = GPIO 8.
+                                                      1 = Column 1.
+0           C0_CONFIG                   Read/write    0 = GPIO 7.
+                                                      1 = Column 0.
+PIN_CONFIG_C Register 0x3A
+Table 66. PIN_CONFIG_D Bit Descriptions
+Bit(s)      Bit Name                    Access        Description
+7           PULL_SELECT                 Read/write    0 = 300 kΩ resistor used for row pull-up during key scanning.
+                                                      1 = 100 kΩ resistor used for row pull-up during key scanning.
+6           C4_ EXTEND_CFG              Read/write    0 = C4 remains configured as GPIO 11.
+                                                      1 = C4 reconfigured as RESET2 output.
+                                                     Rev. C | Page 34 of 40
+
+
+Data Sheet                                                                                                                 ADP5585
+Bit(s)      Bit Name                   Access      Description
+5           R4_ EXTEND_CFG             Read/write  0 = R4 remains configured as GPIO 5.
+                                                   1 = R4 reconfigured as RESET1 output.
+4           N/A                                    Reserved.
+3 to 2      R3_EXTEND_CFG[1:0]         Read/write  00 = R3 remains configured as GPIO 4.
+                                                   01 = R3 reconfigured as LC input for the logic block.
+                                                   10 = R3 reconfigured as PWM_OUT output from PWM block.
+                                                   11 = unused.
+1           N/A                                    Reserved.
+0           R0_ EXTEND_CFG             Read/write  0 = R0 remains configured as GPIO 1.
+                                                   1 = R0 reconfigured as LY output from the logic block.
+GENERAL_CFG Register 0x3B
+Table 67. GENERAL_CFG Bit Descriptions
+Bit(s)      Bit Name                   Access      Description
+7           OSC_EN                     Read/write  0 = disable internal 1 MHz oscillator.
+                                                   1 = enable internal 1 MHz oscillator.
+6 to 5      OSC_FREQ[1:0]              Read/write  Sets the input clock frequency fed from the base 1 MHz oscillator to the digital
+                                                   core. Slower frequencies result in less quiescent current, but key and GPI scan
+                                                   times increase.
+                                                   00 = 50 kHz.
+                                                   01 = 100 kHz.
+                                                   10 = 200 kHz.
+                                                   11 = 500 kHz.
+4 to 2      N/A                                    Reserved.
+1           INT_CFG                    Read/write  Configure the behavior of the INT pin if the user tries to clear it while an interrupt
+                                                   is pending.
+                                                   0 = INT pin remains asserted if an interrupt is pending.
+                                                   1 = INT pin deasserts for 50 µs and reasserts if an interrupt is pending.
+0           RST_CFG                    R/W         Configure the response ADP5585 has to the RST pin.
+                                                   0 = ADP5585 resets if RST is low.
+                                                   1 = ADP5585 does not reset if RST is low.
+INT_EN Register 0x3C
+Table 68. INT_EN Bit Descriptions
+Bit(s)      Bit Name                   Access      Description
+7 to 5      N/A                                    Reserved.
+4           LOGIC_IEN                  Read/write  0 = Logic 1 interrupt is disabled.
+                                                   1 = assert the INT pin if LOGIC_INT is set.
+3           N/A                                    Reserved.
+2           OVRFLOW_IEN                Read/write  0 = overflow interrupt is disabled.
+                                                   1 = assert the INT pin if OVRFLOW_INT is set.
+1           GPI_IEN                    Read/write  0 = GPI interrupt is disabled.
+                                                   1 = assert the INT pin if GPI_INT is set.
+0           EVENT_IEN                  Read/write  0 = event interrupt is disabled.
+                                                   1 = assert the INT pin if EVENT_INT is set.
+                                                  Rev. C | Page 35 of 40
+
+
+ADP5585                                                                                                                Data Sheet
+APPLICATIONS DIAGRAM
+                                                                                                   VDD
+                                                        INT
+                                                        RST
+                        HOST PROCESSOR                  SCL
+                                                        SDA
+    VDD
+               KP/LOGIC1 OUTPUT/GPI/GPO
+               KP/LOGIC1 INPUT/GPI/GPO
+                                                                              SDA      SCL   RST     VDD
+               KP/LOGIC1 INPUT/GPI/GPO
+                                                                                                           ADP5585
+               KP/LOGIC1 INPUT/GPI/GPO/PWM/CLK
+                                                                                                   UVLO     OSCILLATOR
+               KP/RESET1 OUTPUT/GPI/GPO                                             I2C            POR
+                                                                                INTERFACE
+                                                                        R0
+                            1   2   3   4   5
+                                                                        R1
+                            6   7   8   9   10                                                KEY SCAN
+                                                                        R2                       AND
+                           11 12 13 14 15
+                                                                        R3                     DECODE
+                           16 17 18 19 20                                                                                INT
+                                                                        R4                     GPI SCAN
+                           21 22 23 24 25
+                                                                                                 AND
+                                                                        C4                     DECODE
+                                                                        C3
+                                                                                    I/O            LOGIC
+                                                                        C2
+                                                                                  CONFIG
+                                                                        C1
+                                                                                                   PWM     REGISTERS
+                                                                        C0
+                                                                                               RESET1
+                                                                                                GEN
+                                                                                               RESET2
+                                                                                                GEN
+                                                                                                    GND                        09841-026
+                                            Figure 27. Typical Application Schematic
+                                                     Rev. C | Page 36 of 40
+
+
+Data Sheet                                                                                                                               ADP5585
+OUTLINE DIMENSIONS
+                                1.630
+                                1.590 SQ
+                                1.550
+                                                                                4       3        2     1
+                                                                                                             A
+                 BALL A1
+              IDENTIFIER
+                                                            1.20                                             B
+                                                            REF
+                                                                                                             C
+                                                                                                             D
+                                                            0.40
+                                                            REF
+                               TOP VIEW                                              BOTTOM VIEW
+                            (BALL SIDE DOWN)                                         (BALL SIDE UP)
+               0.545
+               0.500            SIDE VIEW
+               0.455
+                                                        COPLANARITY
+                                                        0.05
+               SEATING                 0.300            0.230
+                PLANE                  0.260            0.200
+                                                                                                                          10-23-2012-A
+                                       0.220            0.170
+                             Figure 28. 16-Ball Wafer Level Chip Scale Package [WLCSP]
+                                                     (CB-16-10)
+                                          Dimensions shown in millimeters
+                                3.10                                   0.30
+                                3.00 SQ                                0.23
+                   PIN 1        2.90                                   0.18
+              INDICATOR                                                                              PIN 1
+                                                                        13              16           INDICATOR
+                                                     0.50
+                                                                   12                        1
+                                                     BSC
+                                                                              EXPOSED                   1.75
+                                                                                PAD
+                                                                                                        1.60 SQ
+                                                                                                        1.45
+                                                                   9                         4
+                                                     0.50               8                5
+                                                                                                      0.25 MIN
+                               TOP VIEW              0.40                BOTTOM VIEW
+                                                     0.30
+                   0.80                                                             FOR PROPER CONNECTION OF
+                   0.75                                                             THE EXPOSED PAD, REFER TO
+                                                      0.05 MAX                      THE PIN CONFIGURATION AND
+                   0.70                                                             FUNCTION DESCRIPTIONS
+                                                      0.02 NOM
+                                                                                    SECTION OF THIS DATA SHEET.
+                                                         COPLANARITY
+              SEATING                                        0.08
+               PLANE                             0.20 REF
+                                                                                                                  08-16-2010-E
+                                  COMPLIANT TO JEDEC STANDARDS MO-220-WEED-6.
+                           Figure 29. 16-Lead Lead Frame Chip Scale Package [LFCSP_WQ]
+                                         3 x 3 mm Body, Very Very Thin Quad
+                                                     (CP-16-22)
+                                           Dimensions shown in millimeters
+                                               Rev. C | Page 37 of 40
+
+
+ADP5585                                                                                                   Data Sheet
+ORDERING GUIDE
+Model 1                    Temperature Range Package Description                              Package Option  Branding
+ADP5585ACBZ-00-R7          −40°C to +85°C    16-Ball Wafer Level Chip Scale Package [WLCSP]   CB-16-10
+ADP5585ACBZ-01-R7          −40°C to +85°C    16-Ball Wafer Level Chip Scale Package [WLCSP]   CB-16-10
+ADP5585ACBZ-02-R7          −40°C to +85°C    16-Ball Wafer Level Chip Scale Package [WLCSP]   CB-16-10
+ADP5585ACBZ-04-R7          −40°C to +85°C    16-Ball Wafer Level Chip Scale Package [WLCSP]   CB-16-10
+ADP5585ACPZ-00-R7          −40°C to +85°C    16-Lead Lead Frame Chip Scale Package [LFCSP_WQ] CP-16-22        LJM
+ADP5585ACPZ-01-R7          −40°C to +85°C    16-Lead Lead Frame Chip Scale Package [LFCSP_WQ] CP-16-22        LJN
+ADP5585ACPZ-03-R7          −40°C to +85°C    16-Lead Lead Frame Chip Scale Package [LFCSP_WQ] CP-16-22        LJP
+ADP5585CP-EVALZ                              LFCSP Evaluation Board                           CP-16-22
+1
+  Z = RoHS Compliant Part.
+                                                        Rev. C | Page 38 of 40
+
+
+Data Sheet                        ADP5585
+NOTES
+           Rev. C | Page 39 of 40
+
+
+ADP5585                                                                                                          Data Sheet
+NOTES
+I2C refers to a communications protocol originally developed by Philips Semiconductors (now NXP Semiconductors).
+©2011–2013 Analog Devices, Inc. All rights reserved. Trademarks and
+registered trademarks are the property of their respective owners.
+                                                   D09841-0-1/13(C)
+                                                                    Rev. C | Page 40 of 40
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Analog Devices Inc.:
+ ADP5585ACBZ-00-R7 ADP5585ACBZ-01-R7 ADP5585ACBZ-02-R7 ADP5585ACPZ-00-R7 ADP5585ACPZ-01-R7
+ ADP5585ACPZ-03-R7 ADP5585CP-EVALZ ADP5585ACBZ-04-R7

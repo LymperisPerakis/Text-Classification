@@ -1,0 +1,1316 @@
+                                                                   MCP2200
+           USB 2.0 to UART Protocol Converter with GPIO
+Features                                             Package Types
+Universal Serial Bus (USB)                           The device will be offered in the following packages:
+• Supports full-speed USB (12 Mb/s)                  • 20-lead QFN (5 x 5[mm])
+• Implements USB protocol composite device CDC       • 20-lead SOIC
+  device for communications, configuration and I/O   • 20-lead SSOP
+  control
+• 128 byte buffer to handle data throughput at any                          MCP2200
+  UART baud rate:                                                          SOIC, SSOP
+  - 64 byte transmit
+  - 64 byte receive
+                                                                 VDD 1                               20 VSS
+• Fully configurable VID and PID assignments, and
+                                                               OSC1 2                                19 D+
+  string descriptors                                           OSC2 3                                18 D-
+                                                               RST 4                                 17 VUSB
+• Bus powered or self-powered
+• USB 2.0 Compliant (certification #: TBD)               GP7/TxLED 5                                 16 GP0/SSPND
+                                                         GP6/RxLED 6                                 15 GP1/USBCFG
+USB Driver and Software Support
+                                                               GP5 7                                14 GP2
+• Uses standard Microsoft® Windows® drivers for                GP4 8                                13 CTS
+  Virtual Com Port (VCP):
+                                                                GP3 9                               12 RX
+  - Windows XP(SP2 and later)/Vista/7
+                                                                 TX 10                               11 RTS
+• Configuration utility for initial configuration
+Universal Asynchronous Receiver/Transmitter
+(UART)                                                                          MCP2200
+• Responds to SET LINE CODING commands to                                       5x5 QFN*
+  dynamically change baud rates
+• Supports baud rates: 300-1000k                                         OSC2   OSC1   VDD   VSS   D+
+• Hardware flow control                                                  20 19 18 17 16
+• UART signal polarity option                                  RST 1                                     15 D-
+General Purpose Input/Output (GPIO) Pins                GP7/TxLED 2                                      14 VUSB
+                                                                                       EP
+• Eight (8) general purpose I/O pins                    GP6/RxLED 3                    21                13 GP0/SSPND
+EEPROM                                                         GP5 4                                     12 GP1/USBCFG
+• 256 bytes of user EEPROM                                     GP4 5                                     11 GP2
+                                                                          6      7     8     9 10
+Other
+                                                                         GP3
+                                                                                TX
+• USB activity LED outputs (TxLED and RxLED)                                           RTS   RX
+                                                                                                   CTS
+• SSPND output pin                                      * Includes Exposed Thermal Pad (EP); see Table 1-1.
+• USBCFG output pin (indicates if requested
+  current is allowed)
+• Operating voltage: 3.0-5.5V
+• Oscillator input: 12 MHz
+• ESD protection > 4 kV HBM
+• Industrial (I) Operating Temperature: -40°C to
+  +85°C
+ 2010 Microchip Technology Inc.                                                                           DS22228A-page 1
+
+
+MCP2200
+Block Diagram
+                                               GP5 GP3 GP1         TXLED/ RXLED/
+                                                   GP4 GP2 GP0 GP7          GP6
+                Configuration
+                               256 Byte                GPIO          USB LEDs
+                 and Control
+                               EEPROM
+                  Registers
+          TX
+          RX
+                 UART                                                                 D+
+                Controller      Control           USB Protocol       USB
+        CTS                                         Controller    Transceiver
+                                                                                       D-
+        RTS
+                  Baud                                                               VUSB
+                Generator
+                                        State USB
+                                        Clock Clock
+                                            Osc                      3.3V
+                           VSS                              Reset
+                                                                     LDO
+                           VSS          OSC1 OSC2           RST      VDD
+DS22228A-page 2                                                       2010 Microchip Technology Inc.
+
+
+                                                                                              MCP2200
+1.0       FUNCTIONAL DESCRIPTION                                The MCP2200 has eight general purpose input/output
+                                                                pins. Four pins have alternate functions to indicate
+The MCP2200 is a USB-to-UART serial converter                   USB and communication status. See Table 1-1 and
+which enables USB connectivity in applications that             Section 1.6 “GPIO Module” for details about the pin
+have a UART interface. The device reduces external              functions.
+components by integrating the USB termination
+resistors. The MCP2200 also has 256 bytes of
+integrated user EEPROM.
+TABLE 1-1:        PINOUT DESCRIPTION
+       Pin       SSOP,           Pin
+                        QFN                         Standard Function                      Alternate Function
+     Name        SOIC          Type
+ GP0/SSPND         16    13      I/O General purpose I/O                            USB suspend status pin (refer to
+                                                                                    Section 1.6.1.1 “SSPND Pin
+                                                                                    Function”)
+ GP1/USBCFG        15    12      I/O General purpose I/O                            USB configuration status pin
+                                                                                    (refer to Section 1.6.1.2 “USB-
+                                                                                    CFG Pin Function”)
+ GP2               14    11      I/O General purpose I/O
+ GP3                9     6      I/O General purpose I/O
+ GP4                8     5      I/O General purpose I/O
+ GP5                7     4      I/O General purpose I/O
+ GP6/RxLED         6      3      I/O General purpose I/O                            USB receive activity LED output
+                                                                                    (refer to Section 1.6.1.3
+                                                                                    “RxLED Pin Function (IN Mes-
+                                                                                    sage)”)
+ GP7/TxLED          5     2      I/O General purpose I/O                            USB transmit activity LED output
+                                                                                    (refer to Section 1.6.1.4
+                                                                                    “TxLED Pin Function (OUT
+                                                                                    Message)”)
+ RST                4     1        I Reset input must be externally biased
+ CTS               13    10        I Hardware flow control “Clear to Send” input
+                                     signal
+ RX                12     9        I USART RX input
+ RTS               11     8       O  Hardware flow control “Request to Send” output
+                                     signal
+ TX                10     7       O USART TX output
+ VDD                1    18       P Power
+ VSS               20    17       P Ground
+ OSC1               2    19        I Oscillator input
+ OSC2               3    20       O Oscillator output
+ D+                19    16      I/O USB D+
+ D-                18    15      I/O USB D-
+ VUSB              17    14       P USB power pin (internally connected to 3.3V).
+                                     Should be locally bypassed with a high quality
+                                     ceramic capacitor.
+ EP                —     21       — Exposed Thermal Pad (EP). Do not electrically
+                                     connect, or connect to VSS.
+ 2010 Microchip Technology Inc.                                                                     DS22228A-page 3
+
+
+MCP2200
+1.1       Supported Operating Systems                     1.3       UART Interface
+Microsoft Windows XP(SP2 and               later)/Vista/7
+                                                          The MCP2200 UART interface consists of the TX and
+operating systems are supported.
+                                                          RX data signals and the RTS/CTS flow control pins.
+1.1.1        ENUMERATION                                  The UART is configurable for several baud rates. The
+The MCP2200 will enumerate as a USB device after          available data formats and baud rates are listed in
+POR. The device enumerates as both a Human                Table 1-3.
+Interface Device (HID) for I/O control, and a VCP.
+                                                          1.3.1         INITIAL CONFIGURATION
+1.1.1.1        HID                                        The default UART configuration is 19200, 8, N, 1. The
+The MCP2200 enumerates as a HID so the device can         default start up baud rate can be changed using the
+be configured and the I/O can be controlled. A DLL is     Microchip supplied configuration PC tool. The primary
+supplied by Microchip that allows I/O control using a     baud rates are shown in Table 1-3.
+custom interface.                                         Alternatively, a custom configuration tool can be
+                                                          created using the Microchip supplied DLL to set the
+1.1.1.2        VCP                                        baud rate, as well as other parameters. See
+The VCP enumeration implements the USB-to-UART            Section 2.0 “Configuration” for details.
+data translation.
+                                                          1.3.2         GET/SET LINE CODING
+1.2       Control Module                                  The GET_LINE_CODING and SET_LINE_CODING
+                                                          commands are used to read and set the UART
+The control module is the heart of the MCP2200. All       parameters while in operation. For example,
+other modules are tied together and controlled via the    Hyperterminal sends the SET_LINE_COMMAND when
+control module. The control module manages the data       connecting to the port. The MCP2200 responds by
+transfers between the USB and the UART, as well as        setting the baud rate only. The other parameters (Data
+command requests generated by the USB host                Bits, Parity, Stop Bits) remain unchanged.
+controller, and commands for controlling the function of
+the UART and I/O.                                         1.3.2.1         Rounding Errors
+                                                          The primary baud rate setting (with the rounding errors)
+1.2.1        SERIAL INTERFACE
+                                                          are shown in Table 1-3. If baud rates other than the
+The control module interfaces to the UART and USB         ones shown in the table are used, the error percentage
+modules.                                                  can be calculated using Equation 1-1 to find the actual
+                                                          baud rate.
+1.2.2        INTERFACING TO THE DEVICE
+                                                          TABLE 1-2:          UART CONFIGURATIONS
+The MCP2200 can be accessed for reading and writing
+via USB host commands. The device cannot be                        Parameter                  Configuration
+accessed and controlled via the UART interface.            Primary Baud Rates            See Table 1-3
+                                                           Data Bits                     8
+                                                           Parity                        N
+                                                           Stop Bits                     1
+                                                          1.3.3         CUSTOM BAUD RATES
+                                                          Custom baud rates are configured by sending the
+                                                          SET_LINE_CODING USB command, or by using the
+                                                          DLL. See Section 2.0 “Configuration” for more
+                                                          information.
+DS22228A-page 4                                                                       2010 Microchip Technology Inc.
+
+
+                                                                                                            MCP2200
+1.3.4         HARDWARE FLOW CONTROL                                          TABLE 1-3:          UART PRIMARY BAUD
+Hardware flow control uses the RTS and CTS pins as                                               RATES
+a handshake between two devices. The RTS pin of                                Desired Rate       Actual rate         % Error
+one device is typically connected to the CTS of the
+other device.                                                                 300                      300             0.00%
+                                                                              1200                    1200             0.00%
+RTS is an active low output which notifies the other
+device when it can receive data by driving the pin low.                       2400                    2400             0.00%
+The MCP2200 trip point for de-asserting RTS (high) is                         4800                    4800             0.00%
+63 characters. This is one character short of “buffer                         9600                    9600             0.00%
+full”.
+                                                                              19200                  19200             0.00%
+CTS is an active low input which is used to notify the
+                                                                              38400                  38339             0.16%
+MCP2200 when it can send data. The MCP2200 will
+check CTS just before loading and sending UART data.                          57600                  57692             0.16%
+If the pin is asserted during a transfer, the transfer will                   115200                115385             0.16%
+continue. Refer to Figure 1-1.                                                230400                230769             0.16%
+1.3.4.1         Flow Control Disabled                                         460800                461538             0.16%
+The buffer pointer does not increment (or reset to                            921600                923077             0.16%
+zero) if the buffer is full. Therefore, if hardware flow
+control is not enabled and an overflow occurs (i.e., 65                      1.4       USB Protocol Controller
+unprocessed characters received), the new data over-
+                                                                             The USB controller in the MCP2200 is full-speed USB
+writes the last position in the buffer.
+                                                                             2.0 compliant.
+FIGURE 1-1:                 RTS/CTS CONNECTIONS                              • Composite device (CDC + HID):
+                            EXAMPLE                                             - CDC: USB-to-UART communications
+                                                                                - HID: I/O control, EEPROM access and initial
+  I am ready                                                   I am ready
+                                                                                  configuration
+  to receive                                                   to receive
+                                                                             • 128 byte buffer to handle data throughput at any
+                RTS                                       RTS
+                                                                                UART baud rate:
+                                                                                - 64 byte transmit
+  I’ll transmit                                                I’ll transmit
+                                                                                - 64 byte receive
+  if okay                                                      if okay
+                CTS                                       CTS                • Fully configurable VID and PID assignments, and
+                                                                                descriptors (stored on-chip)
+                MCU                                      MCP2200
+                                                                             • Bus powered or self-powered
+EQUATION 1-1:               SOLVING FOR ACTUAL                               1.4.1       DESCRIPTORS
+                            BAUD RATE                                        The descriptors are stored in the MCP2200 during
+                                                                             configuration using the supplied PC interface.
+                                              12MHz
+                 ActualRate = ------------------
+                                                int  x                     1.4.2       SUSPEND AND RESUME
+         Where:
+                              12MHz                                          The USB Suspend and Resume signals are supported
+                  x = -----------------------------------
+                       DesiredBaud                                           for power management of the MCP2200. The device
+                                                                             will enter Suspend mode when suspend signaling is
+                                                                             detected on the bus.
+                                                                             The MCP2200 exits the Suspend mode when any of
+                                                                             the following occur:
+                                                                             1.   Resume signaling is detected or generated
+                                                                             2.   A USB Reset signal is detected
+                                                                             3.   A device Reset occurs
+ 2010 Microchip Technology Inc.                                                                                   DS22228A-page 5
+
+
+MCP2200
+1.5       USB Transceiver                                1.6       GPIO Module
+The MCP2200 has a built-in, USB 2.0, full-speed          The GPIO Module is a standard 8-bit I/O port.
+transceiver internally connected to the USB module.
+                                                         1.6.1        CONFIGURABLE PIN FUNCTIONS
+The USB transceiver obtains power from the VUSB pin,
+which is internally connected to the 3.3V regulator. The The pins can be configured as:
+best electrical signal quality is obtained when VUSB is  • GPIO – Individually configurable general purpose
+locally bypassed with a high quality ceramic capacitor.     input or output
+                                                         • SSPND – USB Suspend state
+1.5.1        INTERNAL PULL-UP RESISTORS
+                                                         • USBCFG – Indicates USB configuration status
+The MCP2200 devices have built-in pull-up resistors      • RxLED – Indicates USB receive traffic
+designed to meet the requirements for full-speed USB.
+                                                         • TxLED – Indicates USB transmit traffic
+1.5.1.1        Bus Power Only
+                                                         1.6.1.1        SSPND Pin Function
+In Bus Power Only mode, all power for the application
+                                                         The SSPND pin (if enabled) reflects the USB state
+is drawn from the USB (Figure 1-2). This is effectively
+                                                         (Suspend/Resume). The pin is active ‘low’ when the
+the simplest power method for the device.
+                                                         Suspend state has been issued by the USB host.
+In order to meet the inrush current requirements of the  Likewise, the pin drives ‘high’ after the Resume state is
+USB 2.0 specifications, the total effective capacitance  achieved.
+appearing across VBUS and ground must be no more
+                                                         This pin allows the application to go into Low Power
+than 10 µF. If not, some kind of inrush limiting is
+                                                         mode when USB communication is suspended, and
+required. For more details, see Section 7.2.4 of the
+                                                         switches to a full active state when USB activity is
+“Universal Serial Bus Specification”.
+                                                         resumed.
+According to the USB 2.0 specification, all USB devices
+must also support a Low-Power Suspend mode. In the       1.6.1.2        USBCFG Pin Function
+USB Suspend mode, devices must consume no more
+                                                         The USBCFG pin (if enabled) starts out ‘low’ during
+than 500 µA (or 2.5 mA for high powered devices that
+                                                         power-up or after Reset, and goes ‘high’ after the
+are remote wake-up capable) from the 5V VBUS line of
+                                                         device successfully configures to the USB. The pin will
+the USB cable.
+                                                         go ‘low’ when in Suspend mode and ‘high’ when the
+The host signals the USB device to enter Suspend         USB resumes.
+mode by stopping all USB traffic to that device for more
+than 3 ms.                                               1.6.1.3        RxLED Pin Function (IN Message)
+During USB Suspend mode, the D+ or D- pull-up            The ‘Rx’ in the pin name is in respect to the USB host.
+resistor must remain active, which will consume some     The RxLED pin is an indicator for USB ‘IN’ messages.
+of the allowed suspend current budget (500 µA/           This pin will either pulse low for a period of time
+2.5 mA).                                                 (configurable for ~100 ms or ~200 ms), or toggle to the
+                                                         opposite state for every message received
+FIGURE 1-2:             BUS POWER ONLY                   (IN message) by the USB host. This allows the
+                                                         application to count messages or provide a visual
+       VBUS                                VDD
+                                                         indication of USB traffic.
+                                                         1.6.1.4        TxLED Pin Function (OUT Message)
+                                           VUSB
+                                                         The ‘Tx’ in the pin name is in respect to the USB host.
+                                           VSS           The TxLED pin is an indicator for USB ‘OUT’
+                                                         messages.
+                                                         This pin will either pulse low for a period of time
+                                                         (configurable for ~100 ms or ~200 ms), or toggle to the
+                                                         opposite state for every message transmitted (OUT
+                                                         message) by the USB host. This allows the application
+                                                         to count messages or provide a visual indication of
+                                                         USB traffic.
+DS22228A-page 6                                                                     2010 Microchip Technology Inc.
+
+
+                                                                                         MCP2200
+1.7       EEPROM Module                                   1.9      Oscillator
+The EEPROM module is a 256 byte array of nonvolatile      The input clock must be 12 MHz to provide the proper
+memory. The memory locations are accessed for read/       frequency for the USB module.
+write operations via USB host commands. Refer to          USB full-speed is nominally 12 Mb/s. The clock input
+Section 2.0 “Configuration” for details on accessing      accuracy is ±0.25% (2,500 ppm maximum).
+the EEPROM.
+The host should wait for the write cycle to complete and  FIGURE 1-3:            QUARTZ CRYSTAL
+then verify the write by reading the byte(s).                                    OPERATION
+1.8       RESET/POR                                                                            MCP2200
+                                                                                           OSC1
+1.8.1        RESET PIN
+The RST pin provides a method for triggering an
+external Reset of the device. A Reset is generated by                                         RF(2)
+holding the pin low. These devices have a noise filter in
+the reset path which detects and ignores small pulses.
+                                                                                   R (1)   OSC2
+1.8.2        POR                                                   Quartz Crystal S
+A Power-on Reset pulse is generated on-chip                            12 MHz
+whenever VDD rises above a certain threshold. This            Note 1: A series resistor (RS) may be required
+allows the device to start in the initialized state when               for quartz crystals with high drive level.
+VDD is adequate for operation.
+                                                                   2: The value of RF is typically between
+To take advantage of the POR circuitry, tie the RST pin                2 M to 10 M.
+through a resistor (1 kOhm to 10 kOhm) to VDD. This
+will eliminate external RC components usually needed
+to create a Power-on Reset delay.                         FIGURE 1-4:            CERAMIC RESONATOR
+When the device starts normal operation (i.e., exits the                         OPERATION
+Reset condition), device operating parameters
+(voltage, frequency, temperature, etc.) must be met to               Example: muRata
+                                                                    CSTCE12M0G15L
+ensure operation. If these conditions are not achieved,
+the device must be held in Reset until the operating                                           MCP2200
+conditions are met.                                                                           OSC1
+                                                                                              OSC2
+                                                                         Resonator
+                                                                          12 MHz
+ 2010 Microchip Technology Inc.                                                                 DS22228A-page 7
+
+
+MCP2200
+2.0      CONFIGURATION                                           2.1       Configuration Utility
+The MCP2200 is configured by writing special                     A configuration utility is provided by Microchip to allow
+commands using the HID interface. Configuration can              the user to configure the MCP2200 to custom defaults.
+be achieved using the configuration utility provided by          The Configuration Utility (Figure 2-1) connects to the
+Microchip. Alternatively, a custom utility can be                device’s HID interface where all of the configurable
+developed by using the DLL available on the MCP2200              features can be set.
+product page.
+                                                                 2.2       Serial String
+                                                                 The MCP2200 is supplied from the factory with a
+                                                                 serialized USB serial string.
+TABLE 2-1:        CONFIGURATION DESCRIPTIONS
+        Configuration Name                                               Description
+ Vendor ID (0x04D8)                 The USB vendor identification assigned to Microchip by the USB consortium.
+ Product ID (0x00DF)                Device ID assigned by Microchip. The device can be used “as-is”, or Microchip
+                                    can assign a custom PID by request.
+ Baud Rate                          Sets the UART baud rate using a list of primary baud rates. See the UART
+                                    section for details on setting non-primary baud rates.
+ IO Config                          Individually configures the I/O to inputs or outputs.
+ IO Default                         Individually configures the output default state for pins configured as outputs.
+ Tx/Rx LEDs                         Enables/disables the GP6 and GP7 pins to function as USB traffic indicators.
+                                    Pins are active low when configured as traffic indicators.
+ Hardware Flow Control              Enables/disables CTS and RTS flow control.
+ USBCFG Pin                         Enables/disables the GP1 pin as a USB configuration status indicator.
+ Suspend Pin                        Enables/disables the GP0 pin as a USB suspend status pin.
+ Invert Sense                       Enables/disables the UART lines states:
+                                       - Normal – Tx/Rx idle high; CTS/RTS active low
+                                       - Inverted – Tx/Rx idle low; CTS/RTS active high
+ Manufacturer String                USB manufacturer string.
+ Product String                     USB product string.
+DS22228A-page 8                                                                              2010 Microchip Technology Inc.
+
+
+                                             MCP2200
+FIGURE 2-1:            CONFIGURATION UTILITY
+ 2010 Microchip Technology Inc.               DS22228A-page 9
+
+
+MCP2200
+2.3      Simple Configuration and I/O DLL            While ConfigureMCP2200 configures the device
+                                                     with one call, it may also be configured one
+A DLL is provided by Microchip to help the user      parameter at a time:
+develop a custom configurator. See the documentation bool SimpleIOClass::fnRxLED (unsigned int
+on the MCP2200 product page for details on           mode)
+associating the DLL with a Visual C++ project.       bool SimpleIOClass::fnTxLED (unsigned int
+                                                     mode)
+2.3.1       SIMPLE I/O DLL CALLS                     bool SimpleIOClass::fnHardwareFlowControl
+                                                     (unsigned int onOff)
+The DLL provides the following functions to allow    bool SimpleIOClass::fnUSBCFG (unsigned int
+configuration of the device and control of the I/O.  onOff)
+                                                     bool SimpleIOClass::fnSuspend (unsigned int
+2.3.1.1       Initialization                         onOff)
+                                                     bool SimpleIOClass::fnSetBaudRate (unsigned
+void InitMCP2200(VID, PID)
+                                                     long BaudRateParam)
+bool IsConnected()
+                                                     bool SimpleIOClass::ConfigureIO (unsigned
+                                                     char IOMap)
+2.3.1.2       Configuration (only needs to be set
+              once; stored in NVM)                   Constants:
+bool ConfigureIOPins(mask)                           const unsigned   int OFF = 0;
+bool fnRxLED (On/Off, Toggle/Blink, 100/             const unsigned   int ON = 1;
+200mS)                                               const unsigned   int TOGGLE = 3;
+bool fnTxLED (On/Off, Toggle/Blink, 100/             const unsigned   int BLINKSLOW = 4;
+200mS)                                               const unsigned   int BLINKFAST = 5;
+bool fnHardwareFlowControl (On/Off)
+bool fnUSBcfg(on/off)                                2.3.1.5     InitMCP2200
+bool fnSuspend (on/off)                              SimpleIOClass::InitMCP2200 (unsigned int
+bool SetBaudRate (baudrate)                          VendorID, unsigned int ProductID)
+bool ConfigureAll (TRISmask, RxLED, TxLED,
+RxTGL, TxTGL, LEDX, FLOW, USBCFG, SSPND,             Configures the Simple IO class for a specific
+BaudRate)                                            Vendor and product ID.
+2.3.1.3       I/O Control                            Parameters:
+bool  ClearPin(pinnumber)                            Vendor ID - Assigned by USB IF (www.usb.org)
+bool  ReadPin(pinnumber)                                 Product ID - Assigned by the Vendor ID
+bool  SetPort (portValue)                            Holder
+bool  ReadPort(*portValue)
+bool  WriteEEPROM (Address, Data)                    Returns:
+bool  ReadEEPROM (Address)                           none
+2.3.1.4       Summary                                  Example:
+                                                       InitMCP2200 (0x04D8, 0x00DF);
+Summary:
+SimpleIOClass::InitMCP2200 (unsigned int             2.3.1.6     ConfigureMCP2200
+VendorID, unsigned int ProductID)
+bool SimpleIOClass::ConfigureMCP2200                 bool SimpleIOClass::ConfigureMCP2200
+(unsigned char IOMap,                                (unsigned char IOMap,
+unsigned long BaudRate,                              unsigned long BaudRate,
+unsigned int RxLED,                                  unsigned int RxLED,
+unsigned int TxLED,                                  unsigned int TxLED,
+bool              Hardware Flow Control,             bool            Hardware Flow Control,
+bool              USBCFG pin function,               bool            USBCFG pin function,
+bool              Suspend pin function)              bool            Suspend pin function)
+bool SimpleIOClass::SetPin(unsigned int pin)
+bool SimpleIOClass::ClearPin(unsigned int            Configures the device's default baudrate,
+pin)                                                 GPIO configuration and pin functions. Other
+bool SimpleIOClass::ReadPin(unsigned int pin,        functions set each parameter one at a time.
+unsigned int *returnvalue)                           This configures the part in one call.
+bool SimpleIOClass::WritePort(unsigned int
+value)
+bool SimpleIOClass::ReadPort(unsigned int            Precondition:
+*returnvalue)                                        The Vendor and Product ID must have been
+                                                     specified by SimpleIOInit.
+DS22228A-page 10                                                            2010 Microchip Technology Inc.
+
+
+                                                                       MCP2200
+Parameters:                                   2.3.1.8     fnTxLED
+IOMap - A byte which represents the input/
+output state of the pins (each bit may be     bool SimpleIOClass::fnTxLED (unsigned int
+either a 1 for input, and 0 for output.       mode)
+Baudrate -
+RxLED & TxLED - constant OFF, TOGGLE,         Summary:
+BLINKSLOW, BLINKFAST                          Configures the TxLED pin function.
+Boolean - HWFlow control, USBCFG, Suspend
+                                              Description:
+                                              Sets the
+Returns:
+Function returns true if the transmission is  Precondition:
+successful, returns False if there the        The Vendor and Product ID must have been
+                                              specified by SimpleIOInit.
+transmission fails.
+  Example:                                    Parameters:
+                                              mode (constant): OFF, TOGGLE, BLINKSLOW,
+  <code>
+                                              BLINKFAST
+    if (SimpleIOClass::ConfigureMCP2200(0x43,
+                                              Returns:
+9600, BLINKSLOW, BLINKFAST, false, false,
+                                              Function returns true if the transmission is
+false) == SUCCESS)
+                                              successful, returns False if there the
+        lblStatusBar->Text = "Success";
+                                              transmission fails.
+    else
+        lblStatusBar->Text = "Invalid command
+                                              Error code logged in LastError.
+"
+  </code>
+                                                Example:
+                                                <code>
+2.3.1.7      fnRxLED
+                                                  if (SimpleIOClass::fnTxLED(BLINKFAST) ==
+bool SimpleIOClass::fnRxLED (unsigned int     SUCCESS)
+mode)                                                 lblStatusBar->Text = "Success";
+                                                  else
+Summary:                                              lblStatusBar->Text = "Invalid command
+Configures the RxLED pin function.            " + SimpleIOClass::LastError;
+                                                </code>
+Description:
+Sets the                                      2.3.1.9     fnHardwareFlowControl
+                                              bool SimpleIOClass::fnHardwareFlowControl
+Precondition:
+                                              (unsigned int onOff)
+The Vendor and Product ID must have been
+specified by SimpleIOInit.
+                                              Summary:
+                                              Configures the device.
+Parameters:
+mode (constant): OFF, TOGGLE, BLINKSLOW,
+                                              Description:
+BLINKFAST
+                                              Sets the
+Returns:
+                                              Precondition:
+Function returns true if the transmission is
+                                              The Vendor and Product ID must have been
+successful, returns False if there the
+                                              specified by SimpleIOInit.
+transmission fails.
+                                              Parameters:
+Error code logged in LastError.
+                                              IOMap - An array of configuration parameters,
+                                              one byte per IO Line
+  Example:
+  <code>
+                                              Returns:
+                                              Function returns true if the transmission is
+    if (SimpleIOClass::fnRxLED(BLINKFAST) ==
+                                              successful, returns False if there the
+SUCCESS)
+                                              transmission fails.
+        lblStatusBar->Text = "Success";
+    else
+        lblStatusBar->Text = "Invalid command
+" + SimpleIOClass::LastError;
+  </code>
+ 2010 Microchip Technology Inc.                                             DS22228A-page 11
+
+
+MCP2200
+Example:                                       Example:
+   <code>                                        <code>
+if
+(SimpleIOClass::ConfigureMCP2200(OutputPacket      if
+Buffer) == SUCCESS)                            (SimpleIOClass::ConfigureMCP2200(OutputPacket
+lblStatusBar->Text = "Success";                Buffer) == SUCCESS)
+     else                                              lblStatusBar->Text = "Success";
+         lblStatusBar->Text = "Invalid command     else
+" + SimpleIOClass::LastError;                          lblStatusBar->Text = "Invalid command
+   </code>                                     " + SimpleIOClass::LastError;
+                                                 </code>
+2.3.1.10     fnUSBCFG
+                                               Remarks:
+bool SimpleIOClass::fnUSBCFG (unsigned int
+                                               Error code is returned in LastError
+onOff)
+Summary:
+                                               2.3.1.12    fnSetBaudRate
+Configures the USBCFG pin function.            bool SimpleIOClass::fnSetBaudRate (unsigned
+                                               long BaudRateParam)
+Precondition:
+The Vendor and Product ID must have been       Summary:
+specified by SimpleIOInit.                     Configures the device.
+Parameters:                                    Precondition:
+onOff (constant): ON or OFF.                       The Vendor and Product ID must have been
+                                               specified by SimpleIOInit.
+Returns:
+Function returns true if the transmission is   Parameters:
+successful, returns False if there the             IOMap - An array of configuration
+transmission fails.                            parameters, one byte per IO Line
+Example:                                       Returns:
+   <code>                                      Function returns true if the transmission is
+                                               successful, returns False if there the
+if                                             transmission fails.
+(SimpleIOClass::ConfigureMCP2200(OutputPacket
+Buffer) == SUCCESS)                            Example:
+         lblStatusBar->Text = "Success";         <code>
+     else
+         lblStatusBar->Text = "Invalid command     if
+" + SimpleIOClass::LastError;                  (SimpleIOClass::ConfigureMCP2200(OutputPacket
+   </code>                                     Buffer) == SUCCESS)
+                                                       lblStatusBar->Text = "Success";
+Remarks:                                           else
+Error code is returned in LastError                    lblStatusBar->Text = "Invalid command
+                                               " + SimpleIOClass::LastError;
+2.3.1.11     fnSuspend                           </code>
+bool SimpleIOClass::fnSuspend (unsigned int
+                                                 Remarks:
+onOff)
+                                                   Error code is returned in LastError
+Summary:
+Configures the SSPND function
+                                               2.3.1.13    ConfigureIO
+                                               bool SimpleIOClass::ConfigureIO (unsigned
+Precondition:                                  char IOMap)
+The Vendor and Product ID must have been
+specified by SimpleIOInit.                     Summary:
+                                               Configures the IO pins for Digital Input,
+Parameters:                                    Digital Output
+onOff (constant): ON or OFF.
+                                               Description:
+Returns:                                       IO Pins can be configured as Digital Input,
+Function returns true if the transmission is   Digital Output
+successful, returns False if there the
+transmission fails.
+DS22228A-page 12                                                     2010 Microchip Technology Inc.
+
+
+                                                                         MCP2200
+Precondition:                                  2.3.1.15     ClearPin
+The Vendor and Product ID must have been
+specified by SimpleIOInit.                     bool SimpleIOClass::ClearPin(unsigned int
+                                               pin)
+Parameters:
+IOMap - one byte, with each bit corresponding  Summary:
+to each GP pin. 0 for output, 1 for input.     Clears the specified pin.
+Returns:                                       Description:
+Function returns true if the transmission is   Sets the specified pin to zero.
+successful, returns False if there the
+transmission fails.                            Precondition:
+                                               Must have previously been configured as an
+                                               output via a ConfigureGPIO call.
+Example:
+  <code>
+                                               Parameters:
+                                               pin - The pin number to set (0-7)
+    if
+(SimpleIOClass::ConfigureGPIO(OutputPacketBuf
+fer) == SUCCESS)                               Returns:
+                                               Function returns true if the transmission is
+         lblStatusBar->Text = "Success";
+    else                                       successful, returns False if there the
+         lblStatusBar->Text = "Invalid command transmission fails.
+" + SimpleIOClass::LastError;
+  </code>                                      Example:
+                                                  <code>
+                                                    if (SimpleIOClass::ClearPin (2))
+2.3.1.14     SetPin
+                                                    {
+bool SimpleIOClass::SetPin(unsigned int pin)            lblStatusBar->Text = "Success";
+                                                    }
+Summary:                                            else
+Sets the specified pin.                                 lblStatusBar->Text = "Invalid command
+                                               " + SimpleIOClass::LastError;
+Description:                                      </code>
+Sets the specified pin to one.
+                                                  Remarks:
+Precondition:                                       none
+Must have previously been configured as an
+output via a ConfigureGPIO call.               2.3.1.16     ReadPin
+                                               bool SimpleIOClass::ReadPin(unsigned int pin,
+Parameters:
+                                               unsigned int *returnvalue)
+pin - The pin number to set (0-7)
+                                               Summary:
+Returns:
+                                                    Reads the specified pin.
+Function returns true if the transmission is
+successful, returns False if there the
+                                               Description:
+transmission fails.
+                                               Reads the specified pin and returns the value
+                                               in returnvalue. If the pin has been
+Example:
+                                               configured as Digital Input, the return value
+  <code>
+                                               will be either 0 or 1. If the pin has been
+    if (SimpleIOClass::SetPin (2))
+                                               configured as Analog Input, the pin will be
+    {
+                                               read by the ADC and return a 10 bit value,
+         lblStatusBar->Text = "Success";
+                                               right justified.
+    }
+    else
+                                               Precondition:
+         lblStatusBar->Text = "Invalid command
+                                               Must have previously been configured as an
+" + SimpleIOClass::LastError;
+                                               input via a ConfigureGPIO call.
+  </code>
+                                               Parameters:
+  Remarks:
+                                               pin - The pin number to set (0-7)
+    none
+                                               returnvalue - the value read on the pin (0 or
+                                               1)
+ 2010 Microchip Technology Inc.                                               DS22228A-page 13
+
+
+MCP2200
+Returns:                                       2.3.1.18    ReadPort
+    true if the pin was successfully read.
+                                               bool SimpleIOClass::ReadPort(unsigned int
+    false if the pin was not read (not
+                                               *returnvalue)
+configued as an input).
+                                               Summary:
+Example:
+                                                   Reads the GPIO port as digital input.
+  <code>
+    unsigned int rv;
+                                               Description:
+    if (SimpleIOClass::ReadGPIOn (0, &rv))
+                                               Reads the GPIO port and returns the value in
+    {
+                                               returnvalue. This provides a means to read
+         lblStatusBar->Text = "Success";
+                                               all pins at once instead of one-at-a-time.
+    }
+    else
+                                               Precondition:
+         lblStatusBar->Text = "Invalid command
+                                               Must have previously been configured as an
+" + SimpleIOClass::LastError;
+                                               input via a ConfigureGPIO call.
+  </code>
+                                               Parameters:
+2.3.1.17     WritePort
+                                               returnvalue - the value read on the port.
+bool SimpleIOClass::WritePort(unsigned int
+portValue)                                     Returns:
+                                                   Function returns true if the read is
+Summary:                                       successful
+Writes a value to the GPIO port.                   returns False if there the transmission
+                                               fails.
+Description:
+Writes the GPIO port. This provides a means    Example:
+to write all pins at once instead of one-at-     <code>
+a-time.                                        unsigned int rv;
+                                                   if (SimpleIOClass::ReadGPIOPort (&rv))
+Precondition:                                      {
+Must have previously been configured as an             lblStatusBar->Text = "Success";
+output via a ConfigureGPIO call.                   }
+                                                   else
+Parameters:                                            lblStatusBar->Text = "Invalid command
+portValue - Byte value to set on the port.     " + SimpleIOClass::LastError;
+                                                 </code>
+Returns:
+Function returns true if the transmission is   Remarks:
+successful                                         Pins configured for output returns the
+returns False if there the transmission        current state of the port.
+fails.                                             Pins configured as input read as zero.
+  Example:
+  <code>
+    if (SimpleIOClass::WritePort (0x5A))
+    {
+         lblStatusBar->Text = "Success";
+    }
+    else
+         lblStatusBar->Text = "Invalid command
+" + SimpleIOClass::LastError;
+  </code>
+Remarks:
+Pins configured for output returns the
+current state of the port.
+    Pins configured as input read as zero.
+DS22228A-page 14                                                    2010 Microchip Technology Inc.
+
+
+                                                                                                                                       MCP2200
+3.0       ELECTRICAL CHARACTERISTICS
+Absolute Maximum Ratings (†)
+Ambient temperature under bias......................................................................................................... -40°C to +85°C
+Storage temperature ........................................................................................................................ -65°C to +150°C
+Voltage on VDD with respect to VSS, PIC18F ..................................................................................... -0.3V to +6.0V
+Voltage on VDD with respect to VSS, PIC18LF ................................................................................... -0.3V to +4.0V
+Voltage on MCLR with respect to Vss ................................................................................................. -0.3V to +9.0V
+Voltage on VUSB pin with respect to VSS ............................................................................................ -0.3V to +4.0V
+Voltage on D+ and D- pins with respect to VSS ...................................................................... -0.3V to (VUSB + 0.3V)
+Voltage on all other pins with respect to VSS ........................................................................... -0.3V to (VDD + 0.3V)
+Total power dissipation(1) ............................................................................................................................... 800 mW
+Maximum current out of VSS pin ...................................................................................................................... 95 mA
+Maximum current into VDD pin ......................................................................................................................... 95 mA
+Clamp current, IK (VPIN < 0 or VPIN > VDD)20 mA
+Maximum output current sunk by any I/O pin.................................................................................................... 25 mA
+Maximum output current sourced by any I/O pin .............................................................................................. 25 mA
+Maximum current sunk by all ports ................................................................................................................... 90 mA
+Maximum current sourced by all ports ............................................................................................................. 90 mA
+Note 1:     Power dissipation is calculated as follows: PDIS = VDD x {IDD –  IOH} +  {(VDD – VOH) x IOH} + (VOl x IOL).
+       2:   VUSB must always be  VDD + 0.3V
+ † NOTICE: Stresses above those listed under “Absolute Maximum Ratings” may cause permanent damage to the
+ device. This is a stress rating only and functional operation of the device at those or any other conditions above those
+ indicated in the operation listings of this specification is not implied. Exposure above maximum rating conditions for
+ extended periods may affect device reliability.
+ 2010 Microchip Technology Inc.                                                                                                                 DS22228A-page 15
+
+
+MCP2200
+3.1     DC CHARACTERISTICS
+                                Operating Conditions (unless otherwise indicated):
+DC Characteristics
+                                3.0V VDD  5.5V at -40C  TA  +85C (I-Temp)
+ Param
+            Characteristic        Sym          Min         Typ     Max      Units           Conditions
+   No.
+  D001  Supply Voltage            VDD           3.0         —      5.5        V
+        Power-on Reset           VPOR                      1.6                V
+        Release Voltage
+        Power-on Reset                                     0.8                V
+        Rearm Voltage
+  D003  VDD Rise Rate to         SVDD          0.05         —       —       V/ms Design guidance only
+        Ensure Power-on                                                           Not tested
+        Reset
+  D004  Supply Current             IDD
+        VDD = 3.0V                              —           10      12       mA   FOSC = 12 MHz,
+        VDD = 5.0V                              —           13      15       mA   (330 nF on VUSB)
+  D005  Standby current           IDDS          —           9       —        µA
+        Input Low-Voltage
+  D031  Schmitt Trigger (GPIO)                  —           —    0.2 VDD          3.0V VDD  5.5V
+        TTL (CTS pin)              VIL          —           —      0.8        V   4.5V VDD  5.5V
+        Input High-Voltage
+  D041  Schmitt Trigger (GPIO)               0.8 VDD        —      VDD            3.0V VDD  5.5V
+        TTL (RTS pin)              VIH          2.0         —      VDD        V   4.5V VDD  5.5V
+        Input Leakage Current
+        GPIO, CTS                               —          ±50    ±100            VSS VPIN VDD, pin at Hi-Z
+  D060  RST                         IIL                    ±50    ±200       nA
+        OSC1                                               ±50    ±100
+        Output Low-Voltage
+  D080  GPIO                       VOL          —           —      0.6        V   IOL = 8.0 mA, VDD = 5.0V
+                                                —           —      0.6            IOL = 6.0 mA, VDD = 3.3V
+        Output High-Voltage
+  D090  GPIO                      VOH       VDD – 0.7       —       —         V   IOH = -3.5 mA, VDD = 5.0V
+                                            VDD – 0.7       —       —             IOH = -3.0 mA, VDD = 3.3V
+        Capacitive Loading Specs on Output Pins
+  D101  OSC2                     COSC2          —           —       15       pF   Note 1
+  D102  GPIO                       CIO          —           —       50       pF   Note 1
+Note 1:   This parameter is characterized, but not tested.
+DS22228A-page 16                                                                    2010 Microchip Technology Inc.
+
+
+                                                                                             MCP2200
+FIGURE 3-1:              POR AND POR REARM WITH SLOW RISING VDD
+                         VDD
+                        VPOR
+                      VPORR
+                         VSS
+                   NPOR(1)
+                                                            POR REARM
+                         VSS
+                                                     TVLOW(2)             TPOR(3)
+                         Note 1:  When NPOR is low, the device is held in Reset.
+                              2:  TPOR 1 s typical.
+                              3:  TVLOW 2.7 s typical.
+TABLE 3-1:         USB MODULE SPECIFICATIONS
+                                   Operating Conditions (unless otherwise indicated):
+DC Characteristics
+                                   3.0V VDD  5.5V at -40C  TA  +85C (I-Temp)
+ Param
+               Characteristic        Sym         Min         Typ      Max      Units            Conditions
+   No.
+D313      USB Voltage                VUSB        3.0          —       3.6        V    Voltage on VUSB pin must be in
+                                                                                      this range for proper USB
+                                                                                      operation
+D314      Input Leakage on Pin        IIL        —            —       ±1        μA    VSS VPIN VDD pin at
+                                                                                      high-impedance
+D315      Input Low Voltage         VILUSB       —            —       0.8        V    For VUSB range
+          for USB Buffer
+D316      Input High Voltage       VIHUSB        2.0          —        —         V    For VUSB range
+          for USB Buffer
+D318      Differential Input        VDIFS        —            —       0.2        V    The difference between D+
+          Sensitivity                                                                 and D- must exceed this value
+                                                                                      while VCM is met
+D319      Differential Common        VCM         0.8          —       2.5        V
+          Mode Range
+D320      Driver Output             ZOUT         28           —       44         
+          Impedance(1)
+D321      Voltage Output Low         VOL         0.0          —       0.3        V    1.5 kload connected to 3.6V
+D322      Voltage Output High        VOH         2.8          —       3.6        V    1.5 kload connected to
+                                                                                      ground
+Note 1:     The D+ and D- signal lines have been built-in impedance matching resistors. No external resistors,
+            capacitors or magnetic components are necessary on the D+/D- signal paths between the MCP2200 family
+            device and the USB cable.
+ 2010 Microchip Technology Inc.                                                                    DS22228A-page 17
+
+
+MCP2200
+TABLE 3-2:         THERMAL CONSIDERATIONS
+Standard Operating Conditions (unless otherwise stated)
+Operating temperature -40C  TA  +85C (I-Temp)
+Param
+             Sym                  Characteristic                Typ       Units                  Conditions
+  No.
+ TH01        θJA       Thermal Resistance Junction to           85.2      C/W    20-pin SOIC package
+                       Ambient                                 108.1      C/W    20-pin SSOP package
+                                                               TBD        C/W    20-pin QFN 5x5mm package
+ TH02        θJC       Thermal Resistance Junction to            24       C/W    20-pin SOIC package
+                       Case                                      24       C/W    20-pin SSOP package
+                                                                 24       C/W    20-pin QFN 6x6mm package
+ TH03       TJMAX      Maximum Junction Temperature             150        C
+ TH04         PD       Power Dissipation                         —         W      PD = PINTERNAL + PI/O
+ TH05    PINTERNAL Internal Power Dissipation                    —         W      PINTERNAL = IDD x VDD(1)
+ TH06        PI/O      I/O Power Dissipation                     —         W      PI/O =  (IOL * VOL) +  (IOH * (VDD –
+                                                                                  VOH))
+ TH07       PDER       Derated Power                             —         W      PDER = PDMAX (TJ - TA)/θJA(2,3)
+Legend:    TBD = To Be Determined.
+Note 1:    IDD is the current to run the chip alone without driving any load on the output pins.
+      2:   TA = Ambient Temperature.
+      3:   TJ = Junction Temperature.
+DS22228A-page 18                                                                          2010 Microchip Technology Inc.
+
+
+                                                                                            MCP2200
+3.2       AC Characteristics
+3.2.1       TIMING PARAMETER SYMBOLOGY
+The timing parameter symbols have been created in one of the following formats:
+ 1. TppS2ppS                                                 2. TppS
+ T
+     F          Frequency                                        T         Time
+     E          Error
+ Lowercase letters (pp) and their meanings:
+ pp
+     io         Input or Output pin                              osc       Oscillator
+     rx         Receive                                          tx        Transmit
+     bitclk     RX/TX BITCLK                                     RST       Reset
+     drt        Device Reset Timer
+ Uppercase letters and their meanings:
+ S
+     F          Fall                                             P         Period
+     H          High                                             R         Rise
+     I          Invalid (high-impedance)                         V         Valid
+     L          Low                                              Z         High-impedance
+3.2.2       TIMING CONDITIONS
+The operating temperature and voltage specified in
+Table 3-3 apply to all timing specifications unless other-
+wise noted. Figure 3-2 specifies the load conditions for
+the timing specifications.
+TABLE 3-3:         TEMPERATURE AND VOLTAGE SPECIFICATIONS - AC
+                                   Standard Operating Conditions (unless otherwise stated)
+                                   Operating temperature -40C  TA  +85C
+    AC CHARACTERISTICS
+                                   Operating voltage VDD range as described in DC spec Section 3.1 “DC Character-
+                                   istics”.
+FIGURE 3-2:              LOAD CONDITIONS
+                         FOR DEVICE TIMING
+                         SPECIFICATIONS
+        Pin
+                           50 pF (15 pF for OSC2)
+ 2010 Microchip Technology Inc.                                                                   DS22228A-page 19
+
+
+MCP2200
+3.2.3      TIMING DIAGRAMS AND
+           SPECIFICATIONS
+TABLE 3-4:       RESET, OSCILLATOR START-UP TIMER AND POWER-UP TIMER PARAMETERS
+Standard Operating Conditions (unless otherwise stated)
+Operating Temperature -40°C TA +85°C
+Param
+          Sym               Characteristic             Min     Typ†    Max   Units           Conditions
+  No.
+30        TRST   MCLR Pulse Width (low)                  2      —        —     μs
+31      TPWRT Power-up timer                            40      65      140    ms
+32        TOST   Oscillator startup time                —     1024       —    TOST
+        * These parameters are characterized but not tested.
+        † Data in “Typ” column is at 5V, 25°C unless otherwise stated. These parameters are for design guidance
+         only and are not tested.
+DS22228A-page 20                                                                     2010 Microchip Technology Inc.
+
+
+                                                                                              MCP2200
+4.0     PACKAGING INFORMATION
+4.1     Package Marking Information
+           20-Lead QFN                                                      Example
+                   XXXXX
+                  XXXXXX                                                        MCP2200
+                  XXXXXX                                                         I/MQ^^
+                                                                                      e3
+                 YWWNNN                                                         1004256
+           20-Lead SOIC                                                     Example:
+             XXXXXXXXXXXXXX                                                          MCP2200
+             XXXXXXXXXXXXXX                                                            I/SO ^^
+                                                                                             e3
+             XXXXXXXXXXXXXX                                                           1004256
+                      YYWWNNN
+           20-Lead SSOP                                                    Example:
+                 XXXXXXXXXXX                                                          MCP2200
+                 XXXXXXXXXXX                                                             I/SS^^
+                                                                                              e3
+                                                                                       1004256
+                     YYWWNNN
+                Legend: XX...X      Customer-specific information
+                           Y        Year code (last digit of calendar year)
+                           YY       Year code (last 2 digits of calendar year)
+                           WW       Week code (week of January 1 is week ‘01’)
+                           NNN      Alphanumeric traceability code
+                            e3      Pb-free JEDEC designator for Matte Tin (Sn)
+                           *        This package is Pb-free. The Pb-free JEDEC designator ( e3 )
+                                    can be found on the outer packaging for this package.
+                Note:   In the event the full Microchip part number cannot be marked on one line, it will
+                        be carried over to the next line, thus limiting the number of available
+                        characters for customer-specific information.
+ 2010 Microchip Technology Inc.                                                                      DS22228A-page 21
+
+
+MCP2200
+20-Lead Plastic Quad Flat, No Lead Package (MQ) – 5x5x0.9 mm Body [QFN]
+  Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+          http://www.microchip.com/packaging
+                                                                           Microchip Technology Drawing C04-120A
+DS22228A-page 22                                                                   2010 Microchip Technology Inc.
+
+
+                                                                                          MCP2200
+   Note:    For the most current package drawings, please see the Microchip Packaging Specification located at
+            http://www.microchip.com/packaging
+ 2010 Microchip Technology Inc.                                                                  DS22228A-page 23
+
+
+MCP2200
+                    !"#
+   $ %     3& '!&" & 4          # * !(   ! !   &   4             % & & # &
+             && 255***' '5        4 
+                                             D
+                                  N
+                                                                  E
+                                                             E1
+                   NOTE 1
+                                  1 2 3
+                                                           e
+                                      b
+                                                        α
+                                                                                            h
+                                                                                  h
+                                                                                                                   c
+                                                                       φ
+                       A                                      A2
+                                                                              L
+                       A1                                                           L1                β
+                                                               6&!               77..
+                                                    ' !7'&!      8           89            :
+                    8"') %!                              8                        
+                    &                                                             1,
+                    9     ;  &                                      <              <             =/
+                    # # 4      4 !!                        /             <               <
+                    & #%%+                                                     <             -
+                    9     >#&                             .                    -1,
+                    # # 4      >#&                     .                    /1,
+                    9     7  &                                                1,
+                    , '% ? & @                                  /             <             /
+                    3&7  &                                  7                    <             
+                    3& &                                   7                    .3
+                    3&                                     I         A             <              A
+                    7   #4 !!                                                  <             --
+                    7   #>#&                                  )       -             <             /
+                    # %&                           D          /A             <             /A
+                    # %&  1&&'                      E         /A             <             /A
+$  %
+  !" # $% &" '  ()"&'"!&)  & #*&&  & #  
+ + % &,  & !&
+- ' !! #.#&"# '#% ! &"!!#% ! &"!!! & $ #/''       !# 
+ ' !  #&    .0/
+       1,2 1 !' !  &  $ & " !**&"&&   !
+       .32  %   ' !("!" *&"&&   (%%' & " ! !
+                                                                                       * , 1
+DS22228A-page 24                                                                                   2010 Microchip Technology Inc.
+
+
+                                                                                          MCP2200
+   Note:    For the most current package drawings, please see the Microchip Packaging Specification located at
+            http://www.microchip.com/packaging
+ 2010 Microchip Technology Inc.                                                                  DS22228A-page 25
+
+
+MCP2200
+            &'(      )    #
+    $ %     3& '!&" & 4        # * !(    ! !     &   4           % & & # &
+              && 255***' '5      4 
+                                          D
+                              N
+                                                                    E
+                                                             E1
+          NOTE 1
+                              1 2
+                                                         e
+                                b
+                                                                     c
+                A                                            A2
+                                                                                                                     φ
+                  A1
+                                                                              L1                                        L
+                                                               6&!                77..
+                                                   ' !7'&!        8           89            :
+                     8"') %!                              8                         
+                     &                                                            =/1,
+                     9    ;  &                                       <               <           
+                     # # 4     4 !!                          =/           /          /
+                     & #%%                                           /             <             <
+                     9    >#&                              .                              
+                     # # 4     >#&                     .         /           /-          /=
+                     9    7  &                                      =                     /
+                     3&7  &                                 7         //           /          /
+                     3& &                                  7                     /.3
+                     7   #4 !!                                                   <           /
+                     3&                                    I          A             A             A
+                     7   #>#&                                 )                      <           -
+ $  %
+   !" # $% &" '  ()"&'"!&)  & #*&&  & #  
+  ' !! #.#&"# '#% ! &"!!#% ! &"!!! & $    #''   !# 
+ - ' !  #&    .0/
+        1,2 1 !' !  &  $ & " !**&"&&   !
+        .32  %   ' !("!" *&"&&   (%%' & " ! !
+                                                                                                 * , 1
+DS22228A-page 26                                                                                    2010 Microchip Technology Inc.
+
+
+                                                                                          MCP2200
+   Note:    For the most current package drawings, please see the Microchip Packaging Specification located at
+            http://www.microchip.com/packaging
+ 2010 Microchip Technology Inc.                                                                  DS22228A-page 27
+
+
+MCP2200
+NOTES:
+DS22228A-page 28  2010 Microchip Technology Inc.
+
+
+                                        MCP2200
+APPENDIX A:            REVISION HISTORY
+Revision A (March 2010)
+• Original Release of this Document.
+ 2010 Microchip Technology Inc.          DS22228A-page 29
+
+
+MCP2200
+NOTES:
+DS22228A-page 30  2010 Microchip Technology Inc.
+
+
+                                                                                                               MCP2200
+PRODUCT IDENTIFICATION SYSTEM
+To order or obtain information, e.g., on pricing or delivery, refer to the factory or the listed sales office.
+  PART NO.             X              /XX
+                                                                                        Examples:
+    Device      Temperature        Package                                              a)     MCP2200- I/MQ:  Industrial temperature,
+                    Range                                                                                      20LD QFN Package.
+                                                                                        b)     MCP2200T- I/MQ: Tape and Reel,
+                                                                                                               Industrial temperature,
+                                                                                                               20LD QFN Package.
+  Device               MCP2200:       USB-to-UART serial converter
+                       MCP2200T:      USB-to-UART serial converter (Tape and Reel)
+                                                                                        a)     MCP2200- I/SO:  Industrial temperature,
+                                                                                                               20LD SOIC Package.
+                                                                                        b)     MCP2200T- I/SO: Tape and Reel,
+  Temperature Range    I     =     -40C to   +85C    (Industrial)
+                                                                                                               Industrial temperature,
+                                                                                                               20LD SOIC Package.
+  Package              MQ    = Plastic Quad Flat, No Lead Package
+                                                                                        a)     MCP2200- I/SS:  Industrial temperature,
+                                5x5x0.9 mm Body (QFN), 20-Lead
+                                                                                                               20LD SSOP Package.
+                       SO    = Plastic Small Outline - Wide, 7.50 mm Body (SO),
+                                                                                        b)     MCP2200T- I/SS: Tape and Reel,
+                                20-Lead
+                                                                                                               Industrial temperature,
+                       SS    = Plastic Shrink Small Outline - 5.30 mm Body (SS)
+                                                                                                               20LD SSOP Package.
+                                20-Lead
+ 2010 Microchip Technology Inc.                                                                                         DS22228A-page 31
+
+
+MCP2200
+NOTES:
+DS22228A-page 32  2010 Microchip Technology Inc.
+
+
+ Note the following details of the code protection feature on Microchip devices:
+ •     Microchip products meet the specification contained in their particular Microchip Data Sheet.
+ •     Microchip believes that its family of products is one of the most secure families of its kind on the market today, when used in the
+       intended manner and under normal conditions.
+ •     There are dishonest and possibly illegal methods used to breach the code protection feature. All of these methods, to our
+       knowledge, require using the Microchip products in a manner outside the operating specifications contained in Microchip’s Data
+       Sheets. Most likely, the person doing so is engaged in theft of intellectual property.
+ •     Microchip is willing to work with the customer who is concerned about the integrity of their code.
+ •     Neither Microchip nor any other semiconductor manufacturer can guarantee the security of their code. Code protection does not
+       mean that we are guaranteeing the product as “unbreakable.”
+ Code protection is constantly evolving. We at Microchip are committed to continuously improving the code protection features of our
+ products. Attempts to break Microchip’s code protection feature may be a violation of the Digital Millennium Copyright Act. If such acts
+ allow unauthorized access to your software or other copyrighted work, you may have a right to sue for relief under that Act.
+Information contained in this publication regarding device                  Trademarks
+applications and the like is provided only for your convenience
+                                                                            The Microchip name and logo, the Microchip logo, dsPIC,
+and may be superseded by updates. It is your responsibility to
+                                                                            KEELOQ, KEELOQ logo, MPLAB, PIC, PICmicro, PICSTART,
+ensure that your application meets with your specifications.
+                                                                            PIC32 logo, rfPIC and UNI/O are registered trademarks of
+MICROCHIP MAKES NO REPRESENTATIONS OR
+                                                                            Microchip Technology Incorporated in the U.S.A. and other
+WARRANTIES OF ANY KIND WHETHER EXPRESS OR                                   countries.
+IMPLIED, WRITTEN OR ORAL, STATUTORY OR
+OTHERWISE, RELATED TO THE INFORMATION,                                      FilterLab, Hampshire, HI-TECH C, Linear Active Thermistor,
+INCLUDING BUT NOT LIMITED TO ITS CONDITION,                                 MXDEV, MXLAB, SEEVAL and The Embedded Control
+QUALITY, PERFORMANCE, MERCHANTABILITY OR                                    Solutions Company are registered trademarks of Microchip
+FITNESS FOR PURPOSE. Microchip disclaims all liability                      Technology Incorporated in the U.S.A.
+arising from this information and its use. Use of Microchip                 Analog-for-the-Digital Age, Application Maestro, CodeGuard,
+devices in life support and/or safety applications is entirely at           dsPICDEM, dsPICDEM.net, dsPICworks, dsSPEAK, ECAN,
+the buyer’s risk, and the buyer agrees to defend, indemnify and             ECONOMONITOR, FanSense, HI-TIDE, In-Circuit Serial
+hold harmless Microchip from any and all damages, claims,                   Programming, ICSP, Mindi, MiWi, MPASM, MPLAB Certified
+suits, or expenses resulting from such use. No licenses are                 logo, MPLIB, MPLINK, mTouch, Octopus, Omniscient Code
+conveyed, implicitly or otherwise, under any Microchip                      Generation, PICC, PICC-18, PICDEM, PICDEM.net, PICkit,
+intellectual property rights.                                               PICtail, REAL ICE, rfLAB, Select Mode, Total Endurance,
+                                                                            TSHARC, UniWinDriver, WiperLock and ZENA are
+                                                                            trademarks of Microchip Technology Incorporated in the
+                                                                            U.S.A. and other countries.
+                                                                            SQTP is a service mark of Microchip Technology Incorporated
+                                                                            in the U.S.A.
+                                                                            All other trademarks mentioned herein are property of their
+                                                                            respective companies.
+                                                                            © 2010, Microchip Technology Incorporated, Printed in the
+                                                                            U.S.A., All Rights Reserved.
+                                                                                 Printed on recycled paper.
+                                                                            ISBN: 978-1-60932-051-5
+                                                                            Microchip received ISO/TS-16949:2002 certification for its worldwide
+                                                                            headquarters, design and wafer fabrication facilities in Chandler and
+                                                                            Tempe, Arizona; Gresham, Oregon and design centers in California
+                                                                            and India. The Company’s quality system processes and procedures
+                                                                            are for its PIC® MCUs and dsPIC® DSCs, KEELOQ® code hopping
+                                                                            devices, Serial EEPROMs, microperipherals, nonvolatile memory and
+                                                                            analog products. In addition, Microchip’s quality system for the design
+                                                                            and manufacture of development systems is ISO 9001:2000 certified.
+ 2010 Microchip Technology Inc.                                                                                             DS22228A-page 33
+
+
+                             WORLDWIDE SALES AND SERVICE
+AMERICAS                      ASIA/PACIFIC               ASIA/PACIFIC                EUROPE
+Corporate Office              Asia Pacific Office        India - Bangalore           Austria - Wels
+2355 West Chandler Blvd.      Suites 3707-14, 37th Floor Tel: 91-80-3090-4444        Tel: 43-7242-2244-39
+Chandler, AZ 85224-6199       Tower 6, The Gateway       Fax: 91-80-3090-4123        Fax: 43-7242-2244-393
+Tel: 480-792-7200             Harbour City, Kowloon                                  Denmark - Copenhagen
+                                                         India - New Delhi
+Fax: 480-792-7277             Hong Kong                                              Tel: 45-4450-2828
+                                                         Tel: 91-11-4160-8631
+Technical Support:            Tel: 852-2401-1200                                     Fax: 45-4485-2829
+                                                         Fax: 91-11-4160-8632
+http://support.microchip.com  Fax: 852-2401-3431
+                                                         India - Pune                France - Paris
+Web Address:
+                              Australia - Sydney         Tel: 91-20-2566-1512        Tel: 33-1-69-53-63-20
+www.microchip.com
+                              Tel: 61-2-9868-6733        Fax: 91-20-2566-1513        Fax: 33-1-69-30-90-79
+Atlanta                       Fax: 61-2-9868-6755                                    Germany - Munich
+Duluth, GA                                               Japan - Yokohama
+                              China - Beijing                                        Tel: 49-89-627-144-0
+Tel: 678-957-9614                                        Tel: 81-45-471- 6166
+                              Tel: 86-10-8528-2100                                   Fax: 49-89-627-144-44
+Fax: 678-957-1455                                        Fax: 81-45-471-6122
+                              Fax: 86-10-8528-2104                                   Italy - Milan
+Boston                                                   Korea - Daegu
+                              China - Chengdu                                        Tel: 39-0331-742611
+Westborough, MA                                          Tel: 82-53-744-4301
+                              Tel: 86-28-8665-5511                                   Fax: 39-0331-466781
+Tel: 774-760-0087                                        Fax: 82-53-744-4302
+                              Fax: 86-28-8665-7889                                   Netherlands - Drunen
+Fax: 774-760-0088                                        Korea - Seoul
+                              China - Chongqing          Tel: 82-2-554-7200          Tel: 31-416-690399
+Chicago
+                              Tel: 86-23-8980-9588       Fax: 82-2-558-5932 or       Fax: 31-416-690340
+Itasca, IL
+Tel: 630-285-0071             Fax: 86-23-8980-9500       82-2-558-5934               Spain - Madrid
+Fax: 630-285-0075             China - Hong Kong SAR                                  Tel: 34-91-708-08-90
+                                                         Malaysia - Kuala Lumpur
+                              Tel: 852-2401-1200         Tel: 60-3-6201-9857         Fax: 34-91-708-08-91
+Cleveland
+Independence, OH              Fax: 852-2401-3431         Fax: 60-3-6201-9859         UK - Wokingham
+Tel: 216-447-0464             China - Nanjing                                        Tel: 44-118-921-5869
+                                                         Malaysia - Penang
+Fax: 216-447-0643             Tel: 86-25-8473-2460                                   Fax: 44-118-921-5820
+                                                         Tel: 60-4-227-8870
+Dallas                        Fax: 86-25-8473-2470       Fax: 60-4-227-4068
+Addison, TX                   China - Qingdao            Philippines - Manila
+Tel: 972-818-7423             Tel: 86-532-8502-7355      Tel: 63-2-634-9065
+Fax: 972-818-2924             Fax: 86-532-8502-7205      Fax: 63-2-634-9069
+Detroit                       China - Shanghai           Singapore
+Farmington Hills, MI          Tel: 86-21-5407-5533       Tel: 65-6334-8870
+Tel: 248-538-2250             Fax: 86-21-5407-5066       Fax: 65-6334-8850
+Fax: 248-538-2260
+                              China - Shenyang           Taiwan - Hsin Chu
+Kokomo                        Tel: 86-24-2334-2829       Tel: 886-3-6578-300
+Kokomo, IN                    Fax: 86-24-2334-2393       Fax: 886-3-6578-370
+Tel: 765-864-8360
+Fax: 765-864-8387             China - Shenzhen           Taiwan - Kaohsiung
+                              Tel: 86-755-8203-2660      Tel: 886-7-536-4818
+Los Angeles                   Fax: 86-755-8203-1760      Fax: 886-7-536-4803
+Mission Viejo, CA
+Tel: 949-462-9523             China - Wuhan              Taiwan - Taipei
+Fax: 949-462-9608             Tel: 86-27-5980-5300       Tel: 886-2-2500-6610
+                              Fax: 86-27-5980-5118       Fax: 886-2-2508-0102
+Santa Clara
+Santa Clara, CA               China - Xian               Thailand - Bangkok
+Tel: 408-961-6444             Tel: 86-29-8833-7252       Tel: 66-2-694-1351
+Fax: 408-961-6445             Fax: 86-29-8833-7256       Fax: 66-2-694-1350
+Toronto                       China - Xiamen
+Mississauga, Ontario,         Tel: 86-592-2388138
+Canada                        Fax: 86-592-2388130
+Tel: 905-673-0699             China - Zhuhai
+Fax: 905-673-6509             Tel: 86-756-3210040
+                              Fax: 86-756-3210049
+                                                                                                       01/05/10
+DS22228A-page 34                                                                  2010 Microchip Technology Inc.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ MCP2200-I/MQ MCP2200-I/SO MCP2200-I/SS MCP2200T-I/MQ MCP2200T-I/SO MCP2200T-I/SS

@@ -1,0 +1,1036 @@
+I/O Expander for I2C Bus
+with Interrupt, Low-Power,
+16-bit
+PCA9535E, PCA9535EC
+   The PCA9535E and PCA9535EC devices provide 16 bits of
+General Purpose parallel Input / Output (GPIO) expansion through the                              www.onsemi.com
+I2C−bus / SMBus.
+   The PCA9535E and PCA9535EC consist of two 8−bit                                                                      MARKING
+Configuration (Input or Output selection); Input, Output and Polarity                                                  DIAGRAMS
+Inversion (active−HIGH or active−LOW operation) registers. At
+power on, all I/Os default to inputs. Each I/O may be configured as
+                                                                                                                       PCA9535E(C)
+either input or output by writing to its corresponding I/O configuration                                               AWLYYWWG
+bit. The data for each Input or Output is kept in its corresponding Input             SOIC−24
+                                                                                     DW SUFFIX
+or Output register. The Polarity Inversion register may be used to                   CASE 751E
+invert the polarity if the read register. All registers can be read by the
+system master.
+   The PCA9535E, identical to the PCA9655E but with the internal
+I/O pull−up resistors removed, has greatly reduced power                                                                  PCA95
+consumption when the I/Os are held LOW.                                                                                  35E(C)G
+   The PCA9535EC is identical to the PCA9535E but with                                                                    ALYW
+                                                                                     TSSOP−24
+high−impedance open−drain outputs at all the I/O pins.                               DT SUFFIX
+   The PCA9535E and PCA9535EC provide an open−drain interrupt                        CASE 948H
+output which is activated when any input state differs from its
+corresponding input port register state. The interrupt output is used to
+indicate to the system master that an input state has changed. The                                                          PCA
+                                                                                          1
+power−on reset sets the registers to their default values and initializes                                                9535E(C)
+                                                                                      WQFN24
+the device state machine.                                                                                                 ALYWG
+                                                                                     MT SUFFIX
+   Three hardware pins (AD0, AD1, AD2) are used to configure the                    CASE 485BG
+                                                                                                                              G
+I2C−bus slave address of the device. The I2C−bus slave addresses of
+the PCA9535E and PCA9535EC are the same as the PCA9655E. This                             XXXX = Specific Device Code
+allows up to 64 of these devices in any combination to share the same                     A         = Assembly Location
+I2C−bus/SMBus.                                                                            WL, L = Wafer Lot
+                                                                                          YY, Y     = Year
+Features                                                                                  WW, W = Work Week
+                                                                                          G or G = Pb−Free Package
+•  VDD Operating Range: 1.65 V to 5.5 V
+                                                                                     (Note: Microdot may be in either location)
+•  SDA Sink Capability: 30 mA
+•  5.5 V Tolerant I/Os
+                                                                                            ORDERING INFORMATION
+•  Polarity Inversion Register                                                  See detailed ordering and shipping information in the package
+•  Active LOW Interrupt Output                                                  dimensions section on page 17 of this data sheet.
+•  Low Standby Current
+•  Noise Filter on SCL/SDA Inputs                                    • ESD Performance: 3000 V Human Body Model, 400 V
+•  No Glitch on Power−up                                                Machine Model
+•  Internal Power−on Reset                                           • NLV Prefix for Automotive and Other Applications
+•  64 Programmable Slave Addresses using Three                          Requiring Unique Site and Control Change
+   Address Pins                                                         Requirements; AEC−Q100 Qualified and PPAP
+                                                                        Capable
+•  16 I/O Pins which Default to 16 Inputs
+•  I2C SCL Clock Frequencies Supported:
+                                                                     •  These are Pb−Free Devices
+              Standard Mode: 100 kHz
+              Fast Mode: 400 kHz
+              Fast Mode +: 1 MHz
+ © Semiconductor Components Industries, LLC, 2015                 1                                           Publication Order Number:
+ November, 2019 − Rev. 8                                                                                                     PCA9535E/D
+
+
+                                               PCA9535E, PCA9535EC
+                                                     BLOCK DIAGRAM
+                          PCA9535E
+                                                                                                                   IO1_0
+                          PCA9535EC
+                                                                                                                   IO1_1
+                                                                                 8−bit                             IO1_2
+            AD0
+                                                                                             INPUT/                IO1_3
+            AD1
+                                                                                            OUTPUT
+            AD2                                                                                                    IO1_4
+                                                                                            PORTS
+                                                                             write pulse                           IO1_5
+                                                                                                                   IO1_6
+                                                                             read pulse
+                                                                                                                   IO1_7
+                                                         I2C−BUS/SMBus
+                                                            CONTROL
+            SCL                                                                                                    IO0_0
+                                       INPUT
+                                      FILTER                                                                       IO0_1
+            SDA
+                                                                                 8−bit                             IO0_2
+                                                                                             INPUT/                IO0_3
+                                                                                            OUTPUT
+                                                                                                                   IO0_4
+                                                                                            PORTS
+                                                                             write pulse                           IO0_5
+                                                                                                                   IO0_6
+                                                                             read pulse
+            VDD                     POWER−ON                                                                       IO0_7
+                                      RESET
+             VSS                                                                                            VDD
+                                                                                                  LP filter
+                                                                                                                   INT
+                                            Remark: All I/Os are set as inputs at reset.
+                                                  Figure 1. Block Diagram
+              data from                                                                                      output port
+           shift register                                                                                    register data
+                           configuration
+                           register                                              (1)
+                                                                                                             VDD
+              data from                                                                  Q1
+                            D       Q
+           shift register
+                               FF
+                    write
+                                                D       Q
+          configuration     CK      Q
+                   pulse                           FF
+                                                                                                             I/O pin
+            write pulse                         CK                                                Q2
+                                                                 input port                                  VSS
+                                               output port
+                                               register          register
+                                                                  D        Q
+                                                                                                             input port
+                                                                     FF                                      register data
+             read pulse                                           CK
+                                                                                                             to INT
+                                                                 polarity inversion
+                                                                 register
+              data from                                                                                       polarity
+                                                                  D        Q
+           shift register                                                                                     inversion
+                                                                     FF                                       register data
+          write polarity
+                                                                  CK
+                   pulse
+            At power−on reset, all registers return to default values.
+1. PCA9535EC I/Os are open−drain only. The portion of the PCA9535E schematic marked inside the dotted line box is not in
+   PCA9535EC.
+                                           Figure 2. Simplified Schematic of I/Os
+                                                        www.onsemi.com
+                                                                 2
+
+
+                                          PCA9535E, PCA9535EC
+                                                PIN ASSIGNMENT
+                                                                              24 AD2    23 AD1    22 INT   21 VDD     20 SDA     19 SCL
+                                                               terminal 1
+                                                              index area
+             INT 1                   24 VDD                         IO0_0 1                                                                 18 AD0
+             AD1 2                   23 SDA                         IO0_1 2                                                                 17 IO1_7
+             AD2 3                   22 SCL
+                                                                    IO0_2 3              PCA9535E                                           16 IO1_6
+            IO0_0 4                  21 AD0
+                                                                    IO0_3 4             PCA9535EC                                           15 IO1_5
+            IO0_1 5                  20 IO1_7
+                                                                    IO0_4 5                                                                 14 IO1_4
+            IO0_2 6      PCA9535E    19 IO1_6
+                        PCA9535EC                                   IO0_5 6                                                                 13 IO1_3
+            IO0_3 7                  18 IO1_5
+                                                                                                           IO1_0 10   IO1_1 11   IO1_2 12
+            IO0_4 8                  17 IO1_4
+                                                                              IO0_6 7   IO0_7 8
+            IO0_5 9                  16 IO1_3                                                     VSS 9
+            IO0_6 10                 15 IO1_2
+           IO0_7 11                  14 IO1_1                                  Transparent top view
+             VSS 12                  13 IO1_0                        (The exposed thermal pad at the bottom
+                                                                     is not connected to internal circuitry)
+             Figure 3. SOIC24 / TSSOP24                                       Figure 4. WQFN24
+Table 1. PIN DESCRIPTIONS
+                                    Pin
+Symbol        SOIC24, TSSOP24                    WQFN24                                                          Description
+  INT                  1                           22                                   Interrupt Output (active−LOW)
+ AD1                   2                           23                                                      Address Input 1
+ AD2                   3                           24                                                      Address Input 2
+ IO0_0                 4                           1                                                              Port 0 I/O 0
+ IO0_1                 5                           2                                                              Port 0 I/O 1
+ IO0_2                 6                           3                                                              Port 0 I/O 2
+ IO0_3                 7                           4                                                              Port 0 I/O 3
+ IO0_4                 8                           5                                                              Port 0 I/O 4
+ IO0_5                 9                           6                                                              Port 0 I/O 5
+ IO0_6                 10                          7                                                              Port 0 I/O 6
+ IO0_7                 11                          8                                                              Port 0 I/O 7
+  VSS                  12                          9                                                         Supply Ground
+ IO1_0                 13                          10                                                             Port 1 I/O 0
+ IO1_1                 14                          11                                                             Port 1 I/O 1
+ IO1_2                 15                          12                                                             Port 1 I/O 2
+ IO1_3                 16                          13                                                             Port 1 I/O 3
+ IO1_4                 17                          14                                                             Port 1 I/O 4
+ IO1_5                 18                          15                                                             Port 1 I/O 5
+ IO1_6                 19                          16                                                             Port 1 I/O 6
+ IO1_7                 20                          17                                                             Port 1 I/O 7
+ AD0                   21                          18                                                      Address Input 0
+ SCL                   22                          19                                                      Serial Clock Line
+ SDA                   23                          20                                                      Serial Data Line
+  VDD                  24                          21                                                        Supply Voltage
+                                                www.onsemi.com
+                                                          3
+
+
+                                                  PCA9535E, PCA9535EC
+ Table 2. MAXIMUM RATINGS
+   Symbol                                            Parameter                                                       Value            Unit
+     VDD        DC Supply Voltage                                                                                 −0.5 to +7.0          V
+      VI/O      Input / Output Pin Voltage                                                                        −0.5 to +7.0          V
+        II      Input Current                                                                                         $20              mA
+       IO       Output Current                                                                                        $50              mA
+      IDD       DC Supply Current                                                                                    $100              mA
+     IGND       DC Ground Current                                                                                    $600              mA
+    PTOT        Total Power Dissipation                                                                               600              mW
+    POUT        Power Dissipation per Output                                                                          200              mW
+    TSTG        Storage Temperature Range                                                                         −65 to +150          °C
+       TL       Lead Temperature, 1 mm from Case for 10 Seconds                                                       260              °C
+       TJ       Junction Temperature Under Bias                                                                       150              °C
+      qJA       Thermal Resistance (Note 1)                                               SOIC−24                      85            °C/W
+                                                                                        TSSOP−24                       91
+                                                                                          WQFN24                       68
+     MSL        Moisture Sensitivity                                                                                Level 1
+      FR        Flammability Rating Oxygen Index: 28 to 34                                                       UL 94 V−0 @
+                                                                                                                    0.125 in
+    VESD        ESD Withstand Voltage Human Body Mode (Note 2)                                                      > 3000              V
+                          Machine Model (Note 3)                                                                     > 400
+                          Charged Device Model (Note 4)                                                               N/A
+  ILATCHUP      Latchup Performance Above VDD and Below GND at 125°C (Note 5)                                        $100              mA
+ Stresses exceeding those listed in the Maximum Ratings table may damage the device. If any of these limits are exceeded, device functional-
+ ity should not be assumed, damage may occur and reliability may be affected.
+ 1. Measured with minimum pad spacing on an FR4 board, using 10 mm−by−1 inch, 2 ounce copper trace no air flow.
+ 2. Tested to EIA / JESD22−A114−A.
+ 3. Tested to EIA / JESD22−A115−A.
+ 4. Tested to JESD22−C101−A.
+ 5. Tested to EIA / JESD78.
+Table 3. RECOMMENDED OPERATING CONDITIONS
+   Symbol                                            Parameter                                                 Min          Max       Unit
+     VDD      Positive DC Supply Voltage                                                                       1.65          5.5        V
+      VI/O    Switch Input / Output Voltage                                                                      0           5.5        V
+       TA     Operating Free−Air Temperature                                                                   −55         +125        °C
+                                                          www.onsemi.com
+                                                                    4
+
+
+                                                   PCA9535E, PCA9535EC
+Table 4. DC ELECTRICAL CHARACTERISTICS VDD = 1.65 V to 5.5 V, unless otherwise specified.
+                                                                                                    TA = −555C to +1255C
+ Symbol                    Parameter                               Conditions                    Min         Typ        Max       Unit
+SUPPLIES
+   ISTB        Standby Current (Note 6)               Standby mode; no load;                                                       mA
+                                                      VI = 0 V; fSCL = 0 Hz; I/O = inputs                     39        100
+                                                      VI = VDD; fSCL = 0 Hz; I/O = inputs                     39        100
+   VPOR        Power−On Reset Voltage (Note 7)                                                               1.5        1.65       V
+INPUT SCL; INPUT / OUTPUT SDA
+    VIH        High−Level Input Voltage                                                       0.7 x VDD                            V
+    VIL        Low−Level Input Voltage                                                                               0.3 x VDD     V
+    IOL        Low−Level Output Current               VOL = 0.4 V; VDD < 2.3 V                    10                              mA
+                                                      VOL = 0.4 V; VDD w 2.3 V                    20
+     IL        Leakage Current                        VI = VDD or 0 V                                                   $1         mA
+     CI        Input Capacitance                      VI = 0 V                                               4.6         6         pF
+I/Os
+    VIH        High−Level Input Voltage                                                       0.7 x VDD                            V
+    VIL        Low−Level Input Voltage                                                                               0.3 x VDD     V
+    IOL        Low−Level Output Current               VOL = 0.5 V; VDD = 1.65 V                   8           20                  mA
+               (Note 8)
+                                                      VOL = 0.5 V; VDD = 2.3 V                    12          28
+                                                      VOL = 0.5 V; VDD = 3.0 V                    17          35
+                                                      VOL = 0.5 V; VDD = 4.5 V                    25          42
+  IOL(tot)     Total Low−Level Output Current         VOL = 0.5 V; VDD = 4.5 V                                          400       mA
+               (Note 8)
+   VOH         High−Level Output Voltage              IOH = −3 mA; VDD = 1.65 V                  1.2                               V
+               (PCA9535E Only)
+                                                      IOH = −4 mA; VDD = 1.65 V                  1.1
+                                                      IOH = −8 mA; VDD = 2.3 V                   1.8
+                                                      IOH = −10 mA; VDD = 2.3 V                  1.7
+                                                      IOH = −8 mA; VDD = 3.0 V                   2.6
+                                                      IOH = −10 mA; VDD = 3.0 V                  2.5
+                                                      IOH = −8 mA; VDD = 4.5 V                   4.1
+                                                      IOH = −10 mA; VDD = 4.5 V                  4.0
+     IL        Input Leakage Current                  VDD = 5.5 V; VI = VDD or 0 V                                      $1         mA
+   CI/O        Input / Output Capacitance                                                                    3.7         5         pF
+               (Note 9)
+INTERRUPT (INT)
+    IOL        Low−Level Output Current               VOL = 0.4 V                                 6                               mA
+    CO         Output Capacitance                                                                            2.1         5         pF
+INPUTS AD0, AD1, AD2
+    VIH        High−Level Input Voltage                                                       0.7 x VDD                            V
+    VIL        Low−Level Input Voltage                                                                               0.3 x VDD     V
+     IL        Leakage Current                        VI = VDD or 0 V                                                   $1         mA
+     CI        Input Capacitance                                                                             2.4         5         pF
+6. The device is in standby mode after an I2C stop command.
+7. The power−on reset circuit resets the I2C bus logic with VDD < VPOR and set all I/Os to logic 1 upon power−up. Thereafter, VDD must
+    be lower than 0.2 V to reset the part.
+8. Each bit must be limited to a maximum of 25 mA and the total package limited to 400 mA due to internal busing limits.
+9. The value is not tested, but verified on sampling basis.
+                                                           www.onsemi.com
+                                                                     5
+
+
+                                                      PCA9535E, PCA9535EC
+Table 5. AC ELECTRICAL CHARACTERISTICS VDD = 1.65 V to 5.5 V; TA = −55°C to +125°C, unless otherwise specified.
+                                                                      Standard Mode             Fast Mode              Fast Mode +
+   Symbol                           Parameter                          Min        Max         Min          Max        Min        Max        Unit
+     fSCL         SCL Clock Frequency                                   0          0.1          0           0.4         0         1.0       MHz
+     tBUF         Bus−Free Time between a STOP and START               4.7                     1.3                    0.5                     ms
+                  Condition
+   tHD:STA        Hold Time (Repeated) START Condition                 4.0                     0.6                    0.26                    ms
+   tSU:STA        Setup Time for a Repeated START Condition            4.7                     0.6                    0.26                    ms
+   tSU:STO        Setup Time for STOP Condition                        4.0                     0.6                    0.26                    ms
+   tHD:DAT        Data Hold Time                                        0                       0                       0                     ns
+   tVD:ACK        Data Valid Acknowledge Time (Note 10)                0.3        3.45         0.1          0.9       0.05       0.45         ms
+   tVD:DAT        Data Valid Time (Note 11)                            300                     50                      50         450         ns
+   tSU:DAT        Data Setup Time                                      250                    100                      50                     ns
+     tLOW         LOW Period of SCL                                    4.7                     1.3                    0.5                     ms
+    tHIGH         HIGH Period of SCL                                   4.0                     0.6                    0.26                    ms
+       tf         Fall Time of SDA and SCL (Notes 13 and 14)                      300         20 +          300                   120         ns
+                                                                                             0.1Cb
+                                                                                           (Note 12)
+       tr         Rise Time of SDA and SCL                                        1000        20 +          300                   120         ns
+                                                                                             0.1Cb
+                                                                                           (Note 12)
+      tSP         Pulse Width of Spikes Suppressed by Input                        50                       50                    50          ns
+                  Filter (Note 15)
+PORT TIMING: CL v 100 pF (See Figures 6, 9 and 10)
+     tV(Q)        Data Output Valid Time (VDD = 4.5 V to 5.5 V)                   200                       200                   200         ns
+                                            (VDD = 2.3 V to 4.5 V)                350                       350                   350
+                                          (VDD = 1.65 V to 2.3 V)                 550                       550                   550
+    tSU(D)        Data Input Setup Time                                100                    100                     100                     ns
+     tH(D)        Data Input Hold Time                                  1                       1                       1                     ms
+INTERRUPT TIMING: CL v 100 pF (See Figures 9 and 10)
+  tV(INT_N)       Data Valid Time                                                   4                        4                     4          ms
+ tRST(INT_N)      Reset Delay Time                                                  4                        4                     4          ms
+10. tVD:ACK = time for Acknowledgment signal from SCL LOW to SDA (out) LOW.
+11. tVD:DAT = minimum time for SDA data out to be valid following SCL LOW.
+12. Cb = total capacitance of one bus line in pF.
+13. A master device must internally provide a hold time of al least 300 ns for the SDA signal (refer to VIL of the SCL signal) in order to bridge
+     the undefined region SCL’s falling edge.
+14. The maximum tf for the SDA and SCL bus lines is specified at 300 ns. The maximum fall time for the SDA output stage tf is specified at
+     250 ns. This allows series protection resistors to be connected between the SDA and the SCL pins and the SDA/SCL bus lines without
+     exceeding the maximum specified tf.
+15. Input filters on the SDA and SCL inputs suppress noise spikes less than 50 ns.
+                                                             www.onsemi.com
+                                                                       6
+
+
+                                                  PCA9535E, PCA9535EC
+Device Address                                                                         slave address
+   Before the bus master can access a slave device, it must
+send the address of the slave it is accessing and the operation
+                                                                      A6     A5    A4       A3       A2 A1  A0   R/W
+it wants to perform (read or write) following a START
+condition. The slave address of the PCA9535E and
+PCA9535EC is shown in Figure 5. Address pins AD2, AD1,                                programmable
+and AD0 choose 1 of 64 slave addresses. To conserve power,
+no internal pull−up resistors are provided on AD2, AD1, and        Figure 5. PCA9535E and PCA9535EC Device Address
+AD0.
+   A logic 1 on the last bit of the first byte selects a read
+operation while a logic 0 selects a write operation.
+  Table 6. PCA9535E AND PCA9535EC ADDRESS MAP
+              Address Input                                                 Slave Address
+     AD2           AD1             AD0          A6        A5      A4       A3        A2           A1     A0    HEX
+     GND           SCL             GND           0         0       1        0         0            0      0    20h
+     GND           SCL             VDD           0         0       1        0         0            0      1    22h
+     GND           SDA             GND           0         0       1        0         0            1      0    24h
+     GND           SDA             VDD           0         0       1        0         0            1      1    26h
+     VDD           SCL             GND           0         0       1        0         1            0      0    28h
+     VDD           SCL             VDD           0         0       1        0         1            0      1    2Ah
+     VDD           SDA             GND           0         0       1        0         1            1      0    2Ch
+     VDD           SDA             VDD           0         0       1        0         1            1      1    2Eh
+     GND           SCL              SCL          0         0       1        1         0            0      0    30h
+     GND           SCL             SDA           0         0       1        1         0            0      1    32h
+     GND           SDA              SCL          0         0       1        1         0            1      0    34h
+     GND           SDA             SDA           0         0       1        1         0            1      1    36h
+     VDD           SCL              SCL          0         0       1        1         1            0      0    38h
+     VDD           SCL             SDA           0         0       1        1         1            0      1    3Ah
+     VDD           SDA              SCL          0         0       1        1         1            1      0    3Ch
+     VDD           SDA             SDA           0         0       1        1         1            1      1    3Eh
+     GND           GND             GND           0         1       0        0         0            0      0    40h
+     GND           GND             VDD           0         1       0        0         0            0      1    42h
+     GND           VDD             GND           0         1       0        0         0            1      0    44h
+     GND           VDD             VDD           0         1       0        0         0            1      1    46h
+     VDD           GND             GND           0         1       0        0         1            0      0    48h
+     VDD           GND             VDD           0         1       0        0         1            0      1    4Ah
+     VDD           VDD             GND           0         1       0        0         1            1      0    4Ch
+     VDD           VDD             VDD           0         1       0        0         1            1      1    4Eh
+     GND           GND              SCL          0         1       0        1         0            0      0    50h
+     GND           GND             SDA           0         1       0        1         0            0      1    52h
+     GND           VDD              SCL          0         1       0        1         0            1      0    54h
+     GND           VDD             SDA           0         1       0        1         0            1      1    56h
+     VDD           GND              SCL          0         1       0        1         1            0      0    58h
+     VDD           GND             SDA           0         1       0        1         1            0      1    5Ah
+     VDD           VDD              SCL          0         1       0        1         1            1      0    5Ch
+                                                        www.onsemi.com
+                                                                7
+
+
+                                    PCA9535E, PCA9535EC
+Table 6. PCA9535E AND PCA9535EC ADDRESS MAP
+           Address Input                              Slave Address
+  AD2          AD1       AD0      A6     A5     A4    A3       A2   A1 A0 HEX
+  VDD          VDD       SDA       0     1       0    1         1   1   1 5Eh
+   SCL         SCL       GND       1     0       1    0         0   0   0 A0h
+   SCL         SCL       VDD       1     0       1    0         0   0   1 A2h
+   SCL         SDA       GND       1     0       1    0         0   1   0 A4h
+   SCL         SDA       VDD       1     0       1    0         0   1   1 A6h
+  SDA          SCL       GND       1     0       1    0         1   0   0 A8h
+  SDA          SCL       VDD       1     0       1    0         1   0   1 AAh
+  SDA          SDA       GND       1     0       1    0         1   1   0 ACh
+  SDA          SDA       VDD       1     0       1    0         1   1   1 AEh
+   SCL         SCL       SCL       1     0       1    1         0   0   0 B0h
+   SCL         SCL       SDA       1     0       1    1         0   0   1 B2h
+   SCL         SDA       SCL       1     0       1    1         0   1   0 B4h
+   SCL         SDA       SDA       1     0       1    1         0   1   1 B6h
+  SDA          SCL       SCL       1     0       1    1         1   0   0 B8h
+  SDA          SCL       SDA       1     0       1    1         1   0   1 BAh
+  SDA          SDA       SCL       1     0       1    1         1   1   0 BCh
+  SDA          SDA       SDA       1     0       1    1         1   1   1 BEh
+   SCL         GND       GND       1     1       0    0         0   0   0 C0h
+   SCL         GND       VDD       1     1       0    0         0   0   1 C2h
+   SCL         VDD       GND       1     1       0    0         0   1   0 C4h
+   SCL         VDD       VDD       1     1       0    0         0   1   1 C6h
+  SDA          GND       GND       1     1       0    0         1   0   0 C8h
+  SDA          GND       VDD       1     1       0    0         1   0   1 CAh
+  SDA          VDD       GND       1     1       0    0         1   1   0 CCh
+  SDA          VDD       VDD       1     1       0    0         1   1   1 CEh
+   SCL         GND       SCL       1     1       1    0         0   0   0 E0h
+   SCL         GND       SDA       1     1       1    0         0   0   1 E2h
+   SCL         VDD       SCL       1     1       1    0         0   1   0 E4h
+   SCL         VDD       SDA       1     1       1    0         0   1   1 E6h
+  SDA          GND       SCL       1     1       1    0         1   0   0 E8h
+  SDA          GND       SDA       1     1       1    0         1   0   1 EAh
+  SDA          VDD       SCL       1     1       1    0         1   1   0 ECh
+  SDA          VDD       SDA       1     1       1    0         1   1   1 EEh
+                                       www.onsemi.com
+                                             8
+
+
+                                                   PCA9535E, PCA9535EC
+                                                             REGISTERS
+Command Byte
+   During a write transmission, the address byte is followed
+by the command byte. The command byte determines which
+of the following registers will be written or read.
+  Table 7. COMMAND BYTE
+            COMMAND                                                          REGISTER
+                 0                  Input Port 0
+                 1                  Input Port 1
+                 2                  Output Port 0
+                 3                  Output Port 1
+                 4                  Polarity Inversion Port 0
+                 5                  Polarity Inversion Port 1
+                 6                  Configuration Port 0
+                 7                  Configuration Port 1
+Registers 0 and 1: Input Port Registers                                The externally−applied logic level determines the default
+   These registers are input−only. They reflect the incoming         value ‘X’.
+logic levels of the pins, regardless of whether the pin is
+defined as an input or an output by Registers 6 or 7. Writes
+to these registers have no effect.
+  Table 8. INPUT PORT 0 REGISTER
+        Bit              7             6               5           4              3              2             1              0
+  Symbol                I0.7          I0.6           I0.5        I0.4            I0.3           I0.2          I0.1           I0.0
+  Default                X             X               X           X              X              X             X              X
+  Table 9. INPUT PORT 1 REGISTER
+        Bit              7             6               5           4              3              2             1              0
+  Symbol                I1.7          I1.6           I1.5        I1.4            I1.3           I1.2          I1.1           I1.0
+  Default                X             X               X           X              X              X             X              X
+Registers 2 and 3: Output Port Registers                             as inputs. In turn, reads from these registers reflect the values
+   These registers are output−only. They reflect the outgoing        that are in the flip−flops controlling the output selection, not
+logic levels of the pins defined as outputs by Registers 6 and       the actual pin values.
+7. Bit values in these registers have no effect on pins defined
+  Table 10. OUTPUT PORT 0 REGISTER
+        Bit              7             6               5           4              3              2             1              0
+  Symbol               O0.7          O0.6            O0.5        O0.4           O0.3           O0.2          O0.1            O0.0
+  Default                1             1               1           1              1              1             1              1
+  Table 11. OUTPUT PORT 1 REGISTER
+        Bit              7             6               5           4              3              2             1              0
+  Symbol               O1.7          O1.6            O1.5        O1.4           O1.3           O1.2          O1.1            O1.0
+  Default                1             1               1           1              1              1             1              1
+                                                          www.onsemi.com
+                                                                 9
+
+
+                                                     PCA9535E, PCA9535EC
+Registers 4 and 5: Polarity Inversion Registers                       be inverted when its corresponding bit in these registers is
+   These registers allow the polarity of the data in the input        set (written with ‘1’), and retained when the bit is cleared
+port registers to be inverted. The input port data polarity will      (written with a ‘0’).
+  Table 12. POLARITY INVERSION PORT 0 REGISTER
+       Bit                7              6             5            4             3             2              1             0
+  Symbol                N0.7           N0.6           N0.5        N0.4           N0.3          N0.2           N0.1         N0.0
+  Default                 0              0             0            0             0             0              0             0
+  Table 13. POLARITY INVERSION PORT 1 REGISTER
+       Bit                7              6             5            4             3             2              1             0
+  Symbol                N1.7           N1.6           N1.5        N1.4           N1.3          N1.2           N1.1         N1.0
+  Default                 0              0             0            0             0             0              0             0
+Registers 6 and 7: Configuration Registers                            pin is enabled as an input with the output driver in
+   The I/O pin directions are configured through the                  high−impedance. When a bit is cleared (written with ‘0’),
+configuration registers. When a bit in the configuration              the corresponding port pin is enabled as an output. At reset,
+registers is set (written with ‘1’), the bit’s corresponding port     the device’s ports are inputs.
+  Table 14. CONFIGURATION PORT 0 REGISTER
+       Bit                7              6             5            4             3             2              1             0
+  Symbol                C0.7           C0.6           C0.5        C0.4           C0.3          C0.2           C0.1         C0.0
+  Default                 1              1             1            1             1             1              1             1
+  Table 15. CONFIGURATION PORT 1 REGISTER
+       Bit                7              6             5            4             3             2              1             0
+  Symbol                C1.7           C1.6           C1.5        C1.4           C1.3          C1.2           C1.1         C1.0
+  Default                 1              1             1            1             1             1              1             1
+Power−on Reset                                                        high−impedance input. The input voltage may be raised
+   Upon application of power, an internal Power−On Reset              above VDD to a maximum of 5.5 V. In the case of
+(POR) holds the PCA9535E/PCA9535EC in a reset                         PCA9535EC, FET Q1 has been removed and the
+condition while VDD is ramping up. When VDD has reached               open−drain FET Q2 will function the same as PCA9535E.
+VPOR, the reset condition is released and the                            When the I/O pin is configured as an output on the
+PCA9535E/PCA9535EC registers and SMBus state                          PCA9535E, then either Q1 or Q2 is enabled, depending on
+machine will initialize to their default states. The reset is         the state of the output port register. With the PCA9535EC,
+typically completed by the POR and the part enabled by the            an external pullup is required to pull the I/O pin HIGH when
+time the power supply is above VPOR. However, when doing              its corresponding output port register bit is a 1. Care should
+a power reset cycle, it is necessary to lower the power supply        be exercised if an external voltage is applied to an I/O
+below 0.2 V, and then restored to the operating voltage.              configured as an output because of the low−impedance path
+Please refer to application note AND9169/D for                        that exists between the pin and either VDD or VSS.
+recommended power−up and power−cycle reset profiles.
+I/O Port (See Figure 2)
+   When an I/O pin is configured as an input on the
+PCA9535E, FETs Q1 and Q2 are off, creating a
+                                                           www.onsemi.com
+                                                                  10
+
+
+                                                             PCA9535E, PCA9535EC
+                                                               BUS TRANSACTIONS
+Writing to the Port Registers                                                    operate as four register pairs: Input Ports, Output Ports,
+   To transmit data to the PCA9535E/PCA9535EC, the bus                           Polarity Inversion Ports, and Configuration Ports. Data
+master must first send the device address with the least                         bytes are sent alternately to each register in a register pair
+significant bit set to logic 0 (see Figure 5 “PCA9535E and                       (see Figures 6 and 7). For example, if one byte is sent to
+PCA9535EC device address”). The command byte is sent                             Output Port 1 (register 3), then the next byte will be stored
+after the address and determines which registers will receive                    in Output Port 0 (register 2). There is no limitation on the
+the data following the command byte.                                             number of data bytes sent in one write transmission. In this
+   There         are        eight        registers         within      the       way, each 8−bit register may be updated independently of
+PCA9535E/PCA9535EC. These registers are configured to                            the other registers.
+        SCL      1   2   3   4   5   6  7   8   9
+                       slave address                        command byte                 data to port 0                       data to port 1
+       SDA S A6 A5 A4 A3 A2 A1 A0 0             A    0   0   0 0  0  0   1 0 A 0.7          DATA 0            0.0 A 1.7         DATA 1             1.0 A  P
+              START condition             R/W acknowledge                     acknowledge                          acknowledge                           STOP
+                                                 from slave                   from slave                           from slave                          condition
+write to port
+                                                                                                        tv(Q)
+    data out
+ from port 0
+                                                                                                                                             tv(Q)
+    data out
+ from port 1                                                                                                                          DATA VALID
+                                                      Figure 6. Write to Output Port Registers
+ SCL       1   2   3   4   5   6   7   8   9
+                                                                                      data to register                      data to register
+                 slave address                         command byte
+                                                                              MSB                         LSB       MSB                          LSB
+SDA S A6 A5 A4 A3 A2 A1 A0 0               A    0   0   0    0 0  1   1  0 A             DATA 0                  A             DATA 1                  A  P
+        START condition               R/W acknowledge                      acknowledge                           acknowledge                             STOP
+                                            from slave                     from slave                            from slave                            condition
+                                                    Figure 7. Write to Configuration Registers
+Reading the Port Registers                                                       by the PCA9535E/PCA9535EC (see Figures 8, 9 and 10).
+   To read data from the PCA9535E/PCA9535EC, the bus                             Data is clocked into the register on the falling edge of the
+master must first send the PCA9535E/PCA9535EC address                            acknowledge clock pulse. After the first byte is read,
+with the least significant bit set to logic 0 (see Figure 5                      additional bytes may be read but with data alternately
+“PCA9535E and PCA9535EC device address”). The                                    coming from each register in the pair. For example, if you
+command byte is sent after the address and determines                            read Input Port 1, then the next byte read would be
+which register will be accessed.                                                 Input Port 0. There is no limitation on the number of data
+   After a restart, the device address must be sent again, but                   bytes received in one read transmission but the bus master
+this time, the least significant bit is set to logic 1. Data from                must not acknowledge the data for the final byte received.
+the register defined by the command byte will then be sent
+                                                                   www.onsemi.com
+                                                                           11
+
+
+                                                                  PCA9535E, PCA9535EC
+                       slave address
+  SDA     S    A6 A5 A4 A3 A2 A1 A0                0    A          COMMAND BYTE                     A    (cont.)
+          START condition                       R/W                                 acknowledge
+                                       acknowledge                                     from slave
+                                          from slave
+                                                                     data from lower or                                data from upper or
+                                                                    upper byte of register                            lower byte of register
+                          slave address
+                                                               MSB                               LSB             MSB                           LSB
+   (cont.)    S    A6 A5 A4 A3 A2 A1 A0               1    A          DATA (first byte)                A                 DATA (last byte)           NA P
+              (repeated)                            R/W                                                 acknowledge                  no acknowledge        STOP
+              START condition                                                                           from master                       from master      condition
+                                          acknowledge
+                                               from slave            at this moment master−transmitter becomes master−receiver
+                                                                     and slave−receiver becomes slave−transmitter
+       Remark: Transfer can be stopped at any time by a STOP condition.
+                                                                  Figure 8. Read from Register
+ SCL      1 2 3 4 5 6 7 8 9
+                                                                                                                                                           STOP condition
+                 slave address                         I0.x                          I1.x                            I0.x                         I1.x
+ SDA S A6 A5 A4 A3 A2 A1 A0 1 A 7 6 5 4 3 2 1 0 A 7 6 5 4 3 2 1 0 A 7 6 5 4 3 2 1 0 A 7 6 5 4 3 2 1 0 1 P
+     START condition            R/W                       acknowledge                    acknowledge                    acknowledge                 non acknowledge
+                                                            from master                    from master                    from master                    from master
+                          acknowledge
+                            from slave
+ read from port 0
+ data into port 0
+ read from port 1
+ data into port 1
+ INT
+            t v(INT_N)                       t rst(INT_N)
+ Remark: Transfer of data can be stopped at any moment by a STOP condition. When this occurs, data present at the latest acknowledge
+ phase is valid (output mode). It is assumed that the command byte has previously been set to ’00’ (read Input Port register).
+                                                 Figure 9. Read from Input Port Register, Scenario 1
+SCL       1 2 3 4 5 6 7 8 9
+                                  R/W                                                                                                                      STOP condition
+                 slave address                         I0.x                          I1.x                            I0.x                         I1.x
+SDA S A6 A5A4 A3 A2 A1 A0 1 A                        DATA 00          A            DATA 10              A          DATA 03           A          DATA 12            1 P
+    START condition       acknowledge                     acknowledge                    acknowledge                    acknowledge                non acknowledge
+                            from slave                     from master                    from master                    from master                   from master
+                                                th(D)                                        tsu(D)
+read from port 0
+data into port 0               DATA 00                   DATA 01                    DATA 02                        DATA 03
+                                                                              th(D)                                       tsu(D)
+read from port 1
+data into port 1                        DATA 10                                                     DATA 11                                      DATA 12
+INT
+            t v(INT_N)                       t rst(INT_N)
+Remark: Transfer of data can be stopped at any moment by a STOP condition. When this occurs, data present at the latest acknowledge
+phase is valid (output mode). It is assumed that the command byte has previously been set to ’00’ (read Input Port register).
+                                                Figure 10. Read from Input Port Register, Scenario 2
+                                                                          www.onsemi.com
+                                                                                     12
+
+
+                                                   PCA9535E, PCA9535EC
+Interrupt Output                                                       each 8−bit port is read independently, the interrupt caused by
+   The open−drain interrupt output is activated when an I/O            Port 0 will not be cleared by a read of Port 1 or the other way
+pin configured as an input changes state. The interrupt is             around.
+deactivated when the input pin returns to its previous state           Remark: Changing an I/O from an output to an input may
+or when the Input Port register is read (see Figure 9). A pin          cause a false interrupt to occur if the state of the pin does not
+configured as an output cannot cause an interrupt. Since               match the contents of the Input Port register.
+                                                 APPLICATION INFORMATION
+  V DD
+ (5 V)                                                                                                             SUB−SYSTEM 1
+                             10 kW    10 kW   10 kW                          2 kW         100 kW
+                                                                                          (x3)                   (e.g., temp sensor)
+             V DD                                          V DD
+                                                                                                               INT
+           MASTER
+                                                         PCA9535E
+         CONTROLLER
+                   SCL                               SCL         IO0_0
+                                                                                                                   SUB−SYSTEM 2
+                   SDA                               SDA
+                                                                 IO0_1                                              (e.g., counter)
+                                                                 IO0_2                                         RESET
+                     INT                             INT
+                                                                 IO0_3
+                                                                                                                 A
+             GND
+                                                                 IO0_4                                                    controlled
+                                                                                                   ENABLE                 switch
+                                                                 IO0_5                                                    (e.g., 7SB or FST)
+                                                                                                                 B
+                                                                 IO0_6
+                                                                 IO0_7
+                                                                                                                   SUB−SYSTEM 3
+                                                                 IO1_0                                          (e.g., alarm system)
+                                                                 IO1_1           10 DIGIT
+                                                                 IO1_2          NUMERIC                        ALARM
+                                                                 IO1_3          KEYPAD
+                                                                 IO1_4
+                                                    AD2                                                                             V DD
+                                                                 IO1_5
+                                                    AD1          IO1_6
+                                                    AD0          IO1_7
+                                                           V SS
+       Device address configured as 0100 000xb for this example.
+       IO0_0, IO0_2, IO0_3 configured as outputs.
+       IO0_1, IO0_4, IO0_5 configured as inputs.
+       IO0_6, IO0_7, and IO1_0 to IO1_7 configured as inputs.
+                                                  Figure 11. Typical Application
+Minimizing IDD When the I/Os are Used to Control                       pin voltages be greater than or equal to VDD when the LED
+LEDs                                                                   is off. This would minimize current consumption. Figure 12
+   To use the PCA9535E I/Os to control LEDs, the I/Os are              shows a high value resistor in parallel with the LED.
+normally connected to VDD through a resistor as shown in               Figure 13 shows VDD less than the LED supply voltage by
+Figure 11. The LED acts as a diode. When the LED is off,               at least 1.2 V. Both of these methods maintain the I/O VI at
+the I/O VI is about 1.2 V less than VDD. The supply current,           or above VDD and prevents additional supply current
+IDD, increases as VI becomes lower than VDD.                           consumption when the LED is off.
+   For applications requiring low current consumption, such               This concern does not occur for the PCA9535EC because
+as battery power applications, it is recommended that the I/O          the PCA9535EC I/O pins are open−drain.
+                                                          www.onsemi.com
+                                                                   13
+
+
+                                                  PCA9535E, PCA9535EC
+                                                                                              3.3 V         5V
+                                                 VDD
+                    VDD                LED  100 kW                                            VDD              LED
+                      LEDn                                                                       LEDn
+        Figure 12. High Value Resistor in Parallel                        Figure 13. Device Supplied by a Lower Voltage
+                        with the LED
+Characteristics of the I2C−bus                                        Bit transfer
+   The I2C−bus is meant for 2−way, 2−line communication                 One data bit is transferred during each clock pulse. The
+between different ICs or modules. The two lines are the               data on the SDA line must remain stable during the HIGH
+serial data line (SDA) and the serial clock line (SCL). Both          period of the clock pulse. Changes in the data line during the
+lines must be connected to a positive supply via a pull−up            HIGH period of the clock pulse will be interpreted as control
+resistor when connected to the output stages of a device.             signals (see Figure 14).
+Data transfer may only be initiated when the bus is not busy.
+                           SDA
+                           SCL
+                                                    data line      change
+                                                     stable;       of data
+                                                   data valid      allowed
+                                                      Figure 14. Bit Transfer
+START and STOP conditions                                             HIGH. A STOP condition (P) occurs when there is a
+   Both data and clock lines remain HIGH when the bus is              LOW−to−HIGH transition of the data line while the clock is
+not busy. A START condition (S) occurs when there is a                HIGH (see Figure 15).
+HIGH−to−LOW transition of the data line while the clock is
+           SDA                                                                                                       SDA
+           SCL                                                                                                        SCL
+                            S                                                                       P
+                       START condition                                                         STOP condition
+                                     Figure 15. Definition of START and STOP Conditions
+                                                         www.onsemi.com
+                                                                14
+
+
+                                                     PCA9535E, PCA9535EC
+System Configuration                                                       message is the ‘master’ and the devices which are controlled
+   A device generating a message is a ‘transmitter’; a device              by the master are the ‘slaves’ (see Figure 16).
+receiving is the ‘receiver’. The device that controls the
+        SDA
+        SCL
+                   MASTER                SLAVE               SLAVE                                   MASTER
+                                                                                MASTER                             I2C−BUS
+                TRANSMITTER/           RECEIVER         TRANSMITTER/         TRANSMITTER          TRANSMITTER/
+                                                                                                                MULTIPLEXER
+                  RECEIVER                                 RECEIVER                                 RECEIVER
+                                                                                                          SLAVE
+                                                    Figure 16. System Configuration
+Acknowledge                                                                device that acknowledges has to pull down the SDA line
+   The number of data bytes transferred between the START                  during the acknowledge clock pulse, such that the SDA line
+and the STOP conditions from transmitter to receiver is not                is stable LOW during the HIGH period of the acknowledge
+limited. Each 8−bit byte is followed by one acknowledge bit.               clock pulse; set−up time and hold time must be taken into
+The acknowledge bit is a HIGH level put on the bus by the                  account.
+transmitter, whereas the master generates an extra clock                      A master receiver signals an end of data to the transmitter
+pulse for the acknowledge bit.                                             by not generating an acknowledge on the last byte that has
+   A slave receiver which is addressed must generate an                    been clocked out of the slave. In this event, the transmitter
+acknowledge after the reception of each byte. Also a master                must leave the data line HIGH to enable the master to
+must generate an acknowledge after the reception of each                   generate a STOP condition.
+byte that has been clocked out of the slave transmitter. The
+                             data output
+                         by transmitter
+                                                                                       not acknowledge
+                            data output
+                            by receiver
+                                                                                            acknowledge
+                      SCL from master
+                                                              1            2                    8             9
+                                               S
+                                                                                           clock pulse for
+                                             START                                    acknowledgement
+                                           condition
+                                             Figure 17. Acknowledgement of the I2C Bus
+Timing and Test Setup
+SDA
+            tBUF                          tr                       tf                                 tHD;STA    tSP
+                             tLOW
+SCL
+                           tHD;STA                                                                 tSU;STA           tSU;STO
+        P          S                      tHD;DAT         tHIGH        tSU;DAT             Sr                                     P
+                                          Figure 18. Definition of Timing on the I2C Bus
+                                                            www.onsemi.com
+                                                                      15
+
+
+                                               PCA9535E, PCA9535EC
+                         START            bit 7
+                                                             bit 6                       acknowledge
+        protocol        condition        MSB
+                                                             (A6)                             (A)
+                           (S)            (A7)                                                               (P)
+                    tSU;STA         tLOW      tHIGH
+                                                            1/f
+                                                               SCL
+         SCL
+                      tBUF                               tf
+                                      tr
+        SDA
+                            tHD;STA                    tSU;DAT       tHD;DAT         tVD;DAT         tVD;ACK     tSU;STO
+Rise and fall times refer to VIL and VIH
+                                         Figure 19. I2C Bus Timing Diagram
+    SCL                                                                   SCL
+                                         tv(Q)                                                                tv(Q)
+     IOn                                                                   IOn
+                                                    Figure 20. tV(Q) Timing
+                                                                                                VDD
+                                                                                                open
+                                                                                                GND
+                                                                   VDD                  RL
+                                                                                        500 W
+                                                    VI                     VO
+                                  PULSE
+                                                                   DUT
+                               GENERATOR
+                                                              RT                    CL
+                                                                                    50 pF
+        RL = load resistor.
+        CL = load capacitance includes jig and probe capacitance.
+        RT = termination resistance should be equal to the output impedance of Zo of the pulse generators.
+                                   Figure 21. Test Circuitry for Switching Times
+                                                                               RL       S1      2VDD
+                             from output under test                                             open
+                                                                              500 W             GND
+                                                                CL         RL
+                                                            50 pF          500 W
+                                                   Figure 22. Load Circuit
+                                                        www.onsemi.com
+                                                                    16
+
+
+                                                    PCA9535E, PCA9535EC
+  ORDERING INFORMATION
+                     Device                                          Package                                    Shipping†
+ PCA9535EDWR2G                                                       SOIC−24                                1000 / Tape & Reel
+                                                                    (Pb−Free)
+ PCA9535EDTR2G,                                                     TSSOP−24                                2500 / Tape & Reel
+ NLVPCA9535EDTR2G*                                                  (Pb−Free)
+ PCA9535EMTTXG,                                                      WQFN24                                 3000 / Tape & Reel
+ NLVPCA9535EMTTXG*                                                  (Pb−Free)
+ PCA9535ECDWR2G                                                      SOIC−24                                1000 / Tape & Reel
+                                                                    (Pb−Free)
+ PCA9535ECDTR2G                                                     TSSOP−24                                2500 / Tape & Reel
+                                                                    (Pb−Free)
+ PCA9535ECMTTXG                                                      WQFN24                                 3000 / Tape & Reel
+                                                                    (Pb−Free)
+†For information on tape and reel specifications, including part orientation and tape sizes, please refer to our Tape and Reel Packaging
+ Specifications Brochure, BRD8011/D.
+*NLV Prefix for Automotive and Other Applications Requiring Unique Site and Control Change Requirements; AEC−Q100 Qualified and PPAP
+ Capable.
+                                                           www.onsemi.com
+                                                                     17
+
+
+                                               PCA9535E, PCA9535EC
+                                                PACKAGE DIMENSIONS
+                                                         SOIC−24 WB
+                                                        CASE 751E−04
+                                                            ISSUE F
+                                                                                         NOTES:
+                                                                                          1. DIMENSIONING AND TOLERANCING PER ASME
+                         D               A                             H                     Y14.5M, 1994.
+                                                                                          2. CONTROLLING DIMENSION: MILLIMETERS.
+     0.25 C                              B                                                3. DIMENSIONS b AND c APPLY TO THE FLAT SEC-
+                                                                                             TION OF THE LEAD AND ARE MEASURED BE-
+                                                                                             TWEEN 0.10 AND 0.25 FROM THE LEAD TIP.
+                  24              13                                                      4. DIMENSIONS D AND E1 DO NOT INCLUDE MOLD
+                                                                                             FLASH, PROTRUSIONS OR GATE BURRS. MOLD
+                                                                                             FLASH, PROTRUSIONS OR GATE BURRS SHALL
+              E                          E1                                                  NOT EXCEED 0.15 mm PER SIDE. INTERLEAD
+                  1                                                L   C                     FLASH OR PROTRUSION SHALL NOT EXCEED
+                                  12                                                         0.25 PER SIDE. DIMENSIONS D AND E1 ARE DE-
+                                                              DETAIL A                       TERMINED AT DATUM H.
+                                                                                          5. A1 IS DEFINED AS THE VERTICAL DISTANCE
+                                         24X b                                               FROM THE SEATING PLANE TO THE LOWEST
+                                                                                             POINT ON THE PACKAGE BODY.
+     PIN 1
+INDICATOR                               0.25  M  C A  S  B  S                                       MILLIMETERS
+                     TOP VIEW      NOTE 3                                                     DIM    MIN      MAX
+                                                                                               A     2.35     2.65
+                                                                        h                      A1    0.13     0.29
+          A                                                             x 45 _                 b     0.35     0.49
+                                                                                   M            c    0.23     0.32
+                                                                                               D    15.25    15.54
+                                                                                               E      10.30 BSC
+                                                                                               E1    7.40     7.60
+                                                           c
+              A1         e            C  SEATING
+                                                           NOTE 3      DETAIL A                 e      1.27 BSC
+                                         PLANE                                                 h     0.25     0.75
+           NOTE 5
+                     SIDE VIEW                                     END VIEW                    L     0.41     0.90
+                                                                                               M       0_       8_
+                                                      RECOMMENDED
+                                                 SOLDERING FOOTPRINT*
+                                                                                    24X
+                                                  24X
+                                                 0.52                              1.62
+                                                                                      11.00
+                                            1                        1.27
+                                                                     PITCH
+                                                                    DIMENSIONS: MILLIMETERS
+                               *For additional information on our Pb−Free strategy and soldering
+                                details, please download the ON Semiconductor Soldering and
+                                Mounting Techniques Reference Manual, SOLDERRM/D.
+                                                      www.onsemi.com
+                                                               18
+
+
+                                                 PCA9535E, PCA9535EC
+                                                   PACKAGE DIMENSIONS
+                                                     TSSOP24 7.8x4.4, 0.65P
+                                                             CASE 948H
+                                                              ISSUE B
+                NOTE 4
+                                                                                 NOTES:
+                    D               A                                              1. DIMENSIONING AND TOLERANCING PER ASME Y14.5M, 1994.
+   NOTE 6                                                                          2. CONTROLLING DIMENSION: MILLIMETERS.
+                                    NOTE 6                          L2             3. DIMENSION b DOES NOT INCLUDE DAMBAR PROTRUSION.
+       B
+             24            13                                                         DAMBAR PROTRUSION SHALL BE 0.08 MAX AT MMC. DAMBAR
+                                                                       GAUGE
+                                                                       PLANE          CANNOT BE LOCATED ON THE LOWER RADIUS OF THE FOOT.
+                                                                                   4. DIMENSION D DOES NOT INCLUDE MOLD FLASH,
+                                                                                      PROTRUSIONS OR GATE BURRS. MOLD FLASH,
+                                                                                      PROTRUSIONS OR GATE BURRS SHALL NOT EXCEED 0.15
+         E1                                            L                              PER SIDE. DIMENSION D IS DETERMINED AT DATUM PLANE H.
+NOTE 5                             E                                  C
+                                                                                   5. DIMENSION E1 DOES NOT INCLUDE INTERLEAD FLASH OR
+                                                      DETAIL A                        PROTRUSION. INTERLEAD FLASH OR PROTRUSION SHALL
+                                                                                      NOT EXCEED 0.25 PER SIDE. DIMENSION E1 IS DETERMINED
+                                                                                      AT DATUM PLANE H.
+   PIN 1                                                                           6. DATUMS A AND B ARE DETERMINED AT DATUM PLANE H.
+              1             12            0.15 C B     S                           7. A1 IS DEFINED AS THE VERTICAL DISTANCE FROM THE SEAT-
+   REFERENCE
+                                                                                      ING PLANE TO THE LOWEST POINT ON THE PACKAGE BODY.
+             e                       2X 12 TIPS
+                          24X  b                                                             MILLIMETERS
+                               0.10 M  C B    S  A  S                                   DIM  MIN       MAX
+                                                                                         A    ---      1.20
+                TOP VIEW  NOTE 3
+                                                                                        A1    0.05     0.15
+                                                                                         b    0.19     0.30
+                                   A                 H     DETAIL A                      c    0.09     0.20
+                                      A1                                                 D    7.70     7.90
+     0.05 C                                                                              E      6.40 BSC
+                                                                                        E1    4.30     4.50
+                                                                                         e      0.65 BSC
+     0.10 C                                                                              L    0.50     0.75
+                                         SEATING      c
+24X             SIDE VIEW            C                     END VIEW         M           L2      0.25 BSC
+                                         PLANE                                           M     0_       8_
+                                                         RECOMMENDED
+                                                    SOLDERING FOOTPRINT
+                                                         24X 0.42
+                                              24X
+                                              1.15
+                                                                                     6.70
+                                                           0.65
+                                                           PITCH
+                                                                    DIMENSIONS: MILLIMETERS
+                                                         www.onsemi.com
+                                                                   19
+
+
+                                                                          PCA9535E, PCA9535EC
+                                                                            PACKAGE DIMENSIONS
+                                                                                   WQFN24 4x4, 0.5P
+                                                                                       CASE 485BG
+                                                                                           ISSUE A
+                                                                                                                                  NOTES:
+                                                                  A      B                                                          1. DIMENSIONING AND TOLERANCING PER ASME
+                                          D
+                   ÇÇÇÇ
+                                                                                                                                        Y14.5M, 1994.
+                                                                                                    L                       L       2. CONTROLLING DIMENSION: MILLIMETERS.
+                   ÇÇÇÇ
+         PIN ONE                                                                                                                    3. DIMENSION b APPLIES TO PLATED TERMINAL
+    REFERENCE                                                                                                                           AND IS MEASURED BETWEEN 0.15 AND 0.30 MM
+                   ÇÇÇÇ
+                                                                                 L1                                                     FROM TERMINAL TIP.
+                                                                                                                                    4. COPLANARITY APPLIES TO THE EXPOSED PAD
+                                                                                                                                        AS WELL AS THE TERMINALS.
+                   ÇÇÇÇ
+                                                                                               DETAIL A                                         MILLIMETERS
+                                                                        E                ALTERNATE TERMINAL
+                                                                                                                                         DIM     MIN      MAX
+                                                                                            CONSTRUCTIONS
+                                                                                                                                          A      0.70      0.80
+                                                                                            ÉÉÉ
+                                                                                                                                          A1     0.00      0.05
+                                                                                                                                          A3       0.20 REF
+                                                                                   EXPOSED Cu            MOLD CMPD
+                                                                                            ÉÉÉ
+                                                                                                                                          b      0.20      0.30
+          0.15 C                                                                                                                          D        4.00 BSC
+                                                                                                                                          D2     2.00      2.20
+                                                                                                                                          E        4.00 BSC
+             0.15 C                 TOP VIEW                                                                                              E2     2.00      2.20
+                                                                                                DETAIL B                                   e       0.50 BSC
+                                                                  A                             ALTERNATE                                 K      0.20      −−−
+          0.10 C                                                                              CONSTRUCTION                                L      0.30      0.50
+                                                                      A3                                                                  L1     0.00      0.15
+          0.08 C
+                                 DETAIL B
+  NOTE 4                                                          A1             SEATING
+                                    SIDE VIEW                                C   PLANE                                       MOUNTING FOOTPRINT*
+           DETAIL A                                                                                                                             4.30
+                                         D2                       K                                                                            2.26                      24X
+                               7                                                                                                                                         0.63
+                                                             13                                                                 1
+       24X   L
+                                                                    E2                                               2.26                                                  4.30
+                      1
+                                                                                                              PACKAGE
+                                                        19                                                    OUTLINE                                              24X
+                                                             24X   b                                                            0.50                               0.30
+                                  e
+                                                                    0.10 C A B                                                  PITCH
+                               e/2                                                                                                                 DIMENSIONS: MILLIMETERS
+                                                                    0.05 C      NOTE 3
+                                 BOTTOM VIEW
+                                                                                                 *For additional information on our Pb−Free strategy and soldering
+                                                                                                   details, please download the ON Semiconductor Soldering and
+                                                                                                   Mounting Techniques Reference Manual, SOLDERRM/D.
+  ON Semiconductor and            are trademarks of Semiconductor Components Industries, LLC dba ON Semiconductor or its subsidiaries in the United States and/or other countries.
+  ON Semiconductor owns the rights to a number of patents, trademarks, copyrights, trade secrets, and other intellectual property. A listing of ON Semiconductor’s product/patent
+  coverage may be accessed at www.onsemi.com/site/pdf/Patent−Marking.pdf. ON Semiconductor reserves the right to make changes without further notice to any products herein.
+  ON Semiconductor makes no warranty, representation or guarantee regarding the suitability of its products for any particular purpose, nor does ON Semiconductor assume any liability
+  arising out of the application or use of any product or circuit, and specifically disclaims any and all liability, including without limitation special, consequential or incidental damages.
+  Buyer is responsible for its products and applications using ON Semiconductor products, including compliance with all laws, regulations and safety requirements or standards,
+  regardless of any support or applications information provided by ON Semiconductor. “Typical” parameters which may be provided in ON Semiconductor data sheets and/or
+  specifications can and do vary in different applications and actual performance may vary over time. All operating parameters, including “Typicals” must be validated for each customer
+  application by customer’s technical experts. ON Semiconductor does not convey any license under its patent rights nor the rights of others. ON Semiconductor products are not
+  designed, intended, or authorized for use as a critical component in life support systems or any FDA Class 3 medical devices or medical devices with a same or similar classification
+  in a foreign jurisdiction or any devices intended for implantation in the human body. Should Buyer purchase or use ON Semiconductor products for any such unintended or unauthorized
+  application, Buyer shall indemnify and hold ON Semiconductor and its officers, employees, subsidiaries, affiliates, and distributors harmless against all claims, costs, damages, and
+  expenses, and reasonable attorney fees arising out of, directly or indirectly, any claim of personal injury or death associated with such unintended or unauthorized use, even if such
+  claim alleges that ON Semiconductor was negligent regarding the design or manufacture of the part. ON Semiconductor is an Equal Opportunity/Affirmative Action Employer. This
+  literature is subject to all applicable copyright laws and is not for resale in any manner.
+PUBLICATION ORDERING INFORMATION
+LITERATURE FULFILLMENT:                                  TECHNICAL SUPPORT
+Email Requests to: orderlit@onsemi.com                   North American Technical Support:                            Europe, Middle East and Africa Technical Support:
+                                                         Voice Mail: 1 800−282−9855 Toll Free USA/Canada              Phone: 00421 33 790 2910
+ON Semiconductor Website: www.onsemi.com                 Phone: 011 421 33 790 2910                                   For additional information, please contact your local Sales Representative
+ ◊                                                                                 www.onsemi.com
+                                                                                               20
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+ON Semiconductor:
+ PCA9535ECDTR2G PCA9535ECDWR2G PCA9535ECMTTXG PCA9535EDTR2G PCA9535EDWR2G
+PCA9535EMTTXG NLVPCA9535EDTR2G NLVPCA9535EMTTXG

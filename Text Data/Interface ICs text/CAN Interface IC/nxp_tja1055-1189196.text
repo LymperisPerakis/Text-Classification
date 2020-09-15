@@ -1,0 +1,1179 @@
+                  TJA1055
+                  Enhanced fault-tolerant CAN transceiver
+                  Rev. 5 — 6 December 2013                                            Product data sheet
+1. General description
+              The TJA1055 is the interface between the protocol controller and the physical bus wires in
+              a Controller Area Network (CAN). It is primarily intended for low-speed applications up to
+              125 kBd in passenger cars. The device provides differential receive and transmit
+              capability but will switch to single-wire transmitter and/or receiver in error conditions. The
+              TJA1055 is the enhanced version of the TJA1054 and TJA1054A. TJA1055 has the same
+              functionality but in addition offering a number of improvements. The most important
+              improvements of the TJA1055 with respect to the TJA1054 and TJA1054A are:
+                •  Improved ElectroStatic Discharge (ESD) performance
+                •  Lower current consumption in sleep mode
+                •  Wake-up signalling on RXD and ERR without VCC active
+                •  3 V interfacing with microcontroller possible with TJA1055T/3
+2. Features and benefits
+          2.1 Optimized for in-car low-speed communication
+                 Pin-to-pin compatible with TJA1054 and TJA1054A
+                 Baud rate up to 125 kBd
+                 Up to 32 nodes can be connected
+                 Supports unshielded bus wires
+                 Very low ElectroMagnetic Emission (EME) due to built-in slope control function and a
+                  very good matching of the CANL and CANH bus outputs
+                 Very high ElectroMagnetic Immunity (EMI) in normal operating mode and in low power
+                  modes
+                 Fully integrated receiver filters
+                 Transmit Data (TxD) dominant time-out function
+                 High ESD robustness:
+                    8 kV Electrostatic Discharge (ESD) protection Human Body Model (HBM) for
+                      off-board pins
+                    6 kV Electrostatic Discharge (ESD) protection IEC 61000-4-2 for off-board pins
+                 Low-voltage microcontroller support
+          2.2 Bus failure management
+               Supports single-wire transmission modes with ground offset voltages up to 1.5 V
+               Automatic switching to single-wire mode in the event of bus failures, even when the
+                  CANH bus wire is short-circuited to VCC
+
+
+NXP Semiconductors                                                                                                                  TJA1055
+                                                                                                            Enhanced fault-tolerant CAN transceiver
+                        Automatic reset to differential mode if bus failure is removed
+                        Full wake-up capability during failure modes
+                   2.3 Protections
+                           Bus pins short-circuit safe to battery and to ground
+                           Thermally protected
+                           Bus lines protected against transients in an automotive environment
+                           An unpowered node does not disturb the bus lines
+                           Microcontroller interface without reverse current paths, if unpowered
+                   2.4 Support for low power modes
+                        Low current sleep mode and standby mode with wake-up via the bus lines
+                        Software accessible power-on reset flag
+3. Quick reference data
+                       Table 1.       Quick reference data
+                        Symbol Parameter                                             Conditions                             Min         Typ Max                Unit
+                        VCC         supply voltage                                                                          4.75        -        5.25          V
+                        VBAT        battery supply voltage                           no time limit                          0.3        -        +40           V
+                                                                                     operating mode                         5.0         -        40            V
+                                                                                     load dump                              -           -        58            V
+                        IBAT        battery supply current                           sleep mode at                          -           25       40            A
+                                                                                     VRTL = VWAKE = VINH =
+                                                                                     VBAT = 14 V; Tamb =
+                                                                                     40 C to +125 C
+                        VCANH       voltage on pin CANH                              VCC  0 V; VBAT  0 V;                 58         -        +58           V
+                                                                                     no time limit; with respect
+                                                                                     to any other pin
+                        VCANL       voltage on pin CANL                              VCC  0 V; VBAT  0 V;                 58         -        +58           V
+                                                                                     no time limit; with respect
+                                                                                     to any other pin
+                        VO(dom)     dominant output voltage                          VTXD = 0 V; VEN = VCC
+                                       on pin CANH                                        ICANH = 40 mA                    VCC  1.4 -          -             V
+                                       on pin CANL                                        ICANL = 40 mA                     -           -        1.4           V
+                        tPD(L)      propagation delay TXD                            no failures;                           -           -        1.5           s
+                                    (LOW) to RXD (LOW)                               RCAN_L = RCAN_H =
+                                                                                     125 ; CCAN_L =
+                                                                                     CCAN_H = 1 nF;
+                                                                                     see Figure 4 to Figure 6
+                        Tvj         virtual junction temperature                                                        [1] 40         -        +150 C
+                       [1]   Junction temperature in accordance with “IEC 60747-1”. An alternative definition is: Tvj = Tamb + P  Rth(vj-a)
+                             where Rth(vj-a) is a fixed value to be used for the calculation of Tvj. The rating for Tvj limits the allowable
+                             combinations of power dissipation (P) and operating ambient temperature (Tamb).
+TJA1055                                      All information provided in this document is subject to legal disclaimers.             © NXP B.V. 2013. All rights reserved.
+Product data sheet                                         Rev. 5 — 6 December 2013                                                                           2 of 26
+
+
+NXP Semiconductors                                                                                                                           TJA1055
+                                                                                                                Enhanced fault-tolerant CAN transceiver
+4. Ordering information
+Table 2.     Ordering information
+ Type number             Package
+                         Name            Description                                                                                                       Version
+ TJA1055T                SO14            plastic small outline package; 14 leads; body width 3.9 mm                                                        SOT108-1
+ TJA1055T/3
+5. Block diagram
+                                                                                     BAT                                    VCC
+                                                                                       14                                     10
+                       1
+                INH                                                        TEMPERATURE
+                       7                    WAKE-UP
+             WAKE                                                           PROTECTION
+                       5                    STANDBY
+               STB                          CONTROL                                                                                         9
+                       6                                                                                                                          RTL
+                 EN                                                                                                                        11
+                         VCC                                                                                                                      CANH
+                                                                                                                                           12
+                                                                                                                                                  CANL
+                                                                                                                                            8
+                                                                                  DRIVER                                                          RTH
+                       2
+               TXD               TIMER
+                           (1)
+                              VCC(2)
+                                         FAILURE DETECTOR
+                       4                   PLUS WAKE-UP
+               ERR
+                                           PLUS TIME-OUT
+                                                                                                                            TJA1055T
+                              VCC (2)
+                                                                                                                              FILTER
+                       3                                                          RECEIVER
+               RXD
+                                                                                                                              FILTER
+                                      13
+                                                                                                                                     001aac769
+                                    GND
+        (1) For TJA1055T/3 current source to GND; for TJA1055T pull-up resistor to VCC.
+        (2) Not within TJA1055T/3.
+  Fig 1.    Block diagram
+TJA1055                                          All information provided in this document is subject to legal disclaimers.                  © NXP B.V. 2013. All rights reserved.
+Product data sheet                                             Rev. 5 — 6 December 2013                                                                                3 of 26
+
+
+NXP Semiconductors                                                                                                          TJA1055
+                                                                                                     Enhanced fault-tolerant CAN transceiver
+6. Pinning information
+                   6.1 Pinning
+                                                                        INH     1                                14 BAT
+                                                                        TXD     2                                13 GND
+                                                                       RXD      3                                12 CANL
+                                                                                           TJA1055T
+                                                                       ERR      4                                11 CANH
+                                                                                         TJA1055T/3
+                                                                        STB     5                                10 VCC
+                                                                         EN     6                                 9 RTL
+                                                                    WAKE        7                                 8 RTH
+                                                                                                   001aac770
+                        Fig 2.  Pin configuration
+                   6.2 Pin description
+                       Table 3.  Pin description
+                       Symbol              Pin                    Description
+                       INH                 1                     inhibit output for switching an external voltage regulator if a
+                                                                  wake-up signal occurs
+                       TXD                 2                      transmit data input for activating the driver to the bus lines
+                       RXD                 3                     receive data output for reading out the data from the bus lines
+                       ERR                 4                      error, wake-up and power-on indication output; active LOW in
+                                                                  normal operating mode when a bus failure is detected; active LOW
+                                                                  in standby and sleep mode when a wake-up is detected; active
+                                                                  LOW in power-on standby when a VBAT power-on event is
+                                                                  detected
+                       STB                 5                      standby digital control signal input; together with the input signal
+                                                                  on pin EN this input determines the state of the transceiver;
+                                                                  see Table 5 and Figure 3
+                       EN                  6                     enable digital control signal input; together with the input signal on
+                                                                  pin STB this input determines the state of the transceiver;
+                                                                  see Table 5 and Figure 3
+                       WAKE                7                      local wake-up signal input (active LOW); both falling and rising
+                                                                  edges are detected
+                       RTH                 8                      termination resistor connection; in case of a CANH bus wire error
+                                                                  the line is terminated with a predefined impedance
+                       RTL                 9                      termination resistor connection; in case of a CANL bus wire error
+                                                                  the line is terminated with a predefined impedance
+                       VCC                 10                     supply voltage
+                       CANH                11                     HIGH-level CAN bus line
+                       CANL                12                    LOW-level CAN bus line
+                       GND                 13                    ground
+                       BAT                 14                    battery supply voltage
+TJA1055                               All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                  Rev. 5 — 6 December 2013                                                                          4 of 26
+
+
+NXP Semiconductors                                                                                                            TJA1055
+                                                                                                       Enhanced fault-tolerant CAN transceiver
+7. Functional description
+                       The TJA1055 is the interface between the CAN protocol controller and the physical wires
+                       of the CAN bus (see Figure 7 and Figure 8). It is primarily intended for low-speed
+                       applications, up to 125 kBd, in passenger cars. The device provides differential transmit
+                       capability to the CAN bus and differential receive capability to the CAN controller.
+                       To reduce EME, the rise and fall slopes are limited. This allows the use of an unshielded
+                       twisted pair or a parallel pair of wires for the bus lines. Moreover, the device supports
+                       transmission capability on either bus line if one of the wires is corrupted. The failure
+                       detection logic automatically selects a suitable transmission mode.
+                       In normal operating mode (no wiring failures) the differential receiver is output on pin RXD
+                       (see Figure 1). The differential receiver inputs are connected to pins CANH and CANL
+                       through integrated filters. The filtered input signals are also used for the single-wire
+                       receivers. The receivers connected to pins CANH and CANL have threshold voltages that
+                       ensure a maximum noise margin in single-wire mode.
+                       A timer function (TxD dominant time-out function) has been integrated to prevent the bus
+                       lines from being driven into a permanent dominant state (thus blocking the entire network
+                       communication) due to a situation in which pin TXD is permanently forced to a LOW level,
+                       caused by a hardware and/or software application failure.
+                       If the duration of the LOW level on pin TXD exceeds a certain time, the transmitter will be
+                       disabled. The timer will be reset by a HIGH level on pin TXD.
+                   7.1 Failure detector
+                       The failure detector is fully active in the normal operating mode. After the detection of a
+                       single bus failure the detector switches to the appropriate mode (see Table 4). The
+                       differential receiver threshold voltage is set at 3.2 V typical (VCC = 5 V). This ensures
+                       correct reception with a noise margin as high as possible in the normal operating mode
+                       and in the event of failures 1, 2, 5 and 6a. These failures, or recovery from them, do not
+                       destroy ongoing transmissions. The output drivers remain active, the termination does not
+                       change and the receiver remains in differential mode (see Table 4).
+                       Failures 3, 3a and 6 are detected by comparators connected to the CANH and CANL bus
+                       lines. Failures 3 and 3a are detected in a two-step approach. If the CANH bus line
+                       exceeds a certain voltage level, the differential comparator signals a continuous dominant
+                       condition. Because of inter operability reasons with the predecessor products TJA1054
+                       and TJA1054A, after a first time-out the transceiver switches to single-wire operation
+                       through CANH. If the CANH bus line is still exceeding the CANH detection voltage for a
+                       second time-out, the TJA1055 switches to CANL operation; the CANH driver is switched
+                       off and the RTH bias changes to the pull-down current source. The time-outs (delays) are
+                       needed to avoid false triggering by external RF fields.
+TJA1055                                 All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                    Rev. 5 — 6 December 2013                                                                          5 of 26
+
+
+NXP Semiconductors                                                                                                         TJA1055
+                                                                                                    Enhanced fault-tolerant CAN transceiver
+                   Table 4.     Bus failures
+                    Failure   Description                             Termination Termination                   CANH   CANL         Receiver
+                                                                      CANH (RTH) CANL (RTL)                     driver driver       mode
+                    1         CANH wire                               on                         on             on     on           differential
+                              interrupted
+                    2         CANL wire interrupted on                                           on             on     on           differential
+                    3         CANH short-circuited                    weak[1]                    on             off    on           CANL
+                              to battery
+                    3a        CANH short-circuited                    weak[1]                    on             off    on           CANL
+                              to VCC
+                    4         CANL short-circuited                    on                         weak[2]        on     off          CANH
+                              to ground
+                    5         CANH short-circuited                    on                         on             on     on           differential
+                              to ground
+                    6         CANL short-circuited                    on                         weak[2]        on     off          CANH
+                              to battery
+                    6a        CANL short-circuited                    on                         on             on     on           differential
+                              to VCC
+                    7         CANL and CANH                           on                         weak[2]        on     off          CANH
+                              mutually
+                              short-circuited
+                   [1]  A weak termination implies a pull-down current source behavior of 75 A typical.
+                   [2]  A weak termination implies a pull-up current source behavior of 75 A typical.
+                   Failure 6 is detected if the CANL bus line exceeds its comparator threshold for a certain
+                   period of time. This delay is needed to avoid false triggering by external RF fields. After
+                   detection of failure 6, the reception is switched to the single-wire mode through CANH; the
+                   CANL driver is switched off and the RTL bias changes to the pull-up current source.
+                   Recovery from failures 3, 3a and 6 is detected automatically after reading a consecutive
+                   recessive level by corresponding comparators for a certain period of time.
+                   Failures 4 and 7 initially result in a permanent dominant level on pin RXD. After a time-out
+                   the CANL driver is switched off and the RTL bias changes to the pull-up current source.
+                   Reception continues by switching to the single-wire mode via pins CANH or CANL. When
+                   failures 4 or 7 are removed, the recessive bus levels are restored. If the differential
+                   voltage remains below the recessive threshold level for a certain period of time, reception
+                   and transmission switch back to the differential mode.
+                   If any of the wiring failure occurs, the output signal on pin ERR will be set to LOW. On
+                   error recovery, the output signal on pin ERR will be set to HIGH again. In case of an
+                   interrupted open bus wire, this failure will be detected and signalled only if there is an
+                   open wire between the transmitting and receiving node(s). Thus, during open wire
+                   failures, pin ERR typically toggles.
+                   During all single-wire transmissions, EMC performance (both immunity and emission) is
+                   worse than in the differential mode. The integrated receiver filters suppress any HF noise
+                   induced into the bus wires. The cut-off frequency of these filters is a compromise between
+                   propagation delay and HF suppression. In single-wire mode, LF noise cannot be
+                   distinguished from the required signal.
+TJA1055                              All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                 Rev. 5 — 6 December 2013                                                                          6 of 26
+
+
+NXP Semiconductors                                                                                                                     TJA1055
+                                                                                                           Enhanced fault-tolerant CAN transceiver
+                   7.2 Low power modes
+                       The transceiver provides three low power modes which can be entered and exited via
+                        STB and EN (see Table 5 and Figure 3).
+                       The sleep mode is the mode with the lowest power consumption. Pin INH is switched to
+                       HIGH-impedance for deactivation of the external voltage regulator. Pin CANL is biased to
+                       the battery voltage via pin RTL. Pins RXD and ERR will signal the wake-up interrupt even
+                       in case VCC is not present.
+                       The standby mode operates in the same way as the sleep mode but with a HIGH level on
+                       pin INH.
+                       The power-on standby mode is the same as the standby mode, however, in this mode the
+                       battery power-on flag is shown on pin ERR instead of the wake-up interrupt signal. The
+                       output on pin RXD will show the wake-up interrupt. This mode is only for reading out the
+                       power-on flag.
+                       Table 5.       Normal operating and low power modes
+                        Mode            Pin STB             Pin EN                Pin ERR                              Pin RXD                       Pin RTL
+                                                                                  LOW                     HIGH         LOW       HIGH                switched
+                                                                                                                                                     to
+                        Goto-sleep      LOW                 HIGH                  wake-up                 [2][3]       wake-up   [2][3]              VBAT
+                        command                                                   interrupt                            interrupt
+                        Sleep           LOW                 LOW[4]                signal[1]                            signal[1]
+                        Standby         LOW                 LOW
+                        Power-on        HIGH                LOW                   VBAT                                 wake-up                       VBAT
+                        standby                                                   power-on                             interrupt
+                                                                                  flag[5]                              signal[1]
+                        Normal          HIGH                HIGH                  error flag              no error     dominant  recessive           VCC
+                        operating                                                                         flag         received  received
+                                                                                                                       data      data
+                       [1]  Wake-up interrupts are released when entering normal operating mode.
+                       [2]  For TJA1055T a diode is added in series with the high-side driver of ERR and RXD to prevent a reverse
+                            current from ERR to VCC in the unpowered state.
+                       [3]  For TJA1055T/3, ERR and RXD are open-drain.
+                       [4]  In case the goto-sleep command was used before. When VCC drops, pin EN will become LOW, but due to
+                            the fail-safe functionality this does not effect the internal functions.
+                       [5]  VBAT power-on flag will be reset when entering normal operating mode.
+                       Wake-up requests are recognized by the transceiver through two possible channels:
+                         • The bus lines for remote wake-up
+                         • Pin WAKE for local wake-up
+                       In order to wake-up the transceiver remotely through the bus lines, a filter mechanism is
+                       integrated. This mechanism makes sure that noise and any present bus failure conditions
+                       do not result into an erroneous wake-up. Because of this mechanism it is not sufficient to
+                       simply pull the CANH or CANL bus lines to a dominant level for a certain time. To
+                       guarantee a successful remote wake-up under all conditions, a message frame with a
+                       dominant phase of at least the maximum specified tdom(CANH) or tdom(CANL) in it is required.
+TJA1055                                     All information provided in this document is subject to legal disclaimers.                 © NXP B.V. 2013. All rights reserved.
+Product data sheet                                        Rev. 5 — 6 December 2013                                                                               7 of 26
+
+
+NXP Semiconductors                                                                                                             TJA1055
+                                                                                                        Enhanced fault-tolerant CAN transceiver
+                       A local wake-up through pin WAKE is detected by a rising or falling edge with a
+                       consecutive level exceeding the maximum specified tWAKE.
+                       On a wake-up request the transceiver will set the output on pin INH to HIGH which can be
+                       used to activate the external supply voltage regulator.
+                       A wake-up request is signalled on ERR or RXD with an active LOW signal. So the external
+                       microcontroller can activate the transceiver (switch to normal operating mode) via
+                       pins STB and EN.
+                       To prevent a false remote wake-up due to transients or RF fields, the wake-up voltage
+                       levels have to be maintained for a certain period of time. In the low power modes the
+                       failure detection circuit remains partly active to prevent an increased power consumption
+                       in the event of failures 3, 3a, 4 and 7.
+                       To prevent a false local wake-up during an open wire at pin WAKE, this pin has a weak
+                       pull-up current source towards VBAT. However, in order to protect the transceiver against
+                       any EMC immunity issues, it is recommended to connect a not used pin WAKE to pin
+                       BAT. Pin INH is set to floating only if the goto-sleep command is entered successfully. To
+                       enter a successful goto-sleep command under all conditions, this command must be kept
+                       stable for the maximum specified td(sleep).
+                       Pin INH will be set to a HIGH level again by the following events only:
+                         • VBAT power-on (cold start)
+                         • Rising or falling edge on pin WAKE
+                         • A message frame with a dominant phase of at least the maximum specified tdom(CANH)
+                            or tdom(CANL), while pin EN or pin STB is at a LOW level
+                         • Pin STB goes to a HIGH level with VCC active
+                       To provide fail-safe functionality, the signals on pins STB and EN will internally be set to
+                       LOW when VCC is below a certain threshold voltage (VCC(stb)). An unused output pin INH
+                       can simply be left open within the application.
+                   7.3 Power-on
+                       After power-on (VBAT switched on) the signal on pin INH will become HIGH and an internal
+                       power-on flag will be set. This flag can be read in the power-on standby mode through
+                       pin ERR (STB = 1; EN = 0) and will be reset by entering the normal operating mode.
+                   7.4 Protections
+                       A current limiting circuit protects the transmitter output stages against short-circuit to
+                       positive and negative battery voltage.
+                       If the junction temperature exceeds the typical value of 175 C, the transmitter output
+                       stages are disabled. Because the transmitter is responsible for the major part of the power
+                       dissipation, this will result in a reduced power dissipation and hence a lower chip
+                       temperature. All other parts of the device will continue to operate.
+                       The pins CANH and CANL are protected against electrical transients which may occur in
+                       an automotive environment.
+TJA1055                                  All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                     Rev. 5 — 6 December 2013                                                                          8 of 26
+
+
+NXP Semiconductors                                                                                                                TJA1055
+                                                                                                       Enhanced fault-tolerant CAN transceiver
+                                                                       POWER-ON
+                                                                        STANDBY
+                                                                             10
+                                                                                                                    GOTO
+                                 NORMAL (4)                                                                        SLEEP (5)
+                                     11                                                                               01
+                             (1)                                        STANDBY                                                      SLEEP
+                                                                             00                                                        00
+                             (2)
+                             (3)
+                                                                                                                                            mbk949
+                               Mode 10 stands for: Pin STB = HIGH and pin EN = LOW.
+                          (1) Mode change via input pins STB and EN.
+                          (2) Mode change via input pins STB and EN; it should be noted that in the sleep mode pin INH is
+                               inactive and possibly there is no VCC. Mode control is only possible if VCC of the transceiver is
+                               active.
+                          (3) Pin INH is activated and pins RXD and ERR are pulled LOW after wake-up via bus or input
+                               pin WAKE.
+                          (4) Transitions to normal mode clear the internal wake-up: wake-up interrupt flag and power-on flag
+                               are cleared.
+                          (5) Transitions to sleep mode: pin INH is deactivated.
+                     Fig 3.    Mode control
+8. Limiting values
+                   Table 6.       Limiting values
+                   In accordance with the Absolute Maximum Rating System (IEC 60134).[1]
+                    Symbol       Parameter                                         Conditions                                Min   Max                    Unit
+                    VCC          supply voltage                                                                              0.3  +6                     V
+                    VBAT         battery supply voltage                                                                      0.3  +58                    V
+                    VTXD         voltage on pin TXD                                                                          0.3  VCC + 0.3              V
+                    VRXD         voltage on pin RXD                                                                          0.3  VCC + 0.3              V
+                    VERR         voltage on pin ERR                                                                          0.3  VCC + 0.3              V
+                    VSTB         voltage on pin STB                                                                          0.3  VCC + 0.3              V
+                    VEN          voltage on pin EN                                                                           0.3  VCC + 0.3              V
+                    VCANH        voltage on pin CANH                               VCC  0 V; VBAT  0 V;                    58   +58                    V
+                                                                                   no time limit; with
+                                                                                   respect to any other pin
+                    VCANL        voltage on pin CANL                               VCC  0 V; VBAT  0 V;                    58   +58                    V
+                                                                                   no time limit; with
+                                                                                   respect to any other pin
+TJA1055                                 All information provided in this document is subject to legal disclaimers.                © NXP B.V. 2013. All rights reserved.
+Product data sheet                                    Rev. 5 — 6 December 2013                                                                              9 of 26
+
+
+NXP Semiconductors                                                                                                             TJA1055
+                                                                                                        Enhanced fault-tolerant CAN transceiver
+                   Table 6.        Limiting values …continued
+                   In accordance with the Absolute Maximum Rating System (IEC 60134).[1]
+                    Symbol        Parameter                                         Conditions                          Min     Max                    Unit
+                    Vtrt(n)       transient voltage on                                                              [2] 150    +100                   V
+                                  pins CANH and CANL
+                    VI(WAKE)      input voltage on pin WAKE with respect to any                                         0.3    +58                    V
+                                                                                    other pin
+                    II(WAKE)      input current on pin WAKE                                                         [3] 15     -                      mA
+                    VINH          voltage on pin INH                                                                    0.3    VBAT + 0.3 V
+                    VRTH          voltage on pin RTH                                with respect to any                 58     +58                    V
+                                                                                    other pin
+                    VRTL          voltage on pin RTL                                with respect to any                 58     +58                    V
+                                                                                    other pin
+                    RRTH          termination resistance on                                                             500     16000                  
+                                  pin RTH
+                    RRTL          termination resistance on                                                             500     16000                  
+                                  pin RTL
+                    Tvj           virtual junction temperature                                                      [4] 40     +150                   C
+                    Tstg          storage temperature                                                                   55     +150                   C
+                    Vesd          electrostatic discharge                           human body model                [5]
+                                  voltage                                               pins RTH, RTL,                  8      +8                     kV
+                                                                                        CANH and CANL
+                                                                                        all other pins                  2      +2                     kV
+                                                                                    IEC 61000-4-2                   [6]
+                                                                                        pins RTH, RTL,                  6      +6                     kV
+                                                                                        CANH and CANL
+                                                                                    machine model                   [7]
+                                                                                        any pin                         300    +300                   V
+                   [1]   All voltages are defined with respect to pin GND, unless otherwise specified. Positive current flows into the
+                         device.
+                   [2]   Test set-up according to IEC TS 62228, section 4.2.4. Verified by an external test house to ensure pins can
+                         withstand ISO 7637 part 1 & 2 automotive transient test pulses 1, 2a, 3a and 3b.
+                   [3]   Only relevant if VWAKE < VGND  0.3 V; current will flow into pin GND.
+                   [4]   Junction temperature in accordance with “IEC 60747-1”. An alternative definition is: Tvj = Tamb + P  Rth(vj-a)
+                         where Rth(vj-a) is a fixed value to be used for the calculation of Tvj. The rating for Tvj limits the allowable
+                         combinations of power dissipation (P) and operating ambient temperature (Tamb).
+                   [5]   Equivalent to discharging a 100 pF capacitor through a 1.5 k resistor.
+                   [6]   The ESD performance of pins CANH, CANL, RTH and RTL, with respect to GND, was verified by an
+                         external test house in accordance with IEC-61000-4-2 (C = 150 pF, R = 330 ). The results were equal to,
+                         or better than, 6 kV.
+                   [7]   Equivalent to discharging a 200 pF capacitor through a 10  resistor and a 0.75 H coil.
+TJA1055                                  All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                     Rev. 5 — 6 December 2013                                                                        10 of 26
+
+
+NXP Semiconductors                                                                                                                TJA1055
+                                                                                                           Enhanced fault-tolerant CAN transceiver
+9. Thermal characteristics
+                          Table 7.     Thermal characteristics
+                          Symbol         Parameter                                                      Conditions              Typ               Unit
+                          Rth(j-a)       thermal resistance from junction                               in free air             120               K/W
+                                         to ambient
+                          Rth(j-s)       thermal resistance from junction                               in free air             40                K/W
+                                         to substrate
+10. Static characteristics
+Table 8.    Static characteristics
+VCC = 4.75 V to 5.25 V; VBAT = 5.0 V to 40 V; VSTB = VCC; Tvj = 40 C to +150 C; all voltages are defined with respect to
+ground; positive currents flow into the device; unless otherwise specified.[1]
+ Symbol         Parameter                    Conditions                                                                Min  Typ       Max                    Unit
+ Supplies (pins VCC and BAT)
+ VCC            supply voltage                                                                                         4.75 -         5.25                   V
+ VCC(stb)       supply voltage for forced                                                                              3.1  -         4.5                    V
+                standby mode (fail-safe)
+ ICC            supply current               normal operating mode;                                                    2.5  6         10                     mA
+                                             VTXD = VCC (recessive)
+                                             normal operating mode;                                                    3    13        21                     mA
+                                             VTXD = 0 V (dominant); no load
+                                             low power modes at VTXD = VCC
+                                                  Tamb = 40 C to +85 C                                              0    0         5                      A
+                                                  Tamb = +85 C to +125 C                                             0    0         25                     A
+ VBAT           battery supply voltage       no time limit                                                             0.3 -         +40                    V
+                                             operating mode                                                            5.0  -         40                     V
+                                             load dump                                                                 -    -         58                     V
+ IBAT           battery supply current       sleep mode at                                                             -    25        40                     A
+                                             VRTL = VWAKE = VINH = VBAT = 14 V;
+                                             Tamb = 40 C to +125 C
+                                             low power mode at
+                                             VRTL = VWAKE = VINH = VBAT;
+                                             Tamb = 40 C to +125 C
+                                                  VBAT = 5 V to 8 V                                                    10   -         100                    A
+                                                  VBAT = 8 V to 40 V                                                   10   -         75                     A
+                                             normal operating mode at                                                  -    150       220                    A
+                                             VRTL = VWAKE = VINH = VBAT = 5 V
+                                             to 40 V
+ Vpof(BAT)      power-on flag voltage on     low power modes
+                pin BAT                           power-on flag set                                                    -    -         3.8                    V
+                                                  power-on flag not set                                                5    -         -                      V
+ Pins STB, EN and TXD
+ VIH            HIGH-level input voltage                                                                               2.2  -         VCC + 0.3 V
+ VIL            LOW-level input voltage                                                                                0.3 -         +0.8                   V
+TJA1055                                     All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                        Rev. 5 — 6 December 2013                                                                        11 of 26
+
+
+NXP Semiconductors                                                                                                                       TJA1055
+                                                                                                           Enhanced fault-tolerant CAN transceiver
+Table 8.    Static characteristics …continued
+VCC = 4.75 V to 5.25 V; VBAT = 5.0 V to 40 V; VSTB = VCC; Tvj = 40 C to +150 C; all voltages are defined with respect to
+ground; positive currents flow into the device; unless otherwise specified.[1]
+ Symbol         Parameter                    Conditions                                                                Min       Typ         Max                    Unit
+ IIH            HIGH-level input current
+                   pins STB and EN           VI = 4 V                                                                  -         11          21                     A
+                   pin TXD (TJA1055T)        VI = 3 V                                                                  160      80         40                    A
+                   pin TXD (TJA1055T/3)      normal operating mode; VI = 2.4 V                                         2         11          21                     A
+                                             low power mode; VI = 2.4 V                                                0.1       0.9         2                      A
+ IIL            LOW-level input current
+                   pins STB and EN           VI = 1 V                                                                  2         11          -                      A
+                   pin TXD (TJA1055T)        VI = 1 V                                                                  400      240        100                   A
+                   pin TXD (TJA1055T/3)      normal operating mode; VI = 1 V                                           2         11          -                      A
+                                             low power mode; VI = 1 V                                                  0.1       0.9         2                      A
+ Pins RXD and ERR (TJA1055T)
+ VOH(norm)      HIGH-level output voltage
+                in normal mode
+                   on pin ERR                IO = 100 A                                                              VCC  0.9 -           VCC                    V
+                   on pin RXD                IO = 1 mA                                                                VCC  0.9 -           VCC                    V
+ VOH(lp)        HIGH-level output voltage
+                in low-power mode
+                   on pin ERR                IO = 100 A                                                              VCC  1.1 VCC  0.7 VCC  0.4 V
+                   on pin RXD                IO = 100 A                                                              VCC  1.1 VCC  0.7 VCC  0.4 V
+ VOL            LOW-level output voltage     IO = 1.6 mA                                                               0         -           0.4                    V
+                                             IO = 1.2 mA; VCC < 4.75 V                                                 0         -           0.4                    V
+                                             IO = 5 mA                                                                 0         -           1.5                    V
+ Pins RXD and ERR (TJA1055T/3)
+ IOL            LOW-level output current     VO = 0.4 V                                                                1.3       3.5         -                      mA
+ ILH            HIGH-level leakage           VO = 3 V                                                                  5        0           +8                     A
+                current
+ Pin WAKE
+ IIL            LOW-level input current      VWAKE = 0 V; VBAT = 40 V                                                  12       4          1                     A
+ Vth(wake)      wake-up threshold            VSTB = 0 V                                                                2.5       3.2         3.9                    V
+                voltage
+ Pin INH
+ VH            HIGH-level voltage drop      IINH = 0.18 mA; VBAT  5.5 V                                             -         -           0.8                    V
+                                             IINH = 0.18 mA; VBAT = 5.0 V                                             -         -           1.0                    V
+ IL           leakage current              sleep mode; VINH = 0 V                                                    -         -           5                      A
+ Pins CANH and CANL
+ Vth(dif)       differential receiver        no failures and
+                threshold voltage            bus failures 1, 2, 5 and 6a;
+                                             see Figure 4
+                                                  VCC = 5 V                                                            3.5      3.2        2.9                   V
+                                                  VCC = 4.75 V to 5.25 V                                               0.70VCC 0.64VCC 0.58VCC V
+TJA1055                                     All information provided in this document is subject to legal disclaimers.                   © NXP B.V. 2013. All rights reserved.
+Product data sheet                                        Rev. 5 — 6 December 2013                                                                               12 of 26
+
+
+NXP Semiconductors                                                                                                                        TJA1055
+                                                                                                            Enhanced fault-tolerant CAN transceiver
+Table 8.       Static characteristics …continued
+VCC = 4.75 V to 5.25 V; VBAT = 5.0 V to 40 V; VSTB = VCC; Tvj = 40 C to +150 C; all voltages are defined with respect to
+ground; positive currents flow into the device; unless otherwise specified.[1]
+ Symbol           Parameter                   Conditions                                                                Min       Typ         Max                    Unit
+ VO(reces)        recessive output voltage    VTXD = VCC
+                     on pin CANH                   RRTH < 4 k                                                          -         -           0.2                    V
+                     on pin CANL                   RRTL < 4 k                                                          VCC  0.2 -           -                      V
+ VO(dom)          dominant output voltage     VTXD = 0 V; VEN = VCC
+                     on pin CANH                   ICANH = 40 mA                                                       VCC  1.4 -           -                      V
+                     on pin CANL                   ICANL = 40 mA                                                        -         -           1.4                    V
+ IO(CANH)         output current on           normal operating mode;                                                    110      80         45                    mA
+                  pin CANH                    VCANH = 0 V; VTXD = 0 V
+                                              low power modes; VCANH = 0 V;                                             -         0.25       -                      A
+                                              VCC = 5 V
+ IO(CANL)         output current on           normal operating mode;                                                    45        70          100                    mA
+                  pin CANL                    VCANL = 14 V; VTXD = 0 V
+                                              low power modes; VCANL = 14 V;                                            -         0           -                      A
+                                              VBAT = 14 V
+ Vdet(sc)(CANH)   detection voltage for       normal operating mode; VCC = 5 V                                          1.5       1.7         1.85                   V
+                  short-circuit to battery    low power modes                                                           1.1       1.8         2.5                    V
+                  voltage on pin CANH
+ Vdet(sc)(CANL)   detection voltage for       normal operating mode
+                  short-circuit to battery         VCC = 5 V                                                            6.6       7.2         7.8                    V
+                  voltage on pin CANL
+                                                   VCC = 4.75 V to 5.25 V                                               1.32VCC   1.44VCC     1.56VCC                V
+ Vth(wake)        wake-up threshold
+                  voltage
+                     on pin CANL              low power modes                                                           2.5       3.2         3.9                    V
+                     on pin CANH              low power modes                                                           1.1       1.8         2.5                    V
+ Vth(wake)       difference of wake-up       low power modes                                                           0.8       1.4         -                      V
+                  threshold voltages (on
+                  pins CANL and CANH)
+ Vth(se)(CANH)    single-ended receiver       normal operating mode and
+                  threshold voltage on        failures 4, 6 and 7
+                  pin CANH                         VCC = 5 V                                                            1.5       1.7         1.85                   V
+                                                   VCC = 4.75 V to 5.25 V                                               0.30VCC   0.34VCC     0.37VCC                V
+ Vth(se)(CANL)    single-ended receiver       normal operating mode and
+                  threshold voltage on        failures 3 and 3a
+                  pin CANL                         VCC = 5 V                                                            3.15      3.3         3.45                   V
+                                                   VCC = 4.75 V to 5.25 V                                               0.63VCC   0.66VCC     0.69VCC                V
+ Ri(se)(CANH)     single-ended input          normal operating mode                                                     110       165         270                    k
+                  resistance on pin CANH
+ Ri(se)(CANL)     single-ended input          normal operating mode                                                     110       165         270                    k
+                  resistance on pin CANL
+ Ri(dif)          differential input          normal operating mode                                                     220       330         540                    k
+                  resistance
+TJA1055                                      All information provided in this document is subject to legal disclaimers.                   © NXP B.V. 2013. All rights reserved.
+Product data sheet                                         Rev. 5 — 6 December 2013                                                                               13 of 26
+
+
+NXP Semiconductors                                                                                                                          TJA1055
+                                                                                                                 Enhanced fault-tolerant CAN transceiver
+Table 8.       Static characteristics …continued
+VCC = 4.75 V to 5.25 V; VBAT = 5.0 V to 40 V; VSTB = VCC; Tvj = 40 C to +150 C; all voltages are defined with respect to
+ground; positive currents flow into the device; unless otherwise specified.[1]
+ Symbol             Parameter                      Conditions                                                                Min  Typ            Max                   Unit
+ Pins RTH and RTL
+ Rsw(RTL)           switch-on resistance on        normal operating mode; switch-on                                          -    40             100                   
+                    pin RTL                        resistance between pin RTL and
+                                                   VCC; IO < 10 mA
+ Rsw(RTH)           switch-on resistance on        normal operating mode; switch-on                                          -    40             100                   
+                    pin RTH                        resistance between pin RTH and
+                                                   ground; IO < 10 mA
+ VO(RTH)            output voltage on pin RTH low power modes; IO = 100 A                                                   -    0.7            1.0                   V
+ IO(RTL)            output current on pin RTL low power modes; VRTL = 0 V                                                    1.5 0.65          0.1                  mA
+ Ipu(RTL)           pull-up current on pin RTL normal operating mode and                                                     -    75             -                     A
+                                                   failures 4, 6 and 7
+ Ipd(RTH)           pull-down current on           normal operating mode and                                                 -    75             -                     A
+                    pin RTH                        failures 3 and 3a
+ Thermal shutdown
+ Tj(sd)             shutdown junction                                                                                        160  175           190                    C
+                    temperature
+[1]    All parameters are guaranteed over the virtual junction temperature range by design, but only 100 % tested at Tamb = 125 C for dies on
+       wafer level, and above this for cased products 100 % tested at Tamb = 25 C, unless otherwise specified.
+11. Dynamic characteristics
+Table 9.       Dynamic characteristics
+VCC = 4.75 V to 5.25 V; VBAT = 5.0 V to 40 V; VSTB = VCC; Tvj = 40 C to +150 C; RCAN_L = RCAN_H = 125 ; CCAN_L =
+CCAN_H = 1 nF; all voltages are defined with respect to ground; unless otherwise specified.[1]
+ Symbol         Parameter                                      Conditions                                                               Min     Typ       Max Unit
+ tt(reces-dom) transition time for recessive to                between 10 % and 90 %; see Figure 5 and 6                                0.2     -         -            s
+                dominant (on pins CANL and
+                CANH)
+ tt(dom-reces) transition time for dominant to                 between 10 % and 90 %; see Figure 5 and 6                                0.2     -         -            s
+                recessive (on pins CANL and
+                CANH)
+ tPD(L)         propagation delay TXD (LOW) to                 no failures; see Figure 4 to Figure 6                                    -       -         1.5          s
+                RXD (LOW)                                      all failures except CAN_L shorted to CAN_H;                              -       -         1.9          s
+                                                               see Figure 4 to Figure 6
+                                                               failure 7, CAN_L shorted to CAN_H;                                       -       -         1.9          s
+                                                               RCAN_L = 1 M; see Figure 4 to Figure 6
+ tPD(H)         propagation delay TXD (HIGH) to                no failures; see Figure 4 to Figure 6                                    -       -         1.5          s
+                RXD (HIGH)                                     all failures except CAN_L shorted to CAN_H;                              -       -         1.9          s
+                                                               see Figure 4 to Figure 6
+                                                               failure 7, CAN_L shorted to CAN_H;                                       -       -         1.9          s
+                                                               RCAN_L = 1 M; see Figure 4 to Figure 6
+ td(sleep)      delay time to sleep                                                                                                 [2] 5       -         50           s
+ tdis(TxD)      disable time of TxD permanent                  normal operating mode; VTXD = 0 V                                        0.75 -            4            ms
+                dominant timer
+TJA1055                                           All information provided in this document is subject to legal disclaimers.                © NXP B.V. 2013. All rights reserved.
+Product data sheet                                              Rev. 5 — 6 December 2013                                                                            14 of 26
+
+
+NXP Semiconductors                                                                                                                       TJA1055
+                                                                                                                Enhanced fault-tolerant CAN transceiver
+Table 9.      Dynamic characteristics …continued
+VCC = 4.75 V to 5.25 V; VBAT = 5.0 V to 40 V; VSTB = VCC; Tvj = 40 C to +150 C; RCAN_L = RCAN_H = 125 ; CCAN_L =
+CCAN_H = 1 nF; all voltages are defined with respect to ground; unless otherwise specified.[1]
+ Symbol        Parameter                                      Conditions                                                             Min     Typ       Max Unit
+ tdom(CANH) dominant time on pin CANH                         low power modes; VBAT = 14 V                                       [2] 7       -         38           s
+ tdom(CANL)    dominant time on pin CANL                      low power modes; VBAT = 14 V                                       [2] 7       -         38           s
+ tWAKE         local wake-up time on pin WAKE                 low power modes; VBAT = 14 V; for wake-up                          [2] 7       -         38           s
+                                                              after receiving a falling or rising edge
+ tdet          failure detection time                         normal operating mode
+                                                                  failures 3 and 3a                                                  1.6     -         8.0          ms
+                                                                  failures 4, 6 and 7                                                0.3     -         1.6          ms
+                                                              low power modes; VBAT = 14 V
+                                                                  failures 3 and 3a                                                  1.6     -         8.0          ms
+                                                                  failures 4 and 7                                                   0.1     -         1.6          ms
+ trec          failure recovery time                          normal operating mode
+                                                                  failures 3 and 3a                                                  0.3     -         1.6          ms
+                                                                  failures 4 and 7                                                   7       -         38           s
+                                                                  failure 6                                                          125     -         750          s
+                                                              low power modes; VBAT = 14 V
+                                                                  failures 3, 3a, 4 and 7                                            0.3     -         1.6          ms
+ ndet          pulse-count failure detection                  difference between CANH and CANL;                                      -       4         -
+                                                              normal operating mode and failures 1, 2, 5
+                                                              and 6a; pin ERR becomes LOW
+ nrec          number of consecutive pulses for               on CANH and CANL simultaneously;                                       -       4         -
+               failure recovery                               failures 1, 2, 5 and 6a
+[1]   All parameters are guaranteed over the virtual junction temperature range by design, but only 100 % tested at Tamb = 125 C for dies on
+      wafer level, and above this for cased products 100 % tested at Tamb = 25 C, unless otherwise specified.
+[2]   To guarantee a successful mode transition under all conditions, the maximum specified time must be applied.
+TJA1055                                          All information provided in this document is subject to legal disclaimers.              © NXP B.V. 2013. All rights reserved.
+Product data sheet                                             Rev. 5 — 6 December 2013                                                                          15 of 26
+
+
+NXP Semiconductors                                                                                                              TJA1055
+                                                                                                    Enhanced fault-tolerant CAN transceiver
+                       VTXD                                                                                                                 2 V to VCC
+                                                                                                                                            0V
+                      VCANL                                                                                                                 5V
+                                                                                                                                            3.6 V
+                                                                                                                                            1.4 V
+                      VCANH                                                                                                                 0V
+                                                                                                                                            2.2 V
+                                                                                                                                            −3.2 V
+                      ΔVCAN                                                                                                                 −5 V
+                       VRXD
+                                                                                                                                            0.7VCC
+                                                                                                                                            0.3VCC
+                                               tPD(L)                                                                   tPD(H)               mgl424
+                             VCAN = VCANH  VCANL
+                   Fig 4.    Timing diagram for dynamic characteristics
+12. Test information
+                             VBAT = 5 V to 40 V
+                        +5 V
+                                                        INH         BAT        VCC
+                                                      1         14          10 8 RTH
+                                      WAKE                                                                                     CCAN_L        RCAN_L
+                                                   7                                                    RRTH       BAT    VCC
+                          VTXD            TXD                                                           500 Ω
+                                                   2                                   CANL
+                                                                                 12
+                                          STB                                                                     FAILURE
+                                                   5       TJA1055T
+                                                                                       CANH                     GENERATION
+                                            EN                                   11
+                                                   6
+                                                                                               RRTL
+                                         RXD                                                   500 Ω
+                                                   3                                                                  GND
+                                                                                       RTL                                     CCAN_H        RCAN_H
+                                                           13             4        9
+                               CRXD
+                               10 pF                         GND            ERR
+                                                                                                                                001aac932
+                             VTXD is a rectangular signal of 50 kHz with 50 % duty cycle and slope time < 10 ns.
+                             Termination resistors RCAN_L and RCAN_H (125 ) are not connected to pin RTL or pin RTH for
+                             testing purposes because the minimum load allowed on the CAN bus lines is 500  per
+                             transceiver.
+                   Fig 5.    Test circuit for dynamic characteristics
+TJA1055                              All information provided in this document is subject to legal disclaimers.                 © NXP B.V. 2013. All rights reserved.
+Product data sheet                                 Rev. 5 — 6 December 2013                                                                             16 of 26
+
+
+NXP Semiconductors                                                                                                                       TJA1055
+                                                                                                     Enhanced fault-tolerant CAN transceiver
+                      VBAT = 5 V to 40 V
+                      +5 V
+                                                            INH         BAT         VCC
+                                                          1          14          10 8 RTH
+                                           WAKE                                                                                            CCAN_L        RCAN_L
+                                                       7                                                    RRTH          BAT   VCC
+                       VTXD                   TXD                                                           500 Ω
+                                                       2                                    CANL
+                                                                                     12
+                          +3.3 V               STB                                                                       FAILURE
+                                                       5     TJA1055T/3
+                                                                                            CANH                       GENERATION
+                                                EN                                   11
+                                  2.5                  6
+                                  kΩ                                                               RRTL
+                                              RXD                                                  500 Ω
+                                                       3                                                                     GND
+                                                                                            RTL                                            CCAN_H        RCAN_H
+                                                              13             4         9
+                                  CRXD
+                                  10 pF                           GND           ERR
+                                                                                                                                            001aac933
+                             VTXD is a rectangular signal of 50 kHz with 50 % duty cycle and slope time < 10 ns.
+                             Termination resistors RCAN_L and RCAN_H (125 ) are not connected to pin RTL or pin RTH for
+                             testing purposes because the minimum load allowed on the CAN bus lines is 500  per
+                             transceiver.
+                   Fig 6.    Test circuit for dynamic characteristics (TJA1055T/3)
+                                                                                                                                     9%$7
+                                                                                                                         9''    9
+                                                                       9&$1&21752//(5
+                                                             &7; &5; 3[[                    3[[        3[[
+                                                             7;'         5;'       67%         (55         (1        ,1+
+                                                                                                              
+                                         :$.(                                                                            %$7
+                                                                                                                     
+                                                                              7-$7                                   9&&
+                                                                                                                      
+                                                                         &$175$16&(,9(5
+                                                                                                                                  Q)      aQ)
+                                                                                                                         *1'
+                                                                                                                      
+                                                                                                            
+                                                                 57+             &$1+            &$1/              57/
+                                                                      &$1%86/,1(
+                                                                                                                                                       DDF
+                             For more information: refer to the separate FTCAN information available on our web site.
+                   Fig 7.    Application diagram
+TJA1055                               All information provided in this document is subject to legal disclaimers.                         © NXP B.V. 2013. All rights reserved.
+Product data sheet                                  Rev. 5 — 6 December 2013                                                                                     17 of 26
+
+
+NXP Semiconductors                                                                                                                  TJA1055
+                                                                                                     Enhanced fault-tolerant CAN transceiver
+                                                                                                                                 9%$7
+                                                                                                                         9''          9
+                                                                       9&$1&21752//(5
+                                                                                                                                      9
+                                                             &7; &5; 3[[                    3[[        3[[
+                                                             7;'         5;'       67%         (55         (1        ,1+
+                                                                                                              
+                                         :$.(                                                                            %$7
+                                                                                                                     
+                                                                             7-$7                                  9&&
+                                                                                                                      
+                                                                         &$175$16&(,9(5
+                                                                                                                             Q)      aQ)
+                                                                                                                         *1'
+                                                                                                                      
+                                                                                                            
+                                                                 57+             &$1+            &$1/              57/
+                                                                      &$1%86/,1(
+                                                                                                                                                  DDF
+                               For more information: refer to the separate FTCAN information available on our web site.
+                       Fig 8.  Application diagram (TJA1055T/3)
+                12.1 Quality information
+                     This product has been qualified in accordance with the Automotive Electronics Council
+                     (AEC) standard Q100 Rev-G - Failure mechanism based stress test qualification for
+                     integrated circuits, and is suitable for use in automotive applications.
+TJA1055                               All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2013. All rights reserved.
+Product data sheet                                  Rev. 5 — 6 December 2013                                                                                18 of 26
+
+
+NXP Semiconductors                                                                                                                                              TJA1055
+                                                                                                                        Enhanced fault-tolerant CAN transceiver
+13. Package outline
+   SO14: plastic small outline package; 14 leads; body width 3.9 mm                                                                                                          SOT108-1
+                                                      D                                                                              E                 A
+                                                                                                                                                                X
+                                                                                                     c
+                                  y                                                                                                 HE                          v M A
+                               Z
+                             14                                                         8
+                                                                                                                                                Q
+                                                                                                            A2
+                                                                                                                                                    (A 3)     A
+                                                                                                                   A1
+                                pin 1 index
+                                                                                                                                                            θ
+                                                                                                                                              Lp
+                              1                                                          7                                                   L
+                                             e                                                  w M                                   detail X
+                                                                                   bp
+                                                                         0                  2.5                   5 mm
+                                                                                           scale
+      DIMENSIONS (inch dimensions are derived from the original mm dimensions)
+                    A
+         UNIT               A1       A2      A3    bp       c         D (1)     E (1)         e        HE           L          Lp       Q        v       w      y       Z (1)        θ
+                  max.
+                           0.25     1.45          0.49    0.25       8.75        4.0                   6.2                    1.0      0.7                              0.7
+          mm       1.75                     0.25                                            1.27                  1.05                         0.25    0.25    0.1
+                           0.10     1.25          0.36    0.19       8.55        3.8                   5.8                    0.4      0.6                              0.3          8o
+                                                                                                                                                                                        o
+                          0.010 0.057            0.019 0.0100 0.35              0.16                 0.244                   0.039    0.028                           0.028          0
+        inches 0.069                        0.01                                            0.05                 0.041                         0.01    0.01   0.004
+                          0.004 0.049            0.014 0.0075 0.34              0.15                 0.228                   0.016    0.024                           0.012
+       Note
+       1. Plastic or metal protrusions of 0.15 mm (0.006 inch) maximum per side are not included.
+             OUTLINE                                                REFERENCES                                                                EUROPEAN
+                                                                                                                                                                   ISSUE DATE
+             VERSION                     IEC              JEDEC                            JEITA                                             PROJECTION
+                                                                                                                                                                     99-12-27
+             SOT108-1                  076E06             MS-012
+                                                                                                                                                                     03-02-19
+Fig 9.       Package outline SOT108-1 (SO14)
+TJA1055                                                  All information provided in this document is subject to legal disclaimers.                             © NXP B.V. 2013. All rights reserved.
+Product data sheet                                                     Rev. 5 — 6 December 2013                                                                                         19 of 26
+
+
+NXP Semiconductors                                                                                                           TJA1055
+                                                                                                      Enhanced fault-tolerant CAN transceiver
+14. Soldering of SMD packages
+                     This text provides a very brief insight into a complex technology. A more in-depth account
+                     of soldering ICs can be found in Application Note AN10365 “Surface mount reflow
+                     soldering description”.
+                14.1 Introduction to soldering
+                     Soldering is one of the most common methods through which packages are attached to
+                     Printed Circuit Boards (PCBs), to form electrical circuits. The soldered joint provides both
+                     the mechanical and the electrical connection. There is no single soldering method that is
+                     ideal for all IC packages. Wave soldering is often preferred when through-hole and
+                     Surface Mount Devices (SMDs) are mixed on one printed wiring board; however, it is not
+                     suitable for fine pitch SMDs. Reflow soldering is ideal for the small pitches and high
+                     densities that come with increased miniaturization.
+                14.2 Wave and reflow soldering
+                     Wave soldering is a joining technology in which the joints are made by solder coming from
+                     a standing wave of liquid solder. The wave soldering process is suitable for the following:
+                       • Through-hole components
+                       • Leaded or leadless SMDs, which are glued to the surface of the printed circuit board
+                     Not all SMDs can be wave soldered. Packages with solder balls, and some leadless
+                     packages which have solder lands underneath the body, cannot be wave soldered. Also,
+                     leaded SMDs with leads having a pitch smaller than ~0.6 mm cannot be wave soldered,
+                     due to an increased probability of bridging.
+                     The reflow soldering process involves applying solder paste to a board, followed by
+                     component placement and exposure to a temperature profile. Leaded packages,
+                     packages with solder balls, and leadless packages are all reflow solderable.
+                     Key characteristics in both wave and reflow soldering are:
+                       • Board specifications, including the board finish, solder masks and vias
+                       • Package footprints, including solder thieves and orientation
+                       • The moisture sensitivity level of the packages
+                       • Package placement
+                       • Inspection and repair
+                       • Lead-free soldering versus SnPb soldering
+                14.3 Wave soldering
+                     Key characteristics in wave soldering are:
+                       • Process issues, such as application of adhesive and flux, clinching of leads, board
+                         transport, the solder wave parameters, and the time during which components are
+                         exposed to the wave
+                       • Solder bath specifications, including temperature and impurities
+TJA1055                                All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                   Rev. 5 — 6 December 2013                                                                        20 of 26
+
+
+NXP Semiconductors                                                                                                          TJA1055
+                                                                                                     Enhanced fault-tolerant CAN transceiver
+                14.4 Reflow soldering
+                     Key characteristics in reflow soldering are:
+                       • Lead-free versus SnPb soldering; note that a lead-free reflow process usually leads to
+                          higher minimum peak temperatures (see Figure 10) than a SnPb process, thus
+                          reducing the process window
+                       • Solder paste printing issues including smearing, release, and adjusting the process
+                          window for a mix of large and small components on one board
+                       • Reflow temperature profile; this profile includes preheat, reflow (in which the board is
+                          heated to the peak temperature) and cooling down. It is imperative that the peak
+                          temperature is high enough for the solder to make reliable solder joints (a solder paste
+                          characteristic). In addition, the peak temperature must be low enough that the
+                          packages and/or boards are not damaged. The peak temperature of the package
+                          depends on package thickness and volume and is classified in accordance with
+                          Table 10 and 11
+                     Table 10.   SnPb eutectic process (from J-STD-020D)
+                      Package thickness (mm)                  Package reflow temperature (C)
+                                                              Volume (mm3)
+                                                              < 350                                                  350
+                      < 2.5                                   235                                                   220
+                       2.5                                   220                                                   220
+                     Table 11.   Lead-free process (from J-STD-020D)
+                      Package thickness (mm)                  Package reflow temperature (C)
+                                                              Volume (mm3)
+                                                              < 350                                       350 to 2000     > 2000
+                      < 1.6                                   260                                         260             260
+                      1.6 to 2.5                              260                                         250             245
+                      > 2.5                                   250                                         245             245
+                     Moisture sensitivity precautions, as indicated on the packing, must be respected at all
+                     times.
+                     Studies have shown that small packages reach higher temperatures during reflow
+                     soldering, see Figure 10.
+TJA1055                               All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                  Rev. 5 — 6 December 2013                                                                        21 of 26
+
+
+NXP Semiconductors                                                                                                                              TJA1055
+                                                                                                              Enhanced fault-tolerant CAN transceiver
+                                                                           maximum peak temperature
+                                      temperature                              = MSL limit, damage level
+                                                                            minimum peak temperature
+                                                                  = minimum soldering temperature
+                                                                                                                                         peak
+                                                                                                                                      temperature
+                                                                                                                                                            time
+                                                                                                                                                    001aac844
+                                        MSL: Moisture Sensitivity Level
+                               Fig 10. Temperature profiles for large and small components
+                             For further information on temperature profiles, refer to Application Note AN10365
+                             “Surface mount reflow soldering description”.
+15. Appendix
+                    15.1 Overview of differences between the TJA1055 and the TJA1054A
+Table 12.     Limiting values
+ Symbol         Parameter                              Conditions                                                             TJA1055        TJA1054A                   Unit
+                                                                                                                              Min   Max      Min        Max
+ VCANH          voltage on pin CANH                                                                                           58   +58      27        +40             V
+ VCANL          voltage on pin CANL                                                                                           58   +58      27        +40             V
+ Vesd           electrostatic discharge voltage        pins RTH, RTL, CANH, CANL
+                                                          human body model                                                    8    +8       4         +4              kV
+                                                          IEC 61000-4-2                                                   [1]
+[1]   The ESD performance of pins CANH, CANL, RTH and RTL, with respect to GND, was verified by an external test house in accordance
+      with IEC-61000-4-2 (C = 150 pF, R = 330 ). The results were equal to, or better than, 6 kV for TJA1055 and equal to, or better than,
+      1.5 kV for TJA1054A.
+TJA1055                                        All information provided in this document is subject to legal disclaimers.                       © NXP B.V. 2013. All rights reserved.
+Product data sheet                                           Rev. 5 — 6 December 2013                                                                                   22 of 26
+
+
+NXP Semiconductors                                                                                                              TJA1055
+                                                                                                         Enhanced fault-tolerant CAN transceiver
+16. Revision history
+Table 13.    Revision history
+ Document ID                Release date           Data sheet status                                       Change notice  Supersedes
+ TJA1055 v.5                20131206               Product data sheet                                      -              TJA1055 v.4
+ Modifications:               • Template and legal information (Section 17) updated
+                              • Table 1, Table 6: measurement conditions changed for parameters VCANH and VCANL
+                              • Table 6, Table note 2 added; Fig. 7 and Fig. 8 deleted
+                              • Table 8: parameter Isup(tot) deleted; parameter values changed: VIH for pins STB, EN and
+                                TXDVH for pin INH
+                              • Table 9: parameter values changed: tt(reces-dom), tt(dom-reces); table reformatted
+                              • Figure 7, Figure 8: revised (capacitor added)
+                              • Section 12.1: text revised
+ TJA1055 v.4                20090217               Product data sheet                                      -              TJA1055 v.3
+ TJA1055 v.3                20070313               Product data sheet                                      -              TJA1055 v.2
+ TJA1055 v.2                20061030               Preliminary data sheet                                  -              TJA1055 v.1
+ TJA1055 v.1                20060801               Objective data sheet                                    -              -
+ (9397 750 14908)
+TJA1055                                   All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2013. All rights reserved.
+Product data sheet                                      Rev. 5 — 6 December 2013                                                                        23 of 26
+
+
+NXP Semiconductors                                                                                                                                               TJA1055
+                                                                                                                                  Enhanced fault-tolerant CAN transceiver
+17. Legal information
+17.1 Data sheet status
+ Document status[1][2]                   Product status[3]                    Definition
+ Objective [short] data sheet            Development                          This document contains data from the objective specification for product development.
+ Preliminary [short] data sheet          Qualification                        This document contains data from the preliminary specification.
+ Product [short] data sheet              Production                           This document contains the product specification.
+[1]    Please consult the most recently issued document before initiating or completing a design.
+[2]    The term ‘short data sheet’ is explained in section “Definitions”.
+[3]    The product status of device(s) described in this document may have changed since this document was published and may differ in case of multiple devices. The latest product status
+       information is available on the Internet at URL http://www.nxp.com.
+17.2 Definitions                                                                                           Suitability for use in automotive applications — This NXP
+                                                                                                           Semiconductors product has been qualified for use in automotive
+                                                                                                           applications. Unless otherwise agreed in writing, the product is not designed,
+Draft — The document is a draft version only. The content is still under
+                                                                                                           authorized or warranted to be suitable for use in life support, life-critical or
+internal review and subject to formal approval, which may result in
+                                                                                                           safety-critical systems or equipment, nor in applications where failure or
+modifications or additions. NXP Semiconductors does not give any
+                                                                                                           malfunction of an NXP Semiconductors product can reasonably be expected
+representations or warranties as to the accuracy or completeness of
+                                                                                                           to result in personal injury, death or severe property or environmental
+information included herein and shall have no liability for the consequences of
+                                                                                                           damage. NXP Semiconductors and its suppliers accept no liability for
+use of such information.
+                                                                                                           inclusion and/or use of NXP Semiconductors products in such equipment or
+Short data sheet — A short data sheet is an extract from a full data sheet                                 applications and therefore such inclusion and/or use is at the customer's own
+with the same product type number(s) and title. A short data sheet is intended                             risk.
+for quick reference only and should not be relied upon to contain detailed and
+                                                                                                           Applications — Applications that are described herein for any of these
+full information. For detailed and full information see the relevant full data
+                                                                                                           products are for illustrative purposes only. NXP Semiconductors makes no
+sheet, which is available on request via the local NXP Semiconductors sales
+                                                                                                           representation or warranty that such applications will be suitable for the
+office. In case of any inconsistency or conflict with the short data sheet, the
+                                                                                                           specified use without further testing or modification.
+full data sheet shall prevail.
+                                                                                                           Customers are responsible for the design and operation of their applications
+Product specification — The information and data provided in a Product                                     and products using NXP Semiconductors products, and NXP Semiconductors
+data sheet shall define the specification of the product as agreed between                                 accepts no liability for any assistance with applications or customer product
+NXP Semiconductors and its customer, unless NXP Semiconductors and                                         design. It is customer’s sole responsibility to determine whether the NXP
+customer have explicitly agreed otherwise in writing. In no event however,                                 Semiconductors product is suitable and fit for the customer’s applications and
+shall an agreement be valid in which the NXP Semiconductors product is                                     products planned, as well as for the planned application and use of
+deemed to offer functions and qualities beyond those described in the                                      customer’s third party customer(s). Customers should provide appropriate
+Product data sheet.                                                                                        design and operating safeguards to minimize the risks associated with their
+                                                                                                           applications and products.
+17.3 Disclaimers                                                                                           NXP Semiconductors does not accept any liability related to any default,
+                                                                                                           damage, costs or problem which is based on any weakness or default in the
+                                                                                                           customer’s applications or products, or the application or use by customer’s
+Limited warranty and liability — Information in this document is believed to
+                                                                                                           third party customer(s). Customer is responsible for doing all necessary
+be accurate and reliable. However, NXP Semiconductors does not give any
+                                                                                                           testing for the customer’s applications and products using NXP
+representations or warranties, expressed or implied, as to the accuracy or
+                                                                                                           Semiconductors products in order to avoid a default of the applications and
+completeness of such information and shall have no liability for the
+                                                                                                           the products or of the application or use by customer’s third party
+consequences of use of such information. NXP Semiconductors takes no
+                                                                                                           customer(s). NXP does not accept any liability in this respect.
+responsibility for the content in this document if provided by an information
+source outside of NXP Semiconductors.                                                                      Limiting values — Stress above one or more limiting values (as defined in
+                                                                                                           the Absolute Maximum Ratings System of IEC 60134) will cause permanent
+In no event shall NXP Semiconductors be liable for any indirect, incidental,
+                                                                                                           damage to the device. Limiting values are stress ratings only and (proper)
+punitive, special or consequential damages (including - without limitation - lost
+                                                                                                           operation of the device at these or any other conditions above those given in
+profits, lost savings, business interruption, costs related to the removal or
+                                                                                                           the Recommended operating conditions section (if present) or the
+replacement of any products or rework charges) whether or not such
+                                                                                                           Characteristics sections of this document is not warranted. Constant or
+damages are based on tort (including negligence), warranty, breach of
+                                                                                                           repeated exposure to limiting values will permanently and irreversibly affect
+contract or any other legal theory.
+                                                                                                           the quality and reliability of the device.
+Notwithstanding any damages that customer might incur for any reason
+whatsoever, NXP Semiconductors’ aggregate and cumulative liability towards                                 Terms and conditions of commercial sale — NXP Semiconductors
+customer for the products described herein shall be limited in accordance                                  products are sold subject to the general terms and conditions of commercial
+with the Terms and conditions of commercial sale of NXP Semiconductors.                                    sale, as published at http://www.nxp.com/profile/terms, unless otherwise
+                                                                                                           agreed in a valid written individual agreement. In case an individual
+Right to make changes — NXP Semiconductors reserves the right to make                                      agreement is concluded only the terms and conditions of the respective
+changes to information published in this document, including without                                       agreement shall apply. NXP Semiconductors hereby expressly objects to
+limitation specifications and product descriptions, at any time and without                                applying the customer’s general terms and conditions with regard to the
+notice. This document supersedes and replaces all information supplied prior                               purchase of NXP Semiconductors products by customer.
+to the publication hereof.
+TJA1055                                                            All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2013. All rights reserved.
+Product data sheet                                                               Rev. 5 — 6 December 2013                                                                                24 of 26
+
+
+NXP Semiconductors                                                                                                                                     TJA1055
+                                                                                                                         Enhanced fault-tolerant CAN transceiver
+No offer to sell or license — Nothing in this document may be interpreted or                      Translations — A non-English (translated) version of a document is for
+construed as an offer to sell products that is open for acceptance or the grant,                  reference only. The English version shall prevail in case of any discrepancy
+conveyance or implication of any license under any copyrights, patents or                         between the translated and English versions.
+other industrial or intellectual property rights.
+Export control — This document as well as the item(s) described herein
+may be subject to export control regulations. Export might require a prior
+                                                                                                  17.4 Trademarks
+authorization from competent authorities.                                                         Notice: All referenced brands, product names, service names and trademarks
+Quick reference data — The Quick reference data is an extract of the                              are the property of their respective owners.
+product data given in the Limiting values and Characteristics sections of this
+document, and as such is not complete, exhaustive or legally binding.
+18. Contact information
+For more information, please visit: http://www.nxp.com
+For sales office addresses, please send an email to: salesaddresses@nxp.com
+TJA1055                                                   All information provided in this document is subject to legal disclaimers.                   © NXP B.V. 2013. All rights reserved.
+Product data sheet                                                      Rev. 5 — 6 December 2013                                                                               25 of 26
+
+
+NXP Semiconductors                                                                                                                        TJA1055
+                                                                                                 Enhanced fault-tolerant CAN transceiver
+19. Contents
+1    General description . . . . . . . . . . . . . . . . . . . . . . 1
+2    Features and benefits . . . . . . . . . . . . . . . . . . . . 1
+2.1    Optimized for in-car low-speed
+       communication . . . . . . . . . . . . . . . . . . . . . . . . . 1
+2.2    Bus failure management. . . . . . . . . . . . . . . . . . 1
+2.3    Protections . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+2.4    Support for low power modes . . . . . . . . . . . . . . 2
+3    Quick reference data . . . . . . . . . . . . . . . . . . . . . 2
+4    Ordering information . . . . . . . . . . . . . . . . . . . . . 3
+5    Block diagram . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+6    Pinning information . . . . . . . . . . . . . . . . . . . . . . 4
+6.1    Pinning . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+6.2    Pin description . . . . . . . . . . . . . . . . . . . . . . . . . 4
+7    Functional description . . . . . . . . . . . . . . . . . . . 5
+7.1    Failure detector. . . . . . . . . . . . . . . . . . . . . . . . . 5
+7.2    Low power modes . . . . . . . . . . . . . . . . . . . . . . 7
+7.3    Power-on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+7.4    Protections . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+8    Limiting values. . . . . . . . . . . . . . . . . . . . . . . . . . 9
+9    Thermal characteristics . . . . . . . . . . . . . . . . . 11
+10   Static characteristics. . . . . . . . . . . . . . . . . . . . 11
+11   Dynamic characteristics . . . . . . . . . . . . . . . . . 14
+12   Test information . . . . . . . . . . . . . . . . . . . . . . . . 16
+12.1   Quality information . . . . . . . . . . . . . . . . . . . . . 18
+13   Package outline . . . . . . . . . . . . . . . . . . . . . . . . 19
+14   Soldering of SMD packages . . . . . . . . . . . . . . 20
+14.1   Introduction to soldering . . . . . . . . . . . . . . . . . 20
+14.2   Wave and reflow soldering . . . . . . . . . . . . . . . 20
+14.3   Wave soldering . . . . . . . . . . . . . . . . . . . . . . . . 20
+14.4   Reflow soldering . . . . . . . . . . . . . . . . . . . . . . . 21
+15   Appendix . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+15.1   Overview of differences between the
+       TJA1055 and the TJA1054A . . . . . . . . . . . . . 22
+16   Revision history . . . . . . . . . . . . . . . . . . . . . . . . 23
+17   Legal information. . . . . . . . . . . . . . . . . . . . . . . 24
+17.1   Data sheet status . . . . . . . . . . . . . . . . . . . . . . 24
+17.2   Definitions . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+17.3   Disclaimers . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+17.4   Trademarks. . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+18   Contact information. . . . . . . . . . . . . . . . . . . . . 25
+19   Contents . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+                                                                               Please be aware that important notices concerning this document and the product(s)
+                                                                               described herein, have been included in section ‘Legal information’.
+                                                                               © NXP B.V. 2013.                                                All rights reserved.
+                                                                               For more information, please visit: http://www.nxp.com
+                                                                               For sales office addresses, please send an email to: salesaddresses@nxp.com
+                                                                                                                                     Date of release: 6 December 2013
+                                                                                                                                         Document identifier: TJA1055
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+NXP:
+ TJA1055T,512 TJA1055T/3/C,512 TJA1055T/3/C,518 TJA1055T/C,512 TJA1055T/C,518 TJA1055T,518
+TJA1055T TJA1055T-T TJA1055T/CM,118 TJA1055T/1J TJA1055T/3/1J TJA1055T/3/CM,118 TJA1055T/2Z
+TJA1055T/3/C TJA1055T/C TJA1055T/3/2Z TJA1055T/3/C-T TJA1055T/C-T

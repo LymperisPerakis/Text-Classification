@@ -1,0 +1,717 @@
+MAX31913                                                                 Industrial, Octal, Digital Input
+                                                                                        Translator/Serializer
+General Description                                          Benefits and Features
+The MAX31913 industrial interface serializer translates,     ●● Very Low Power and Heat Dissipation
+conditions, and serializes the 24V digital output of sensors    • Low Quiescent Current (1.6mA typ)
+and switches used in industrial, process, and building          • Highly Accurate and Stable Input Current Limiters,
+automation to 5V CMOS-compatible signals required                  Adjustable from 0.5mA to 6mA
+by microcontrollers. It provides the front-end interface        • Energy-Less Field-Side LED Drivers
+circuit of a programmable logic controller (PLC) digital     ●● High Integration Reduces BOM Count, Board Size,
+input module.                                                   and System Cost
+The device features integrated current limiting, lowpass        • 8 High-Voltage Input Channels (36V max)
+filtering, and channel serialization. Input current limiting    • On-Chip 8-1 Serialization with SPI Interface
+allows a significant reduction in power consumed from           • On-Chip 5V Regulator
+the field voltage supply as compared to traditional             • On-Chip Overtemperature Indicator
+discrete resistor-divider implementations. Selectable on-       • Dual On-Chip Field Supply Voltage Monitor
+chip lowpass filters allow flexible debouncing and filter-      • Integrated Debounce Filters, Selectable From 0 to 3ms
+ing of sensor outputs based on the application.              ●● Robust Features and Performance for Industrial
+                                                                Environments
+On-chip serialization allows a drastic reduction in the         • Multibit CRC Code Generation and Transmission for
+number of optocouplers used for isolation. The device              Error Detection and More Reliable Data Transmission
+serializer is stackable so that any number of input channels    • High ESD Immunity on All Field Input Pins
+can be serialized and output through only one SPI-
+                                                             ●● Accepts Industry Standard Input Types
+compatible port. This reduces the number of optocou-
+                                                                • Configurable for IEC 61131-2 Input Types 1, 2, and 3
+plers needed to only three, regardless of the number of
+                                                             ●● Flexible Power Supply Capability Enables Usage
+input channels.
+                                                                in 5V, 12V, 24V, and Higher Voltage Systems
+For enhanced robustness with respect to high-frequency          • Wide Operating Field Supply Range of 7V to 36V
+noise and fast electrical transients, a multibit CRC code       • Can Be Powered From the Logic-Side Using a 5V
+is generated and transmitted through the SPI port for              Supply
+each 8 bits of data. The on-chip 5V voltage regulator
+can be used to power external optocouplers, digital isola-   Applications
+tors, or other external 5V circuitry. Field-side LED drivers    • Digital Input Modules for PLCs
+recycle the current from the eight inputs to provide visual     • Industrial, Building, and Process Automation
+input status indication without any additional current or       • Motor Control
+power consumption.
+For ultra-low-power applications, and for the lowest
+possible heat dissipation, Maxim Integrated offers a
+pin-compatible version of this device, the MAX31912.
+The MAX31912 uses patent-pending circuit techniques
+to achieve further reduction of power beyond what is
+possible by input current limiting alone. Contact the
+factory for availability.
+Ordering Information appears at end of data sheet.
+19-6641; Rev 3; 4/15
+
+
+MAX31913                                                            Industrial, Octal, Digital Input
+                                                                              Translator/Serializer
+Block Diagram
+      24V                                                                                      5V
+                VCC24V        5V REGULATOR                                      5VOUT
+                                             VREF              MAX31913
+                               SUPPLY
+                                                                                FAULTB
+                              MONITOR
+                                TEMP
+                              MONITOR                                           DB0
+                                                                                DB1
+                  RIREF
+                              CURRENT                               CRC GEN.
+                    RT1
+                               LIMITER
+                    IN1                                                                         µCONTROLLER
+                                                          LP
+SENSORS                                                                         SIN             OR
+                                                        FILTER
+                                                                                                ISOLATION
+                               VOLTAGE                                          MODESEL
+                        VREF COMPARATOR
+                                                                                CLK
+                                                                   SERIALIZER   CS
+                                        INPUT CHANNEL 0
+                    RT8
+                                        INPUT CHANNEL 7                         SOUT
+                    IN8
+                   GND
+www.maximintegrated.com                                                                 Maxim Integrated │ 2
+
+
+MAX31913                                                                                               Industrial, Octal, Digital Input
+                                                                                                                          Translator/Serializer
+Absolute Maximum Ratings
+(Voltages relative to GND.)                                                        Operating Temperature Range
+Voltage Range on VCC24V.............................. -0.3V to +45V                 Ambient Temperature............................... -40NC to +125NC
+Voltage Range on IN1–IN8............................. -0.3V to +45V                 Junction Temperature.............................. -40NC to +150NC
+Voltage Range on IN1–IN8                                                           Storage Temperature Range....................... -55NC to +125NC
+    (through 2.2kω resistors).............................. -45V to +45V           Lead Temperature (soldering, 10s)..........................+300NC
+Voltage Range on DB0/DB1, CLK, SIN,                                                Soldering Temperature (reflow)................................+260NC
+    CS, MODESEL........................... -0.3V to (V5VOUT + 0.3V)
+Continuous Power Dissipation (TA = +70NC)
+    TSSOP (derate 27mW/NC above +70NC)........... 2162.2mW
+Stresses beyond those listed under “Absolute Maximum Ratings” may cause permanent damage to the device. These are stress ratings only, and functional opera-
+tion of the device at these or any other conditions beyond those indicated in the operational sections of the specifications is not implied. Exposure to absolute
+maximum rating conditions for extended periods may affect device reliability.
+Package Thermal Characteristics (Note 1)
+TSSOP
+    Junction-to-Ambient Thermal Resistance (qJA)...........37°C/W
+    Junction-to-Case Thermal Resistance (qJC)..................2°C/W
+Note 1: Package thermal resistances were obtained using the method described in JEDEC specification JESD51-7, using a four-layer
+            board. For detailed information on package thermal considerations, refer to www.maximintegrated.com/thermal-tutorial.
+Recommended Operating Conditions (Note 2)
+             PARAMETER                      SYMBOL                         CONDITIONS                           MIN            TYP          MAX        UNITS
+   Field Supply Voltage                      VCC24V          (Note 3)                                             7                          36           V
+   Field Inputs Voltage                         VINn         (Note 4)                                           -0.3                         36           V
+   Logic Inputs Voltage                      VLOGIC                                                               0                          5.5          V
+   Current-Limit Setting Resistor               RREF                                                                            15                       kI
+   Field Input Data Rate                         fIN         (Note 5)                                                          200                       kHz
+www.maximintegrated.com                                                                                                                  Maxim Integrated │ 3
+
+
+MAX31913                                                                           Industrial, Octal, Digital Input
+                                                                                              Translator/Serializer
+DC Electrical Characteristics
+(VCC24V = 7V to 36V, TJ = -40NC to +150NC, unless otherwise noted.) (Note 2)
+            PARAMETER               SYMBOL                  CONDITIONS                  MIN      TYP     MAX       UNITS
+                                                 IN1–IN8 = 24V, 5VOUT = open,
+  Field-Supply Current               ICC24V                                                       1.6      2.3       mA
+                                                 RT1–RT8 = GND, all logic inputs open
+  Field-Supply UV1 Alarm Off/On      VONUV1                                                        9       10          V
+  Field-Supply UV1 Alarm On/Off     VOFFUV1                                               7        8                   V
+  Field-Supply UV2 Alarm Off/On      VONUV2                                                      16.5      18          V
+  Field-Supply UV2 Alarm On/Off     VOFFUV2                                              14      15.5                  V
+  LED On-State Current                IRT-ON     RREF = 15kI, VCC24V = 18V to 30V                 2.2                mA
+  Field Input Threshold High-to-
+                                    VIN-(INF)    2.2kI external series resistor           7       8.4                  V
+  Low
+  Field Input Threshold Low-to-
+                                    VIN+(INF)    2.2kI external series resistor                   9.4     10.2         V
+  High
+  Field Input Hysteresis            VHYS(INF)    2.2kI external series resistor                    1                   V
+  Input Threshold High-to-Low
+                                    VTH-(INP)                                             3       3.4                  V
+  (at IC pin)
+  Input Threshold Low-to-High
+                                    VTH+(INP)                                                     4.4       5          V
+  (at IC pin)
+  Input Threshold Hysteresis
+                                    VHYS(INP)                                                      1                   V
+  (at IC pin)
+  Field Input Pin Resistance            RINP                                                      0.8                kI
+                                                 RREF = 15kI, VCC24V = 18V to 30V,
+  Field Input Current Limit            IINLIM                                            2.2      2.4      2.7       mA
+                                                 TA = +25°C to +125°C (Note 6)
+                                                 DB1/DB0 = 0/0: no filtering                       0
+                                                 DB1/DB0 = 0/1                         0.008    0.025    0.038
+  Filter Time Constant               tFILTER                                                                         ms
+                                                 DB1/DB0 = 1/0                          0.25     0.75      1.1
+                                                 DB1/DB0 = 1/1                           1.0       3       4.5
+  Linear Regulator Output            V5VOUT      Max ILOAD = 50mA                       4.75      5.0     5.25         V
+  Regulator Line Regulation        dVREGLINE     ILOAD = 50mA                                     10       20        mV
+  Regulator Load Regulation        dVREGLOAD     ILOAD = 1mA to 50mA                              20       50        mV
+  Logic-Low Output Voltage               VOL     IOL = 4mA                                        0.4      1.0         V
+  Logic-High Output Voltage             VOH      IOH = -4mA                              4.0                           V
+                                                                                        0.3 x    0.5 x    0.7 x
+  Logic-Input Trip Point               VIH-IL                                                                          V
+                                                                                      V5VOUT   V5VOUT   V5VOUT
+  Logic-Input Leakage Current             IIL                                           -50      -30      -15        FA
+  Overtemperature Alarm               TALRM                                                      135                  NC
+www.maximintegrated.com                                                                                Maxim Integrated │ 4
+
+
+MAX31913                                                                               Industrial, Octal, Digital Input
+                                                                                                      Translator/Serializer
+AC Electrical Characteristics
+(VCC24V = 7V to 36V, TJ = -40NC to +150NC, unless otherwise noted.) (Note 2)
+           PARAMETER                    SYMBOL                   CONDITIONS                     MIN       TYP     MAX       UNITS
+                                                     No external capacitors on pins
+  Field Input Pulse Width                   tPW                                                  1                            µs
+                                                     IN1-IN8
+                                                     HBM, all pins                                         ±2
+  ESD                                                                                                                         kV
+                                                     HBM, IN1-IN8 with respect to GND                     ±15
+AC Electrical Characteristics: SPI Interface
+(VCC24V = 7V to 36V, TJ = -40NC to +150NC, unless otherwise noted.) (Note 2)
+            PARAMETER                   SYMBOL                   CONDITIONS                    MIN        TYP     MAX       UNITS
+ CLK Pulse Duration                       tCLKPW    (Note 7)                                    20                             ns
+ CS Pulse Duration                         tCSPW    (Note 8)                                    20                             ns
+ SIN to CLK Setup Time                      tSU1    (Note 9)                                     5                             ns
+ SIN to CLK Hold Time                        tH1    (Note 9)                                     8                             ns
+ CS to CLK Setup Time                       tSU2    (Note 10)                                    8                             ns
+ CS to CLK Recovery Time                    tREC    (Note 10)                                   12                             ns
+ Clock Pulse Frequency                      fCLK    (Notes 7, 11)                                                  25        MHz
+ Propagation Delay, CLK to SOUT               tP1   (Note 7)                                                       20          ns
+ Propagation Delay, CS to SOUT                tP2   (Note 8)                                                       20          ns
+ Rise/Fall Time SOUT/FAULT                   tR/F   (Note 7)                                                       40          ns
+Note 2:     Limits are 100% production tested at TA = +25°C and/or TA = +125°C. Limits over the operating temperature range and
+            relevant supply voltage range are guaranteed by design and characterization. Typical values are not guaranteed.
+Note 3: If a 24V supply is not available, the device can be powered through V5VOUT. In this mode of operation, the VCC24V
+            supply must be left unconnected. All other specifications remain identical. The field-supply UV1 and UV2 alarms will be
+            activated (set to 1), indicating the absence of the 24V supply in this mode of operation.
+Note 4: When using suggested external 2.2kω series resistors, limits of -3V to +36V apply.
+Note 5: fIN refers to the maximum pulse frequency (1/fIN = shortest pulse width) that can be detected from the field sensors and
+            switches.
+Note 6: External resistor RREF can be adjusted to set any desired current limit between 0.5mA and 6mA.
+Note 7: See Figure 8.
+Note 8: See Figure 5.
+Note 9: See Figure 7.
+Note 10: See Figure 6.
+Note 11: This is the maximum bit transfer rate through the serializer interface.
+www.maximintegrated.com                                                                                         Maxim Integrated │ 5
+
+
+MAX31913                                                                                                                                                                                   Industrial, Octal, Digital Input
+                                                                                                                                                                                                    Translator/Serializer
+Typical Operating Characteristics
+(TA = +25°C, RREF = 15kω, unless otherwise noted.)
+                                                 SUPPLY CURRENT
+                                             vs. VCC24V FIELD SUPPLY                                                                   SUPPLY CURRENT vs. TEMPERATURE                                                                                        CURRENT LIMIT vs. RREF
+                           1.90                                                                                              2.3
+                                                                                     MAX31913 toc01                                                                                        MAX31913 toc02                                                                                                   MAX31913 toc03
+                                                                                                                                                                                                                                            5.5
+                           1.85                                                                                              2.2
+                                                                                                                             2.1                                                                                                            4.5
+SUPPLY CURRENT (mA)                                                                                   SUPPLY CURRENT (mA)
+                           1.80
+                                                                                                                                                                                                            CURRENT LIMIT (mA)
+                                                                                                                             2.0
+                           1.75                                                                                                                                                                                                             3.5
+                                                                                                                             1.9
+                           1.70
+                                                                                                                             1.8                                                                                                            2.5
+                           1.65
+                                                                                                                             1.7
+                                                                                                                                                                                                                                            1.5
+                           1.60
+                                                                                                                             1.6
+                           1.55                                                                                              1.5                                                                                                            0.5
+                                   5                 15            25           35                                                 -40            10           60               110                                                               0          10           20         30        40          50
+                                                     SUPPLY VOLTAGE (V)                                                                            TEMPERATURE (°C)                                                                                                       RREF (kI)
+                                                                                                                                             INPUT CURRENT LIMIT                                                                                           INPUT-VOLTAGE HYSTERESIS
+                                  INPUT CURRENT LIMIT vs. TEMPERATURE                                                                      vs. FIELD-INPUT VOLTAGE                                                                                             vs. TEMPERATURE
+                            3.0                                                                                              3.0                                                                                                            5.0
+                                                                                     MAX31913 toc04                                                                                        MAX31913 toc05                                                                                                   MAX31913 toc06
+                                                                                                                                                                                                                                                        RIN = 0I
+                            2.9                                                                                                                                                                                                             4.8
+                                         VIN = 24V
+                                                                                                                             2.5                                                                                                            4.6
+                                                                                                                                                                                                            INPUT-VOLTAGE HYSTERESIS (V)
+                            2.8
+                                                                                                                                                                                                                                            4.4
+                                                                                                      CURRENT LIMIT (mA)
+                            2.7
+CURRENT LIMIT (mA)
+                                                                                                                             2.0                                                                                                            4.2
+                            2.6                                                                                                                                                                                                             4.0                            OFF-ON THRESHOLD
+                            2.5                                                                                              1.5                                                                                                            3.8
+                            2.4                                                                                                                                                                                                             3.6
+                                                                                                                             1.0                                                                                                            3.4
+                            2.3
+                                                                                                                                                        VCC24V = 24V                                                                        3.2
+                            2.2                                                                                              0.5                                                                                                            3.0                    ON-OFF THRESHOLD
+                            2.1                                                                                                                                                                                                             2.8
+                            2.0                                                                                               0                                                                                                             2.6
+                                  -40                10          60           110                                                  5               15            25                   35                                                          -40               10               60              110
+                                                     TEMPERATURE (°C)                                                                            FIELD-INPUT VOLTAGE (V)                                                                                             TEMPERATURE (°C)
+                                           INPUT-VOLTAGE HYSTERESIS
+                                               vs. TEMPERATURE                                                                              LDO LOAD REGULATION                                                                                                  LDO LINE REGULATION
+                           10.0                                                                                             5.10                                                                                                           5.10
+                                                                                     MAX31913 toc07                                                                                        MAX31913 toc08                                                                                                   MAX31913 toc09
+                            9.8         RIN = 2.2I                                                                                                                                                                                                      I5VOUT = 5mA
+                                                                                                                            5.08                                                                                                           5.08
+                            9.6
+                                                                                                                            5.06                                                                                                           5.06
+INPUT-VOLTAGE HYSTERESIS
+                            9.4
+                                                                                                                            5.04                                                                                                           5.04
+                                                                                                      5VOUT VOLTAGE (V)                                                                                     5VOUT VOLTAGE (V)
+                            9.2
+                            9.0                            OFF-ON THRESHOLD                                                 5.02                                                                                                           5.02
+                            8.8                                                                                             5.00                                                                                                           5.00
+                            8.6                                                                                             4.98                                                                                                           4.98
+                            8.4
+                                                                                                                            4.96                                                                                                           4.96
+                            8.2
+                                                ON-OFF THRESHOLD                                                            4.94                                                                                                           4.94
+                            8.0
+                            7.8                                                                                             4.92                                                                                                           4.92
+                            7.6                                                                                             4.90                                                                                                           4.90
+                                  -40                10          60           110                                                  0        10          20     30          40          50                                                         6         11       16         21        26    31         36
+                                                     TEMPERATURE (°C)                                                                       5VOUT OUTPUT CURRENT (mA)                                                                                               SUPPLY VOLTAGE (V)
+www.maximintegrated.com                                                                                                                                                                                                                                                        Maxim Integrated │ 6
+
+
+MAX31913                                                                                                                                                 Industrial, Octal, Digital Input
+                                                                                                                                                                  Translator/Serializer
+Typical Operating Characteristics (continued)
+(TA = +25°C, RREF = 15kω, unless otherwise noted.)
+                                                                                                                                                                 LDO OUTPUT
+                                                       LDO LINE REGULATION                                                                                 vs. VCC24V FIELD SUPPLY
+                                 5.10                                                                                                     5.5
+                                                                                              MAX31913 toc10                                                                                 MAX31913 toc11
+                                 5.08         I5VOUT = 50mA                                                                               5.4         I5VOUT = 50mA
+                                 5.06                                                                                                     5.3
+                                                                                                               5VOUT OTPUT VOLTAGE (V)
+                                 5.04                                                                                                     5.2
+             5VOUT VOLTAGE (V)
+                                 5.02                                                                                                     5.1
+                                 5.00                                                                                                     5.0
+                                 4.98                                                                                                     4.9
+                                 4.96                                                                                                     4.8
+                                 4.94                                                                                                     4.7
+                                 4.92                                                                                                     4.6
+                                 4.90                                                                                                     4.5
+                                        6         11       16     21        26    31         36                                                 4               14           24         34
+                                                          SUPPLY VOLTAGE (V)                                                                                    SUPPLY VOLTAGE (V)
+                                                       LDO OUTPUT VOLTAGE                                                                                    LDO OUTPUT VOLTAGE
+                                                        vs. TEMPERATURE                                                                                       vs. TEMPERATURE
+                                 5.10                                                                                                    5.10
+                                                                                              MAX31913 toc12                                                                                 MAX31913 toc13
+                                 5.08         I5VOUT = 0mA                                                                               5.08         I5VOUT = 5mA
+                                 5.06                                                                                                    5.06
+                                 5.04                                                                                                    5.04
+             5VOUT VOLTAGE (V)                                                                                 5VOUT VOLTAGE (V)
+                                 5.02                                                                                                    5.02
+                                 5.00                                                                                                    5.00
+                                 4.98                                                                                                    4.98
+                                 4.96                                                                                                    4.96
+                                 4.94                                                                                                    4.94
+                                 4.92                                                                                                    4.92
+                                 4.90                                                                                                    4.90
+                                        -40               10           60              110                                                      -40             10          60         110
+                                                       AMBIENT TEMPERATURE (°C)                                                                             AMBIENT TEMPERATURE (°C)
+www.maximintegrated.com                                                                                                                                                                  Maxim Integrated │ 7
+
+
+MAX31913                                                                        Industrial, Octal, Digital Input
+                                                                                          Translator/Serializer
+Pin Configuration
+                                     TOP VIEW
+                                   DB0      1    +                        28    GND
+                                   DB1      2                             27    SIN
+                                    IN1     3                             26    MODESEL
+                                    RT1     4                             25    CLK
+                                    IN2     5                             24    CS
+                                    RT2     6                             23    SOUT
+                                                       MAX31913
+                                    IN3     7                             22    IN8
+                                    RT3     8                             21    RT8
+                                    IN4     9                             20    IN7
+                                    RT4    10                             19    RT7
+                                    IN5    11                             18    IN6
+                                    RT5    12                             17    RT6
+                                  RIREF    13                   EP        16    FAULT
+                                 VCC24V    14                             15    5VOUT
+Pin Description
+         PIN              NAME                                             FUNCTION
+        1, 2            DB0, DB1     Debounce (Filtering) Time Select Inputs
+ 3, 5, 7, 9, 11, 18,
+                         IN1–IN8     Field Inputs
+       20, 22
+  4, 6, 8, 10, 12,
+                        RT1–RT8      Energyless LED Driver Outputs. Connect to GND if LEDs are not required.
+     17, 19, 21
+         13               RIREF      Current-Limiter Reference Resistor
+         14              VCC24V      Field-Supply Voltage
+         15               5VOUT      5V Regulator Output
+         16               FAULT      Active-Low Undervoltage Alarm
+         23               SOUT       Serial-Data Out
+         24                 CS       Active-Low Chip-Select Input
+         25                CLK       Serial-Clock Input
+                                     Mode-Select Input
+         26             MODESEL       MODESEL = 1: Selects 8-bit shift register
+                                      MODESEL = 0: Selects 16-bit shift register
+         27                SIN       Serial-Data Input
+         28                GND       Field Ground
+          —                 EP       Exposed Pad. Must be connected to the PCB ground plane.
+www.maximintegrated.com                                                                                Maxim Integrated │ 8
+
+
+MAX31913                                                                              Industrial, Octal, Digital Input
+                                                                                                      Translator/Serializer
+Basic Application Circuit
+                                                          JUMPERS TO
+                                                            5VOUT
+                                                           AND GND
+                       R1
+             24V                  VCC24V          5VOUT
+                          C1                        DB0
+                                                    DB1                 C3
+                                                MODESEL                                                            VDD_LOGIC
+                                                     SIN
+                                      MAX31913
+                             RINX
+                  fIN1–8          IN1–8             CLK                                                            CLK
+                                                     CS                                                            CS
+                                                                                        ISOLATION
+                                                   SOUT                                                            SOUT
+                                  RT1–8
+                                                  FAULT                                                            FAULT
+                  LED 1–8            RIREF      GND
+                                           RREF
+                                                         NOTE: SEE FIGURE 1 FOR ADDITIONAL COMPONENTS NEEDED FOR EMC.
+Detailed Description                                            the IN1–IN8 input pins are compared against internal-
+                                                                ly set references to determine whether the sensor is
+Input Current Clamp
+                                                                on (logic 1) or off (logic 0). The trip points determining
+The MAX31913 industrial interface serializer inputs             the on/off status of the sensor satisfy the requirements
+(IN1–IN8) sense the state (on vs. off) of field sen-            of IEC 61131-2 Type 1 and 3 switches. The device can
+sors by monitoring both voltage and current flowing             also be configured to work as a Type 2 switch.
+through the sensor output. The current sinking through
+these input pins rises linearly with input voltage until        Glitch Filter
+the limit set by the current clamp is reached. Any volt-        A digital glitch filter provides debouncing and filtering
+age increase beyond this point does not increase the            of noisy sensor signals. The time constant of this filter
+input current any further.                                      is programmable from 0ms to 3ms through the DB0
+The value of the current clamp is adjustable through            and DB1 pins. See Table 1 for debounce settings.
+an external resistor connected between the RIREF                To provide the digital glitch filter, the device checks
+pin and GND. Pins RT1—RT8 are connected through                 that an input is stable for at least three clock cycles.
+LEDs which recycle the current from the eight inputs            The duration of a clock cycle is 1/3 of the selected
+to provide visual status indication, without consuming          debounce time. If the input is not stable for at least
+additional current. If LEDs are not used, these pins            three clock cycles, the input change is not sent to the
+must be connected directly to GND to provide a return           internal shift register.
+path for the input current. The voltage and current at
+www.maximintegrated.com                                                                                             Maxim Integrated │ 9
+
+
+MAX31913                                                                    Industrial, Octal, Digital Input
+                                                                                          Translator/Serializer
+Reading Serial Data                                         The shift register contents are read only (no write
+The filtered outputs of the input comparators are           capability exists) through the SPI-compatible
+latched into a shift register at the falling edge of CS.    interface.
+Clocking the CLK pin, while CS is held low, shifts the      For higher input counts than 8, multiple devices can
+latched data out of SOUT 1 bit at a time.                   be cascaded. In this case, the SOUT pin of one
+The internal data serializer comprises a 16-bit shift       device should be connected to the SIN pin of the next
+register, containing 8 bits of data corresponding to        device, effectively cascading the internal shift regis-
+the eight field inputs, as well as an 8-bit status byte     ters. The CLK and CS pins of all the devices should be
+containing supplementary status and CRC informa-            connected together in this configuration. See the
+tion. The status byte contains 1 bit representing the       Serial-Port Operation section for more detailed
+status of the field-supply voltage (UV1), 1 bit repre-      information on operating the SPI interface.
+senting the status of the internal temperature monitor
+(OT), a 5-bit CRC code internally calculated and gen-
+                                                            Temperature Monitoring
+erated, and 1 bit representing a secondary voltage          The internal junction temperature of the device is
+supply monitor (UV2).                                       constantly monitored. An alarm is raised, by asserting the
+                                                            OT bit to a 1.
+The undervoltage (UV1) bit is normally 1. If the supply
+voltage falls below VOFFUVLO, the UV1 becomes a 0.          Supply Voltage Monitoring
+The UV1 bit returns to 1 once the supply voltage has        A primary supply voltage monitor circuit constantly
+returned above VONUVLO.                                     monitors the field-supply voltage. If this voltage falls
+The overtemperature (OT) bit is normally 0. If the junction below a threshold (VOFFUV1), an alarm is raised by
+temperature increases to above TALRM, the OT bit            asserting the FAULT pin, indicating that the part is expe-
+becomes a 1. The bit returns to 0 once the junction         riencing a fault condition and the data in the serializer is
+temperature has returned below TALRM.                       not to be trusted. In addition, the device resets the UV1
+The CRC code can be used to check data integrity during     bit to a 0. Once the field-supply voltage has recovered
+transfer from the device to an external microcontroller. In and goes above VONUV1, the FAULT pin is released. A
+applications where the integrity of data transferred is not secondary supply voltage monitor circuit also monitors
+of concern, the CRC bits can be ignored. The CRC uses       the field-supply voltage. This secondary monitor only
+the following polynomial:                                   raises a flag in the serializer, by resetting the UV2 bit to
+                                                            0 (it does not assert the FAULT pin), if the field supply
+                 P(x) = x5 + x4 + x2 + x0                   drops below VOFFUV2. Once the supply voltage goes
+The number of bits in the internal serializer can be        back above VONUV2, the UV2 bit is set to 1. The second-
+selected between 8 bits or 16 bits. The MODESEL             ary supply monitor has higher trip points and its purpose
+pin is used to configure the serializer as an 8-bit         is to warn the system that the supply voltage is below
+(disabling the status byte) or 16-bit shift register.       specifications (approximately 24V - 20%). Whereas the
+In 8-bit mode, only the eight field input states are        purpose of the primary supply monitor is to warn that
+transferred through the SPI port and the status byte is     the supply voltage has dropped to a value close to the
+ignored. Therefore, in multiple IC applications (input      minimum operating voltage of the IC.
+channels greater than 8), if desired, only a single
+status byte can be generated and transmitted for any
+number of input channels.
+Table 1. Debounce Settings
+             DB1                            DB0                   BINARY VALUE                  DEBOUNCE TIME
+               0                             0                          0                                0
+               0                             1                          1                              25Fs
+               1                             0                          2                             0.75ms
+               1                             1                          3                               3ms
+www.maximintegrated.com                                                                             Maxim Integrated │ 10
+
+
+MAX31913                                                                                           Industrial, Octal, Digital Input
+                                                                                                                    Translator/Serializer
+Applications Information                                                          ments. Table 2 lists an example device for each com-
+                                                                                  ponent in Figure 1. The system shown in Figure 1,
+EMC Standards Compliance
+                                                                                  using the components shown in Table 2, is designed
+The external components shown in Figure 1 allow the                               to be robust against IEC fast transient burst, surge,
+device to operate in harsh industrial environments.                               RFI specifications, and ESD specifications (IEC
+Components were chosen to assist in suppression                                   61000-4-4, -5, -6, and -2).
+of voltage burst and surge transients, allowing the
+system to meet or exceed international EMC require-
+Table 2. Recommended Components
+       COMPONENT                                     DESCRIPTION                              REQUIRED/RECOMMENDED/OPTIONAL
+             C0                     4.7nF, 2kV polypropylene capacitor                                       Recommended
+             C1                     10FF, 60V ceramic capacitor                                                  Required
+             C3                     100nF, 10V ceramic capacitor                                             Recommended
+             C4                     4.7µF, 10V low ESR ceramic capacitor                                         Required
+             C5                     100nF, 100V ceramic capacitor                                            Recommended
+             D0                     36V fast zener diode (ZSMB36)                                            Recommended
+             D1                     General-purpose rectifier (IN4007)                         Optional: For reverse-polarity protection.
+        LED1­–LED8                  LEDs for visual input status indication                                       Optional
+             R1                     150I, 1/3W MELF resistor                                                     Required
+            RINX                    2.2kI, 1/4W MELF resistor                                                    Required
+            RREF                    15kI, 1/8W resistor                                                          Required
+Note: For higher EFT performance, a minimum 1nF, 1000V capacitor can be added from nodes fIN1–fIN8 to Earth or Ground. For
+additional methods to improve EFT robustness, please check the Maxim website regularly for upcoming application notes currently
+being developed.
+                                                                                JUMPERS TO
+                    24V                                                           5VOUT
+                          R1           D1                                        AND GND
+                                                         VCC24V          5VOUT
+                 C0          D0         C1      C5                         DB0
+                                                                           DB1             C3   C4
+              EARTH
+                                                                       MODESEL                                                VDD_LOGIC
+                                                                           SIN
+                                                             MAX31913
+                                       RINX
+                          fIN1–8                         IN1–8             CLK                                                CLK
+                                                                            CS                                                CS
+                                                                                                         ISOLATION
+                                                                          SOUT                                                SOUT
+                                                         RT1–8
+                                                                         FAULT                                                FAULT
+                                      LED 1–8*
+                                                            RIREF      GND
+                                                                  RREF
+                    GROUND 0V    C0
+                                          EARTH
+                           *IF LEDS ARE NOT USED, USER MUST GROUND THE RT PINS.
+Figure 1. Typical EMC Protection Circuitry
+www.maximintegrated.com                                                                                                       Maxim Integrated │ 11
+
+
+MAX31913                                                                             Industrial, Octal, Digital Input
+                                                                                                  Translator/Serializer
+Serial-Port Operation                                                external components used to enhance EMC robustness
+Serial output of the device functions in one of two                  do not need to be duplicated for each device of a circuit
+modes, depending on the MODESEL setting (Table 3).                   board. Figure 4 illustrates a 16-input application.
+With MODESEL = 0, the device output includes a 5-bit
+                                                                     SPI Waveforms
+CRC, an undervoltage alarm, and an overtemperature
+alarm. See the Detailed Description for CRC, undervolt-              The serial output of the device adheres to the SPI proto-
+age, and overtemperature functional descriptions. With               col, running with CPHA = 0 and CPOL = 0. Input states
+MODESEL = 1, the device outputs only the state of the                on IN1–IN8 are latched in on the falling edge of CS. The
+IN1–IN8 inputs and omits the CRC, undervoltage alarm,                transfer of data out of the slave output, SOUT, starts
+and overtemperature alarm.                                           immediately when CS is asserted (i.e., MSB is output
+                                                                     onto SOUT independent of CLK). The remaining data bits
+Daisy-Chain Operation                                                are shifted out on the falling edge of CLK. The data bits
+For systems with more than eight sensor inputs, multiple             are written to the output SOUT with MSB first. When CS
+devices can be daisy-chained to allow access to all data             is high, SOUT is high impedance. The resultant timing is
+inputs through a single serial port. When using a daisy-             shown in Figure 5. Note that all bits after IN1 are invalid
+chain configuration, connect SOUT of one of the devices              if 8-bit operation mode is selected with the MODESEL
+to the SIN input of another upstream device. CS and SCK              input. Figure 6, Figure 7, Figure 8, and Figure 9 illustrate
+of all devices in the chain should be connected together             SPI timing specifications.
+in parallel (see Figure 2). In a daisy-chain configuration,
+                         SIN                          SIN                      SIN
+                              MAX31913                     MAX31913                 MAX31913
+                         SOUT                         SOUT                     SOUT
+                                                                                                   TO µCONTROLLER
+Figure 2. Daisy-Chain Operation
+Table 3. MODESEL Settings
+    MODESEL SETTING                                                     FUNCTIONALITY
+              0               16-bit output; [IN8–IN1][CRC (5 bit)][UV1][OT][UV2]
+              1               8-bit output; [IN8–IN1]
+www.maximintegrated.com                                                                                       Maxim Integrated │ 12
+
+
+MAX31913                                                             Industrial, Octal, Digital Input
+                                                                               Translator/Serializer
+Powering the Device Through the 5VOUT Pin
+The device can alternatively be powered using a 5V
+supply connected to the 5VOUT pin. In this case a 24V
+supply is no longer needed and the VCC24V supply must
+be kept unconnected. (see Figure 3)
+In this configuration, the device will always indicate
+a UVFAULT (UV1 and UV2) and the FAULT pin will
+always be active (pulled low). Faults due to the Supply
+Voltage monitoring will not be available. Faults due to the
+Temperature monitor can only be read through the SPI
+interface.
+This configuration has lower power consumption and
+heat dissipation since the on-chip 5V voltage regulator
+is disabled.
+                                                                        JUMPERS TO           5V
+                                                                        5V AND GND
+                  NOT                                         5VOUT
+                                             VCC24V
+                  CONNECTED                                     DB0
+                                                                DB1                                 C1
+                                                                          C3
+                                                            MODESEL
+                                                                 SIN
+                         RINX
+                                                     MAX31913
+    FIN1-8                                   IN1-8
+                                                                CLK
+                                                                  CS
+                                                               SOUT
+                                             RT1-8
+                                                               FAULT
+                                                   RIREF     GND
+                                                       RREF
+Figure 3. Basic Application Powered Through 5VOUT
+www.maximintegrated.com                                                              Maxim Integrated │ 13
+
+
+MAX31913                                                                    Industrial, Octal, Digital Input
+                                                                                       Translator/Serializer
+                                                           JUMPERS TO
+                                                             5VOUT
+       24V                                                  AND GND
+               R1
+                                       VCC24V       5VOUT
+    C0            D0         C1                       DB0
+                                                      DB1              C3     C4
+                                                 MODESEL
+      EARTH
+                                                                                                        VDD_LOGIC
+                                         MAX31913
+                                                       SIN
+                      RINX
+          fIN1–8                       IN1–8          CLK                                               CLK
+                                                       CS                                               CS
+                                                                                    ISOLATION
+                                                     SOUT                                               SOUT
+                                       RT1–8
+                                                    FAULT                                               FAULT
+                                        RIREF      GND
+                                              RREF
+                                D1
+                 0V C0
+                       EARTH
+                                       VCC24V         CLK
+                                   C1                  CS
+                                                     SOUT
+                                                    FAULT
+                                                       SIN
+                                                                 JUMPERS TO
+                                          MAX31913                  5VOUT
+                           RINX
+                                                                   AND GND
+               fIN1–8                  IN1–8
+                                                    5VOUT
+                                                      DB0
+                                                      DB1                   C3   C4
+                                       RT1–8     MODESEL
+                                        RIREF      GND
+                                              RREF
+Figure 4. 16-Input Application Circuit
+www.maximintegrated.com                                                                       Maxim Integrated │ 14
+
+
+MAX31913                                                                         Industrial, Octal, Digital Input
+                                                                                                      Translator/Serializer
+        CLK
+      SOUT      IN8   IN7  IN6      IN5    IN4 IN3      IN2 IN1 CRC4   CRC3    CRC2     CRC1      CRC0      UV1  OT     UV2
+         CS
+   IN8 –IN1 VALID
+Figure 5. SPI Communication Example
+                    tCSPW              tP2
+                                                                                          tSU1        tH1
+     CS                                                                   CLK
+                                                                          SIN               SIN VALID
+   SOUT
+Figure 6. SPI Timing Diagram 1                                  Figure 8. SPI Timing Diagram 3
+                                                                                                     1/fCLK
+                                                                                      tCLKPW
+                               tSU2                tREC
+                                                                   CLK
+    CS
+                                                                                     tR/F
+                                                                  SOUT
+    CLK
+                                                                                 tP1
+                                                                                                                          tR/F
+Figure 7. SPI Timing Diagram 2                                  Figure 9. SPI Timing Diagram 4
+www.maximintegrated.com                                                                                         Maxim Integrated │ 15
+
+
+MAX31913                                                                    Industrial, Octal, Digital Input
+                                                                                            Translator/Serializer
+Chip Information                                          Package Information
+PROCESS: S45JRS                                           For the latest package outline information and land patterns
+                                                          (footprints), go to www.maximintegrated.com/packages. Note
+                                                          that a “+”, “#”, or “-” in the package code indicates RoHS status
+                                                          only. Package drawings may show a different suffix character,
+                                                          but the drawing pertains to the package regardless of RoHS status.
+Ordering Information
+                                                             PACKAGE            PACKAGE        OUTLINE          LAND
+                                   PIN-                         TYPE               CODE          NO.       PATTERN NO.
+      PART          TEMP RANGE                   CARRIER
+                                   PACKAGE                  28 TSSOP-EP           U28E+4       21-0108        90-0146
+ MAX31913AUI+      -40NC to +125NC 28 TSSOP        Bulk
+                                                   Tape
+ MAX31913AUI+T     -40NC to +125NC 28 TSSOP
+                                                 and Reel
++Denotes a lead(Pb)-free/RoHS-compliant package.
+T = Tape and reel.
+www.maximintegrated.com                                                                               Maxim Integrated │ 16
+
+
+MAX31913                                                                                                    Industrial, Octal, Digital Input
+                                                                                                                             Translator/Serializer
+Revision History
+   REVISION            REVISION                                                                                                                    PAGES
+                                                                              DESCRIPTION
+   NUMBER                DATE                                                                                                                   CHANGED
+         0                3/13          Initial release                                                                                                —
+         1                7/14          Various typos corrected                                                                              2, 6, 9, 11, 13, 14
+         2                2/15          Updated page 1 content                                                                                          1
+                                        Updated Reading Serial Data section, IEC diagram, and added Powering
+         3                4/15                                                                                                                   10-12, 14
+                                        the Device Through the 5VOUT Pin section
+For pricing, delivery, and ordering information, please contact Maxim Direct at 1-888-629-4642, or visit Maxim Integrated’s website at www.maximintegrated.com.
+Maxim Integrated cannot assume responsibility for use of any circuitry other than circuitry entirely embodied in a Maxim Integrated product. No circuit patent licenses
+are implied. Maxim Integrated reserves the right to change the circuitry and specifications without notice at any time. The parametric values (min and max limits)
+shown in the Electrical Characteristics table are guaranteed. Other parametric values quoted in this data sheet are provided for guidance.
+Maxim Integrated and the Maxim Integrated logo are trademarks of Maxim Integrated Products, Inc.                 © 2015 Maxim Integrated Products, Inc. │ 17
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Maxim Integrated:
+ MAX31913AUI+ MAX31913AUI+T

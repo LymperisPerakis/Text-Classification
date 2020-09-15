@@ -1,0 +1,472 @@
+                                                                                         EZ-PD™ CMG1 Datasheet
+                                                                      USB Type-C EMCA Controller
+General Description
+EZ-PD™ CMG1 is a dedicated USB Type-C EMCA controller that complies with the USB Type-C and Power Delivery (PD) standards
+for Electronically Marked Type-C Thunderbolt and non-Thunderbolt passive cable applications. EZ-PD CMG1 integrates a complete
+Type-C transceiver including the RA termination resistors on the VCONN pins and VBUS short circuit protection on both VCONN and
+CC pins. CMG1 also includes 40 bytes of storage for configuration of vendor-, device-, and cable-specific configuration data.
+EZ-PD CMG1 is targeted for passive EMCA implementations with either one or two e-marker chips on the cable.
+Features                                                            Clocks and Oscillators
+                                                                    ■ Integrated oscillator eliminating the need for external clock
+Type-C Support and USB-PD Support
+                                                                    Power
+■ Supports USB PD3.0 spec and USB Type-C spec version 1.3
+  (Including support for the revised minimum VCONN operating        ■ 2.7 V to 5.5 V operation
+  voltage of 3 V)
+                                                                    ■ Sleep: 1.7 mA
+■ Integrated high-voltage protection on CC, VCONN1, and
+  VCONN2 pins to protect against accidental shorts to the VBUS      System-Level ESD Protection
+  pin on the Type-C connector                                       ■ On CC, VCONN1, and VCONN2 pins
+■ 40-byte storage programmable over Type-C interface for            ■ ± 8 kV Contact Discharge and ±15 kV Air Gap Discharge based
+  storing vendor-, device-, and cable-specific configuration data     on IEC61000-4-2 level 4C
+■ Termination resistor RA on VCONN1 and VCONN2
+                                                                    Package
+■ Supports RA weakening to reduce power consumption
+                                                                    ■ 9-ball WLCSP
+■ Supports electronically marked passive cable implementations
+  with one or two controllers                                       ■ Supports industrial temperature range (–40 °C to +85 °C)
+Logic Block Diagram
+                                     CMG1: Type-C Passive EMCA Controller
+                                                USB PD                            Storage
+                                              Subsystem
+                                               VBUS-to-CC                   40-byte Storage for
+                                           Short Protection                    Configuration
+                                            VBUS-to-VCONN1
+                                          Short Protection,
+                                                    RA                      System Resources
+                                             VBUS-to-VCONN2
+                                                                                 Oscillator
+                                          Short Protection,
+                                                    RA
+                                                                                    Reset
+                                            EMCA Protocol
+                                                 Engine
+                                                                                    VREF
+                                        USB Type-C Physical
+                                                  Layer                             IREF
+Cypress Semiconductor Corporation           •    198 Champion Court        •    San Jose, CA 95134-1709           •     408-943-2600
+Document Number: 002-20412 Rev. *H                                                                             Revised July 13, 2018
+
+
+                                                                                                                EZ-PD™ CMG1 Datasheet
+Contents
+Pinouts .............................................................................. 3 Acronyms ........................................................................ 13
+Power................................................................................. 4 Document Conventions .................................................            13
+CMG1 Application Configuration Update Over                                                   Units of Measure .......................................................      13
+CC Interface ...................................................................... 5    Document History Page .................................................           14
+Application Diagrams....................................................... 6            Sales, Solutions, and Legal Information ......................                    15
+Electrical Specifications .................................................. 8               Worldwide Sales and Design Support.......................                     15
+    Absolute Maximum Ratings......................................... 8                      Products .................................................................... 15
+    Device-Level Specifications ........................................ 8                   PSoC® Solutions ......................................................        15
+Ordering Information...................................................... 10                Cypress Developer Community.................................                  15
+    Ordering Code Definition........................................... 10                   Technical Support .....................................................       15
+Packaging........................................................................ 11
+Document Number: 002-20412 Rev. *H                                                                                                                              Page 2 of 15
+
+
+                                                                                                                    EZ-PD™ CMG1 Datasheet
+Pinouts
+Table 1. 9-Ball CSP Pin Description
+      9-Ball CSP                   Pin Name                                                               Description
+            A1                          CC             Communication Channel (VBUS short protected)/IEC
+            A2                      VCONN2             VCONN2 supply with RA termination (2.7 V to 5.5 V) (VBUS Short protected)/IEC
+            A3                       DNU[1]            Do not use[1]
+            B1                      VCONN1             VCONN1 supply with RA termination (2.7 V to 5.5 V) (VBUS Short protected)/IEC
+            B2                         VSS             Ground pin. Mandatory to connect to system GND
+                                                       Optional GND pin. This pin can be connected to the system GND for better board layout
+            B3                      O-GND[2]
+                                                       routability.
+            C1                        VCCD             1.8-V Core Voltage Out. Connect to 1-µF capacitor
+                                                       Optional GND pin. This pin can be connected to system GND for better board layout
+            C2                      O-GND[2]
+                                                       routability.
+                                                       Optional GND pin. This pin can be connected to system GND for better board layout
+            C3                      O-GND[2]
+                                                       routability.
+                                                 Figure 1. Pinout of 9-WLCSP Bottom (Balls Up) View
+                                                              3                  2                   1
+                                                             DNU             VCONN2                 CC             A
+                                                            O-GND               VSS             VCONN1             B
+                                                            O-GND             O-GND               VCCD             C
+Notes
+ 1. Keep pin A3 floating for all passive EMCA applications. See Figure 4 and Figure 5 for more details.
+ 2. Any of the optional GND pins B3, C2, and C3 can be connected to system GND for better board layout routability. If connected to GND, ensure that the selected
+    pin/s are shorted with the VSS pin (B2) of the CMG1 device in their board layout. If users are not planning to connect these optional GND pins to system GND, then
+    it is mandatory to leave them unconnected in their board designs.
+Document Number: 002-20412 Rev. *H                                                                                                                        Page 3 of 15
+
+
+                                                                                             EZ-PD™ CMG1 Datasheet
+Power
+Figure 2 shows an overview of the CMG1 power system requirement. CMG1 operates from two possible external supply sources,
+VCONN1 and VCONN2. The VCONN supplies support operation over 2.7 V–5.5 V. CMG1 has two different power modes: Active and
+Sleep, transitions between which are managed by the Power System. The VCCD pin, the output of the core regulator (1.8 V), is
+brought out for connecting a 1-µF capacitor for regulator stability only. This pin is not supported as a power supply.
+                                                     Figure 2. Power System
+                       VCONN1                                                                            VCONN2
+                     1 uF                      RA                                           RA                1 uF
+                                                           1.8-V Regulator
+                                                                                                         VCCD
+                                                                                                               1 uF
+                                                                                       CC
+                                                                 Core
+                                                                                      Tx/Rx
+                                                                                                         VSS
+Document Number: 002-20412 Rev. *H                                                                                     Page 4 of 15
+
+
+                                                                                          EZ-PD™ CMG1 Datasheet
+CMG1 Application Configuration Update Over CC Interface
+The CMG1 Manufacturing Test Kit (MTK) Utility is used for updating the configuration parameters of the CMG1 devices over the CC
+interface. The CMG1 MTK Utility is integrated as a part of the EZ-PD Configuration Utility and is supported by its version 1.1 Beta (or
+later). Vendor-specific and cable-specific parameters can be set using the EZ-PD Configuration Utility. Once the parameters are set,
+the CMG1 MTK Utility is used for configuration and testing of CMG1-based passive EMCA cables.
+To use the CMG1 MTK Utility, you must use the CY4532 EZ-PD CCG3PA EVK as shown in a high-level block diagram in Figure 3.
+The CMG1 MTK Utility is accompanied with a CMG1 MTK-specific firmware solution, which is intended for the CCG4 device present
+on the CY4532 EZ-PD CCG3PA EVK’s Power Board. If customers are using the CY4532 EZ-PD CCG3PA EVK for the first time to
+update the configuration parameters of CMG1 devices, then the CCG4 device’s firmware needs to be updated to this MTK-specific
+firmware (detailed instructions are provided in Getting Started with EZ-PD CMG1 Application Note).
+The EZ-PD Configuration Utility 1.1 Beta (or later), which integrates and supports the CMG1 MTK Utility, can be downloaded here.
+For further details, follow the instructions provided in Getting Started with EZ-PD CMG1 Application Note for hardware setup and
+step-by-step instructions. Also, see Chapter 4 of the EZ-PD Configuration Utility User Manual for more details on how to configure
+and test CMG1-based passive EMCA cables.
+                                   Figure 3. CMG1 Application Configuration Update Over CC Interface
+                                                       CY4532 EZ-PD CCG3PA EVK
+                                                                 Power Board
+              Host PC Running
+             EZ-PD CMG1 MTK              USB                           I2C     CCG4 Device          CC
+                                                   Cypress USB to                                           CMG1 Based
+             Utility (Supplied as a                                            (MTK specific
+                 part of EZ-PD                      Serial Bridge                                            EMCA Cable
+                                                                                 firmware)
+             Configuration Utility)
+Document Number: 002-20412 Rev. *H                                                                                        Page 5 of 15
+
+
+                                                                                              EZ-PD™ CMG1 Datasheet
+Application Diagrams                                                     diagram shown in Figure 4 requires a single VCONN wire to run
+                                                                         through the cable so that the CMG1 device can be powered
+Figure 4 and Figure 5 show the application diagrams of a                 irrespective of which plug is connected to the host (DFP).
+Passive EMCA application using CMG1 devices. Figure 4 shows              However, in the application diagram shown in Figure 5, the
+the application using a single CMG1 device per cable present at          VCONN signal does not run through the entire cable, but only
+one of the two plugs, whereas Figure 5 shows the same with two           runs to the respective VCONN pin of the CMG1 device at each
+CMG1 devices per cable present at each plug. The VBUS signal,            end of the plug. Also, only one CMG1 device is powered at any
+the SuperSpeed lines, Hi-Speed lines, and CC lines are                   given instance, depending on which one is nearer to the DFP that
+connected directly from one end to another. The application              supplies VCONN.
+                                     Figure 4. Passive EMCA Application - Single CMG1 Chip Per Cable
+   Type-C                                                                                                                       Type-C
+     Plug                                                                                                                        Plug
+             VBUS
+              10nF
+                                                                                                                          10nF
+           VCONN                                    1uF
+                                                                                                                  VCONN
+                                                 C1
+                                               VCCD
+                                  B1                           A2
+                                     VCONN1             VCONN2
+                    1uF                                              1uF
+                                                                  A3
+                                                           DNU
+                                              CMG1
+                                         CYPD270X-09FNXIT
+                             B3, C2,
+                             C3
+                                     O-GND                  CC A1
+                                 B2 VSS
+                   Pins B3, C2 and C3 can be
+                   optionally connected to VSS.
+                   See Table 1 for more details.
+               CC
+              SuperSpeed and Hi-Speed Lines
+              GND
+Document Number: 002-20412 Rev. *H                                                                                             Page 6 of 15
+
+
+                                                                                                  EZ-PD™ CMG1 Datasheet
+                                            Figure 5. Passive EMCA Application - Single CMG1 Chip Per Plug
+ Type-C                                                                                                                                            Type-C
+  Plug                                                                                                                                              Plug
+                                                                          VBUS
+          10nF
+                                                                                                                                              10nF
+        VCONN                                                                                                                              VCONN
+                                                 1uF                                                             1uF
+                                              C1                                                              C1
+                                            VCCD                                                            VCCD
+                              B1                            A2                                 A2                           B1
+                                  VCONN1             VCONN2                                                          VCONN1
+                                                                                                  VCONN2
+                 1uF
+                                                                                                                                   1uF
+                                                            A3                                 A3
+                                                        DNU                                       DNU
+                                           CMG1                                                            CMG1
+                          B3, C2,
+                                      CYPD270X-09FNXIT                                                CYPD270X-09FNXIT
+                                                                                                                             B3, C2,
+                          C3                                                                                                 C3
+                                  O-GND
+                                                         CC A1                                 A1 CC
+                                                                                                                      O-GND
+                              B2  VSS                                                                                       B2
+                                                                                                                        VSS
+           Pins B3, C2 and C3 can be                                                                             Pins B3, C2 and C3 can be
+           optionally connected to VSS.                                                                          optionally connected to VSS.
+           See Table 1 for more details.                                                                         See Table 1 for more details.
+                                                                            CC
+                                                                 SuperSpeed and Hi-Speed Lines
+                                                                           GND
+Document Number: 002-20412 Rev. *H                                                                                                            Page 7 of 15
+
+
+                                                                                            EZ-PD™ CMG1 Datasheet
+Electrical Specifications
+Absolute Maximum Ratings
+Table 2. Absolute Maximum Ratings
+   Parameter                    Description                   Min         Typ        Max         Units          Details/Conditions
+ VCONN_MAX        Max supply voltage relative to VSS            –           –         25           V
+                                                                                                          Absolute max
+ VCC_PIN_ABS      Max voltage on the CC pin                     –           –         25           V
+                  Electrostatic discharge human body
+ ESD_HBM                                                     2200           –          –           V                      –
+                  model
+                  Electrostatic discharge charged
+ ESD_CDM                                                      500           –          –           V                      –
+                  device model
+ LU               Pin current for latch-up                   –140           –        140          mA                      –
+                  Electrostatic discharge                                                                 Contact discharge on CC and
+ ESD_IEC_CON                                                 8000           –          –           V
+                  IEC61000-4-2                                                                            VCONN pins
+                  Electrostatic discharge                                                                 Air discharge for CC and
+ ESD_IEC_AIR                                                15000           –          –           V
+                  IEC61000-4-2                                                                            VCONN pins
+Device-Level Specifications
+See basic specifications in the following tables. More specifications will be added in a future version of this document.
+Table 3. DC Specifications
+    Spec ID        Parameter                 Description                Min      Typ     Max      Units         Details/Conditions
+                   VCONN1 or
+SID.PWR#1                       Power supply input voltage               2.7      –       5.5       V                      –
+                   VCONN2
+SID.PWR#5          VCCD         Output voltage (for core logic)            –     1.8       –        V                      –
+                                External regulator voltage bypass on
+SID.PWR#12        CEFC                                                   0.8      1       1.2      µF      X5R ceramic or better
+                                VCCD
+                                Power supply decoupling capacitor
+SID.PWR#13        CVCONN                                                 0.8      1        –       µF      X5R ceramic or better
+                                on VCONN1 and VCONN2
+Active Mode, VCONN1 or VCONN2 = 2.7 V to 5.5 V. Typical values measured at VCONN1 or VCONN2 = 5 V
+                                                                                                           CC I/O in Transmit or
+SID.PWR#8          IDD_A        Active current                             –      5       7.5      mA
+                                                                                                           Receive
+Sleep Mode, Typical values measured at VCONN1 or VCONN2 = 5 V and TA = 25 °C
+                                                                                                           CC as wakeup source. One
+                                                                                                           VCONN supply is powered,
+SID25A            IDD_S         Sleep mode current                         –     1.7      3.0      mA
+                                                                                                           the other is floating or
+                                                                                                           grounded.
+Document Number: 002-20412 Rev. *H                                                                                           Page 8 of 15
+
+
+                                                                             EZ-PD™ CMG1 Datasheet
+Table 4. PD DC Specifications
+   Spec ID     Parameter               Description             Min  Typ Max    Units        Details/Conditions
+                                                                                      All supplies force to 0 V and
+SID.PD.6      RA           Power cable termination             0.8   1   1.2    k    0.2 V applied at VCONN1 or
+                                                                                      VCONN2
+                                                                                      2.7 V applied at VCONN1 or
+SID.PD.7      RA_OFF       Power cable termination - disabled  0.4 0.75    –    M
+                                                                                      VCONN2 with RA disabled
+                           Leaker on VCONN1 or VCONN2 for
+SID.PD.14     ILEAK                                            150   –     –    µA                    –
+                           discharge upon cable detach
+                           Ground offset tolerated by BMC                             Relative to remote BMC trans-
+SID.PD.15     VGNDOFST                                        –500   –   500    mV
+                           receiver                                                   mitter
+                           Impedance of CC pin with VCONN1
+SID.PD.16     ZOPEN_PD                                         200   –     –    k    0 V ≤ CC Voltage ≤ 5.5 V
+                           and VCONN2 un-powered
+Table 5. Storage Specifications
+   Spec ID      Parameter             Description             Min  Typ  Max   Units         Details/Conditions
+SID.MEM#3     NVL_ERASE NVL bulk erase time                   25    –   100    ms
+                                                                                     –40 °C  TA  85 °C
+SID.MEM#4     NVL_WRITE NVL program                            2    –    10    ms
+SID.MEM#5     NVL_DR        NVL data retention                20    –    –    years  25 °C  TA  55 °C
+SID.MEM#5A NVL_DR           NVL data retention                10    –    –    years  55 °C  TA  85 °C
+SID.MEM#6     NVL_ENPB      NVL write endurance               100   –     –   cycles 25 °C  TA  55 °C
+Document Number: 002-20412 Rev. *H                                                                        Page 9 of 15
+
+
+                                                                                   EZ-PD™ CMG1 Datasheet
+Ordering Information
+Table 6 lists the EZ-PD CMG1 part numbers and features.
+Table 6. CMG1 Ordering Information
+               MPN                 Application        Type-C Ports          Role         Package Type              Si ID
+CYPD2703-09FNXIT                 Passive Cable             1               EMCA           9-ball CSP               2600
+                              Thunderbolt Passive
+CYPD2704-09FNXIT                                           1               EMCA            9-ball CSP              2601
+                                     Cable
+Ordering Code Definition
+  CY   PD      XX    XX - XX   XX    X    X    X
+                                                             T = Tape and reel
+                                                             Temperature Range: I = Industrial (-40 oC to 85 oC)
+                                                              X = Pb-free
+                                                              Package Type: FN = CSP
+                                                              Number of pins in the package
+                                                              Application and Feature Combination Designation
+                                                              Product Type: 27 = CMG1 Product Family
+                                                              Marketing Code: PD = Power Delivery product family
+                                                              Company ID: CY = Cypress
+Document Number: 002-20412 Rev. *H                                                                               Page 10 of 15
+
+
+                                                                             EZ-PD™ CMG1 Datasheet
+Packaging
+Table 7. Package Characteristics
+  Parameter                    Description                Conditions   Min        Typ        Max        Units
+      TA       Operating ambient temperature               Industrial  –40         25         85          °C
+      TJ       Operating junction temperature              Industrial –38.68     26.32      86.32         °C
+      TJA      Package JA (9-pin CSP)                                  –           –        31.9        °C/W
+      TJC      Package JC (9-pin CSP)                                  –           –       20.02        °C/W
+Table 8. Solder Reflow Peak Temperature
+                Package                       Maximum Peak Temperature        Maximum Time within 5 °C of Peak
+                                                                                       Temperature
+9-pin CSP                                                260 °C                         30 seconds
+Table 9. Package Moisture Sensitivity Level (MSL), IPC/JEDEC J-STD-2
+                           Package                                                MSL
+                          9-pin CSP                                              MSL 1
+Document Number: 002-20412 Rev. *H                                                                   Page 11 of 15
+
+
+                                                                            EZ-PD™ CMG1 Datasheet
+                                   Figure 6. 9-ball CSP Package Outline
+                                                      DIMENSIONS       NOTES
+                                         SYMBOL
+                                                  MIN.    NOM.   MAX.  1. ALL DIMENSIONS ARE IN MILLIMETERS.
+                                            A    0.440    0.480  0.520
+                                            A1   0.175      -    0.235
+                                            A2   0.225    0.250  0.275
+                                            D          1.351 BSC
+                                            E          1.376 BSC
+                                            D1         0.800 BSC
+                                            E1         0.800 BSC
+                                            n               9
+                                           Øb    0.231    0.261  0.291
+                                            eD         0.400 BSC
+                                            eE         0.400 BSC
+                                                                                                      002-21607 *A
+Document Number: 002-20412 Rev. *H                                                                         Page 12 of 15
+
+
+                                                                                   EZ-PD™ CMG1 Datasheet
+Acronyms                                                        Document Conventions
+Table 10. Acronyms Used in this Document                        Units of Measure
+ Acronym                       Description                      Table 11. Units of Measure
+CC         configuration channel                                  Symbol                      Unit of Measure
+CPU        central processing unit                              °C          degrees Celsius
+DFP        downstream facing port                               Hz          hertz
+DRP        dual role port                                       KB          1024 bytes
+           electronically marked cable assembly, a USB          kHz         kilohertz
+           cable that includes an IC that reports cable
+EMCA                                                            k          kilo ohm
+           characteristics (e.g., current rating) to the Type-C
+           ports                                                Mbps        megabits per second
+ESD        electrostatic discharge                              MHz         megahertz
+IC         integrated circuit                                   M          mega-ohm
+MCU        microcontroller unit                                 Msps        megasamples per second
+NC         no connect                                           µA          microampere
+NVL        non-volatile latch                                   µF          microfarad
+PD         power delivery                                       µs          microsecond
+PHY        physical layer                                       µV          microvolt
+POR        power-on reset                                       µW          microwatt
+PSoC®      Programmable System-on-Chip™                         mA          milliampere
+RX         receive                                              ms          millisecond
+TX         transmit                                             mV          millivolt
+           a new standard with a slimmer USB connector and      nA          nanoampere
+Type-C     a reversible cable, capable of sourcing up to 100 W
+           of power                                             ns          nanosecond
+USB        Universal Serial Bus                                            ohm
+                                                                pF          picofarad
+                                                                ppm         parts per million
+                                                                ps          picosecond
+                                                                s           second
+                                                                sps         samples per second
+                                                                V           volt
+Document Number: 002-20412 Rev. *H                                                                            Page 13 of 15
+
+
+                                                                                    EZ-PD™ CMG1 Datasheet
+Document History Page
+ Document Title: EZ-PD™ CMG1 Datasheet, USB Type-C EMCA Controller
+ Document Number: 002-20412
+                     Orig. of Submission
+ Revision    ECN                                                           Description of Change
+                     Change       Date
+   *H      6242326    VGT      07/13/2018 Changed datasheet status to Final.
+Document Number: 002-20412 Rev. *H                                                               Page 14 of 15
+
+
+                                                                                                                          EZ-PD™ CMG1 Datasheet
+Sales, Solutions, and Legal Information
+Worldwide Sales and Design Support
+Cypress maintains a worldwide network of offices, solution centers, manufacturer’s representatives, and distributors. To find the office
+closest to you, visit us at Cypress Locations.
+Products                                                                                     PSoC® Solutions
+Arm® Cortex® Microcontrollers                                cypress.com/arm                 PSoC 1 | PSoC 3 | PSoC 4 | PSoC 5LP | PSoC 6 MCU
+Automotive                                         cypress.com/automotive
+                                                                                             Cypress Developer Community
+Clocks & Buffers                                         cypress.com/clocks
+                                                                                             Community | Projects | Video | Blogs | Training | Components
+Interface                                             cypress.com/interface
+Internet of Things                                             cypress.com/iot               Technical Support
+Memory                                                 cypress.com/memory                    cypress.com/support
+Microcontrollers                                             cypress.com/mcu
+PSoC                                                        cypress.com/psoc
+Power Management ICs                                        cypress.com/pmic
+Touch Sensing                                             cypress.com/touch
+USB Controllers                                               cypress.com/usb
+Wireless Connectivity                                  cypress.com/wireless
+Notice regarding compliance with Universal Serial Bus specification. Cypress offers firmware and hardware solutions that are certified to comply with the Universal Serial
+Bus specification, USB Type-C™ Cable and Connector Specification, and other specifications of USB Implementers Forum, Inc (USB-IF). You may use Cypress or third
+party software tools, including sample code, to modify the firmware for Cypress USB products. Modification of such firmware could cause the firmware/hardware combination
+to no longer comply with the relevant USB-IF specification. You are solely responsible ensuring the compliance of any modifications you make, and you must follow the
+compliance requirements of USB-IF before using any USB-IF trademarks or logos in connection with any modifications you make. In addition, if Cypress modifies firmware
+based on your specifications, then you are responsible for ensuring compliance with any desired standard or specifications as if you had made the modification. CYPRESS
+IS NOT RESPONSIBLE IN THE EVENT THAT YOU MODIFY OR HAVE MODIFIED A CERTIFIED CYPRESS PRODUCT AND SUCH MODIFIED PRODUCT NO LONGER
+COMPLIES WITH THE RELEVANT USB-IF SPECIFICATIONS.
+© Cypress Semiconductor Corporation, 2017-2018. This document is the property of Cypress Semiconductor Corporation and its subsidiaries, including Spansion LLC
+("Cypress"). This document, including any software or firmware included or referenced in this document ("Software"), is owned by Cypress under the intellectual property
+laws and treaties of the United States and other countries worldwide. Cypress reserves all rights under such laws and treaties and does not, except as specifically stated
+in this paragraph, grant any license under its patents, copyrights, trademarks, or other intellectual property rights. If the Software is not accompanied by a license agreement
+and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress hereby grants you a personal, non-exclusive, nontransferable
+license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to modify and reproduce the Software
+solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users (either
+directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress's patents that are infringed
+by the Software (as provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products. Any other use,
+reproduction, modification, translation, or compilation of the Software is prohibited.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT
+OR ANY SOFTWARE OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE. No computing device can be absolutely secure. Therefore, despite security measures implemented in Cypress hardware or software
+products, Cypress does not assume any liability arising out of any security breach, such as unauthorized access to or use of a Cypress product. In addition, the products
+described in these materials may contain design defects or errors known as errata which may cause the product to deviate from published specifications. To the extent
+permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any liability arising out of the
+application or use of any product or circuit described in this document. Any information provided in this document, including any sample design information or programming
+code, is provided only for reference purposes. It is the responsibility of the user of this document to properly design, program, and test the functionality and safety of any
+application made of this information and any resulting product. Cypress products are not designed, intended, or authorized for use as critical components in systems designed
+or intended for the operation of weapons, weapons systems, nuclear installations, life-support devices or systems, other medical devices or systems (including resuscitation
+equipment and surgical implants), pollution control or hazardous substances management, or other uses where the failure of the device or system could cause personal
+injury, death, or property damage ("Unintended Uses"). A critical component is any component of a device or system whose failure to perform can be reasonably expected
+to cause the failure of the device or system, or to affect its safety or effectiveness. Cypress is not liable, in whole or in part, and you shall and hereby do release Cypress
+from any claim, damage, or other liability arising from or related to all Unintended Uses of Cypress products. You shall indemnify and hold Cypress harmless from and
+against all claims, costs, damages, and other liabilities, including claims for personal injury or death, arising from or related to any Unintended Uses of Cypress products.
+Cypress, the Cypress logo, Spansion, the Spansion logo, and combinations thereof, WICED, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered
+trademarks of Cypress in the United States and other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be
+claimed as property of their respective owners.
+Document Number: 002-20412 Rev. *H                                                      Revised July 13, 2018                                                  Page 15 of 15
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Cypress Semiconductor:
+ CYPD2703-09FNXIT CYPD2704-09FNXIT

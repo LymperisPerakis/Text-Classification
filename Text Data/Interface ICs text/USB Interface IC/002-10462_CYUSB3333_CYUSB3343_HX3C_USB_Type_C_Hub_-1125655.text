@@ -1,0 +1,1161 @@
+                                                                                                                                                                     CYUSB3333
+                                                                                                                                                                     CYUSB3343
+                                                                                                            HX3C USB Type-C Hub with PD
+HX3C USB Type-C Hub with PD
+Functional Description
+HX3C is a family of USB 3.1 Gen 1 Type-C hub with USB Power Delivery (PD) that complies with the USB 3.1 Gen 1 specification,
+and the latest Type-C and PD standards. HX3C supports SuperSpeed (SS), Hi-Speed (HS), Full-Speed (FS), and Low-Speed (LS)
+on all the ports. HX3C provides a complete Type-C and USB PD port controller solution in Upstream (US) and one Downstream (DS)
+port.
+Features
+■      USB 3.1 Gen 1-compliant Hub Controller                                                                 ■   Integrated DFP (RP), UFP (RD) termination resistors
+       ❐ All ports support SS (5 Gbps), and are backward-compatible
+                                                                                                              ■   Charging Standard support:
+         with HS (480 Mbps), FS (12 Mbps), and LS (1.5 Mbps)
+                                                                                                                  ❐ USB Power Delivery (PD) 2.0, Battery Charging v1.2 Apple
+       ❐ SS and USB 2.0 Link Power Management (LPM)
+                                                                                                                    Charging Standard
+       ❐ Dedicated Hi-Speed Transaction Translators (Multi-TT)
+       ❐ Configurable USB SS and USB 2.0 PHY.                                                                 ■   PD policy engine configures power profiles dynamically
+■      Integrated Type-C transceiver, supporting two Type-C ports                                             ■   Ghost Charge™: Charging DS without US connection
+       ❐ Type-C supported in two ports (1 US port and 1 DS port)                                              ■   Firmware upgradable over USB
+       ❐ Integrated transceiver (baseband PHY)
+       ❐ Integrated UFP (RD), and current sources for DFP (RP)                                                ■   System-level ESD protection on CC pins: 8-kV contact, 15-kV
+                                                                                                                  Air Gap IEC61000-4-2 level 4C
+■      Upstream: Type-C or Type-B port
+                                                                                                              ■   121-ball BGA (10 mm × 10 mm, 0.8-mm ball-pitch)
+■      Downstream: One Type-C and 2 Type-A or 3 Type-A ports
+Block Diagram
+                                                                               UPSTREAM PORT
+                                                                                                    VBUS
+                                                                       D+
+                                                                                  SSRx   SSTx
+                                                                       D-                                                                        USB 2.0 Specific
+                                                                                                                                                 USB 3.0 (SS) Specific
+                                                                                                                                                                          CC1_P1
+                                                                       USB2.0          USB3.0    VBUS                        TYPE-C PD                                    CC2_P1
+                                                                        PHY             PHY     DETECT                      CONTROLLER
+                                                                                                                                                           CPU
+                                                                                                                                                                          3.3V
+                                                                                                                                                        RAM    ROM
+                                                                                                            UPSTREAM PORT CONTROL                                         1.2V
+                                                      PHY INTERFACE
+                                                                                                                   ROUTING
+                                                                                                                                                                         I2C_SDAx
+                                                                                                                                                          I2C I/Fs
+                                                     HUB CONTROLLER                                             HUB CONTROLLER                                           I2C_SCLx
+                                                               TRANSACTION
+                                                               TRANSLATORS                                 UPSTREAM        DOWNSTREAM                                         26
+                                               REPEATER                                                                                                     PLL
+                                                                                                            BUFFERS          BUFFERS                                         MHz
+                                                                                                                                                                          CC1_P2
+                                                      ROUTING LOGIC                                        BUFFER AND ROUTING LOGIC                  TYPE-C PD
+                                                                                                                                                    CONTROLLER            CC2_P2
+                              USB 2.0 USB 3.0        PORT     USB 2.0 USB 3.0              PORT            USB 2.0        USB     USB 2.0 USB 3.0         PORT
+                               PHY     PHY          CONTROL    PHY     PHY                CONTROL           PHY       BILLBOARD    PHY     PHY           CONTROL
+                                     SSRx    SSTx                       SSRx    SSTx                                                     SSRx
+                                                    PWR
+                                                                                                                                                 SSTx
+                                                                                         PWR                                                            PWR
+                              D+                    OVR       D+                         OVR               D+                     D+                    OVR
+                              D-                    LED       D-                         LED               D-                     D-                    LED
+                                            PORT1                              PORT2                        PORT3                               PORT4
+Cypress Semiconductor Corporation                                  •           198 Champion Court                      •    San Jose, CA 95134-1709    •    408-943-2600
+Document Number: 002-10462 Rev. *C                                                                                                                Revised August 16, 2017
+
+
+                                                                                                                                                          CYUSB3333
+                                                                                                                                                          CYUSB3343
+Contents
+Architecture Overview ..................................................... 3                 Hub Configuration Mode Select ................................ 10
+     USB-PD Controller ...................................................... 3               Hub Configuration Options ........................................ 11
+     SS Hub Controller ....................................................... 3          EMI ................................................................................... 15
+     USB 2.0 Hub Controller ............................................... 3             ESD .................................................................................. 15
+     USB Billboard .............................................................. 3       Absolute Maximum Ratings .......................................... 16
+     CPU ............................................................................. 3  Electrical Specifications ................................................ 16
+     Flash ............................................................................ 3     DC Electrical Characteristics ..................................... 16
+     I2C Interfaces .............................................................. 3          Power Consumption .................................................. 18
+     Port Controller ............................................................. 3      Ordering Information ...................................................... 19
+Applications ...................................................................... 4         Ordering Code Definitions ......................................... 19
+HX3C Product Options ..................................................... 4              Packaging ........................................................................ 20
+Product Features .............................................................. 5         Package Diagram ............................................................ 21
+     Ghost Charge in Type-A DS Port ................................ 5                    Acronyms ........................................................................ 22
+     Vendor-Command Support ......................................... 5                   Reference Documents .................................................... 22
+Pin Information ................................................................. 6       Document Conventions ................................................. 22
+Pin Description ................................................................. 7           Units of Measure ....................................................... 22
+System Interfaces ........................................................... 10          Document History ........................................................... 23
+     Upstream Port (US) ................................................... 10            Sales, Solutions, and Legal Information ...................... 24
+     Downstream Ports (DS1, 2, 3, 4) .............................. 10                        Worldwide Sales and Design Support ....................... 24
+     Communication Interfaces (I2C) ................................ 10                       Products .................................................................... 24
+     Oscillator ................................................................... 10        PSoC® Solutions ...................................................... 24
+     Power Control ............................................................ 10            Cypress Developer Community ................................. 24
+     Reset ......................................................................... 10       Technical Support ..................................................... 24
+Document Number: 002-10462 Rev. *C                                                                                                                                    Page 2 of 24
+
+
+                                                                                                                  CYUSB3333
+                                                                                                                  CYUSB3343
+Architecture Overview                                                USB Billboard
+                                                                     HX3C has integrated USB Billboard controller. This is USB 2.0
+The Block Diagram on page 1 shows the HX3C architecture.             certified Full-Speed (12 Mbps) controller, which supports native
+HX3C consists of two independent hub controllers (SS and USB         Billboard device class driver.
+2.0), the Cortex-M0 CPU subsystem, two USB Type-C PD
+controllers, USB billboard, I2C interface, and port controller       CPU
+blocks.                                                              The Cortex-M0 CPUs in HX3C are part of the 32-bit MCU
+                                                                     controller, which is optimized for low-power operation with
+USB-PD Controller                                                    extensive clock gating. It mostly uses 16-bit instructions and
+HX3C has two USB-PD controllers consisting of a USB Type-C           executes a subset of the Thumb-2 instruction set. This enables
+baseband transceiver and physical-layer logic. This transceiver      fully compatible binary upward migration of the code to higher
+performs the BMC and the 4b/5b encoding and decoding                 performance processors such as the Cortex-M3 and M4, thus
+functions as well as the 1.2-V front end. These controllers          enabling upward compatibility. The Cypress implementation
+                                                                     includes a hardware multiplier that provides a 32-bit result in one
+integrate the required termination resistors to identify the role of
+                                                                     cycle. It includes a nested vectored interrupt controller (NVIC)
+the EZ-PD solutions on two Type-C ports of the HX3C device.          block with 32 interrupt inputs and also includes a Wakeup
+RD is used to identify a UFP in a dock or a dongle. When             Interrupt Controller (WIC). The WIC can wake the processor up
+configured as a DFP, integrated current sources perform the role     from the Deep Sleep mode, allowing power to be switched off to
+of RP or pull-up resistors. These current sources can be             the main processor when the chip is in the Deep Sleep mode.
+programmed to indicate the complete range of current capacity        The Cortex-M0 CPU provides a Non-Maskable Interrupt (NMI)
+on VBUS defined in the Type-C spec. HX3C PD ports respond            input, which is made available to the user when it is not in use
+to all USB-PD communication.                                         for system functions requested by the user.
+The USB-PD controller contains a 8-bit Successive Approxi-           The CPUs also include a serial wire debug (SWD) interface,
+mation Register (SAR) ADC for analog-to-digital conversions          which is a two-wire form of JTAG.
+(ADC). The ADC includes a 8-bit DAC and a comparator. The            Flash
+DAC output forms the positive input of the comparator. The
+negative input of the comparator is from a 4-input multiplexer.      HX3C has one flash module each for both USB-PD controllers
+                                                                     and one for Billboard; with a flash accelerator, tightly coupled to
+The four inputs of the multiplexer are a pair of global analog
+                                                                     the CPU to improve average access times from the flash block.
+multiplex busses an internal bandgap voltage and an internal         The flash block is designed to deliver 1 wait-state (WS) access
+voltage proportional to the absolute temperature. All GPIO inputs    time at 48 MHz and with 0-WS access time at 24 MHz. The flash
+can be connected to the global Analog Multiplex Busses through       accelerator delivers 85% of single-cycle SRAM access
+a switch at each GPIO that can enable that GPIO to be                performance on average.
+connected to the mux bus for ADC use. The CC1, and CC2 pins
+are not available to connect to the mux busses.                      I2C Interfaces
+                                                                     HX3C supports two I2C interfaces, which supports I2C slave,
+SS Hub Controller                                                    master and multi-master configurations. One of the I2C inter-
+This block supports the SS hub functionality based on the            faces is used for configuration of the hub during boot-up. Config-
+USB 3.1 Gen 1 specification. The SS hub controller supports the      uration can be from an external I2C EEPROM or from an external
+following:                                                           I2C master. Second I2C interface shall be used to configure
+                                                                     external I2C slave device from HX3C.
+■ SS link power management (U0, U1, U2, U3 states)
+                                                                     Port Controller
+■ Full-duplex data transmission
+                                                                     The port controller block controls the DS port power to comply
+USB 2.0 Hub Controller                                               with the BC v1.2 and USB 3.1 Gen 1 specifications. Control
+This block supports the LS, FS, and HS hub functionalities. It       signals for external power switches are implemented within the
+includes the repeater, frame timer, and four transaction trans-      chip. HX3C controls the external power switches at power-on to
+lators.                                                              reduce in-rush current.
+The USB 2.0 hub controller block supports the following:
+■ USB 2.0 link power management (L0, L1, L2, L3 states)
+■ Suspend, resume, and remote wake-up signaling
+■ Multi-TT (one TT for each DS port)
+Document Number: 002-10462 Rev. *C                                                                                         Page 3 of 24
+
+
+                                                                                                                                   CYUSB3333
+                                                                                                                                   CYUSB3343
+Applications
+■  Docking stations for notebook PCs and tablets                                        ■  Printers, scanners
+■  PC motherboards, servers                                                             ■  Set-top boxes, home gateways, routers, game consoles
+■  Digital TV, monitors                                                                 ■  Dongles and adapters
+■  Retail hub boxes
+HX3C Product Options
+Table 1. HX3C Product Options
+                             Features                                         CYUSB3333 (Dongle-DRP)                 CYUSB3343 (Dock-DFP)
+Application                                                                                Dongles                  Self-powered Docks, Monitors
+Number of DS ports                                                                      3 (USB 3.0)                           3 (USB 3.0)
+Battery Charging on DS ports                                                           Apple/BC v1.2                        Apple/BC v1.2
+External Power Switch Control                                                      Individual or Ganged                  Individual or Ganged
+Number of I2C ports                                                                              2                                 2
+Number of PD/Type-C ports                                                                        2                                 2
+PD port-1 power role                                                                          DRP                                 DRP
+PD port-2 power role                                                                          DRP                                 DFP
+Termination Resistor on CC1 line of PD port-1                                            RP[1],   RD[1]                       RP[1], RD[1]
+Termination Resistor on CC2 line of PD port-1                                                 RA  [2]                         RP[1], RD[1]
+Termination Resistor on CC1 line of PD port-2                                            RP , RD[1]
+                                                                                             [1]
+                                                                                                                                  Rp[3]
+Termination Resistor on CC2 line of PD port-2                                            RP[1], RD[1]                             Rp[3]
+Billboard device                                                                              Yes                                 Yes
+Package                                                                                121-ball BGA                          121-ball BGA
+Temperature range                                                              Industrial and Commercial             Industrial and Commercial
+ Notes
+  1. Termination resistor denoting the PD port as dual role port for power, power provider/consumer.
+  2. Termination resistor denoting the PD port as a VCONN powered accessory.
+  3. Termination resistor denoting the PD port as downstream facing port, power provider only.
+Document Number: 002-10462 Rev. *C                                                                                                         Page 4 of 24
+
+
+                                                                                                                    CYUSB3333
+                                                                                                                    CYUSB3343
+Product Features
+Ghost Charge in Type-A DS Port                                   Figure 2. Ghost Charge Implementation in HX3C
+Ghost Charge is a Cypress-proprietary feature for charging USB                            HX3C DS PORT
+devices on the DS port when the US port is not connected to a
+host. For example, in a docking station with HX3C as shown in                   Other
+                                                                                               BC v1.2
+Figure 1, when the laptop is undocked, HX3C will emulate a                     Charging
+                                                                                               Scheme
+dedicated charging port (DCP) to provide charge to a phone                     Scheme
+connected on a Type-A DS port.
+                                                                                     Charging
+Figure 1. Ghost Charge                                                               Scheme
+                                                                                     Detector
+                                  Power to Smartphone
+                                  (HX3C’s  Downstream Port)                                                    5V
+                                                                                                                        DSx_OVRCURR
+                                  (HX3’s Downstream Port)
+                                                                                                  DSx_PWREN
+                                                                                    DP    DM                  Power
+                                                                                                              Switch
+                                     USB Cable
+   HX3C                                                                                                          VBUS
+    HX3
+                                                                                  Wall Charger                Battery
+                                                                                   Detector                   Charger
+                                   Notebook PC
+                                   Undocked
+                                                                                   USB Battery-Powered Device
+                                                                 Ghost Charge is enabled by default and can be disabled through
+          Charge a smartphone without docking the notebook       configuration. Refer to Hub Configuration Options on page 11.
+                                                                 Vendor-Command Support
+When the US port is disconnected from the host, HX3C detects     The hub supports vendor-specific requests and can also
+if any of the DS ports are connected to a device requesting      enumerate as a vendor-specific device. The vendor-specific
+charging. It determines the charging method and then switches    request can be used to (a) bridge USB and I2C and (b) configure
+to the appropriate signaling based on the detected charging      HX3C. This feature can be used for the following applications:
+specification as shown in Figure 2. The hub either emulates a
+USB-compliant dedicated charging port by connecting DP and       ■   Firmware upgrade of an external ASSP connected to HX3C
+DM (see the BC v1.2 specification) or other supported                through USB
+proprietary charging schemes.                                    ■   In-System programming (ISP) of an EEPROM connected to
+                                                                     HX3C through USB
+Document Number: 002-10462 Rev. *C                                                                                           Page 5 of 24
+
+
+                                                                                                                                CYUSB3333
+                                                                                                                                CYUSB3343
+Pin Information
+                                           Figure 3. HX3C 121-ball BGA Pinout for CYUSB3333/CYUSB3343
+          1             2             3           4            5             6             7           8         9           10        11
+ A     DS4_DM        DS4_DP        AVDD33      DS2_DM       DS2_DP        AVDD33       DS1_DM      DS1_DP       VSS       US_DM      US_DP
+ B  DS2_OVRCURR      DVDD12    DS3_OVRCURR      VSS         AVDD12         VDDIO        AVDD33        VSS     XTAL_IN       VSS      DVDD12
+ C     US_TXM     DS4_OVRCURR      DS3_DP      DS3_DM     DS3_GREEN    DS1_PWREN     SWDCLK_BB    VCCD_BB   XTAL_OUT       GPIO2    DS1_RXP
+ D     US_TXP      MODE_SEL[1]  DS2_PWREN     RESET_N       AVDD12       DVDD12       XRES_BB     I2C_SDA2      VSS     SWDIO_BB    DS1_RXM
+ E     DVDD12        AVDD33       SWDCLK    USB2_RESREF      VSS         XRES_P1      I2C_SCL2  DS1_OVRCURR    GPIO1       GPIO6      VSS
+ F     US_RXM       SUSPEND    USB3_RESREF  MODE_SEL[0]  DS4_PWREN     DS4_GREEN       I2C_SDA    VDDIO_BB     GPIO5     DVDD12     DS1_TXM
+ G     US_RXP        SWDIO       VDD_EFUSE    VBUS_US      VBUS_DIS-    VBUS_DIS-       AVDD12       GPIO0   VSEL1_P2 VBUS_MON_P2   DS1_TXP
+                                                          CHARGE_P1    CHARGE_P2
+                                           CC2/VCONN1_P                HOTPLUG_-                            VBUS_P_C-  VBUS_C_C-
+ H     AVDD12      DS2_GREEN      VBUS_DS         1        VSEL2_P1       DET_P2    VBUS_MON_P1      GPIO7    TRL_P1      TRL_P2     DVDD12
+                                                          VBUS_C_C-                                                    VBUS_P_C-
+ J    DS4_TXP       VDDIO_P1       CC1_P1     SWDIO_P1                  VSEL2_P2        CC1_P2      CC2_P2   XRES_P2                DS2_RXP
+                                                            TRL_P1                                                        TRL_P2
+ K    DS4_TXM         VSS          AVDD12     VDDD_P1      VSEL1_P1    SWDCLK_P1      SWDIO_P2    VDDIO_P2      VSS         VSS     DS2_RXM
+                                                                       HOTPLUG_-
+ L     DVDD12       DS4_RXM       DS4_RXP       VSS        VCCD_P1                    VCCD_P2      I2C_SCL   DS2_TXP     DS2_TXM   SWDCLK_P2
+                                                                          DET_P1
+Document Number: 002-10462 Rev. *C                                                                                                 Page 6 of 24
+
+
+                                                                                                                CYUSB3333
+                                                                                                                CYUSB3343
+Pin Description
+Table 2. 121-ball BGA Pinout for CYUSB3333/CYUSB3343
+         Pin Name             Type       Ball #                                           Description
+                                                  USB 3.0 Upstream Port
+US_RXP                           I        G1          Upstream port SuperSpeed receive plus
+US_RXM                           I        F1          Upstream port SuperSpeed receive minus
+US_TXP                          O         D1          Upstream port SuperSpeed transmit plus
+US_TXM                          O         C1          Upstream port SuperSpeed transmit minus
+US_DP                          I/O        A11         Upstream port USB 2.0 data plus
+US_DM                          I/O        A10         Upstream port USB 2.0 data minus
+                                                USB 3.0 Downstream Port 1
+DS1_RXP                          I        C11         Downstream port 1 SuperSpeed receive plus
+DS1_RXM                          I        D11         Downstream port 1 SuperSpeed receive minus
+DS1_TXP                         O         G11         Downstream port 1 SuperSpeed transmit plus
+DS1_TXM                         O         F11         Downstream port 1 SuperSpeed transmit minus
+DS1_DP                         I/O        A8          Downstream port 1 USB 2.0 data plus
+DS1_DM                         I/O        A7          Downstream port 1 USB 2.0 data minus
+DS1_OVRCURR                      I        E8          Downstream port 1 Active low Over current detect
+DS1_PWREN                       O         C6          Downstream port 1 Active low VBUS Power enable
+                                                USB 3.0 Downstream Port 2
+DS2_RXP                          I        J11         Downstream port 2 SuperSpeed receive plus
+DS2_RXM                          I        K11         Downstream port 2 SuperSpeed receive minus
+DS2_TXP                         O          L9         Downstream port 2 SuperSpeed transmit plus
+DS2_TXM                         O         L10         Downstream port 2 SuperSpeed transmit minus
+DS2_DP                         I/O        A5          Downstream port 2 USB 2.0 data plus
+DS2_DM                         I/O        A4          Downstream port 2 USB 2.0 data minus
+DS2_OVRCURR                      I        B1          Downstream port 2 Active low Over current detect
+DS2_PWREN                       O         D3          Downstream port 2 Active low VBUS Power enable
+DS2_GREEN                       O         H2          Downstream port 2 USB 2.0 Green LED indicator
+                                                USB 3.0 Downstream Port 3
+                                                      Downstream port 3 USB 2.0 data plus
+DS3_DP                         I/O        C3          This pin is NC when Billboard function is used
+DS3_DM                         I/O        C4          Downstream port 3 USB 2.0 data minus
+                                                      This pin is NC when Billboard function is used
+                                                      Downstream port 3 Active low Over current detect
+DS3_OVRCURR                      I        B3
+                                                      Pull-up this pin to 3.3 V when Billboard function is used
+DS3_GREEN                       O         C5          Downstream port3 USB 2.0 Green LED indicator
+                                                USB 3.0 Downstream Port 4
+DS4_RXP                          I        L3          Downstream port 4 SuperSpeed receive plus
+DS4_RXM                          I        L2          Downstream port 4 SuperSpeed receive minus
+DS4_TXP                         O          J1         Downstream port 4 SuperSpeed transmit plus
+DS4_TXM                         O         K1          Downstream port 4 SuperSpeed transmit minus
+DS4_DP                         I/O        A2          Downstream port 4 USB 2.0 data plus
+DS4_DM                         I/O        A1          Downstream port 4 USB 2.0 data minus
+DS4_OVRCURR                      I        C2          Downstream port 4 Active low Over current detect
+Document Number: 002-10462 Rev. *C                                                                                 Page 7 of 24
+
+
+                                                                                                                 CYUSB3333
+                                                                                                                 CYUSB3343
+Table 2. 121-ball BGA Pinout for CYUSB3333/CYUSB3343 (continued)
+         Pin Name             Type       Ball #                                           Description
+DS4_PWREN                       O         F5         Downstream port 4 Active low VBUS Power enable
+DS4_GREEN                       O         F6         Downstream port 4 USB 2.0 Green LED indicator
+                                                  Precision Resistors
+USB2_RESREF                     A         E4         Connect pin to a precision resistor (6.04 kΩ ±1%) to generate a current reference
+                                                     for USB 2.0 PHY.
+                                                     Connect pin to a precision resistor (200 Ω ±1%) for SS PHY termination impedance
+USB3_RESREF                     A         F3
+                                                     calibration.
+                                                  PD Controller Port 1
+CC1_P1                          A          J3        USB PD port 1 connector detect/Configuration Channel 1
+CC2/VCONN1_P1                   A         H4         CYUSB3333: USB PD port 1 VCONN1 input (4.0 V to 5.5 V)
+                                                     CYUSB3343: USB PD port 1 connector detect/Configuration Channel 2
+                                                     VBUS monitor for PD port 1, connect PD port 1 VBUS through 100K:10K resistor
+VBUS_MON_P1                     A         H7
+                                                     divider network
+VBUS_P_CTRL_P1                 I/O        H9         GPIO, used for controlling provider power switch of PD port 1
+VBUS_C_CTRL_P1                 I/O         J5        GPIO, used for controlling consumer power switch of PD port 1
+VBUS_DISCHARGE_P1              I/O        G5         GPIO, used for controlling VBUS discharge switch of PD port 1
+VSEL1_P1                       I/O        K5         GPIO, used for selecting VBUS voltage level of PD port 1
+VSEL2_P1                       I/O        H5         GPIO, used for selecting VBUS voltage level of PD port 1
+HOTPLUG_DET_P1                 I/O         L6        GPIO, used as Hot plug detect input from display port of PD port 1
+                                                  PD Controller Port 2
+CC1_P2                          A          J7        USB PD port 2 connector detect/Configuration Channel 2
+CC2_P2                          A          J8        USB PD port 2 connector detect/Configuration Channel 2
+                                                     VBUS monitor for PD port 2, connect PD port 2 VBUS through 100K:10K resistor
+VBUS_MON_P2                     A         G10
+                                                     divider network
+VBUS_P_CTRL_P2                 I/O        J10        GPIO, used for controlling provider power switch of PD port 2
+VBUS_C_CTRL_P2                 I/O        H10        GPIO, used for controlling consumer power switch of PD port 2
+VBUS_DISCHARGE_P2              I/O        G6         GPIO, used for controlling VBUS discharge switch of PD port 2
+VSEL1_P2                       I/O        G9         GPIO, used for selecting VBUS voltage level of PD port 2
+VSEL2_P2                       I/O         J6        GPIO, used for selecting VBUS voltage level of PD port 2
+HOTPLUG_DET_P2                 I/O        H6         GPIO, used as Hot plug detect input from display port of PD port 2
+                                              Mode select, Clock and Reset
+MODE_SEL[0]                      I        F4         Hub firmware source
+                                                     MODE_SEL[1:0] = 11: Internal ROM firmware
+                                                     MODE_SEL[1:0] = 01: Firmware from external I2C EEPROM
+MODE_SEL[1]                      I        D2         MODE_SEL[1:0] = 10: Firmware from external I2C Master
+                                                     MODE_SEL[1:0] = 00: Reserved, do not use this mode
+XTAL_OUT                        A         C9         Crystal out
+XTAL_IN                         A         B9         Crystal In
+RESET_N                          I        D4         Active Low reset input of hub controller
+XRES_P1                          I        E6         Active Low reset input of port1 PD controller
+XRES_P2                          I         J9        Active Low reset input of port 2 PD controller
+XRES_BB                          I        D7         Active Low reset input of Billboard device
+                                                I2C, Debug, and GPIOs
+I2C_SCL                        I/O         L8        I2C Clock, connect to I2C EEPROM to download hub firmware
+I2C_SDA                        I/O        F7         I2C Data, connect to I2C EEPROM to download hub firmware
+I2C_SCL2                       I/O        E7         GPIO, used as I2C clock for configuring DP/Flip MUX on Type-C ports
+I2C_SDA2                       I/O        D8         GPIO, used for I2C data for configuring DP/Flip MUX on Type-C ports
+Document Number: 002-10462 Rev. *C                                                                                       Page 8 of 24
+
+
+                                                                                                                      CYUSB3333
+                                                                                                                      CYUSB3343
+Table 2. 121-ball BGA Pinout for CYUSB3333/CYUSB3343 (continued)
+         Pin Name             Type         Ball #                                           Description
+SWDCLK                         I/O           E3         GPIO, used as SWD clock input for hub
+SWDIO                          I/O           G2         GPIO, used as SWD data I/O for hub
+SWDCLK_P1                      I/O           K6         GPIO, used as SWD clock input for port1 PD controller
+SWDIO_P1                       I/O           J4         GPIO, used as SWD data I/O for port1 PD controller
+SWDCLK_P2                      I/O          L11         GPIO, used as SWD clock input for port2 PD controller
+SWDIO_P2                       I/O           K7         GPIO, used as SWD data I/O for port2 PD controller
+SWDCLK_BB                      I/O           C7         GPIO, used as SWD clock input for Billboard device
+SWDIO_BB                       I/O          D10         GPIO, used as SWD data I/O for Billboard device
+GPIO0                          I/O           G8         GPIO
+GPIO1                          I/O           E9         GPIO
+GPIO2                          I/O          C10         GPIO
+GPIO5                          I/O           F9         GPIO
+GPIO6                          I/O          E10         GPIO
+GPIO7                          I/O           H8         GPIO
+SUSPEND                                      F2         Hub suspend status indicator. This pin is asserted if both the SS and USB 2.0 hubs
+                                                        are in the suspend state
+                                                        Power Supply
+VBUS_US                       PWR            G4         This pin must be connected to VBUS from Type-B port. For Type-C port this pin
+                                                        should be connected to 5 V on Type-C attach and to GND on deattach.
+                                                        This pin is used to power the Apple-charging circuit. For BC v1.2 compliance
+VBUS_DS                       PWR            H3
+                                                        testing, connect pin to GND. For normal operation, connect pin to local 5-V supply.
+                                                        1.2 V for normal operation, 2.5 V for eFuse programming. Customers should
+VDD_EFUSE                     PWR            G3         connect this pin to 1.2 V
+DVDD12                        PWR     B2, B11, D6, E1, 1.2-V digital supply
+                                        F10, H11, L1
+AVDD12                        PWR    B5, D5, G7, H1, K3 1.2-V analog supply
+AVDD33                        PWR      A3, A6, B7, E2   3.3-V analog supply
+VDDIO                         PWR            B6
+VDDIO_P1                      PWR            J2
+                                                        3.3-V I/O supply
+VDDIO_P2                      PWR            K8
+VDDIO_BB                      PWR            F8
+                                                        CYUSB3343: Connect to 3.3-V power supply
+VDDD_P1                       PWR            K4
+                                                        CYUSB3333: Connect to VCONN1/5-V power supply
+                                                        1.8-V regulator output of port 1 PD controller. This pin should be decoupled to
+VCCD_P1                       PWR            L5         ground using a 1-μF
+VCCD_P2                       PWR            L7         1.8-V regulator output of port 2 PD controller. This pin should be decoupled to
+                                                        ground using a 1-μF
+                                                        1.8-V regulator output of Billboard device. This pin should be decoupled to ground
+VCCD_BB                       PWR            C8
+                                                        using a 1-μF
+                                      A9, B4, B8, B10,
+VSS                           PWR    D9, E11, E5, K10, Supply ground
+                                         K2, K9, L4
+Document Number: 002-10462 Rev. *C                                                                                            Page 9 of 24
+
+
+                                                                                                                CYUSB3333
+                                                                                                                CYUSB3343
+System Interfaces
+Upstream Port (US)                                                Reset
+The HX3C US port can function in Type-C or Type-B modes. This     There are four reset pins for the HX3C device. These pins control
+port includes an integrated 1.5-k pull-up resistor and termi-    independently reset operations for Hub controller, two USBPD
+nation resistors.                                                 controllers and Billboard section of the product. If any particular
+                                                                  section of the device function not required, then that section
+Downstream Ports (DS1, 2, 3, 4)                                   alone can be kept in reset by asserting correspond reset pin to
+One HX3C DS port works in Type-C mode and remaining ports         LOW.
+work in Type-A mode. Selection of Type-C port is made by          HX3C operates with two external power supplies, 3.3 V and
+firmware at the time of device boot-up. The DS ports integrate    1.2 V. There is no power sequencing requirement between these
+15-k pull-down and termination resistors. Type-A DS ports can    two supplies. However, all reset pins should be held LOW until
+be disabled or enabled, and can be set to removable or            both these supplies become stable.
+non-removable options. BC v1.2 charging is enabled by default
+                                                                  The reset pins can be tied to VDD_IO through an external
+on Type-A DS ports and can be disabled using the configuration
+                                                                  resistor and to ground (GND) through an external capacitor
+options (see Hub Configuration Options). DS3 is internally
+                                                                  (minimum 5 ms time constant), as shown in Figure 5. This
+connected to Billboard device. This port can be used for external
+                                                                  creates a clean reset signal for power-on reset (POR). If
+connection if Billboard device is disabled.
+                                                                  power-supply (VDD_IO supply) to RC circuit has a slow ramp-up,
+Communication Interfaces (I2C)                                    the ramp-up time of the power-supply has to be added to the
+                                                                  Reset time-constant. For example, If power supply to VDD_IO
+There are two I2C interfaces. The interfaces follow the Inter-IC  has a ramp-up of 2 ms to reach valid range, then minimum
+Bus specification, version 3.0, with support for the standard     time-constant should be higher than 7 ms (2 ms+5 ms).
+mode (100 kHz) and the fast mode (400 kHz) frequencies. HX3C
+supports I2C in the slave and master modes. The I2C interface     HX3C does not support internal brown-out detection. If the
+supports the multi-master mode of operation. Both the SCL and     system requires this feature, an external reset should be
+SDA signals require external pull-up resistors based on the       provided on the reset pins when supplies are below their valid
+specification. VDD_IO for HX3C is 3.3 V and I2C pull-up resistors operating ranges.
+shall be connected to the same supply.                            Figure 5. Reset Connection
+                                                                                             VDD_IO
+Oscillator
+HX3C requires an external crystal with a frequency of 26 MHz
+and an accuracy of ±150 ppm in parallel resonant, fundamental                          10 k
+mode. The crystal drive circuit is capable of a low-power drive
+level (<200 µW). The crystal connection to the XTAL_OUT and                                               RESETN
+XTAL_IN pins is shown in Figure 4.
+Figure 4. Crystal Connection                                                          1.5 µF
+                            26 MHz
+                XTAL_IN               XTAL_OUT
+                   10 pF               10 pF                      Hub Configuration Mode Select
+                                                                  Configuration options are selected through the MODE_SEL pins.
+                                                                  After power-up, these pins are sampled by an on-chip bootloader
+                                                                  to determine the configuration options (see Table 3).
+Power Control                                                     Table 3. Hub Boot Sequence
+The DS[1, 2 or 4]_PWREN and DS[1, 2, 3 or 4]_OVRCURR pins           MODE       MODE
+interface HX3C to external power switches. These pins are used                                   Hub Configuration Modes
+                                                                    SEL[1]     SEL[0]
+to control power switches for DS port power and monitor
+overcurrent conditions. The power switch polarity and the power        0           0      Reserved. Do not use this mode.
+control mode can be changed using the configuration options.           1           1      Internal ROM configuration.
+                                                                                          I2C Master, read configuration from I2C
+                                                                       0           1
+                                                                                          EEPROM.
+                                                                                          I2C Slave, configure from an external I2C
+                                                                       1           0
+                                                                                          Master.
+Document Number: 002-10462 Rev. *C                                                                                    Page 10 of 24
+
+
+                                                                                                                          CYUSB3333
+                                                                                                                          CYUSB3343
+Hub Configuration Options                                              The contents of the EEPROM can be updated with the
+                                                                       easy-to-use Cypress Blaster Plus tool. Blaster Plus is a
+The Hub can be configured by using one of the following:
+                                                                       GUI-based tool to configure HX3C. This tool allows to do the
+■  External I2C slave such as an EEPROM                                following:
+■  External I2C master                                                 ■  Download the Cypress-provided firmware from a PC via
+                                                                          HX3C’s US port and store it on an EEPROM connected to
+I2C Configuration                                                         HX3C’s I2C port.
+When enabled for I2C configuration through the MODE_SEL                ■  Read the configuration settings from the EEPROM. These
+pins (See Table 3 on page 10), HX3C can be configured as an               settings are displayed in the Blaster Plus GUI. Modify settings
+I2C master or as an I2C slave using I2C_SCL and I2C_SDA pins.             as required.
+Hub’s configuration data is a maximum of 197 bytes and Hub’s
+firmware is 10 KB. Note that Hub’s firmware also includes config-      ■  Write back the updated settings on to the EEPROM. In addition,
+uration settings.                                                         an image file can be created for external use.
+                                                                       The Blaster Plus tool, user guide, and the Cypress-provided
+HX3C as I2C Master
+                                                                       firmware are available at www.cypress.com/hx3.
+HX3C reads configurations from an external I2C EEPROM with
+sizes ranging from 16 to 64 KB using I2C_SCL and I2C_SDA               HX3C as I2C Slave
+pins. An example of a supported EEPROM is 24LC128. Based               An external I2C master can program the configuration settings
+on the contents of the bSignature and bImageType fields in Table       into the Hub according to the EEPROM map in Table 4 on page
+4 on page 11, HX3C performs one of the following actions:              11. Alternatively, the Hub firmware (<10 KB), which includes
+■  Loads custom configuration settings from the EEPROM when            configuration settings, can also be programmed. It is recom-
+   bSignature is “CY” and bImageType is 0xD4.                          mended to use the Blaster Plus tool to create the HX3C firmware
+                                                                       or configuration image file. Hub’s I2C slave address needs to be
+■  Loads the Cypress-provided firmware from the EEPROM when            provided while creating the image file.
+   bSignature is “CY” and bImageType is 0xB0. This firmware also
+   includes configuration settings.
+■  If bSignature  “CY”, the Hub enumerates in the
+   vendor-specific mode.
+Table 4. EEPROM Map
+ I2C Offset   Bits                Name                           Default                                      Description
+                                                                                      The first byte of the 2-byte signature initialized with “CY”
+                                                                                      ASCII text.
+      0       7:0   bSignature LSB (“C”)                          0x43
+                                                                                      When the signature is not valid, the hub enumerates as
+                                                                                      a vendor-specific device.
+                                                                                      The second byte of the 2-byte signature initialized with
+      1       7:0   bSignature MSB (“Y”)                          0x59                “CY” ASCII text. When the signature is not valid, the hub
+                                                                                      enumerates as a vendor-specific device.
+              7:6   bImageCTL                                      b’00               Reserved
+              5:4   I2 C Speed                                     b’11               b’01: 400 kHz
+                                                                                      b’11: 100 kHz
+      2
+              3:1   bImageCTL                                     b’000               Reserved
+               0    bImageCTL                                        0                0: Execution binary file
+                                                                                      1: Data file
+                                                                                      0xD4: Load only configuration
+      3       7:0   bImageType                                    0xD4                0xB0: Load firmware boot image
+                                                                                      All other bImageType will return an error code.
+                                                                                      bD4Length is defined in bytes as the length from offset 5.
+                                                                                      I2C offset bytes 0–4 are the header bytes.
+                                                                                        bD4Length = 6: Only update VID, PID, and DID
+                                                                                        bD4Length = 18: Configuration options (no PHY trim)
+      4       7:0   bD4Length                                       40                  bD4Length = 40: Configuration options with PHY trim
+                                                                                      options
+                                                                                        bD4Length > 40: User must provide valid string
+                                                                                      descriptors
+                                                                                        bD4Length > 192: Error
+      5       7:0   VID [7:0]                                     0xB4                Custom Vendor ID - LSB
+      6       7:0   VID [15:8]                                    0x04                Custom Vendor ID - MSB
+Document Number: 002-10462 Rev. *C                                                                                                 Page 11 of 24
+
+
+                                                                                      CYUSB3333
+                                                                                      CYUSB3343
+Table 4. EEPROM Map (continued)
+I2C Offset Bits             Name          Default                           Description
+     7     7:0  PID [7:0]                   0x04  Custom Product ID (PID)
+                                                  Default: 0x6504
+                                                  If separate PID is used for USB 2.0, the USB 2.0 PID will
+     8     7:0  PID [15:8]                  0x65  be read from offset 35 and 36.
+                                                  Else, USB 2.0 PID = PID+2; Default: 0x6506
+     9     7:0  DID [7:0]                    00   Custom Device ID - revision - LSB
+    10     7:0  DID [15:8]                   50   Custom Device ID - revision - MSB
+    11     7:0  Reserved                      0   Reserved
+           7:4  Reserved                  b’0000  Reserved
+                                                  Indicates if a SuperSpeed port is active.
+    12                                            bit[3:0] = DS4, Reserved, DS2, DS1
+           3:0  SHC_ACTIVE_PORTS [3:0]     b’1111 0: Not active
+                                                  1: Active
+                                                  Time (in 2-ms intervals) from the time the power-on
+    13     7:0  POWER_ON_TIME               0x32  sequence begins on a port until power is good on that port
+                                                  (bPwron2PwrGood)
+                                                  Indicates if the port is removable.
+                                                  bit[7:4] = DS4, DS3, DS2, DS1
+           7:4  REMOVABLE_PORTS [3:0]      b’1011
+                                                  0: Non-removable
+                                                  1: Removable
+    14
+                                                  Indicates if a USB 2.0 port is active.
+                                                  bit[3:0] = DS4, DS3, DS2, DS1
+           3:0  UHC_ACTIVE_PORTS [3:0]     b’1111 0: Not active
+                                                  1: Active
+           7:4  Reserved                      0   Reserved
+                                                  Identifies a compound device.
+            3   COMPOUND_HUB                  1   0: Hub is not part of a compound device.
+    15                                            1: Hub is part of a compound device.
+           2:1  Reserved                      0   Reserved
+            0   GANG                          0   1: Ganged power switch enable for all DS ports
+                                                  0: Individual port power switch enable for each DS port
+                                                  0: Suspend indicator enabled
+            7   SUSPEND_INDICATOR_DISABLE     0
+                                                  1: Suspend indicator disabled
+                                                  Hub mode of operation (USB 3.0 or USB 2.0)
+            6   SS_US_DISABLE                 0   0: USB 3.0 hub and USB 2.0 hub enabled
+                                                  1: USB 3.0 hub disabled and USB 2.0 hub enabled
+    16                                            Power switch control output polarity
+            5   PWR_EN_POLARITY               0   0: Active LOW
+                                                  1: Active HIGH
+                                                  USB 2.0 DP and DM swapped
+                                                  bit[4:0] = DS4, DS3, DS2, DS1, US
+           4:0  PORT_POLARITY             b’00000
+                                                  1: Port polarity swapped
+                                                  0: Port polarity not swapped
+           7:5  Reserved                      0   Reserved
+            4   BC_ENABLE                     1   0: BC v1.2 disabled
+                                                  1: BC v1.2 enabled
+            3   ACA_DOCK                      0   If this bit is set, enable ACA-Dock on the US port
+    17                                            0: Max limit for Apple charging 2.1 A
+            2   APPLE_XA                      0
+                                                  1: Max limit for Apple charging 1 A
+            1   Reserved                      0   Reserved
+            0   GHOST_CHARGE_EN               1   0: Ghost Charging disabled
+                                                  1: Ghost Charging enabled
+                                                  Per-port charging setting
+           7:4  CDP_EN[3:0]                b’1111 bit[7:4] = DS4, DS3, DS2, DS1
+                                                  0: CDP disabled
+                                                  1: CDP enabled
+    18
+                                                  Per-port charging setting
+                                                  bit[3:0] = DS4, DS3, DS2, DS1
+           3:0  DCP_EN[3:0]               b’0000  0: DCP disabled
+                                                  1: DCP enabled
+Document Number: 002-10462 Rev. *C                                                          Page 12 of 24
+
+
+                                                                                                                                            CYUSB3333
+                                                                                                                                            CYUSB3343
+Table 4. EEPROM Map (continued)
+I2C Offset   Bits                       Name                                  Default                                            Description
+                7     EMBEDDED_HUB                                                0                   If this bit is set, the US is as an embedded port and VBUS
+                                                                                                      connected to VBUS_US pin is ignored.
+                                                                                                      If this bit is set, the USB 2.0 hub controller will accept both
+                6     ILLEGAL_DESCRIPTOR                                          1                   0x00 and 0x29 as valid descriptor types. If ‘0’, only 0x29
+                                                                                                      will be accepted as a valid descriptor type.
+    19          5     Reserved                                                    1                   Reserved
+                                                                                                      Overcurrent input polarity
+                4     OC_POLARITY                                                 0                   0: Active LOW
+                                                                                                      1: Active HIGH
+              3:0     OC_TIMER                                                b’1000                  Time in milliseconds for which the overcurrent inputs will
+                                                                                                      be filtered
+    20        7:0     Reserved                                                    0                   Reserved
+              7:4     Reserved                                                    0                   Reserved
+                                                                                                      0: String descriptor support is disabled
+                                                                                                      1: String descriptor support is enabled
+                                                                                                      When string descriptors are not supported, the hub
+    21          3     STRING_DESCRIPTOR_ENABLE[4]                                 0                   controller returns a non-zero index (compile-time
+                                                                                                      programmable) for each string which is supported, and
+                                                                                                      0x00 for each string not supported, as indicated by this
+                                                                                                      field.
+              2:0     Reserved                                                    0                   Reserved
+    22        7:0     Reserved                                                    0                   Reserved
+              7:6     HS_AMPLITUDE_DS4                                          b’00
+                                                                                                      HS driver amplitude control; HS driver current: +0% to
+              5:4     HS_AMPLITUDE_DS3                                          b’00                  +7.5%
+    23                                                                                                b’00: Default
+              3:2     HS_AMPLITUDE_DS2                                          b’00
+                                                                                                      b’01: +2.5%
+              1:0     HS_AMPLITUDE_DS2                                          b’00                  b’10: +5%
+                                                                                                      b’11: +7.5%
+              7:6     HS_AMPLITUDE_US                                           b’00
+                                                                                                      HS driver slope control for all ports
+                                                                                                      b’0000: +15%
+              5:2     HS_SLOPE                                                 b'0100                 b’0001: +5%
+                                                                                                      b’0100: Default
+                                                                                                      b’0101: -5%
+    24                                                                                                b’1111: -7.5%
+                                                                                                      Reference voltage for HS squelch (transmission
+                                                                                                      envelope detector) for all ports
+              1:0     HS_TX_VREF                                                b’10                  b’00: 96 mV
+                                                                                                      b’01: 108 mV
+                                                                                                      b’10: 120 mV
+                                                                                                      b’11: 132 mV
+                                                                                                      HS driver pre-emphasis enable – for ports DS4, DS3,
+                                                                                                      DS2, DS1, and US
+              7:3     HS_PREEMP_EN[4:0]                                       b’00000
+                                                                                                      0: pre-emphasis is disabled
+                                                                                                      1: pre-emphasis is enabled
+    25
+                2     HS_PREEMP_DEPTH_DS4[5]                                      0
+                1     HS_PREEMP_DEPTH_DS3[5]                                      0
+                                                                                                      HS driver pre-emphasis depth
+                0     HS_PREEMP_DEPTH_DS2[5]                                      0                   0: +10%
+                                                                                                      1: +20%
+                7     HS_PREEMP_DEPTH_DS1[5]                                      0
+                6     HS_PREEMP_DEPTH_US[5]                                       0
+                5     Reserved                                                    1                   Reserved
+    26                                                                                                USB 3.0 Tx driver de-emphasis value
+              4:1     PCS_TX_DEEMPH_DS4                                          0x6                  0x3: –2.75 dB
+                                                                                                      0x6: –3.4 dB (Default)
+                                                                                                      0x9: –4.0 dB
+                0     Reserved                                                    0                   Reserved
+Notes
+ 4. When the string descriptor supports LangID, Manufacturer, Product and Serial Number, the serial number must be unique for each device.
+ 5. HS_PREEMP_DEPTH is valid only when corresponding HS_PREEMP_EN is set for that port.
+Document Number: 002-10462 Rev. *C                                                                                                                   Page 13 of 24
+
+
+                                                                                                                         CYUSB3333
+                                                                                                                         CYUSB3343
+Table 4. EEPROM Map (continued)
+I2C Offset Bits                Name                         Default                                           Description
+           7:4  Reserved                                       0x6
+    27                                                                                 USB 3.0 Tx driver de-emphasis value
+           3:0  PCS_TX_DEEMPH_DS2                              0x6                     0x3: –2.75 dB
+           7:4  PCS_TX_DEEMPH_DS1                              0x6                     0x6: –3.4 dB (Default)
+    28                                                                                 0x9: –4.0 dB
+           3:0  PCS_TX_DEEMPH_US                               0x6
+            7   Reserved                                        0                      Reserved
+            6   Reserved                                        1                      Reserved
+    29                                                                                 Adjust launch amplitude of the transmitter
+                                                                                       0x1F - 0.9 V
+           5:0  PCS_TX_SWING_FULL_DS4                        0x29                      0x29 - 1.0 V (Default)
+                                                                                       0x35 - 1.1 V
+                                                                                       0x3F - 1.2 V
+           7:6  Reserved                                        0                      Reserved
+    30
+           5:0  Reserved                                     0x29                      Reserved
+           7:6  Reserved                                        0                      Reserved
+                                                                                       Adjust launch amplitude of the transmitter
+    31                                                                                 0x1F - 0.9 V
+           5:0  PCS_TX_SWING_FULL_DS2                        0x29                      0x29 - 1.0 V (Default)
+                                                                                       0x35 - 1.1 V
+                                                                                       0x3F - 1.2 V
+           7:6  Reserved                                        0                      Reserved
+                                                                                       Adjust launch amplitude of the transmitter
+    32                                                                                 0x1F - 0.9 V
+           5:0  PCS_TX_SWING_FULL_DS1                        0x29                      0x29 - 1.0 V (Default)
+                                                                                       0x35 - 1.1 V
+                                                                                       0x3F - 1.2 V
+           7:6  Reserved                                        0                      Reserved
+                                                                                       Adjust launch amplitude of the transmitter
+    33                                                                                 0x1F - 0.9 V
+           5:0  PCS_TX_SWING_FULL_US                         0x29                      0x29 - 1.0 V (Default)
+                                                                                       0x35 - 1.1 V
+                                                                                       0x3F - 1.2 V
+    34     7:0  Reserved                                        0                      Reserved
+    35     7:0  UHC_PID [7:0]_LSB                            0x06                      USB 2.0 PID. If bD4Length  40, USB 2.0 PID will be read
+    36     7:0  UHC_PID [15:8]_MSB                           0x65                      from this location.
+  37–44    7:0  Reserved                                        0                      Eight bytes reserved for future expansion
+    45     7:0  bLength: LangID                                 4                      Size of LangID (defined by spec as N + 2)
+    46     7:0  DescType                                        3                      String descriptor type (constant value)
+    47     7:0  LangID - MSB                                    9                      String language ID - MSB of wLangID
+    48     7:0  LangID - LSB                                    4                      String language ID - MSB of wLangID
+                                                                                       Manufacturer string length (“bLength: LangID + bLength:
+    49     7:0  bLength: Manufacturer (X)                      54                      Manufacturer + bLength: Product + bLength: Serial
+                                                                                       Number” should be less than or equal to 152 bytes). X ≤
+                                                                                       66.
+    50     7:0  DescType                                        3                      String descriptor type (constant value)
+                                          ‘2’, 0, ‘0’, 0, ‘1’, 0, ‘4’, 0, ‘ ‘, 0, ‘C’,
+                                          0, ‘y’, 0, ‘p’, 0, ‘r’, 0, ‘e’, 0, ‘s’, 0,
+                                                                                       Manufacturer string: UNICODE UTF-16LE per USB 2.0
+    51     7:0  bString: Manufacturer       ‘s’, 0, ‘ ‘, 0, ‘S’, 0, ‘e’, 0, ‘m’, 0, specification: “2014 Cypress Semiconductor”
+                                          ‘i’, 0, ‘c’, 0, ‘o’, 0, ‘n’, 0, ‘d’, 0, ‘u’,
+                                                0, ‘c’, 0, ‘t’, 0, ‘o’, 0, ‘r’, 0
+                                                                                       Product string length (“bLength: LangID + bLength:
+                                                                                       Manufacturer + bLength: Product + bLength: Serial
+  49 + X   7:0  bLength: Product (Y)                           22                      Number” should be less than or equal to 152 bytes). Y ≤
+                                                                                       66.
+  50 + X   7:0  DescType                                        3                      String descriptor type (constant value)
+                                           ‘C’, 0, ‘Y’, 0, ‘-’, 0, ‘H’, 0, ‘X’, 0, Product string: UNICODE UTF-16LE per USB 2.0
+  51 + X   7:0  bString: Product
+                                            ‘3’, 0, ‘ ‘, 0, ‘H’, 0, ‘U’, 0, ‘B’, 0 specification: “CY-HX3 HUB”
+Document Number: 002-10462 Rev. *C                                                                                              Page 14 of 24
+
+
+                                                                                                                                CYUSB3333
+                                                                                                                                CYUSB3343
+Table 4. EEPROM Map (continued)
+I2C Offset Bits                    Name                             Default                                          Description
+                                                                                              Serial number string length (“bLength: LangID + bLength:
+                                                                                              Manufacturer + bLength: Product + bLength: Serial
+49 + X + Y  7:0    bLength: Serial Number (Z)                           22                    Number” should be less than or equal to 152 bytes).
+                                                                                              Z ≤ 66.
+50 + X + Y  7:0    DescType                                              3                    String descriptor type (constant value)
+                                                      ‘1’, 0, ‘2’, 0, ‘3’, 0, ‘4’, 0, ‘5’, 0, Serial number string: UNICODE UTF-16LE per USB 2.0
+51 + X + Y  7:0    bString: Serial Number
+                                                      ‘6’, 0, ‘7’, 0, ‘8’, 0, ‘9’, 0, ‘A’, 0 specification: “123456789A”
+EMI
+HX3C meets the EMI requirements outlined by FCC 15B (USA) and EN55022 (Europe) for consumer electronics. HX3C tolerates EMI
+conducted by aggressors outlined by the above specifications and continues to function as expected.
+ESD
+HX3C has a built-in ESD protection on all pins. The ESD protection level provided on these ports is 2.2 kV Human Body Model (HBM)
+based on the JESD22-A114 specification.
+Document Number: 002-10462 Rev. *C                                                                                                     Page 15 of 24
+
+
+                                                                                                                                   CYUSB3333
+                                                                                                                                   CYUSB3343
+Absolute Maximum Ratings
+Exceeding maximum ratings may shorten the useful life of the              Electrostatic discharge voltage ................................. 2200 V
+device. User guidelines are not tested.                                   Oscillator or crystal frequency ................. 26 MHz ±150 ppm
+Storage temperature................................... –65 °C to +150 °C  I/O voltage supply ...............................................3 V to 3.6 V
+Operating temperature .............................. –40 °C to +85 °C     Maximum input sink current per I/O .............................. 4 mA
+Electrical Specifications
+HX3C meets all USB-IF Electrical Compliance specifications.
+DC Electrical Characteristics
+Table 5. DC Electrical Characteristics
+  Parameter                  Description                           Min   Typ         Max         Units                 Details/Conditions
+ Power supply Voltage Specs
+                                                                   1.14  1.2         1.26          V       Normal operation
+VDD_EFUSE        eFuse supply
+                                                                    2.5  2.6          2.7          V       Programming
+VBUS             VBUS supply voltage                               4.35  5.0          5.5           V      –
+DVDD12           1.2 V core supply                                 1.14  1.2         1.26           V      –
+AVDD12           1.2 V analog supply                               1.14  1.2         1.26          V       –
+AVDD33           3.3 V analog supply                                3.0  3.3          3.6          V       –
+VDDIO
+VDDIO_P1
+                 3.3 V I/O supply                                    3   3.3          3.6          V       –
+VDDIO_P2
+VDDIO_BB
+                                                                    2.7    –          5.5          V       UFP Applications
+VDDD_P1          PD Port-1 power supply
+                                                                    3.0    –          5.5          V       DFP/DRP Applications
+                                                                                                           Connect a 1-µF capacitor between
+VCCD_P1          Output voltage (for core logic)                     –   1.8           –           V
+                                                                                                           this pin and ground
+                                                                                                           Connect a 1-µF capacitor between
+VCCD_P2          Output voltage (for core logic)                     –   1.8           –           V
+                                                                                                           this pin and ground
+                                                                                                           Connect a 1-µF capacitor between
+VCCD_BB          Output voltage (for core logic)                     –   1.8           –           V
+                                                                                                           this pin and ground
+VCONN1           VCONN supply voltage                                4   5.0          5.5          V       –
+                 Voltage ramp rate on core and I/O
+VRAMP                                                               0.2    –          50          V/ms Voltage ramp must be monotonic
+                 supplies
+                 Noise level permitted on core and                                                         Max p-p noise level permitted on all
+VN                                                                   –     –         100           mV
+                 I/O supplies                                                                              supplies except AVDD
+                 Noise level permitted on AVDD12                                                           Max p-p noise level permitted USB
+VN_USB                                                               –     –           20          mV
+                 and AVDD33 supply                                                                         supplies
+Power Supply Current Specs
+                                                                                                           Upstream connected to Super-
+                 1.2 V supplies combined                                                                   Speed Host and DS connected to
+ICC12                                                                –   320          420          mA
+                 operating current                                                                         Hubs (both SS and USB 2.0 in
+                                                                                                           active state)
+                 3.3 V supplies combined                                                                   All USB ports active, PD ports and
+ICC33                                                                –   230          300          mA
+                 operating current                                                                         BB device in active state
+Document Number: 002-10462 Rev. *C                                                                                                           Page 16 of 24
+
+
+                                                                                                      CYUSB3333
+                                                                                                      CYUSB3343
+Table 5. DC Electrical Characteristics (continued)
+    Parameter                  Description               Min    Typ     Max     Units          Details/Conditions
+                                                                                      Current consumed through VBUS
+ICCVBUS             VBUS supply operating current         –      3        5      mA   supply pin when USB is in Active
+                                                                                      state
+                    1.2 V supplies combined suspend
+ISB12                                                     –      12       –      mA
+                    current
+                                                                                      USB in suspend state, CPUs are in
+                    3.3 V supplies combined suspend                                   SLEEP mode, CC I/O ON, no I/O
+ISB33                                                     –      13       –      mA
+                    current                                                           sourcing current
+ISBVBUS             VBUS supply suspend current           –      5        –      µA
+  I/O Specs
+VIH[6]              Input voltage HIGH threshold    0.7 × VDDIO  –        –       V   CMOS input
+VIL                 Input voltage LOW threshold           –      –  0.3 × VDDIO   V   CMOS input
+                                                                                      Output HIGH voltage at IOH ≤ +4
+VOH                 Output voltage HIGH level            2.4     –        –       V
+                                                                                      mA
+VOL                 Output voltage LOW level              –      –       0.6      V   Output LOW voltage at IOL ≥ –4 mA
+IIL                 Input leakage current                –1      –        1      µA    I/O signals held at VDDIO or GND
+Note
+ 6. VIH should not exceed VDDIO + 0.2 V.
+Document Number: 002-10462 Rev. *C                                                                          Page 17 of 24
+
+
+                                                                                                                              CYUSB3333
+                                                                                                                              CYUSB3343
+Power Consumption
+Table 6 provides the power consumption estimates for HX3C under different conditions. Table 7 summarizes the power consumption
+for various combinations of devices connected to DS ports.
+For example, to calculate the HX3C power consumption for three SS devices connected to DS ports (and no device connected to one
+DS port), and a US port connected to a USB 3.1 Gen 1 host:
+Power consumption = [a] + (2 × [g]) = 492.5 + (2 × 76) = 644 mW
+[a] is the active power consumption for the US port connected to a USB 3.0 host and the SS device connected to the DS port.
+[g] is the incremental power consumption for an additional SS device connected to the DS port.
+Table 6. Power Consumption Estimates for Various Usage Scenarios
+                                                                                                  Typical Consumption
+                                         Number and Speed of DS Ports
+          Device Condition                                                              Supply Current (mA)                         Comments
+                                                      Connected                                                      Power (mW)
+                                                                                          1.2 V              3.3 V
+ Suspend[7]                                                 –                             12.0                13.0        57               –
+                                                          1 SS                           204.0                75.0       492              [a]
+ Active with USB 3.0 host                                 1 HS                            52.0                46.0       214              [b]
+ upstream[8]                                              1 FS                            51.0                34.0       173              [c]
+                                                      1 SS + 1 HS                        218.0               104.0       605              [d]
+ Active with USB 2.0 host                                 1 HS                            52.0                46.0       214              [e]
+ upstream[8, 9]                                           1 FS                            51.0                34.0       173               [f]
+                                                           SS                             40.0                9.0         78              [g]
+ Incremental active power for
+                                                           HS                              7.0                20.0        74              [h]
+ every DS port connected
+                                                           FS                              7.0                14.0        55               [i]
+ Active power for each PD port                              –                               –                 7.5         25               [j]
+ Active power for Bill board
+                                                            –                               –                 20.0        66              [k]
+ function
+Table 7. Power Consumption Under Various Configurations
+                                                                                                  Typical Consumption
+                                                  Number of DS Devices
+              Configuration                                                              Supply    Current (mA)                    Comments
+                                             Connected With Data Transfer                                          Power (mW)
+                                                                                            1.2 V          3.3 V
+                                             3 SS Type-A devices                           284.0           100.5      673     a + (2 × g) + j
+                                             2 SS + 1 HS Type-A devices                    258.0           120.5      707     d+g+j
+                                             2 HS Type-A devices                            59.0            73.5      313     b+h+j
+ US connected to USB 3.0 Type-C              1 SS Type-C + 1 SS Type-A +
+ host                                                                                      258.0            128       732     d + g + (2 × j)
+                                             1 HS Type-A devices
+                                             1 SS Type-C + 1 SS Type-A +
+                                             1 HS Type-A devices +                         265.0            162       853     d + g + i + (2 × j) + k
+                                             Billboard enumerated
+                                             3 HS Type-A devices                            66.0            93.5      388     e + (2 × h) + j
+                                             1 HS Type-C + 1 HS Type-A +
+                                                                                            66.0             95       393     e + h + i + (2 × j)
+ US connected to USB 2.0 Type-C              1 FS Type-A devices
+ host                                        1 HS Type-C + 1 HS Type-A +
+                                             1 FS Type-A devices +                          80.0            149       588     e + h + (2 × i) + (2 × j)
+                                             Billboard enumerated
+ Notes
+  7. Suspend means US port SS in U3 state, USB2.0 in L2 power states, no PD activity and no I/O sourcing current.
+  8. All DS ports are enabled.
+  9. US SuperSpeed disabled.
+Document Number: 002-10462 Rev. *C                                                                                                   Page 18 of 24
+
+
+                                                                                                                CYUSB3333
+                                                                                                                CYUSB3343
+Ordering Information
+Table 8 lists HX3C’s ordering information. The table contains only the part numbers that are currently available for order. Additional
+part numbers with customized configurations can be made available on request. For more information, visit the Cypress website or
+contact the local sales representative.
+Table 8. Ordering Information
+ Serial No. Ordering Part Number                Application              PD Port-2 Power Roles      Type-C Ports        Package
+      1        CYUSB3333-BZXI           Dongles                                   DRP              US and 1 DS       121-ball BGA
+      2        CYUSB3343-BZXI           Self-Powered Docks, Monitors              DFP              US and 1 DS       121-ball BGA
+Ordering Code Definitions
+ CY USB X         3   X   X - BZ      X   X
+                                                        Temperature Range: X = C or I
+                                                        C = Commercial; I = Industrial
+                                                        Pb-free
+                                                        Package Type:
+                                                        BZ = 121-ball BGA
+                                                        Number of Ports
+                                                        Feature list: X = 3 or 4
+                                                        3 = Dongle; 4 = Dock DFP
+                                                        Hub Family
+                                                        USB speed: X = 3 or 2
+                                                        3 = USB 3.0; 2 = USB 2.0
+                                                        Marketing Code: USB
+                                                        Company ID: CY = Cypress
+Document Number: 002-10462 Rev. *C                                                                                     Page 19 of 24
+
+
+                                                                                           CYUSB3333
+                                                                                           CYUSB3343
+Packaging
+Table 9. Package Characteristics
+   Parameter                             Description                   Min        Typ         Max       Units
+TA                Operating ambient temperature                        –40         –           85         °C
+TJ                Operating junction temperature                       –40         –          125         °C
+TJA               Package JA (121-ball BGA)                             –        44.05          –       °C/W
+TJC               Package JC (121-ball BGA)                             –        19.65         –        °C/W
+Table 10. Solder Reflow Peak Temperature
+       Package                   Maximum Peak Temperature             Maximum Time at Peak Temperature
+    121-ball BGA                            260 °C                              30 seconds
+Table 11. Package Moisture Sensitivity Level (MSL), IPC/JEDEC J-STD-2
+             Package                               MSL
+           121-ball BGA                           MSL 3
+Document Number: 002-10462 Rev. *C                                                                Page 20 of 24
+
+
+                                                                                                                                         CYUSB3333
+                                                                                                                                         CYUSB3343
+Package Diagram
+              Figure 6. 121-ball FBGA (10.0 × 10.0 × 1.20 mm (0.30 Ball Diameter)) Package Outline, 001-54471
+          2X     0.10 C
+                                                                                                                 E1
+                                         E                          B     A                                             (datum B)         A1 CORNER
+                                                                                                11 10   9 8   7   6  5  4 3 2     1
+        7
+       A1 CORNER                                                                                                                       A
+                                                                                                                                       B
+                                                                                                                                       C
+                                                                                         6                                             D
+                                                                                       SD                                              E
+                                                                                                                                           D1
+                                                                          D                                                            F
+                                                                                                                                       G         (datum A)
+                                                                                                                                       H
+                                                                                                                                       J
+                                                                                                                                       K
+                                                                                        eD
+                                                                                                                                       L
+                                                                                  0.10 C 2X
+                                                                                                           6
+                                   TOP VIEW                                                                  SE                     eE
+                                                                                                            BOTTOM VIEW
+                                                                0.20 C
+                                                                                                                                          DETAIL A
+                               A1
+                             0.08 C     C           121XØb    5
+                                                                                   A
+                                                     Ø0.15 M C A B
+                                                     Ø0.08 M C
+                                             DETAIL A                                                           SIDE VIEW
+                                                                       NOTES:
+                                  DIMENSIONS                           1. ALL DIMENSIONS ARE IN MILLIMETERS.
+          SYMBOL
+                        MIN.          NOM.             MAX.            2. SOLDER BALL POSITION DESIGNATION PER JEP95, SECTION 3, SPP-020.
+             A            -              -              1.20           3. "e" REPRESENTS THE SOLDER BALL GRID PITCH.
+            A1          0.15             -                -            4. SYMBOL "MD" IS THE BALL MATRIX SIZE IN THE "D" DIRECTION.
+            D                   10.00 BSC                                 SYMBOL "ME" IS THE BALL MATRIX SIZE IN THE "E" DIRECTION.
+             E                                                            N IS THE NUMBER OF POPULATED SOLDER BALL POSITIONS FOR MATRIX
+                                10.00 BSC
+                                                                          SIZE MD X ME.
+            D1                    8.00 BSC
+            E1                    8.00 BSC                             5. DIMENSION "b" IS MEASURED AT THE MAXIMUM BALL DIAMETER IN A
+                                                                          PLANE PARALLEL TO DATUM C.
+            MD                        11
+            ME                                                         6. "SD" AND "SE" ARE MEASURED WITH RESPECT TO DATUMS A AND B AND
+                                      11
+                                                                           DEFINE THE POSITION OF THE CENTER SOLDER BALL IN THE OUTER ROW.
+             N                       121
+                                        0.30                              WHEN THERE IS AN ODD NUMBER OF SOLDER BALLS IN THE OUTER ROW,
+               b        0.25                            0.35
+                                                                          "SD" OR "SE" = 0.
+             eD                       0.80 BSC
+                                                                          WHEN THERE IS AN EVEN NUMBER OF SOLDER BALLS IN THE OUTER ROW,
+             eE                       0.80 BSC
+                                                                           "SD" = eD/2 AND "SE" = eE/2.
+            SD                          0.00
+                                                                       7. A1 CORNER TO BE IDENTIFIED BY CHAMFER, LASER OR INK MARK
+            SE                          0.00
+                                                                          METALIZED MARK, INDENTATION OR OTHER MEANS.
+                                                                       8. "+" INDICATES THE THEORETICAL CENTER OF DEPOPULATED SOLDER
+                                                                          BALLS.
+                                                                                                                                        001-54471 *F
+Document Number: 002-10462 Rev. *C                                                                                                              Page 21 of 24
+
+
+                                                                                                     CYUSB3333
+                                                                                                     CYUSB3343
+Acronyms                                                  Reference Documents
+Table 12. Acronyms Used in this Document                  USB 2.0 Specification
+  Acronym                      Description                USB 3.1 Specification
+ACA          Accessory Charging Adapter                   Battery Charging Specification
+ASSP         Application-Specific Standard Product        Document Conventions
+BC           Battery Charging
+                                                          Units of Measure
+CDP          Charging Downstream Port
+                                                          Table 13. Units of Measure
+DS           DownStream
+                                                            Symbol                       Unit of Measure
+DCP          Dedicated Charging Port
+                                                          °C           degree Celsius
+DNU          Do Not Use
+                                                                      ohm
+DWG          Device Working Group
+                                                          Gbps         gigabit per second
+EEPROM       Electrically Erasable Programmable Read-Only
+             Memory                                       KB           kilobyte
+FBGA         Fine-Pitch Ball Grid Array                   kHz          kilohertz
+FS           Full-Speed                                   k           kiloohm
+FW           FirmWare                                     Mbps         megabit per second
+GND          GrouND                                       MHz          megahertz
+GPIO         General-Purpose Input/Output                 µA           microampere
+HS           Hi-Speed                                     mA           milliampere
+ISP          In-System Programming                        ms           millisecond
+I/O          Input/Output                                 mW           milliwatt
+LS           Low-Speed                                    ns           nanosecond
+NC           No Connect                                   ppm          parts per million
+OTG          On-The-Go                                    V            volt
+PID          Product ID
+POR          Power-On Reset
+ROM          Read-Only Memory
+SCL          Serial CLock
+SDA          Serial DAta
+SS           SuperSpeed
+TT           Transaction Translator
+US           UpStream
+VID          Vendor ID
+Document Number: 002-10462 Rev. *C                                                                       Page 22 of 24
+
+
+                                                                                                   CYUSB3333
+                                                                                                   CYUSB3343
+Document History
+ Document Title: CYUSB3333/CYUSB3343, HX3C USB Type-C Hub with PD
+ Document Number: 002-10462
+                        Orig. of   Submission
+ Revision     ECN                                                        Description of Change
+                        Change         Date
+    **     5147085       HBM       03/30/2016  New datasheet.
+    *A     5312423       HBM        06/17/2016 Corrected typo in 121-ball BGA Pinout for CYUSB3333/CYUSB3343.
+    *B     5766271    AESATMP9     06/07/2017  Updated logo and copyright.
+                                               Updated subsections SS Hub Controller and Reset.
+    *C     5846705       HBM       08/16/2017  Updated Figure 6 in Package Diagram (spec 001-54471 *E to *F).
+                                               Removed Preliminary document status.
+Document Number: 002-10462 Rev. *C                                                                       Page 23 of 24
+
+
+                                                                                                                                                                            CYUSB3333
+                                                                                                                                                                            CYUSB3343
+Sales, Solutions, and Legal Information
+Worldwide Sales and Design Support
+Cypress maintains a worldwide network of offices, solution centers, manufacturer’s representatives, and distributors. To find the office
+closest to you, visit us at Cypress Locations.
+Products                                                                                                   PSoC® Solutions
+ARM® Cortex® Microcontrollers                                          cypress.com/arm                     PSoC 1 | PSoC 3 | PSoC 4 | PSoC 5LP | PSoC 6
+Automotive                                                 cypress.com/automotive
+                                                                                                           Cypress Developer Community
+Clocks & Buffers                                                   cypress.com/clocks
+                                                                                                           Forums | WICED IOT Forums | Projects | Video | Blogs |
+Interface                                                      cypress.com/interface                       Training | Components
+Internet of Things                                                       cypress.com/iot
+                                                                                                           Technical Support
+Memory                                                          cypress.com/memory
+                                                                                                           cypress.com/support
+Microcontrollers                                                       cypress.com/mcu
+PSoC                                                                  cypress.com/psoc
+Power Management ICs                                                  cypress.com/pmic
+Touch Sensing                                                        cypress.com/touch
+USB Controllers                                                         cypress.com/usb
+Wireless Connectivity                                           cypress.com/wireless
+© Cypress Semiconductor Corporation, 2016-2017. This document is the property of Cypress Semiconductor Corporation and its subsidiaries, including Spansion LLC ("Cypress"). This document,
+including any software or firmware included or referenced in this document ("Software"), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries
+worldwide. Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or other
+intellectual property rights. If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress
+hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to
+modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users
+(either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress's patents that are infringed by the Software (as
+provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products. Any other use, reproduction, modification, translation, or compilation
+of the Software is prohibited.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE
+OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. To the extent
+permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any liability arising out of the application or use of any
+product or circuit described in this document. Any information provided in this document, including any sample design information or programming code, is provided only for reference purposes. It is
+the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this information and any resulting product. Cypress products
+are not designed, intended, or authorized for use as critical components in systems designed or intended for the operation of weapons, weapons systems, nuclear installations, life-support devices or
+systems, other medical devices or systems (including resuscitation equipment and surgical implants), pollution control or hazardous substances management, or other uses where the failure of the
+device or system could cause personal injury, death, or property damage ("Unintended Uses"). A critical component is any component of a device or system whose failure to perform can be reasonably
+expected to cause the failure of the device or system, or to affect its safety or effectiveness. Cypress is not liable, in whole or in part, and you shall and hereby do release Cypress from any claim,
+damage, or other liability arising from or related to all Unintended Uses of Cypress products. You shall indemnify and hold Cypress harmless from and against all claims, costs, damages, and other
+liabilities, including claims for personal injury or death, arising from or related to any Unintended Uses of Cypress products.
+Cypress, the Cypress logo, Spansion, the Spansion logo, and combinations thereof, WICED, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress in
+the United States and other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be claimed as property of their respective owners.
+Document Number: 002-10462 Rev. *C                                                                Revised August 16, 2017                                                              Page 24 of 24
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Cypress Semiconductor:
+ CYUSB3343-BZXI CYUSB3333-BZXI

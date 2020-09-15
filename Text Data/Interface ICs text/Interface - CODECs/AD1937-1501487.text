@@ -1,0 +1,1509 @@
+                                                                                                                    Four ADCs/Eight DACs with PLL,
+                                                                                                                            192 kHz, 24-Bit Codec
+                                                                                                                                         AD1937
+FEATURES                                                                                                                GENERAL DESCRIPTION
+PLL-generated clock or direct master clock                                                                              The AD1937 is a high performance, single-chip codec that provides
+Low EMI design                                                                                                          four analog-to-digital converters (ADCs) with differential input
+112 dB DAC/107 dB ADC dynamic range and SNR                                                                             and eight digital-to-analog converters (DACs) with differential
+−96 dB THD + N                                                                                                          output, using the Analog Devices, Inc., patented multibit sigma-
+Single 3.3 V supply                                                                                                     delta (Σ-Δ) architecture. An I2C® port is included, allowing a
+Tolerance for 5 V logic inputs                                                                                          microcontroller to adjust volume and many other parameters.
+Supports 24-bits and 8 kHz to 192 kHz sample rates                                                                      The AD1937 operates from 3.3 V digital and analog supplies.
+Differential ADC input                                                                                                  The AD1937 is available in a 64-lead (differential output) LQFP.
+Differential DAC output                                                                                                 The AD1937 is designed for low EMI. This consideration is
+Log volume control with autoramp function                                                                               apparent in both the system and circuit design architectures.
+I2C-controllable for flexibility                                                                                        By using the on-board PLL to derive the master clock from the
+Software-controllable clickless mute                                                                                    LR (frame) clock or from an external crystal, the AD1937 elimi-
+Software power-down                                                                                                     nates the need for a separate high frequency master clock and
+Right-justified, left-justified, I2S, and TDM modes                                                                     can also be used with a suppressed bit clock. The DACs and
+Master and slave modes up to 16-channel input/output                                                                    ADCs are designed using the latest Analog Devices continuous
+Available in a 64-lead LQFP                                                                                             time architecture to further minimize EMI. By using 3.3 V
+Qualified for automotive applications                                                                                   supplies, power consumption is minimized and further
+                                                                                                                        reduces emissions.
+APPLICATIONS
+Automotive audio systems
+Home theater systems
+Set-top boxes
+Digital audio effects processors
+                                                                               FUNCTIONAL BLOCK DIAGRAM
+                                                                                                   DIGITAL AUDIO
+                                                                                                   INPUT/OUTPUT
+                                                          AD1937
+                                                                                                SERIAL DATA PORT
+                                                                                                                                             DAC
+                                                                                                                                             DAC
+                                                            ADC                           SDATA                     SDATA
+                                                                                           OUT                        IN                     DAC
+                                                                                                                                DIGITAL
+                                     ANALOG                 ADC                                                CLOCKS           FILTER       DAC          ANALOG
+                                       AUDIO                               DIGITAL                                                AND                     AUDIO
+                                      INPUTS                               FILTER                                              VOLUME                     OUTPUTS
+                                                            ADC                                                                              DAC
+                                                                                              TIMING MANAGEMENT                CONTROL
+                                                                                                  AND CONTROL                                DAC
+                                                            ADC                                 (CLOCK AND PLL)
+                                                                                                                                             DAC
+                                                                                                                                             DAC
+                                                                                                       I2C
+                                                          PRECISION                               CONTROL PORT
+                                                           VOLTAGE
+                                                          REFERENCE
+                                                                                                                                                                    07414-001
+                                                                                                  CONTROL DATA
+                                                                                                  INPUT/OUTPUT
+                                                                                                            Figure 1.
+Rev. B
+Information furnished by Analog Devices is believed to be accurate and reliable. However, no
+responsibility is assumed by Analog Devices for its use, nor for any infringements of patents or other
+rights of third parties that may result from its use. Specifications subject to change without notice. No               One Technology Way, P.O. Box 9106, Norwood, MA 02062-9106, U.S.A.
+license is granted by implication or otherwise under any patent or patent rights of Analog Devices.                     Tel: 781.329.4700                                 www.analog.com
+Trademarks and registered trademarks are the property of their respective owners.                                       Fax: 781.461.3113 ©2008-2010 Analog Devices, Inc. All rights reserved.
+
+
+AD1937
+TABLE OF CONTENTS
+Features .............................................................................................. 1               Analog-to-Digital Converters (ADCs) .................................... 15
+Applications ....................................................................................... 1                  Digital-to-Analog Converters (DACs) .................................... 15
+General Description ......................................................................... 1                         Clock Signals ............................................................................... 15
+Functional Block Diagram .............................................................. 1                               Reset and Power-Down ............................................................. 16
+Revision History ............................................................................... 2                      I2C Control Port.......................................................................... 16
+Specifications..................................................................................... 3                   Power Supply and Voltage Reference....................................... 18
+  Test Conditions ............................................................................. 3                       Serial Data Ports—Data Format ............................................... 19
+  Analog Performance Specifications ........................................... 3                                       Time-Division Multiplexed (TDM) Modes ............................ 20
+  Crystal Oscillator Specifications................................................. 5                                  Daisy-Chain Mode ..................................................................... 23
+  Digital Specifications ................................................................... 6                          Additional Modes ....................................................................... 26
+  Power Supply Specifications........................................................ 6                              Control Registers ............................................................................ 27
+  Digital Filters ................................................................................. 7                   Definitions ................................................................................... 27
+  Timing Specifications .................................................................. 8                            PLL and Clock Control Registers ............................................. 27
+  Timing Diagrams.......................................................................... 9                           DAC Control Registers .............................................................. 28
+Absolute Maximum Ratings.......................................................... 10                                   ADC Control Registers .............................................................. 30
+  Thermal Resistance .................................................................... 10                         Applications Circuits...................................................................... 32
+  ESD Caution ................................................................................ 10                    Outline Dimensions ....................................................................... 33
+Pin Configuration and Function Descriptions ........................... 11                                              Ordering Guide .......................................................................... 33
+Typical Performance Characteristics ........................................... 13                                      Automotive Products ................................................................. 33
+Theory of Operation ...................................................................... 15
+REVISION HISTORY
+6/10—Rev. A to Rev. B
+Changes to Table 3 Introductory Text and to Table 3 .................. 4
+Changes to Table 5 Introductory Text ........................................... 6
+Changes to Table 8 Introductory Text ........................................... 8
+3/10—Rev. 0 to Rev. A
+Changes to Ordering Guide .......................................................... 33
+9/08—Revision 0: Initial Version
+                                                                                                    Rev. B | Page 2 of 36
+
+
+                                                                                                                               AD1937
+SPECIFICATIONS
+TEST CONDITIONS
+Performance of all channels is identical, exclusive of the interchannel gain mismatch and interchannel phase deviation specifications.
+Table 1.
+Parameter                                                                Value
+Supply Voltages (AVDD, DVDD)                                             3.3 V
+Temperature                                                              As specified in Table 2 and Table 3
+Master Clock                                                             12.288 MHz (48 kHz fS, 256 × fS mode)
+Input Sample Rate                                                        48 kHz
+Measurement Bandwidth                                                    20 Hz to 20 kHz
+Word Width                                                               24 bits
+Load Capacitance (Digital Output)                                        20 pF
+Load Current (Digital Output)                                            ±1 mA or 1.5 kΩ to ½ DVDD supply
+Input Voltage High                                                       2.0 V
+Input Voltage Low                                                        0.8 V
+ANALOG PERFORMANCE SPECIFICATIONS
+Specifications guaranteed at a TA of 25°C.
+Table 2.
+Parameter                                        Conditions/Comments                         Min       Typ      Max       Unit
+ANALOG-TO-DIGITAL CONVERTERS
+  ADC Resolution                                  All ADCs                                             24                 Bits
+  Dynamic Range                                   20 Hz to 20 kHz, −60 dB input
+     No Filter (RMS)                                                                         96        102                dB
+     With A-Weighted Filter (RMS)                                                            98        105                dB
+  Total Harmonic Distortion + Noise               −1 dBFS                                              −96      −87       dB
+  Full-Scale Input Voltage (Differential)                                                              1.9                V rms
+  Gain Error                                                                                 −10                +10       %
+  Interchannel Gain Mismatch                                                                 −0.25              +0.25     dB
+  Offset Error                                                                               −10       0        +10       mV
+  Gain Drift                                                                                           100                ppm/°C
+  Interchannel Isolation                                                                               −110               dB
+  CMRR                                           100 mV rms, 1 kHz                                     55                 dB
+                                                  100 mV rms, 20 kHz                                   55                 dB
+  Input Resistance                                                                                     14                 kΩ
+  Input Capacitance                                                                                    10                 pF
+  Input Common-Mode Bias Voltage                                                                       1.5                V
+DIGITAL-TO-ANALOG CONVERTERS
+  DAC Resolution                                  All DACs                                             24                 Bits
+  Dynamic Range                                   20 Hz to 20 kHz, −60 dB input
+     No Filter (RMS)                                                                         102       107                dB
+     With A-Weighted Filter (RMS)                                                            105       110                dB
+     With A-Weighted Filter (Average)                                                                  112                dB
+                                                                Rev. B | Page 3 of 36
+
+
+AD1937
+Parameter                                     Conditions/Comments                       Min      Typ            Max  Unit
+  Total Harmonic Distortion + Noise           0 dBFS
+                                              Two channels running                               −94                 dB
+                                              Eight channels running                             −86            −76  dB
+  Full-Scale Output Voltage                                                                      1.76 (4.96)         V rms (V p-p)
+  Gain Error                                                                            −10                     +10  %
+  Interchannel Gain Mismatch                                                            −0.2                    +0.2 dB
+  Offset Error                                                                          −25      −6             +25  mV
+  Gain Drift                                                                            −30                     +30  ppm/°C
+  Interchannel Isolation                                                                         100                 dB
+  Interchannel Phase Deviation                                                                   0                   Degrees
+  Volume Control Step                                                                            0.375               dB
+  Volume Control Range                                                                           95                  dB
+  De-emphasis Gain Error                                                                                        ±0.6 dB
+  Output Resistance at Each Pin                                                                  100                 Ω
+REFERENCE
+  Internal Reference Voltage                  FILTR pin                                          1.50                V
+  External Reference Voltage                  FILTR pin                                 1.32     1.50           1.68 V
+  Common-Mode Reference Output                CM pin                                             1.50                V
+REGULATOR
+  Input Supply Voltage                        VSUPPLY pin                               4.5      5              5.5  V
+  Regulated Output Voltage                    VSENSE pin                                3.19     3.37           3.55 V
+Specifications measured at −40°C < TC < +125°C, AVDD = 3.3 V ± 10%.
+Table 3.
+                                                                            −40°C < TC < +125°C, AVDD = 3.3 V ± 10%
+Parameter                                  Conditions/Comments              Min                     Max                Units
+ANALOG-TO-DIGITAL CONVERTERS
+  ADC Resolution                           All ADCs                                              24                    Bits
+  Dynamic Range                            20 Hz to 20 kHz, −60 dB
+     No Filter (RMS)                                                        93                                         dB
+     With A-Weighted Filter (RMS)                                           95                                         dB
+  Total Harmonic Distortion + Noise        −1 dBFS                                                  −85                dB
+  Full-Scale Input Voltage (Differential)                                   1.75                    2.05               V rms
+  Gain Error                                                                −10                     +10                %
+  Interchannel Gain Mismatch                                                −0.46                   +0.25              dB
+  Offset Error                                                              −10                     +10                mV
+  Gain Drift                                                                                        100                ppm/°C
+  Interchannel Isolation                                                    −105                                       dB
+  CMRR                                     100 mV rms, 1 kHz                                        42                 dB
+                                           100 mV rms, 20 kHz                                       42                 dB
+  Input Resistance                                                                           By design                 kΩ
+  Input Capacitance                                                                          By design                 pF
+  Input Common-Mode Bias Voltage                                            1.45                    1.55               V dc
+DIGITAL-TO-ANALOG CONVERTERS
+  DAC Resolution                           All DACs                                              24                    Bits
+  Dynamic Range                            20 Hz to 20 kHz, −60 dB
+     No Filter (RMS)                                                        100                                        dB
+     With A-Weighted Filter (RMS)                                           104                                        dB
+     With A-Weighted Filter (Average)                                       109                                        dB
+  Total Harmonic Distortion + Noise        0 dBFS
+                                           Two channels                                             −84                dB
+                                           Eight channels                                           −76                dB
+                                                           Rev. B | Page 4 of 36
+
+
+                                                                                                              AD1937
+                                                                 −40°C < TC < +125°C, AVDD = 3.3 V ± 10%
+Parameter                        Conditions/Comments             Min                    Max                 Units
+   Full-Scale Output Voltage                                     1.6                    1.9                 V rms (V p-p)
+   Gain Error                                                    −10                    +10                 %
+   Interchannel Gain Mismatch                                    −0.2                   +0.2                dB
+   Offset Error                                                  −30                    +25                 mV
+   Gain Drift                                                    −30                    +30                 ppm/°C
+   Interchannel Isolation                                        −95                                        dB
+   Interchannel Phase Deviation                                                   By design                 Degrees
+   Volume Control Step                                                            By design                 dB
+   Volume Control Range                                                           By design                 dB
+   De-emphasis Gain Error                                                         By design                 dB
+   Output Resistance at Each Pin                                                  By design                 Ω
+REFERENCE
+   Internal Reference Voltage    FILTR pin                       1.46                   1.57                V dc
+   External Reference Voltage    FILTR pin                       1.32                   1.68                V dc
+   Common-Mode Reference Output  CM pin                          1.45                   1.56                V dc
+REGULATOR
+   Input Supply Voltage          VSUPPLY pin                     4.5                    5.5                 V dc
+   Regulated Output Voltage      VSENSE pin                      3.05                   3.71                V dc
+CRYSTAL OSCILLATOR SPECIFICATIONS
+Table 4.
+Parameter                                   Min                    Typ             Max                Unit
+Transconductance                                                   3.5                                mmhos
+                                                Rev. B | Page 5 of 36
+
+
+AD1937
+DIGITAL SPECIFICATIONS
+−40°C < TC < +125°C, DVDD = 3.3 V ± 10%.
+Table 5.
+Parameter                                    Conditions/Comments           Min         Typ Max Unit
+INPUT
+  High Level Input Voltage (VIH)                                           2.0                 V
+                                             MCLKI/MCLKXI pin              2.2                 V
+  Low Level Input Voltage (VIL)                                                            0.8 V
+  Input Leakage                              IIH @ VIH = 2.4 V                             10  μA
+                                             IIL @ VIL = 0.8 V                             10  μA
+  Input Capacitance                                                                        5   pF
+OUTPUT
+  High Level Output Voltage (VOH)            IOH = 1 mA                    DVDD − 0.60         V
+  Low Level Output Voltage (VOL)             IOL = 1 mA                                    0.4 V
+POWER SUPPLY SPECIFICATIONS
+Table 6.
+Parameter                                    Conditions/Comments           Min         Typ Max Unit
+SUPPLIES
+  Voltage                                    DVDD                          3.0         3.3 3.6 V
+                                             AVDD                          3.0         3.3 3.6 V
+                                             VSUPPLY                       4.5         5.0 5.5 V
+  Digital Current                            Master clock = 256 fS
+    Normal Operation                         fS = 48 kHz                               56      mA
+                                             fS = 96 kHz                               65      mA
+                                             fS = 192 kHz                              95      mA
+    Power-Down                               fS = 48 kHz to 192 kHz                    2.0     mA
+  Analog Current
+    Normal Operation                                                                   74      mA
+    Power-Down                                                                         23      mA
+DISSIPATION
+  Operation                                  Master clock = 256 fS, 48 kHz
+    All Supplies                                                                       429     mW
+    Digital Supply                                                                     185     mW
+     Analog Supply                                                                     244     mW
+  Power-Down, All Supplies                                                             83      mW
+POWER SUPPLY REJECTION RATIO
+  Signal at Analog Supply Pins               1 kHz, 200 mV p-p                         50      dB
+                                             20 kHz, 200 mV p-p                        50      dB
+                                         Rev. B | Page 6 of 36
+
+
+                                                                                                  AD1937
+DIGITAL FILTERS
+Table 7.
+Parameter                Mode                                       Factor       Min Typ    Max      Unit
+ADC DECIMATION FILTER    All modes, typical @ 48 kHz
+  Pass Band                                                         0.4375 × fS      21              kHz
+  Pass-Band Ripple                                                                   ±0.015          dB
+  Transition Band                                                   0.5 × fS         24              kHz
+  Stop Band                                                         0.5625 × fS      27              kHz
+  Stop-Band Attenuation                                                          79                  dB
+  Group Delay                                                       22.9844 ÷ fS     479             μs
+DAC INTERPOLATION FILTER
+  Pass Band              48 kHz mode, typical @ 48 kHz              0.4535 × fS      22              kHz
+                         96 kHz mode, typical @ 96 kHz              0.3646 × fS  35                  kHz
+                         192 kHz mode, typical @ 192 kHz            0.3646 × fS      70              kHz
+  Pass-Band Ripple       48 kHz mode, typical @ 48 kHz                                      ±0.01    dB
+                         96 kHz mode, typical @ 96 kHz                                      ±0.05    dB
+                         192 kHz mode, typical @ 192 kHz                                    ±0.1     dB
+  Transition Band        48 kHz mode, typical @ 48 kHz              0.5 × fS         24              kHz
+                         96 kHz mode, typical @ 96 kHz              0.5 × fS         48              kHz
+                         192 kHz mode, typical @ 192 kHz            0.5 × fS         96              kHz
+  Stop Band              48 kHz mode, typical @ 48 kHz              0.5465 × fS      26              kHz
+                         96 kHz mode, typical @ 96 kHz              0.6354 × fS      61              kHz
+                         192 kHz mode, typical @ 192 kHz            0.6354 × fS      122             kHz
+  Stop-Band Attenuation  48 kHz mode, typical @ 48 kHz                           70                  dB
+                         96 kHz mode, typical @ 96 kHz                           70                  dB
+                         192 kHz mode, typical @ 192 kHz                         70                  dB
+  Group Delay            48 kHz mode, typical @ 48 kHz              25 ÷ fS          521             μs
+                         96 kHz mode, typical @ 96 kHz              11 ÷ fS          115             μs
+                         192 kHz mode, typical @ 192 kHz            8 ÷ fS           42              μs
+                                              Rev. B | Page 7 of 36
+
+
+AD1937
+TIMING SPECIFICATIONS
+−40°C < TC < +125°C, DVDD = 3.3 V ± 10%.
+Table 8.
+Parameter                                Condition                           Comments                                Min  Max  Unit
+INPUT MASTER CLOCK (MCLK) AND RESET
+   tMH                                   MCLK duty cycle                     DAC/ADC clock source = PLL clock        40   60   %
+                                                                             @ 256 fS, 384 fS, 512 fS, and 768 fS
+   tMH                                                                       DAC/ADC clock source = direct MCLK      40   60   %
+                                                                             @ 512 fS (bypass on-chip PLL)
+   fMCLK                                 MCLK frequency                      PLL mode, 256 fS reference              6.9  13.8 MHz
+   fMCLK                                                                     Direct 512 fS mode                           27.6 MHz
+   tPDR                                  Low                                                                         15        ns
+   tPDRR                                 Recovery                            Reset to active output                  4096      tMCLK
+PLL
+   Lock Time                             MCLK or LRCLK                                                                    10   ms
+   256 fS VCO Clock, Output Duty Cycle,                                                                              40   60   %
+       MCLKO/MCLKXO Pin
+I2C                                                                          See Figure 13 and Figure 14
+   fSCL                                  SCL clock frequency                                                              400  kHz
+   tSCLL                                 SCL low                                                                     1.3       μs
+   tSCLH                                 SCL high                                                                    0.6       μs
+   tSCS                                  Setup time (start condition)        Relevent for repeated start condition   0.6       μs
+   tSCH                                  Hold time (start condition)         First clock generated after this period 0.6       μs
+   tSSH                                  Setup time (stop condition)                                                 0.6       μs
+   tDS                                   Data setup time                                                             100       ns
+   tSR                                   SDA and SCL rise time                                                            300  ns
+   tSF                                   SDA and SCL fall time                                                            300  ns
+   tBFT                                  Bus-free time                       Between stop and start                  1.3       μs
+DAC SERIAL PORT                                                              See Figure 2
+   tDBH                                  DBCLK high                          Slave mode                              10        ns
+   tDBL                                  DBCLK low                           Slave mode                              10        ns
+   tDLS                                  DLRCLK setup                        To DBCLK rising, slave mode             10        ns
+                                         DLRCLK skew                         From DBCLK falling, master mode         −8   +8   ns
+   tDLH                                  DLRCLK hold                         From DBCLK rising, slave mode           5         ns
+   tDDS                                  DSDATA setup                        To DBCLK rising                         10        ns
+   tDDH                                  DSDATA hold                         From DBCLK rising                       5         ns
+ADC SERIAL PORT                                                              See Figure 3
+   tABH                                  ABCLK high                          Slave mode                              10        ns
+   tABL                                  ABCLK low                           Slave mode                              10        ns
+   tALS                                  ALRCLK setup                        To ABCLK rising, slave mode             10        ns
+                                         ALRCLK skew                         From ABCLK falling, master mode         −8   +8   ns
+   tALH                                  ALRCLK hold                         From ABCLK rising, slave mode           5         ns
+   tABDD                                 ASDATA delay                        From ABCLK falling, any mode                 18   ns
+AUXILIARY INTERFACE
+   tAXDS                                 AAUXDATA setup                      To AUXBCLK rising                       10        ns
+   tAXDH                                 AAUXDATA hold                       From AUXBCLK rising                     5         ns
+   tDXDD                                 DAUXDATA delay                      From AUXBCLK falling                         18   ns
+   tXBH                                  AUXBCLK high                                                                10        ns
+   tXBL                                  AUXBCLK low                                                                 10        ns
+   tDLS                                  AUXLRCLK setup                      To AUXBCLK rising                       10        ns
+   tDLH                                  AUXLRCLK hold                       From AUXBCLK rising                     5         ns
+                                                       Rev. B | Page 8 of 36
+
+
+                                                                                                                              AD1937
+TIMING DIAGRAMS
+                    tDBH
+          DBCLK
+                            tDBL
+                            tDLS                                                                                       tDLH
+         DLRCLK
+                            tDDS
+        DSDATAx
+  LEFT-JUSTIFIED                   MSB             MSB – 1
+          MODE
+                                         tDDH
+                                                 tDDS
+        DSDATAx
+   I2S-JUSTIFIED                                        MSB
+          MODE
+                                                              tDDH
+                                                                                           tDDS               tDDS
+        DSDATAx
+ RIGHT-JUSTIFIED                                                                                 MSB             LSB
+                                                                                                                                  07414-025
+          MODE
+                                                                                                       tDDH          tDDH
+                                                                     Figure 2. DAC Serial Timing
+                    tABH
+          ABCLK
+                            tABL
+                            tALS                                                                                       tALH
+         ALRCLK
+                           tABDD
+        ASDATAx
+  LEFT-JUSTIFIED
+          MODE                           MSB              MSB – 1
+                                                tABDD
+         ASDATAx
+    I2S-JUSTIFIED                                             MSB
+           MODE
+                                                                                         tABDD
+        ASDATAx
+ RIGHT-JUSTIFIED                                                                                       MSB
+                                                                                                                                  07414-026
+                                                                                                                        LSB
+          MODE
+                                                                     Figure 3. ADC Serial Timing
+                                                                        Rev. B | Page 9 of 36
+
+
+AD1937
+ABSOLUTE MAXIMUM RATINGS
+Table 9.                                                                        THERMAL RESISTANCE
+Parameter                                  Rating                               θJA represents junction-to-ambient thermal resistance;
+Analog (AVDD)                              −0.3 V to +3.6 V                     θJC represents the junction-to-case thermal resistance.
+Digital (DVDD)                             −0.3 V to +3.6 V                     All characteristics are for a 4-layer board.
+VSUPPLY                                    −0.3 V to +6.0 V
+                                                                                Table 10.
+Input Current (Except Supply Pins)         ±20 mA
+Analog Input Voltage (Signal Pins)         –0.3 V to AVDD + 0.3 V               Package Type                       θJA       θJC      Unit
+Digital Input Voltage (Signal Pins)        −0.3 V to DVDD + 0.3 V               64-Lead LQFP                       47        11.1     °C/W
+Operating Temperature Range (Case)         −40°C to +125°C
+Storage Temperature Range                  −65°C to +150°C                      ESD CAUTION
+Stresses above those listed under Absolute Maximum Ratings
+may cause permanent damage to the device. This is a stress
+rating only; functional operation of the device at these or any
+other conditions above those indicated in the operational
+section of this specification is not implied. Exposure to absolute
+maximum rating conditions for extended periods may affect
+device reliability.
+                                                               Rev. B | Page 10 of 36
+
+
+                                                                                                                                                                                                                     AD1937
+PIN CONFIGURATION AND FUNCTION DESCRIPTIONS
+                                                                 AVDD                ADC2RN   ADC2RP   ADC2LN    ADC2LP   ADC1RN   ADC1RP    ADC1LN    ADC1LP   CM       AVDD
+                                                NC     NC                  LF                                                                                                    NC    NC
+                                                64     63        62        61        60       59       58        57       56       55        54        53       52       51      50    49
+                                    AGND    1                                                                                                                                                 48   AGND
+                             MCLKI/MCLKXI   2                                                                                                                                                 47   FILTR
+                            MCLKO/MCLKXO    3                                                                                                                                                 46   AGND
+                                    AGND    4                                                                                                                                                 45   AVDD
+                                    AVDD    5                                                                                                                                                 44   AGND
+                                  DAC3LP    6                                                                                                                                                 43   DAC2RN
+                                  DAC3LN    7                                                                                                                                                 42   DAC2RP
+                                                                                                             AD1937
+                                  DAC3RP    8                                                       TOP VIEW                                                                                  41   DAC2LN
+                                                                                                  (Not to Scale)
+                                  DAC3RN    9
+                                                                                              DIFFERENTIAL OUTPUT                                                                             40   DAC2LP
+                                  DAC4LP 10                                                                                                                                                   39   DAC1RN
+                                  DAC4LN 11                                                                                                                                                   38   DAC1RP
+                                  DAC4RP 12                                                                                                                                                   37   DAC1LN
+                                  DAC4RN 13                                                                                                                                                   36   DAC1LP
+                                  PD/RST 14                                                                                                                                                   35   ADDR1
+                                 DSDATA4 15                                                                                                                                                   34   SCL
+                                    DGND 16                                                                                                                                                   33   DGND
+                                                17     18        19        20        21       22       23        24       25       26        27        28       29       30      31    32
+                                                                                              DLRCLK   VSUPPLY   VSENSE                                         ALRCLK
+                                                                                                                          VDRIVE
+                                                                                                                                                                                 SDA
+                                                DVDD
+                                                                                     DBCLK                                                             ABCLK
+                                                                                                                                                                                       DVDD
+                                                       DSDATA3   DSDATA2   DSDATA1                                                 ASDATA2   ASDATA1
+                                                                                                                                                                         ADDR0
+                              NC = NO CONNECT
+                                                                                                                                                                                                         07414-002
+                                                                             Figure 4. Pin Configuration
+Table 11. Pin Function Descriptions
+Pin No.            Type 1   Mnemonic                 Description
+1, 4, 44, 46, 48   I        AGND                     Analog Ground.
+2                  I        MCLKI/MCLKXI             Master Clock Input/Crystal Oscillator Input.
+3                  O        MCLKO/MCLKXO             Master Clock Output/Crystal Oscillator Output.
+5, 45, 51, 62      I        AVDD                     Analog Power Supply. Connect this pin to analog 3.3 V supply.
+6                  O        DAC3LP                   DAC3 Left Positive Output.
+7                  O        DAC3LN                   DAC3 Left Negative Output.
+8                  O        DAC3RP                   DAC3 Right Positive Output.
+9                  O        DAC3RN                   DAC3 Right Negative Output.
+10                 O        DAC4LP                   DAC4 Left Positive Output.
+11                 O        DAC4LN                   DAC4 Left Negative Output.
+12                 O        DAC4RP                   DAC4 Right Positive Output.
+13                 O        DAC4RN                   DAC4 Right Negative Output
+14                 I        PD/RST                   Power-Down Reset (Active Low).
+15                 I/O      DSDATA4                  DAC Serial Data Input 4. Data input to DAC4 data in/TDM DAC2 data out (dual-line mode)/
+                                                     AUX DAC2 data out (to external DAC2).
+16, 33             I        DGND                     Digital Ground.
+17, 32             I        DVDD                     Digital Power Supply. Connect this pin to digital 3.3 V supply.
+18                 I/O      DSDATA3                  DAC Serial Data Input 3. Data input to DAC3 data in/TDM DAC2 data in (dual-line mode)/AUX
+                                                     ADC2 data in (from external ADC2).
+19                 I/O      DSDATA2                  DAC Serial Data Input 2. Data input to DAC2 data in/TDM DAC data out/AUX ADC1 data in
+                                                     (from external ADC1).
+20                 I        DSDATA1                  DAC Serial Data Input 1. Data input to DAC1 data in/TDM DAC data in/TDM data in.
+21                 I/O      DBCLK                    Bit Clock for DACs. Can be programmed as input or output in all modes.
+22                 I/O      DLRCLK                   Frame Clock for DACs. Can be programmed as input or output in all modes.
+                                                                                     Rev. B | Page 11 of 36
+
+
+AD1937
+Pin No.              Type 1 Mnemonic Description
+23                   I      VSUPPLY  5 V Input to Regulator, Emitter of Pass Transistor.
+24                   I      VSENSE   Connect 3.3 V Regulator Output, Collector of Pass Transistor, to This Pin.
+25                   O      VDRIVE   Drive for Base of Pass Transistor.
+26                   I/O    ASDATA2  ADC Serial Data Output 2. Data Output from ADC2/TDM ADC data in/AUX DAC1 data out (to
+                                     external DAC1).
+27                   O      ASDATA1  ADC Serial Data Output 1. Data Output from ADC1/TDM ADC data out/TDM data out.
+28                   I/O    ABCLK    Bit Clock for ADCs. Can be programmed as input or output in all modes.
+29                   I/O    ALRCLK   Frame Clock for ADCs. Can be programmed as input or output in all modes.
+30                   I      ADDR0    I2C Address Assignment.
+31                   I/O    SDA      Control Data Port (I2C).
+34                   I      SCL      Control Clock Port (I2C).
+35                   I      ADDR1    I2C Address Assignment.
+36                   O      DAC1LP   DAC1 Left Positive Output.
+37                   O      DAC1LN   DAC1 Left Negative Output.
+38                   O      DAC1RP   DAC1 Right Positive Output.
+39                   O      DAC1RN   DAC1 Right Negative Output.
+40                   O      DAC2LP   DAC2 Left Positive Output.
+41                   O      DAC2LN   DAC2 Left Negative Output.
+42                   O      DAC2RP   DAC2 Right Positive Output.
+43                   O      DAC2RN   DAC2 Right Negative Output.
+47                   O      FILTR    Analog Voltage Reference Filter Capacitor Connection. Bypass with 10 μF||100 nF to AGND.
+49, 50, 63, 64              NC       No Connect.
+52                   O      CM       Common-Mode Reference Filter Capacitor Connection. Bypass with 47 μF||100 nF to AGND.
+53                   I      ADC1LP   ADC1 Left Positive Input.
+54                   I      ADC1LN   ADC1 Left Negative Input.
+55                   I      ADC1RP   ADC1 Right Positive Input.
+56                   I      ADC1RN   ADC1 Right Negative Input.
+57                   I      ADC2LP   ADC2 Left Positive Input.
+58                   I      ADC2LN   ADC2 Left Negative Input.
+59                   I      ADC2RP   ADC2 Right Positive Input.
+60                   I      ADC2RN   ADC2 Right Negative Input.
+61                   O      LF       PLL Loop Filter, Return to AVDD.
+1
+  I = input, O = output.
+                                                 Rev. B | Page 12 of 36
+
+
+                                                                                                                                                                                                               AD1937
+TYPICAL PERFORMANCE CHARACTERISTICS
+                      0.10
+                                                                                                                                                        0
+                      0.08
+                      0.06
+                      0.04
+                                                                                                                                   MAGNITUDE (dB)
+                                                                                                                                                     –50
+    MAGNITUDE (dB)
+                      0.02
+                         0
+                     –0.02
+                                                                                                                                                    –100
+                     –0.04
+                     –0.06
+                     –0.08
+                                                                                                                                                    –150
+                     –0.10
+                                                                                                                                                                                                                        07414-006
+                                                                                                                                                            0              12            24            36          48
+                                                                                                           07414-003
+                             0      2     4    6         8        10        12        14    16   18
+                                                                                                                                                                                  FREQUENCY (kHz)
+                                                       FREQUENCY (kHz)
+                                 Figure 5. ADC Pass-Band Filter Response, 48 kHz                                                                                Figure 8. DAC Stop-Band Filter Response, 48 kHz
+                         0                                                                                                                           0.10
+                       –10
+                       –20
+                                                                                                                                                     0.05
+                       –30
+    MAGNITUDE (dB)                                                                                                                 MAGNITUDE (dB)
+                       –40
+                       –50                                                                                                                             0
+                       –60
+                       –70
+                                                                                                                                                    –0.05
+                       –80
+                       –90
+                      –100                                                                                                                          –0.10
+                                                                                                           07414-004                                                                                                    07414-007
+                             0       5    10       15        20        25         30       35    40                                                         0             24            48             72          96
+                                                       FREQUENCY (kHz)                                                                                                           FREQUENCY (kHz)
+                                 Figure 6. ADC Stop-Band Filter Response, 48 kHz                                                                                Figure 9. DAC Pass-Band Filter Response, 96 kHz
+                      0.06
+                                                                                                                                                        0
+                      0.04
+                                                                                                                                   MAGNITUDE (dB)
+                      0.02
+ MAGNITUDE (dB)
+                                                                                                                                                     –50
+                        0
+                     –0.02                                                                                                                          –100
+                     –0.04
+                                                                                                                                                    –150
+                     –0.06
+                                                                                                                                                                                                                        07414-008
+                                                                                                                                                            0              24            48            72          96
+                                                                                                              07414-005
+                             0                     8                             16                   24
+                                                                                                                                                                                  FREQUENCY (kHz)
+                                                       FREQUENCY (kHz)
+                                 Figure 7. DAC Pass-Band Filter Response, 48 kHz
+                                                                                                                                                                Figure 10. DAC Stop-Band Filter Response, 96 kHz
+                                                                                                               Rev. B | Page 13 of 36
+
+
+AD1937
+                   0.5
+                                                                                                                              0
+                   0.4
+                   0.3
+                                                                                                                             –2
+                   0.2
+                                                                                                           MAGNITUDE (dB)
+ MAGNITUDE (dB)
+                   0.1
+                                                                                                                             –4
+                    0
+                  –0.1                                                                                                       –6
+                  –0.2
+                  –0.3                                                                                                       –8
+                  –0.4
+                                                                                                                            –10
+                  –0.5
+                                                                                                                                                                                           07414-010
+                                                                                                                               48                 64                80                96
+                                                                                 07414-009
+                         0              8          16           32          64
+                                                                                                                                                    FREQUENCY (kHz)
+                                               FREQUENCY (kHz)
+                             Figure 11. DAC Pass-Band Filter Response, 192 kHz                                                    Figure 12. DAC Stop-Band Filter Response, 192 kHz
+                                                                                       Rev. B | Page 14 of 36
+
+
+                                                                                                                                         AD1937
+THEORY OF OPERATION
+ANALOG-TO-DIGITAL CONVERTERS (ADCs)                                              Each output pin has a nominal common-mode dc level of 1.5 V
+There are four ADC channels in the AD1937 configured as two                      and swings ±1.27 V for a 0 dBFS digital input signal. A single
+stereo pairs with differential inputs. The ADCs can operate at a                 op amp, third-order, external, low-pass filter is recommended
+nominal sample rate of 48 kHz, 96 kHz, or 192 kHz. The ADCs                      to remove high frequency noise present on the output pins, as
+include on-board digital antialiasing filters with 79 dB stop-                   well as to provide a differential-to-single-ended conversion for
+band attenuation and linear phase response, operating at an                      the differential output. Note that the use of op amps with low
+oversampling ratio of 128 (48 kHz, 96 kHz, and 192 kHz modes).                   slew rates or low bandwidth can cause high frequency noise
+Digital outputs are supplied through two serial data output                      and tones to fold down into the audio band; exercise care in
+pins (one for each stereo pair): a common frame clock (ALRCLK)                   selecting these components.
+and a common bit clock (ABCLK). Alternatively, the TDM                           The voltage at CM can be used to bias the external op amps that
+modes can be used to access up to 16 channels on a single                        buffer the output signals (see the Power Supply and Voltage
+TDM data line.                                                                   Reference section).
+The ADCs must be driven from a differential signal source for                    CLOCK SIGNALS
+best performance. The input pins of the ADCs connect to internal                 The on-chip phase-locked loop (PLL) can be selected to ref-
+switched capacitors. To isolate the external driving op amp from                 erence the input sample rate from either of the LRCLK pins
+the glitches caused by the internal switched capacitors, each                    or 256×, 384×, 512×, or 768× sample rate s (fS), referenced to
+input pin should be isolated by using a series-connected external                the 48 kHz mode from the MCLKI/MCLKXI pin. The default at
+100 Ω resistor and a 1 nF capacitor connected from each input                    power-up is 256 × fS from the MCLKI/MCLKXI pin. In 96 kHz
+to ground. Use a high quality capacitor such as a ceramic                        mode, the master clock frequency stays at the same absolute
+NP0/C0G, or polypropylene film.                                                  frequency; therefore, the actual multiplication rate is divided
+The differential inputs have a nominal common-mode voltage                       by 2. In 192 kHz mode, the actual multiplication rate is divided
+of 1.5 V. The voltage at the common-mode reference pin (CM)                      by 4. For example, if the AD1937 is programmed in 256 × fS
+can be used to bias external op amps to buffer the input signals                 mode, the frequency of the master clock input is 256 × 48 kHz
+(see the Power Supply and Voltage Reference section). The                        = 12.288 MHz. If the AD1937 is then switched to 96 kHz
+inputs can also be ac-coupled and in that case do not need                       operation (by writing to the I2C port), the frequency of the
+an external dc bias to CM.                                                       master clock should remain at 12.288 MHz, which is 128 × fS
+A digital high-pass filter can be switched in line with the                      in this example. In 192 kHz mode, this becomes 64 × fS.
+ADCs (ADC Control 0 Register) to remove residual dc offsets.                     The internal clock for the ADCs is 256 × fS for all clock modes.
+It has a 1.4 Hz, 6 dB per octave cutoff at a 48 kHz sample rate.                 The internal clock for the DACs varies by mode: 512 × fS (48 kHz
+The cutoff frequency scales directly with sample frequency.                      mode), 256 × fS (96 kHz mode), or 128 × fS (192 kHz mode). By
+                                                                                 default, the on-board PLL generates this internal master clock
+DIGITAL-TO-ANALOG CONVERTERS (DACs)
+                                                                                 from an external clock. A direct 512 × fS (referenced to 48 kHz
+The AD1937 DAC channels are arranged in four stereo pairs,                       mode) master clock can be used for either the ADCs or DACs,
+giving eight analog outputs; the outputs are differential for                    if selected in the PLL and Clock Control 1 register.
+improved noise and distortion performance. The DACs include
+on-board digital reconstruction filters with 70 dB stop-band                     Note that it is not possible to use a direct clock for the ADCs
+attenuation and linear phase response, operating at an over-                     set to the 192 kHz mode. It is required that the on-chip PLL
+sampling ratio of 4 (48 kHz or 96 kHz modes) or 2 (192 kHz                       be used in this mode.
+mode). Each channel has its own independently programmable                       The PLL can be powered down in the PLL and Clock Control 0
+attenuator, adjustable in 255 steps in increments of 0.375 dB.                   Register. To ensure reliable locking when changing PLL modes,
+Digital inputs are supplied through four serial data input pins                  or if the reference clock is unstable at power-on, power down
+(one for each stereo pair), a common frame clock (DLRCLK),                       the PLL and then power it back up after the reference clock has
+and a common bit clock (DBCLK). Alternatively, one of the                        stabilized.
+TDM modes can be used to access up to 16 channels on a                           The internal master clock (MCLK) can be disabled in the
+single TDM data line.                                                            PLL and Clock Control 0 register to reduce power dissipation
+                                                                                 when the AD1937 is idle. The clock should be stable before it
+                                                                                 is enabled. Unless a standalone mode is selected (see the I2C
+                                                                                 Control Port section), the clock is disabled by reset and must
+                                                                                 be enabled by writing to the I2C port for normal operation.
+                                                                Rev. B | Page 15 of 36
+
+
+AD1937
+To maintain the highest performance possible, limit the clock jitter                The I2C interface of the AD1937 is a 2-wire interface that
+of the internal master clock signal to less than a 300 ps rms time                  consists of a clock line (SCL) and a data line (SDA). SDA
+interval error (TIE). Even at these levels, extra noise or tones                    is bidirectional and the AD1937 drives SDA either to acknowl-
+can appear in the DAC outputs if the jitter spectrum contains                       edge the master (ACK) or to send data during a read operation.
+large spectral peaks. If the internal PLL is not used, it is best to                The SDA pin for the I2C port is an open-drain collector and
+use an independent crystal oscillator to generate the master clock.                 requires a 2 kΩ pull-up resistor. A write or read access occurs
+In addition, it is especially important that the clock signal not                   when the SDA line is pulled low while the SCL line is high,
+pass through an FPGA, CPLD, or other large digital chip (such                       indicated by start in the timing diagrams. SDA is only allowed
+as a DSP) before being applied to the AD1937. In most cases,                        to change when SCL is low except when a start or stop condition
+this induces clock jitter due to the sharing of common power                        occurs, as shown in Figure 13 and Figure 14. The first eight bits
+and ground connections with other unrelated digital output                          of the data-word consist of the device address and the R/W bit.
+signals. When the PLL is used, jitter in the reference clock is                     The device address consists of an internal built-in address
+attenuated above a certain frequency depending on the loop filter.                  (0x08) OR’ed with the two address bits, ADDR1 and ADDR0,
+RESET AND POWER-DOWN                                                                and the R/W bit. The two address bits allow four AD1937s to be
+                                                                                    used in a system. Tie I2C ADDR0 and ADDR1 low or high and
+The function of the PD/RST pin sets all the control registers to
+                                                                                    program the ADDR bits accordingly as 0 or 1. Initiating a write
+their default settings. To avoid audio pops, PD/RST does not                        operation to the AD1937 involves sending a start condition and
+power down the analog outputs. After PD/RST is deasserted                           then sending the device address with the R/W bit set low. The
+and the PLL acquires lock condition, an initialization routine                      AD1937 responds by issuing an acknowledge to indicate that it
+runs inside the AD1937. This initialization lasts for approx-                       has been addressed. The user then sends a second frame telling
+imately 256 master clock cycles. Once the routine is complete,                      the AD1937 which register is required to be written to. Another
+the registers can be programmed.                                                    acknowledge is issued by the AD1937. Finally, the user can send
+The power-down bits in the PLL and Clock Control 0, DAC                             another frame with the eight data bits required to be written to
+Control 1, and ADC Control 1 registers power down their                             the register. A third acknowledge is issued by the AD1937 after
+respective sections. All other register settings are retained.                      which the user can send a stop condition to complete the data
+To guarantee proper startup, the PD/RST pin should be                               transfer.
+pulled low by an external resistor.                                                 A read operation requires that the user first write to the
+ 2
+I C CONTROL PORT                                                                    AD1937 to point to the correct register and then read the
+                                                                                    data. This is achieved by sending a start condition followed
+The AD1937 has an I2C-compatible control port that permits
+                                                                                    by the device address frame, with the R/W bit low; the AD1937
+programming and reading back the internal control registers
+                                                                                    returns an acknowledge. The master then sends the register
+for the ADCs, DACs, and clock system. There is also a stand-
+                                                                                    address frame. Following the acknowledge from the AD1937,
+alone mode available for operation without serial control,
+                                                                                    the user must issue a repeated start condition. The next frame
+configured at reset using the serial control pins. All registers
+are set to default except internal MCLK enable, which is set to                     is the device address with the R/W bit set high; the AD1937
+1 and ADC BCLK and LRCLK master/slave is set by SDA (see                            returns an acknowledge. On the next frame, the AD1937
+Table 12 for details).                                                              outputs the register data on the SDA line; the master should
+                                                                                    send an acknowledge. A stop condition completes the read
+Table 12. Hardware Selection of Standalone Mode                                     operation. Figure 13 and Figure 14 show examples of writing
+                   ADDR0        SDA          SCL             ADDR1                  to and reading from the DAC1L volume control register,
+ADC Clocks         (Pin 30)     (Pin 31)     (Pin 34)        (Pin 35)               Address 0x06 (see Table 28).
+Slave              0            0            0               0
+Master             0            1            0               0
+                                                                   Rev. B | Page 16 of 36
+
+
+                                                                                                                                                                                                AD1937
+         SCK
+         SDA               0       0       0         0       1       ADDR1   ADDR0     R/W           0            0           0         0        0        1         1        0
+          START BY                                                                        ACK. BY                                                                                  ACK. BY
+          MASTER (S)                                                                     AD1937 (AS)                                                                             MASTER (AM)
+                                                     FRAME 1                                                                             FRAME 2
+                                               CHIP ADDRESS BYTE                                                                  REGISTER ADDRESS BYTE
+                                                                            SCK
+                                                                     (CONTINUED)
+                                                                            SDA
+                                                                     (CONTINUED)                D7       D6       D5         D4         D3       D2       D1        D0
+                                                                                                                                                                     ACK. BY           STOP BY
+                                                                                                                                                                                                    07414-011
+                                                                                                                                                                   MASTER (AM)        MASTER (P)
+                                                                                                                                 FRAME 3
+                                                                                                                           DATA BYTE TO AD1937
+                                                                                Figure 13. I2C Write Format
+              SCK
+              SDA              0       0       0         0       1     ADDR1   ADDR0    R/W              0             0          0          0        0        1         1       0
+               START BY                                                                        ACK. BY                                                                                 ACK. BY
+              MASTER (S)                                                                     AD1937 (AS)                                                                              AD1937 (AS)
+                                                         FRAME 1                                                                             FRAME 2
+                                                   CHIP ADDRESS BYTE                                                                  REGISTER ADDRESS BYTE
+        SCL
+(CONTINUED)
+       SDA
+(CONTINUED)                    0       0       0         0       1    ADDR1 ADDR0       R/W                  D7       D6          D5        D4       D3       D2        D1       D0
+          REPEATED START                                                                  ACK. BY                                                                              ACK. BY    STOP BY
+                                                                                                                                                                                                                07414-012
+           BY MASTER (S)                                                                 AD1937 (AS)                                                                         MASTER (AM) MASTER (P)
+                                                         FRAME 3                                                                               FRAME 4
+                                                   CHIP ADDRESS BYTE                                                                        REGISTER DATA
+                                                                                Figure 14. I2C Read Format
+                                                                                     Rev. B | Page 17 of 36
+
+
+AD1937
+Table 13. I2C Abbreviation Table
+Abbreviation                                                Condition
+S                                                           Repeated start by master
+P                                                           Stop by master
+AM                                                          Acknowledge by master
+AS                                                          Acknowledge by AD1937
+Table 14. Single Word I2C Write
+S       Chip Address, R/W = 0                           AS      Register Address                      AS         Data Word                AS        P
+Table 15. Burst Mode I2C Write
+S    Chip Address, R/W = 0          AS     Register Address      AS       Data Word 1         AS    Data Word 2       AS     Data Word N        AS     P
+Table 16. Single Word I2C Read
+S     Chip Address, R/W = 0           AS      Register Address        AS       S      Chip Address, R/W = 1          AS     Data Word         AM       P
+Table 17. Burst Mode I2C Read
+     Chip Address,                Register                   Chip Address,                 Data               Data                Data
+S                          AS                        AS   S                         AS                 AM                   AM                   AM     P
+     R/W = 0                      Address                    R/W = 1                       Word 1             Word 2              Word N
+POWER SUPPLY AND VOLTAGE REFERENCE                                                 The ADC and DAC internal analog voltage reference (VREF) is
+The AD1937 is designed for a 3.3 V supply. Separate power                          brought out on the FILTR pin and should be bypassed as close
+supply pins are provided for the analog and digital sections.                      as possible to the chip with a parallel combination of 10 μF and
+To minimize noise pickup, these pins should be bypassed with                       100 nF capacitors. Any external current drawn should be limited
+100 nF ceramic chip capacitors placed as close to the pins as                      to less than 50 μA.
+possible. A bulk aluminum electrolytic capacitor of at least                       The internal reference can be disabled in the PLL and Clock
+22 μF should also be provided on the same printed circuit                          Control 1 register, and FILTR can be driven from an external
+board (PCB) as the codec. For critical applications, improved                      source. This can be used to scale the DAC output to the clipping
+performance is obtained with separate supplies for the analog                      level of a power amplifier based on its power supply voltage.
+and digital sections. If this is not possible, it is recommended                   The ADC input gain varies by the inverse ratio. It is not advisable
+that the analog and digital load pins be isolated by means of a                    to drive the FILTR pin with more than (AVDD/2) V. The total
+ferrite bead in series with the supply. It is important that the                   gain from ADC input to DAC output remains constant.
+analog supply be as clean as possible.                                             The CM pin should be bypassed as close as possible to the chip,
+The AD1937 includes a 3.3 V regulator driver that only requires                    with a parallel combination of 47 μF and 100 nF capacitors. This
+an external pass transistor, a resistor, and bypass capacitors to                  voltage can be used to bias external op amps to the common-mode
+turn a 5 V supply into 3.3 V. If the regulator driver is not used,                 voltage of the input and output signal pins. The output current
+connect VSUPPLY, VDRIVE, and VSENSE to DGND.                                       should be limited to less than 0.5 mA source and 2 mA sink.
+All digital inputs are compatible with TTL and CMOS levels.
+All outputs are driven from the 3.3 V DVDD supply and are
+compatible with TTL and 3.3 V CMOS levels.
+                                                                  Rev. B | Page 18 of 36
+
+
+                                                                                                                                        AD1937
+SERIAL DATA PORTS—DATA FORMAT                                                      24 bits by default and can be set to 16 or 20 bits in the DAC
+The eight DAC channels use a common serial bit clock (DBCLK)                       Control 2 and ADC Control 1 registers. The DAC serial formats
+and a common left-right framing clock (DLRCLK) in the serial                       are programmable in the DAC Control 0 register. The polarity of
+data port. The four ADC channels use a common serial bit                           DBCLK and DLRCLK is programmable in the DAC Control 1 reg-
+clock (ABCLK) and left-right framing clock (ALRCLK) in the                         ister. The ADC serial format is programmable in ADC Control 1
+serial data port. The clock signals are all synchronous with the                   register. The ABCLK and ALRCLK clock polarities are pro-
+sample rate. The normal stereo serial modes are shown in                           grammed in ADC Control 2 register. In Figure 2, Figure 3, and
+Figure 15.                                                                         Figure 15 all of the clocks are shown with their normal polarity.
+                                                                                   Both DAC and ADC serial ports can be programmed to become
+The ADC and DAC serial data modes default to I2S stereo.                           the bus masters according to DAC Control 1 and ADC Control 2
+The ports can also be programmed for left-justified stereo,                        registers. By default, both ADC and DAC serial ports are in the
+right-justified stereo, and TDM modes. The word width is                           slave mode.
+      LRCLK                            LEFT CHANNEL                                                RIGHT CHANNEL
+       BCLK
+      SDATA        MSB                              LSB                         MSB                            LSB
+                                                 LEFT-JUSTIFIED MODE—16 BITS TO 24 BITS PER CHANNEL
+      LRCLK                            LEFT CHANNEL                                                RIGHT CHANNEL
+       BCLK
+      SDATA                MSB                             LSB                             MSB                         LSB
+                                                  I2S-JUSTIFIED MODE—16 BITS TO 24 BITS PER CHANNEL
+      LRCLK                            LEFT CHANNEL                                                RIGHT CHANNEL
+       BCLK
+      SDATA                        MSB                                LSB                        MSB                          LSB
+                                              RIGHT-JUSTIFIED MODE—SELECT NUMBER OF BITS PER CHANNEL
+      LRCLK
+       BCLK
+      SDATA                MSB                              LSB                            MSB                         LSB
+                                                      DSP MODE—16 BITS TO 24 BITS PER CHANNEL
+                                                                         1/fS
+              NOTES
+              1. DSP MODE DOES NOT IDENTIFY CHANNEL.
+                                                                                                                                            07414-024
+              2. LRCLK NORMALLY OPERATES AT fS EXCEPT FOR DSP MODE, WHICH IS 2 × fS.
+              3. BCLK FREQUENCY IS NORMALLY 64 × LRCLK BUT MAY BE OPERATED IN BURST MODE.
+                                                               Figure 15. Stereo Modes
+                                                                  Rev. B | Page 19 of 36
+
+
+AD1937
+TIME-DIVISION MULTIPLEXED (TDM) MODES                                                    The I/O pin functions of the serial ports are defined according
+The serial ports of the AD1937 have several different TDM                                to the serial mode that is selected. For a detailed description of
+serial data modes. Single-line TDM mode is the most com-                                 the function of each pin in TDM and TDM/AUX modes, see
+monly used configuration (see Figure 16 and Figure 17).                                  Table 18.
+These figures show 8-channel configuration; other possible                               The AD1937 allows systems with more than eight DAC channels
+options are 4- and 16-channel configurations. In Figure 16,                              to be easily configured by the use of an auxiliary serial data port.
+the eight on-chip DAC data slots are packed into one I2S                                 The TDM/AUX mode 16-channel configuration is shown in
+TDM stream. In this mode, both DBCLK and ABCLK are                                       Figure 18. In this mode, the AUX channels are the last four
+256 fS. In Figure 17, the ADC serial port outputs one data                               slots of the TDM data stream. These slots are extracted and
+stream consisting of four on-chip ADCs followed by four                                  output to the AUX serial port. It should be noted that due to
+unused slots.                                                                            the high DBCLK frequency, this mode is available only in the
+DLRCLK
+                                                                                         48 kHz/44.1 kHz/32 kHz sample rates. An 8-channel DAC
+                                          256 BCLKs
+                                                                                         configuration cannot be TDM/AUX because there are no
+DBCLK                                                                                    extra data slots for the AUX packets; this would be single-
+         32 BCLKs
+                                                                                         line TDM mode.
+         SLOT 1     SLOT 2    SLOT 3   SLOT 4 SLOT 5 SLOT 6 SLOT 7 SLOT 8
+DSDATA   LEFT 1     RIGHT 1   LEFT 2   RIGHT 2 LEFT 3 RIGHT 3 LEFT 4 RIGHT 4             The AD1937 also allows system configurations with more
+                                                                                         than four ADC channels as shown in Figure 19 (using 8 ADCs)
+                                                      LRCLK                              and Figure 20 (using 16 ADCs). Due to the high ABCLK
+                                                      BCLK                               frequency, this mode is available only in the 48 kHz/44.1 kHz/
+                                                                           07414-014     32 kHz sample rates.
+                       MSB      MSB – 1    MSB – 2    DATA
+     Figure 16. Single-Line TDM Mode 8-Channel DAC Configuration                         Combining the TDM/AUX ADC and DAC modes results in
+                                                                                         a system configuration of 8 ADCs and 12 DACs. The system,
+                                                                                         then consists of two external stereo ADCs, two external stereo
+ALRCLK
+                                                                                         DACs, and one AD1937. This mode is shown in Figure 21
+                                          256 BCLKs
+ ABCLK                                                                                   (combined TDM/AUX DAC and ADC modes).
+         32 BCLKs
+                                                                                         In the TDM/AUX mode, the frame sync (ALRCLK) triggers
+         SLOT 1     SLOT 2    SLOT 3   SLOT 4
+ASDATA                                         SLOT 5 SLOT 6 SLOT 7 SLOT 8               the TDM word by crossing the high frequency TDM BCLK
+         LEFT 1     RIGHT 1   LEFT 2   RIGHT 2
+                                                                                         (ABCLK) to 0, similar to the single-line TDM modes (see
+                                                      LRCLK                              Figure 16 and Figure 17). The AUX LRCLK (DLRCLK) runs at
+                                                      BCLK                               the much slower fS of the AUX port; the AUX BCLK (DBCLK)
+                                                                           07414-013
+                       MSB      MSB – 1    MSB – 2    DATA                               runs at 64 × fS. This is shown in the TDM/AUX figures (see
+                                                                                         Figure 18 to Figure 21).
+     Figure 17. Single-Line TDM Mode 8-Channel ADC Configuration
+Table 18. Pin Function Changes in TDM and TDM/AUX Modes
+Mnemonic               Stereo Modes                           TDM Modes                                             TDM/AUX Modes
+ASDATA1                ADC1 data out                          TDM ADC data out                                      TDM data out
+ASDATA2                ADC2 data out                          TDM ADC data in                                       AUX DAC1 data out (to external DAC1)
+DSDATA1                DAC1 data in                           TDM DAC data in                                       TDM data in
+DSDATA2                DAC2 data in                           TDM DAC data out                                      AUX ADC1 data in (from external ADC1)
+DSDATA3                DAC3 data in                           TDM DAC2 data in (dual-line mode)                     AUX ADC2 data in (from external ADC2)
+DSDATA4                DAC4 data in                           TDM DAC2 data out (dual-line mode)                    AUX DAC2 data out (to external DAC2)
+ALRCLK                 ADC LRCLK in/out                       TDM ADC frame sync in/out                             TDM frame sync in/out
+ABCLK                  ADC BCLK in/out                        TDM ADC BCLK in/out                                   TDM BCLK in/out
+DLRCLK                 DAC LRCLK in/out                       TDM DAC frame sync in/out                             AUX LRCLK in/out
+DBCLK                  DAC BCLK in/out                        TDM DAC BCLK in/out                                   AUX BCLK in/out
+                                                                        Rev. B | Page 20 of 36
+
+
+                                                                                                                                                         AD1937
+            ALRCLK
+             ABCLK
+                                                                                                                            AUX DAC CHANNELS
+                                                                                                                                APPEAR AT
+                              UNUSED SLOTS                                8 ON-CHIP DAC CHANNELS                             AUX DAC PORTS
+          DSDATA1
+                      EMPTY    EMPTY   EMPTY   EMPTY   DAC1L   DAC1R     DAC2L   DAC2R   DAC3L   DAC3R   DAC4L   DAC4R   AUX1L   AUX1R   AUX2L   AUX2R
+      (TDM DATA IN)
+                                           32 BITS
+                                MSB
+           DLRCLK                              LEFT                                                                 RIGHT
+ (AUX LRCLK IN/OUT)
+             DBCLK
+  (AUX BCLK IN/OUT)
+           ASDATA2
+(AUX DAC1 DATA OUT)                        MSB                                                               MSB
+                                                                                                                                                                    07414-015
+           DSDATA4
+(AUX DAC2 DATA OUT)                        MSB                                                               MSB
+                                                 Figure 18. TDM/AUX Mode 16-Channel DAC configuration
+           ALRCLK
+            ABCLK
+                                                                         8 ON-CHIP DAC CHANNELS
+         DSDATA1       DACL1            DACR1           DACL2              DACR2          DACL3           DACR3            DACL4          DACR4
+     (TDM DATA IN)
+                                     4 ON-CHIP ADC CHANNELS                                                 4 AUX ADC CHANNELS
+          ASDATA1      ADCL1            ADCR1           ADCL2              ADCR2          AUXL1           AUXR1            AUXL2          AUXR2
+    (TDM DATA OUT)
+                                          32 BITS
+                               MSB
+          DLRCLK
+(AUX LRCLK IN/OUT)                             LEFT                                                                RIGHT
+            DBCLK
+ (AUX BCLK IN/OUT)
+         DSDATA2
+(AUX ADC1 DATA IN)                        MSB                                                               MSB
+                                                                                                                                                            07414-016
+         DSDATA3
+(AUX ADC2 DATA IN)                        MSB                                                               MSB
+                                                 Figure 19. TDM/AUX Mode 8-Channel ADC Configuration
+                                                                       Rev. B | Page 21 of 36
+
+
+AD1937
+            ALRCLK
+             ABCLK
+                        4 ON-CHIP ADC CHANNELS             AUXILIARY ADC CHANNELS                                  UNUSED SLOTS
+           ASDATA1
+                        ADCL1   ADCR1    ADCL2    ADCR2    AUXL1    AUXR1     AUXL2    AUXR2 UNUSED UNUSED UNUSED UNUSED UNUSED UNUSED UNUSED UNUSED
+     (TDM DATA OUT)
+                                             32 BITS
+                                 MSB
+            DLRCLK                                LEFT                                                                   RIGHT
+  (AUX LRCLK IN/OUT)
+              DBCLK
+   (AUX BCLK IN/OUT)
+           DSDATA2
+  (AUX ADC1 DATA IN)                         MSB                                                                  MSB
+                                                                                                                                                               07414-017
+           DSDATA3
+  (AUX ADC2 DATA IN)                         MSB                                                                  MSB
+                                                    Figure 20. TDM/AUX Mode 16-Channel ADC Configuration
+             ALRCLK
+              ABCLK
+                                                                                                                               AUXILIARY DAC CHANNELS
+                                                                                                                                      APPEAR AT
+                                UNUSED SLOTS                                    8 ON-CHIP DAC CHANNELS                              AUX DAC PORTS
+            DSDATA1
+                        EMPTY    EMPTY   EMPTY     EMPTY   DACL1    DACR1      DACL2   DACR2   DACL3   DACR3   DACL4   DACR4   AUXL1   AUXR1   AUXL2   AUXR2
+        (TDM DATA IN)
+                         4 ON-CHIP ADC CHANNELS             AUXILIARY ADC CHANNELS                                     UNUSED SLOTS
+            ASDATA1
+                        ADCL1    ADCR1   ADCL2     ADCR2    AUXL1    AUXR1     AUXL2   AUX R2 UNUSED UNUSED UNUSED UNUSED UNUSED UNUSED UNUSED UNUSED
+      (TDM DATA OUT)
+             DLRCLK                                LEFT                                                                   RIGHT
+   (AUX LRCLK IN/OUT)
+               DBCLK
+    (AUX BCLK IN/OUT)
+            DSDATA2
+   (AUX ADC1 DATA IN)                            MSB                                                               MSB
+            DSDATA3
+   (AUX ADC2 DATA IN)                            MSB                                                               MSB
+            ASDATA2
+ (AUX ADC1 DATA OUT)                             MSB                                                               MSB
+                                                                                                                                                                       07414-018
+            DSDATA4
+ (AUX DAC2 DATA OUT)                             MSB                                                               MSB
+                                                 Figure 21. Combined TDM/AUX Mode DAC and ADC Configuration
+                                                                             Rev. B | Page 22 of 36
+
+
+                                                                                                                                                                       AD1937
+DAISY-CHAIN MODE                                                                            There are two configurations for the ADC port to work in
+The AD1937 also allows a daisy-chain configuration to expand                                daisy-chain mode. The first configuration is with an ABCLK
+the system to 16 DACs and 8 ADCs (see Figure 22 to Figure 26).                              at 256 × fS, see Figure 25. The second configuration is with an
+In this mode, the DBCLK frequency is 512 × fS. The first eight                              ABCLK at 512 × fS, see Figure 26. Note that in the 512 × fS
+slots of the TDM DAC data stream belong to the first AD1937                                 ABCLK mode, the ADC channels occupy the first eight
+in the chain and the last eight slots belong to the second AD1937.                          slots; the second eight slots are empty. The TDM ADC data
+The second AD1937 is the device attached to the DSP TDM port.                               in (ASDATA2) port of the first AD1937 must be grounded
+                                                                                            in all modes of operation.
+To accommodate 16 channels at a 96 kHz sample rate, the
+AD1937 can be configured into a dual-line, TDM mode as                                      The I/O pins of the serial ports are defined according to the
+shown in Figure 23. This mode allows a slower DBCLK than                                    serial mode selected. See Table 19 for a detailed description
+normally required by the one-line TDM mode. The first four                                  of the function of each pin. See Figure 27 for a typical AD1937
+channels of each TDM input belong to the first AD1937 in the                                configuration with two external stereo DACs and two external
+chain and the last four channels belong to the second AD1937.                               stereo ADCs.
+The dual-line TDM mode can also be used to send data at a
+192 kHz sample rate into the AD1937, as shown in Figure 24.
+                   DLRCLK
+                     DBCLK
+                                      8 DAC CHANNELS OF THE FIRST IC IN THE CHAIN                     8 DAC CHANNELS OF THE SECOND IC IN THE CHAIN
+  DSDATA1 (TDM ADC DATA IN)
+                              DAC1L    DAC1R    DAC2L    DAC2R   DAC3L   DAC3R    DAC4L   DAC4R    DAC1L   DAC1R     DAC2L   DAC2R    DAC3L   DAC3R    DAC4L   DAC4R
+      OF THE SECOND AD1937
+DSDATA2 (TDM DAC DATA OUT)
+     OF THE SECOND AD1937;                                                                         DAC1L   DAC1R     DAC2L   DAC2R    DAC3L   DAC3R    DAC4L   DAC4R
+            THIS IS THE TDM
+        TO THE FIRST AD1937                             8 UNUSED SLOTS
+                                                                                                           32 BITS
+                                                                                                                                                                                      07414-019
+                           FIRST       SECOND
+                                                          DSP
+                          AD1937       AD1937                                                          MSB
+                                      Figure 22. Single-Line Daisy-Chain TDM Mode 16-Channel 48 kHz DAC Configuration
+                DLRCLK
+                 DBCLK
+                               8 DAC CHANNELS OF THE FIRST IC IN THE CHAIN                        8 DAC CHANNELS OF THE SECOND IC IN THE CHAIN
+              DSDATA1
+      (TDM DAC DATA IN)       DAC1L            DAC1R             DAC2L           DAC2R            DAC1L            DAC1R             DAC2L            DAC2R
+              DSDATA2
+    (TDM DAC DATA OUT)                                                                            DAC1L            DAC1R             DAC2L            DAC2R
+              DSDATA3
+     (TDM DAC2 DATA IN)       DAC3L            DAC3R             DAC4L           DAC4R            DAC3L            DAC3R             DAC4L            DAC4R
+              DSDATA4
+   (TDM DAC2 DATA OUT)                                                                            DAC3L            DAC3R             DAC4L            DAC4R
+                                                32 BITS
+                                    MSB
+                                                                                                                                                                          07414-020
+                      FIRST        SECOND
+                     AD1937        AD1937         DSP
+                                          Figure 23. Dual-Line Daisy-Chain TDM Mode16-Channel 96 kHz DAC Configuration
+                                                                          Rev. B | Page 23 of 36
+
+
+AD1937
+          DLRCLK
+           DBCLK
+         DSDATA1                DAC1L                            DAC1R                           DAC2L                       DAC2R
+         DSDATA2                DAC3L                            DAC3R                           DAC4L                       DAC4L
+                                          32 BITS
+                               MSB                                                                                                                   07414-021
+                                        Figure 24. Dual-Line Daisy-Chain TDM Mode 8-Channel 192 kHz DAC Configuration
+                   ALRCLK
+                     ABCLK
+                                        4 ADC CHANNELS OF SECOND IC IN THE CHAIN                         4 ADC CHANNELS OF FIRST IC IN THE CHAIN
+ASDATA1 (TDM ADC DATA OUT)
+     OF THE SECOND AD1937            ADC1L          ADC1R          ADC2L           ADC2R           ADC1L           ADC1R        ADC2L        ADC2R
+               IN THE CHAIN
+ ASDATA2 (TDM ADC DATA IN)
+     OF THE SECOND AD1937            ADC1L          ADC1R          ADC2L           ADC2R
+              IN THE CHAIN
+                                                                                                         32 BITS
+                       FIRST         SECOND
+                                                    DSP
+                      AD1937         AD1937
+                                                                                                    MSB                                                          07414-022
+                                             Figure 25. Single-Line Daisy-Chain TDM Mode 256 × fS ADC Configuration
+                   ALRCLK
+                    ABCLK
+                                   4 ADC CHANNELS OF                4 ADC CHANNELS OF
+                                 SECOND IC IN THE CHAIN            FIRST IC IN THE CHAIN
+ASDATA1 (TDM ADC DATA OUT)
+     OF THE SECOND AD1937       ADCL1    ADCR1   ADCL2   ADCR2   ADCL1   ADCR1   ADCL2   ADCR2
+               IN THE CHAIN
+ ASDATA2 (TDM ADC DATA IN)
+    OF THE SECOND AD1937        ADCL1    ADCR1   ADCL2   ADCR2
+              IN THE CHAIN
+                                                                                                         32 BITS
+                       FIRST         SECOND
+                      AD1937         AD1937          DSP
+                                                                                                    MSB                                                          07414-023
+                                             Figure 26. Single-Line Daisy-Chain TDM Mode 512 × fS ADC Configuration
+                                                                          Rev. B | Page 24 of 36
+
+
+                                                                                                                                                                        AD1937
+Table 19. Pin Function Changes in TDM and TDM/AUX Modes (Replication of Table 18)
+Mnemonic       Stereo Modes                       TDM Modes                                                                         TDM/AUX Modes
+ASDATA1        ADC1 data out                      TDM ADC data out                                                                  TDM data out
+ASDATA2        ADC2 data out                      TDM ADC data in                                                                   AUX DAC1 data out (to external DAC1)
+DSDATA1        DAC1 data in                       TDM DAC data in                                                                   TDM data in
+DSDATA2        DAC2 data in                       TDM DAC data out                                                                  AUX ADC1 data in (from external ADC1)
+DSDATA3        DAC3 data in                       TDM DAC2 data in (dual-line mode)                                                 AUX ADC2 data in (from external ADC2)
+DSDATA4        DAC4 data in                       TDM DAC2 data out (dual-line mode)                                                AUX DAC2 data out (to external DAC2)
+ALRCLK         ADC LRCLK in/out                   TDM ADC frame sync in/out                                                         TDM frame sync in/out
+ABCLK          ADC BCLK in/out                    TDM ADC BCLK in/out                                                               TDM BCLK in/out
+DLRCLK         DAC LRCLK in/out                   TDM DAC frame sync in/out                                                         AUX LRCLK in/out
+DBCLK          DAC BCLK in/out                    TDM DAC BCLK in/out                                                               AUX BCLK in/out
+                                       30MHz                                                                             SHARC IS RUNNING IN SLAVE MODE
+                                                                                                                         (INTERRUPT-DRIVEN)
+                                                      FSYNC-TDM (RFS)
+                                                                                         SHARC
+                                                                                           TFS (NC)
+                                      12.288MHz
+                                                                        RxCLK   RxDATA                TxCLK     TxDATA
+                       LRCLK                                                                                                                LRCLK
+                       BCLK                                                                                                                 BCLK
+                AUX                                                                                                                               AUX
+               ADC 1   DATA                                                                                                                 DATA DAC 1
+                                                                        ASDATA1 ALRCLK ABCLK DSDATA1
+                       MCLK                                                                                                                 MCLK
+                                                    DBCLK
+                                                    DLRCLK                                AD1937
+                       LRCLK                                                                                                                LRCLK
+                       BCLK                         DSDATA2                                                   ASDATA2                       BCLK
+                AUX                                                                      TDM MASTER                                               AUX
+               ADC 2   DATA                         DSDATA3                              AUX MASTER           DSDATA4                       DATA DAC 2
+                                                                                                                                                            07414-027
+                       MCLK                         MCLKI/MCLKXI                                                                            MCLK
+                       Figure 27. Example of TDM/AUX Mode Connection to SHARC® (AD1937 as TDM Master/AUX Master Shown)
+                                                                                  Rev. B | Page 25 of 36
+
+
+AD1937
+ADDITIONAL MODES                                                                   To relax the requirement for the setup time of the AD1937 in
+The AD1937 offers several additional modes for board level                         cases of high speed TDM data transmission, the AD1937 can
+design enhancements. To reduce the EMI in board level design,                      latch in the data using the falling edge of DBCLK. This effec-
+serial data can be transmitted without an explicit BCLK. See                       tively dedicates the entire BCLK period to the setup time. This
+Figure 28 and Figure 29 for an example of a DAC TDM data                           mode is useful in cases where the source has a large delay time
+transmission mode that does not require high speed DBCLK.                          in the serial data driver. Figure 30 shows this pipeline mode of
+This configuration is applicable when the AD1937 master                            data transmission.
+clock is generated by the PLL with the DLRCLK as the PLL                           Both the BCLK-less and pipeline modes are available on the
+reference frequency.                                                               ADC serial data port.
+                  DLRCLK
+                                                 32 BITS
+              INTERNAL
+                 DBCLK
+               DSDATAx                                                                                                              07414-028
+                        Figure 28. Serial DAC Data Transmission in TDM Format Without DBCLK; 2-Channel 64 BCLKs per Frame Mode
+                               (Applicable Only If PLL Locks to DLRCLK; This Mode Is Also Available in the ADC Serial Data Port)
+         DLRCLK
+          DBCLK
+                                                     DATA MUST BE VALID
+                                                     AT THIS BCLK EDGE
+        DSDATAn                      MSB                                                                                                        07414-029
+                       Figure 29. Serial DAC Data Transmission in TDM Format Without DBCLK; 128 to 512 BCLKs per Frame TDM Mode
+                               (Applicable Only If PLL Locks to DLRCLK; This Mode Is Also Available in the ADC Serial Data Port)
+           DLRCLK
+          INTERNAL
+             DBCLK
+      TDM DSDATAn                                                                                                                                           07414-128
+                                               Figure 30. I2S Pipeline Mode in DAC Serial Data Transmission
+                                       (Applicable in Stereo and TDM, Useful for High Frequency TDM Transmission;
+                                                  This Mode Is Also Available in the ADC Serial Data Port)
+                                                                  Rev. B | Page 26 of 36
+
+
+                                                                                                                                    AD1937
+CONTROL REGISTERS
+DEFINITIONS
+The global address for the AD1937 is 0x08 OR’ed with ADDR1 and ADDR0 and one R/W bit; see Figure 13 and Figure 14. The address
+bits (Bits[18:17]) setting must correspond to the low/high state of Pin 30 and Pin 35. All registers are reset to 0, except for the DAC
+volume registers that are set to full volume.
+Note that the first setting in each control register parameter is the default setting.
+Table 20. Register Format
+          Global Address                     R/W                                                 Register Address                     Data
+Bit       23:17                              16                                                  15:8                                 7:0
+Table 21. Register Addresses and Functions
+Hexadecimal             Address                         Function
+0x00                    0                               PLL and Clock Control 0
+0x01                    1                               PLL and Clock Control 1
+0x02                    2                               DAC Control 0
+0x03                    3                               DAC Control 1
+0x04                    4                               DAC Control 2
+0x05                    5                               DAC individual channel mutes
+0x06                    6                               DAC1L volume control
+0x07                    7                               DAC1R volume control
+0x08                    8                               DAC2L volume control
+0x09                    9                               DAC2R volume control
+0x0A                    10                              DAC3L volume control
+0x0B                    11                              DAC3R volume control
+0x0C                    12                              DAC4L volume control
+0x0D                    13                              DAC4R volume control
+0x0E                    14                              ADC Control 0
+0x0F                    15                              ADC Control 1
+0x10                    16                              ADC Control 2
+PLL AND CLOCK CONTROL REGISTERS
+Table 22. PLL and Clock Control 0 Register (Address 0, 0x00)
+Bit          Value           Function                                  Description
+0            0               Normal operation                          PLL power-down
+             1               Power-down
+2:1          00              Input 256 (× 44.1 kHz or 48 kHz)          MCLKI/MCLKXI pin functionality (PLL active), master clock rate setting
+             01              Input 384 (× 44.1 kHz or 48 kHz)
+             10              Input 512 (× 44.1 kHz or 48 kHz)
+             11              Input 768 (× 44.1 kHz or 48 kHz)
+4:3          00              XTAL oscillator enabled                   MCLKO/MCLKXO pin, master clock rate setting
+             01              256 × fS VCO output
+             10              512 × fS VCO output
+             11              Off
+6:5          00              MCLKI/MCLKXI                              PLL input
+             01              DLRCLK
+             10              ALRCLK
+             11              Reserved
+7            0               Disable: ADC and DAC idle                 Internal master clock enable
+             1               Enable: ADC and DAC active
+                                                               Rev. B | Page 27 of 36
+
+
+AD1937
+Table 23. PLL and Clock Control 1 Register (Address 1, 0x01)
+Bit    Value     Function                                         Description
+0      0         PLL clock                                        DAC clock source select
+       1         MCLK
+1      0         PLL clock                                        ADC clock source select
+       1         MCLK
+2      0         Enabled                                          On-chip voltage reference
+       1         Disabled
+3      0         Not locked                                       PLL lock indicator (read-only)
+       1         Locked
+7:4    0000      Reserved
+DAC CONTROL REGISTERS
+Table 24. DAC Control 0 Register (Address 2, 0x02)
+Bit    Value      Function                                                    Description
+0      0          Normal                                                      Power-down
+       1          Power-down
+2:1    00         32 kHz/44.1 kHz/48 kHz                                      Sample rate
+       01         64 kHz/88.2 kHz/96 kHz
+       10         128 kHz/176.4 kHz/192 kHz
+       11         Reserved
+5:3    000        1 cycle (I2S mode)                                          DSDATA delay (BCLK periods)
+       001        0 (left-justified mode)
+       010        8 cycles (right-justified 24-bit mode)
+       011        12 cycles (right-justified 20-bit mode)
+       100        16 cycles (right-justified 16-bit mode)
+       101        Reserved
+       110        Reserved
+       111        Reserved
+7:6    00         Stereo (normal)                                             Serial format
+       01         TDM single-line, standalone, and daisy-chain modes
+       10         TDM/AUX mode (ADC-, DAC-, TDM-coupled)
+       11         TDM dual-line daisy-chain mode
+                                                           Rev. B | Page 28 of 36
+
+
+                                                                                                            AD1937
+Table 25. DAC Control 1 Register (Address 3, 0x03)
+Bit    Value      Function                                   Description
+0      0          Latch in midcycle (normal)                 DBCLK active edge (TDM_IN)
+       1          Latch in at end of cycle (pipeline)
+2:1    00         64 (2 channels)                            DBCLKs per frame
+       01         128 (4 channels)
+       10         256 (8 channels)
+       11         512 (16 channels)
+3      0          Left low                                   DLRCLK polarity
+       1          Left high
+4      0          Slave                                      DLRCLK master/slave
+       1          Master
+5      0          Slave                                      DBCLK master/slave
+       1          Master
+6      0          DBCLK pin                                  DBCLK source
+       1          Internally generated
+7      0          Normal                                     DBCLK polarity
+       1          Inverted
+Table 26. DAC Control 2 Register (Address 4, 0x04)
+Bit         Value       Function                             Description
+0           0           Unmute                               Master mute
+            1           Mute
+2:1         00          Flat                                 De-emphasis (32 kHz/44.1 kHz/48 kHz mode only)
+            01          48 kHz curve
+            10          44.1 kHz curve
+            11          32 kHz curve
+4:3         00          24 bits                              Word width
+            01          20 bits
+            10          Reserved
+            11          16 bits
+5           0           Noninverted                          DAC output polarity
+            1           Inverted
+7:6         00          Reserved
+Table 27. DAC Individual Channel Mutes Register (Address 5, 0x05)
+Bit         Value       Function                             Description
+0           0           Unmute                               DAC1L mute
+            1           Mute
+1           0           Unmute                               DAC1R mute
+            1           Mute
+2           0           Unmute                               DAC2L mute
+            1           Mute
+3           0           Unmute                               DAC2R mute
+            1           Mute
+4           0           Unmute                               DAC3L mute
+            1           Mute
+5           0           Unmute                               DAC3R mute
+            1           Mute
+6           0           Unmute                               DAC4L mute
+            1           Mute
+7           0           Unmute                               DAC4R mute
+            1           Mute
+                                                      Rev. B | Page 29 of 36
+
+
+AD1937
+Table 28. DACxx Volume Controls Registers (Address 6 to Address 13, 0x06 to 0x0D)
+Bit         Value    Function                                       Description
+7:0         0        No attenuation                                 DAC volume control
+            1 to 254 −0.375 dB per step
+            255      Full attenuation
+ADC CONTROL REGISTERS
+Table 29. ADC Control 0 Register (Address 14, 0x0E)
+Bit           Value       Function                                                  Description
+0             0           Normal                                                    Power-down
+              1           Power down
+1             0           Off                                                       High-pass filter
+              1           On
+2             0           Unmute                                                    ADC1L mute
+              1           Mute
+3             0           Unmute                                                    ADC1R mute
+              1           Mute
+4             0           Unmute                                                    ADC2L mute
+              1           Mute
+5             0           Unmute                                                    ADC2R mute
+              1           Mute
+7:6           00          32 kHz/44.1 kHz/48 kHz                                    Output sample rate
+              01          64 kHz/88.2 kHz/96 kHz
+              10          128 kHz/176.4 kHz/192 kHz
+              11          Reserved
+Table 30. ADC Control 1 Register (Address 15, 0x0F)
+Bit           Value       Function                                                      Description
+1:0           00          24 bits                                                       Word width
+              01          20 bits
+              10          Reserved
+              11          16 bits
+4:2           000         1 cycle (I2S mode)                                            ASDATA delay (BCLK periods)
+              001         0 (left-justified mode)
+              010         8 cycles (right-justified 24-bit mode)
+              011         12 cycles (right-justified 20-bit mode)
+              100         16 cycles (right-justified 16-bit mode)
+              101         Reserved
+              110         Reserved
+              111         Reserved
+6:5           00          Stereo                                                        Serial format
+              01          TDM single-line, standalone, and daisy-chain modes
+              10          TDM/AUX mode (ADC-, DAC-, TDM-coupled)
+              11          Reserved
+7             0           Latch in midcycle (normal)                                    ABCLK active edge (TDM_IN)
+              1           Latch in at end of cycle (pipeline)
+                                                             Rev. B | Page 30 of 36
+
+
+                                                                                                        AD1937
+Table 31. ADC Control 2 Register (Address 16, 0x10)
+Bit             Value         Function                                              Description
+0               0             50/50 (allows 32, 24, 20, or 16 BCLKs per channel)    ALRCLK format
+                1             Pulse (32 BCLKs per channel)
+1               0             Drive out on falling edge (DEF)                       ABCLK polarity
+                1             Drive out on rising edge
+2               0             Left low                                              ALRCLK polarity
+                1             Left high
+3               0             Slave                                                 ALRCLK master/slave
+                1             Master
+5:4             00            64 cycles                                             ABCLKs per frame
+                01            128 cycles
+                10            256 cycles
+                11            512 cycles
+6               0             Slave                                                 ABCLK master/slave
+                1             Master
+7               0             ABCLK pin                                             ABCLK source
+                1             Internally generated
+                                                             Rev. B | Page 31 of 36
+
+
+AD1937
+APPLICATIONS CIRCUITS
+Typical application circuits are shown in Figure 31 through Figure 34. Figure 31 shows a typical ADC input filter circuit. Recommended
+loop filters for LRCLK and MCLK as the PLL reference are shown in Figure 32. Output filters for the DAC outputs are shown in Figure 33
+and a regulator circuit is shown in Figure 34.
+                                      120pF
+          600Z      5.76kΩ            5.76kΩ
+AUDIO
+INPUT
+                              2
+          100pF                   –
+                                               1
+                                  OP275
+                              3
+                                  +
+                                                                                                                                  11kΩ                68pF
+                                                                                                                                                      NPO
+                                                                                                                                 11kΩ     3.01kΩ
+                                      5.76kΩ            4.7µF 237Ω                                                     DAC
+                                                                                             ADCxxN                   OUTN
+                                                           +                                                                              270pF          2
+                                      120pF                            1nF                                                                NPO                –
+                                                                                                                                                                            1   604Ω
+                                                                      NPO                                                                                    OP275                                    AUDIO
+                                                                                                                                          560pF          3                                            OUTPUT
+                                                                                    100pF                                                 NPO                +
+                                                                                                                                                                                2.2nF
+                                      5.76kΩ                       1nF                                                                                                           NPO
+                                                                                                                       DAC
+                              6                                   NPO                                                 OUTP
+                                  –                     4.7µF 237Ω
+                                               7                                                                                5.62kΩ    1.50kΩ
+                                  OP275                                                      ADCxxP                                                   150pF
+                              5                            +                                                                    5.62kΩ                NPO
+                                                                                                      07414-030
+                                  +
+                                                                                                                                                                                                               07414-032
+                  Figure 31. Typical ADC Input Filter Circuit                                                                Figure 33. Typical DAC Output Filter Circuit (Differential)
+                                                                                                                                              100nF                  10µF
+                                                                                                                                                                 +
+                                                                                                                                  VSUPPLY                                              5V
+                                                                                                                                                   1kΩ                 E
+                      LRCLK                                    MCLK                                                                                          B
+                                                                                                                                    VDRIVE                                  FZT953
+             LF                                    LF
+                       39nF                                    5.6nF                                                                                                   C
+                                                                                                                                   VSENSE                                              3.3V
+                                  2.2nF                                  390pF
+                                                                                                                                                                 +
+                      3.32kΩ                                   562Ω                                                                           100nF                  10µF
+                                                                                 07414-031                                                                                                    07414-033
+         AVDD2                            AVDD2
+ Figure 32. Recommended Loop Filters for LRCLK or MCLK as PLL Reference                                                          Figure 34. Recommended 3.3 V Regulator Circuit
+                                                                                                 Rev. B | Page 32 of 36
+
+
+                                                                                                                                                           AD1937
+OUTLINE DIMENSIONS
+                                                                                                       12.20
+                                                                0.75                                   12.00 SQ
+                                                                0.60      1.60                         11.80
+                                                                0.45      MAX
+                                                                                        64                                 49
+                                                                                   1                                            48
+                                                                                              PIN 1
+                                                                                                                                     10.20
+                                                                                                      TOP VIEW                       10.00 SQ
+                                                                                                      (PINS DOWN)
+                                                                                                                                      9.80
+                                 1.45
+                                                        0.20
+                                 1.40
+                                                        0.09
+                                 1.35
+                                                          7°
+                                                         3.5°
+                                    0.15                                           16                                           33
+                                                          0°
+                                    0.05   SEATING                                      17                                 32
+                                           PLANE     0.08
+                                                     COPLANARITY             VIEW A                                 0.27
+                                                                                                0.50
+                                                                                                BSC                 0.22
+                                        VIEW A                                               LEAD PITCH             0.17
+                                   ROTATED 90° CCW
+                                                                                                                                                051706-A
+                                                         COMPLIANT TO JEDEC STANDARDS MS-026-BCD
+                                                      Figure 35. 64-Lead Low Profile Quad Flat Package [LQFP]
+                                                                             (ST-64-2)
+                                                                  Dimensions shown in millimeters
+ORDERING GUIDE
+Model 1, 2                                  Temperature Range                      Package Description                                 Package Option
+AD1937WBSTZ                                 –40°C to +125°C                        64-Lead LQFP                                        ST-64-2
+AD1937WBSTZ-RL                              –40°C to +125°C                        64-Lead LQFP, 13” Tape and Reel                     ST-64-2
+EVAL-AD1937AZ                                                                      Evaluation Board
+1
+    Z = RoHS Compliant Part.
+2
+    W = Qualified for Automotive Applications.
+AUTOMOTIVE PRODUCTS
+The AD1937WBSTZ models are available with controlled manufacturing to support the quality and reliability requirements of
+automotive applications. Note that these automotive models may have specifications that differ from the commercial models; therefore,
+designers should review the Specifications section of this data sheet carefully. Only the automotive grade products shown are available for
+use in automotive applications. Contact your local Analog Devices account representative for specific product ordering information and
+to obtain the specific Automotive Reliability reports for these models.
+                                                                       Rev. B | Page 33 of 36
+
+
+AD1937
+NOTES
+       Rev. B | Page 34 of 36
+
+
+                             AD1937
+NOTES
+      Rev. B | Page 35 of 36
+
+
+AD1937
+NOTES
+I2C refers to a communications protocol originally developed by Philips Semiconductors (now NXP Semiconductors).
+©2008-2010 Analog Devices, Inc. All rights reserved. Trademarks and
+ registered trademarks are the property of their respective owners.
+                                                   D07414-0-6/10(B)
+                                                                          Rev. B | Page 36 of 36
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Analog Devices Inc.:
+ EVAL-AD1937AZ AD1937WBSTZ-RL AD1937WBSTZ

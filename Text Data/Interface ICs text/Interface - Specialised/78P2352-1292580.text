@@ -1,0 +1,2091 @@
+                                                                                                          78P2352
+                                                                                                     Dual Channel
+                                                                                       OC-3/ STM1-E/ E4 LIU
+                                                                                         DATA SHEET
+                                                                                                      SEPTEMBER 2006
+DESCRIPTION                                                      FEATURES
+The 78P2352 is Teridian’s second generation Line                 •    ITU-T G.703 compliant cable driver for 139.264
+Interface Unit (LIU) for 155 Mbps SDH/SONET                           Mbps or 155.52 Mbps CMI-coded coax
+(OC-3, STS-3, or STM-1) and 140 Mbps PDH (E4)                         transmission
+telecom interfaces. The device is a dual channel,                •    Integrated adaptive CMI equalizer and CDR in
+single chip solution that includes an integrated CDR                  receive path handles over 12.7dB of cable loss
+in the transmit path for flexible NRZ to CMI                     •    Serial, LVPECL system interface with integrated
+conversion. The device can interface to 75Ω coaxial                   CRU in transmit path for flexible NRZ to CMI
+cable using CMI coding or directly to a fiber optics                  conversion.
+transceiver module using NRZ coding.               The           •    4-bit parallel CMOS system interface with
+78P2352 is compliant with all respective ANSI, ITU-                   master and slave Tx clock modes.
+T, and Telcordia standards for jitter tolerance,                 •    Selectable LVPECL compatible NRZ media
+generation, and transfer.                                             interface for 155.52 Mbps optical transmission.
+                                                                 •    Configurable via HW control pins or 4-wire serial
+APPLICATIONS                                                          port interface
+                                                                 •    Compliant with ANSI T1.105.03-1994; ITU-T
+•   Central Office Interconnects
+                                                                      G.751, G.813, G.823, G.825, G.958; and
+•   DSLAMs
+                                                                      Telcordia GR-253-CORE for jitter performance.
+•   Add Drop Multiplexers (ADMs)
+                                                                 •    Receiver Loss of Signal (LOS) detection
+•   Multi Service Switches                                            compatible with ITU-T G.783
+•   Digital Microwave Radios                                     •    Operates from a single 3.3V supply
+                                                                 •    Standard and thermally enhanced 128-pin
+                                                                      JEDEC LQFP package options
+BLOCK DIAGRAM
+                                                   EACH CHANNEL: Tx
+                      Lock Detect
+                                                                                                          ECLxP/N
+      SIxDP/N          Tx CDR                  FIFO                                                       TXxCKP/N
+                                                                   CMI
+                                                                Encoder
+     SIxCKP/N
+                                                                                                          CMIxP/N
+         PIxCK
+      PIx[3:0]D
+                                           PMOD, SMOD[1:0], PAR
+      PTOxCK                                                                                    RLBK
+    SOxCKP/N
+     SOxDP/N                         CMI
+                                                 Rx CDR
+                                   Decoder                                  Adaptive                       RXxP/N
+     POx[3:0]D                                                                Eq.
+                                               Lock Detect
+       POxCK
+                                                                                     LOS Detect
+                                                             CMI                                  LLBK
+                                                    EACH CHANNEL: Rx
+Page: 1 of 42                            2006 Teridian Semiconductor Corporation                                 Rev. 2.4
+
+
+                                                                                                                                                       78P2352
+                                                                                                                                            Dual Channel
+                                                                                                                           OC-3/ STM1-E/ E4 LIU
+TABLE OF CONTENTS ................................................................................................ 2
+FUNCTIONAL DESCRIPTION........................................................................................ 4
+   MODE SELECTION................................................................................................................................4
+   REFERENCE CLOCK ............................................................................................................................4
+   RECEIVER OPERATION .......................................................................................................................4
+        Receiver Monitor Mode ..................................................................................................................4
+        Receive Loss of Signal ..................................................................................................................5
+        Receive Loss of Lock.....................................................................................................................5
+   TRANSMITTER OPERATION ................................................................................................................5
+        Synchronous (Re-timing) Tx Serial Modes ..................................................................................5
+        Plesiochronous Serial Modes .......................................................................................................6
+        Synchronous Parallel Modes ........................................................................................................6
+        Transmit FIFO Description ............................................................................................................6
+        Transmit Driver ...............................................................................................................................7
+        Clock Synthesizer...........................................................................................................................7
+        Transmit Backplane Equalizer ......................................................................................................7
+        Transmit Loss of Lock ...................................................................................................................7
+   POWER-DOWN FUNCTION .................................................................................................................7
+   ANALOG LOOPBACK MODES.............................................................................................................7
+   POWER-ON RESET ..............................................................................................................................7
+   SERIAL CONTROL INTERFACE .........................................................................................................8
+   PROGRAMMABLE INTERRUPTS ........................................................................................................8
+REGISTER DESCRIPTION............................................................................................. 9
+   REGISTER ADDRESSING.....................................................................................................................9
+   REGISTER TABLE.................................................................................................................................9
+   LEGEND ...............................................................................................................................................10
+   GLOBAL REGISTERS .........................................................................................................................10
+        ADDRESS 0-0: MASTER CONTROL REGISTER .......................................................................10
+        ADDRESS 0-1: INTERRUPT CONTROL REGISTER..................................................................11
+   PORT-SPECIFIC REGISTERS ............................................................................................................12
+        ADDRESS N-0: MODE CONTROL REGISTER...........................................................................12
+        ADDRESS N-1: SIGNAL CONTROL REGISTER ........................................................................13
+        ADDRESS N-2: ADVANCED TX CONTROL REGISTER 1 ........................................................14
+        ADDRESS N-3: ADVANCED TX CONTROL REGISTER 0 ........................................................14
+        ADDRESS N-4: MODE CONTROL REGISTER 2........................................................................14
+        ADDRESS N-5: STATUS MONITOR REGISTER ........................................................................15
+PIN DESCRIPTION ....................................................................................................... 16
+   LEGEND ...............................................................................................................................................16
+   TRANSMITTER PINS ...........................................................................................................................16
+   RECEIVER PINS ..................................................................................................................................17
+   REFERENCE AND STATUS PINS ......................................................................................................18
+   CONTROL PINS ..................................................................................................................................19
+   SERIAL-PORT PINS ............................................................................................................................21
+   POWER AND GROUND PINS .............................................................................................................21
+Page: 2 of 42                                      2006 Teridian Semiconductor Corporation                                                                 Rev. 2.4
+
+
+                                                                                                                                                       78P2352
+                                                                                                                                            Dual Channel
+                                                                                                                           OC-3/ STM1-E/ E4 LIU
+TABLE OF CONTENTS (continued)
+ELECTRICAL SPECIFICATIONS ................................................................................. 22
+  ABSOLUTE MAXIMUM RATINGS..........................................................................................................22
+  RECOMMENDED OPERATING CONDITIONS ......................................................................................22
+  DC CHARACTERISTICS.........................................................................................................................22
+  ANALOG PINS CHARACTERISTICS.....................................................................................................23
+  DIGITAL I/O CHARACTERISTICS..........................................................................................................23
+        Pins of type CI, CIU, CID................................................................................................................23
+        Pins of type CIT ..............................................................................................................................23
+        Pins of type CIS ..............................................................................................................................23
+        Pins of type CO and COZ...............................................................................................................24
+        Pins of type PO...............................................................................................................................24
+        Pins of type PI.................................................................................................................................24
+        Pins of type OD...............................................................................................................................24
+  SERIAL-PORT TIMING CHARACTERISTICS........................................................................................25
+  TRANSMITTER TIMING CHARACTERISTICS ......................................................................................26
+  TIMING DIAGRAM: Transmitter Waveforms .......................................................................................26
+  REFERENCE CLOCK CHARACTERISTICS..........................................................................................27
+  RECEIVER TIMING CHARACTERISTICS..............................................................................................27
+  TIMING DIAGRAM: Receive Waveforms ............................................................................................27
+  TRANSMITTER SPECIFICATIONS FOR CMI INTERFACE .................................................................28
+  TRANSMITTER OUTPUT JITTER ..........................................................................................................33
+  RECEIVER SPECIFICATIONS FOR CMI INTERFACE (Transformer-coupled)..................................34
+  RECEIVER JITTER TOLERANCE ..........................................................................................................35
+  RECEIVER JITTER TRANSFER FUNCTION .........................................................................................37
+  CMI MODE LOSS OF SIGNAL CONDITION ..........................................................................................38
+APPLICATION INFORMATION .................................................................................... 38
+  EXTERNAL COMPONENTS ...................................................................................................................38
+  (CMI) TRANSFORMER SPECIFICATIONS............................................................................................38
+  THERMAL INFORMATION .....................................................................................................................38
+MECHANICAL SPECIFICATIONS ............................................................................... 39
+PACKAGE INFORMATION (pinout)................................................................................................ 41
+ORDERING INFORMATION ......................................................................................... 41
+Revision History ........................................................................................................................................42
+Page: 3 of 42                                      2006 Teridian Semiconductor Corporation                                                                 Rev. 2.4
+
+
+                                                                                                           78P2352
+                                                                                                    Dual Channel
+                                                                                          OC-3/ STM1-E/ E4 LIU
+FUNCTIONAL DESCRIPTION                                           The frequency of this reference input is controlled by
+                                                                 the rate selection and the CKSL control pin or
+The 78P2352 contains all the necessary transmit
+                                                                 register bit.
+and receive circuitry for connection between
+139.264Mbps and 155.52Mbps line interfaces and                                             Reference Frequency
+the digital universe. The chip is controllable through             CKSL pin
+                                                                                      SDO_E4 low       SDO_E4 high
+pins or serial port register settings.
+                                                                   Low                 19.44MHz         17.408MHz
+     In hardware mode (pin control) the SPSL pin                   Float               77.76MHz             N/A
+     must be low.                                                  High                155.52MHz        139.264MHz
+     In software mode (SPSL pin high), control pins                CKSL[1:0] bits       E4 bit = 0       E4 bit = 1
+     are disabled and the 78P2352 must be                          00                  19.44MHz         17.408MHz
+     configured via the 4-wire serial port.                        10                  77.76MHz             N/A
+MODE SELECTION                                                     11                  155.52MHz        139.264MHz
+The SDO_E4 pin or E4 register bit determines which
+rate the device (both channels) operates in                      RECEIVER OPERATION
+according to the table below. This control, combined             The receiver accepts serial data, at 155.52Mbps or
+with CKSL, also selects the global reference clock               139.264Mbps from the RXxP/N inputs. In CMI mode,
+frequency.                                                       the input is differentially terminated with 75Ω and
+  Rate                      SDO_E4 pin       E4 bit              transformer-coupled to a coaxial connector. In Fiber
+                                                                 (NRZ) mode, the input is differentially terminated
+  E4                        High             1
+                                                                 with 100Ω and AC-coupled to an optical transceiver
+  STM-1, STS-3, OC-3        Low              0
+                                                                 module. For board designs utilizing both coax and
+The SEN_CMI pin or CMI register bit enables the                  fiber media options, an analog switch or mechanical
+CMI encoder/decoder and selects one of two media                 relay is required to switch between the different
+for reception and transmission: 75Ω coaxial cable in             terminations and media paths.
+CMI mode or optical fiber in Fiber (NRZ) mode.                   The CMI signal first enters an AGC and adaptive
+Independent channel operation for media type is                  equalizer designed to overcome inter-symbol
+available with register controls only.                           interference caused by long cable lengths. The
+  Media (coding)            SEN_CMI pin      CMI bit             variable gain differential amplifier automatically
+                                                                 controls the gain to maintain a constant voltage level
+  75Ω Coax (CMI)            High             1
+                                                                 output regardless of the input voltage level. Note
+  Fiber (NRZ)               Low              0                   that in Fiber (NRZ) mode, the input signals bypass
+The SDI_PAR pin or PAR register bit selects the                  the adaptive equalizer.
+interface to the framer to be 4-bit parallel CMOS or             The outputs of the data comparators are connected
+serial LVPECL.        For each interface there are               to the clock recovery circuits. The clock recovery
+different transmit timing modes available. See                   system employs a Delay Locked Loop (DLL), which
+TRANSMITTER OPERATION section for more info.                     uses a reference frequency derived from the clock
+REFERENCE CLOCK                                                  applied to the CKREFP/N pins.
+The 78P2352 requires a reference clock supplied to               In serial mode, the clock and data are decoded and
+the CKREFP/N pins. This reference clock is used                  transmitted through the LVPECL drivers. In parallel
+for clock recovery in the Rx DLL and Tx DLL. It is               mode, the data is decoded and converted into four
+also used for transmit re-timing in the synchronous              bit parallel segments before being transmitted
+transmit modes.        Refer to the TRANSMITTER                  through the CMOS drivers. Note that in Fiber (NRZ)
+OPERATION section for timing requirements during                 mode, the CMI decoder is bypassed.
+synchronous (re-timing) transmit modes.                          Receiver Monitor Mode
+For reference frequencies of 77.76MHz or lower, the              In CMI mode, the SCK_MON pin or MONx register
+device accepts a single ended CMOS input at                      bit enables the receiver’s monitor mode which adds
+CKREFP (with CKREFN grounded). For reference                     approximately 20dB of flat gain to the receive signal
+frequencies of 139.264 or 155.52MHz, the device                  before equalization. Rx Monitor Mode can handle
+accepts a differential LVPECL clock input at                     20dB of flat loss typical of monitoring points with up
+CKREFP/N.                                                        to 6dB of cable loss. Note that Loss of Signal
+                                                                 detection is disabled during Rx Monitor Mode.
+Page: 4 of 42                             2006 Teridian Semiconductor Corporation                              Rev. 2.4
+
+
+                                                                                                                                       78P2352
+                                                                                                                            Dual Channel
+                                                                                                       OC-3/ STM1-E/ E4 LIU
+Receive Loss of Signal                                          Each of the serial NRZ transmit timing modes can be
+The 78P2352 includes a Loss of Signal (LOS)                     configured in HW mode or SW mode as shown in
+detector. When the peak value of the received CMI               the table below.
+signal is less than approximately 19dB below
+nominal for approximately 110 UI, Receive Loss of                                        HW Control Pins SW Control Bits
+                                                                 Serial Mode
+Signal is asserted. The Rx LOS signal is cleared                                         SDI_PAR            CKMODE             PAR       SMOD[1:0]
+when the received signal is greater than                          Synchronous
+approximately 18dB below nominal for 110 UI.                                                 Low                Low               0          00
+                                                                  clock + data
+In ECL mode, the LOSx signal will be asserted when                Synchronous
+                                                                                             Low             Floating             0          10
+                                                                  data only
+there are no transitions for longer than 2.3µs. The
+signal is cleared when there are more than 4                      Plesiochronou
+                                                                                             Low                High              0          01
+                                                                  s data only
+transitions in 32 UI. It is generally recommended to
+use the LOS status signal from the optical                        Loop-timing                 n/a                n/a              X          11
+transceiver module.
+During Rx LOS conditions, the receive clock will                Synchronous (Re-timing) Tx Serial Modes
+remain on the last selected phase tap of the Rx DLL             In Figure 1, serial NRZ transmit data is input to
+outputting a stable clock while the receive data                SIDxP/N pins at LVPECL levels. By default, the data
+outputs are squelched and held at logic ‘0’.                    is latched in on the rising edge of SICKxP. An
+                                                                integrated FIFO decouples the on chip and off chip
+     Note: Rx Loss of Signal detection is disabled              clocks and re-clocks the data using a clean
+     during Local Loopback and Receive Monitor                  synthesized clock generated from the provided
+     Modes.                                                     reference clock. As such, the SICKxP/N clock
+Receive Loss of Lock                                            provided by the framer/mapper IC for both
+The 78P2352 includes an optional Receiver Loss of               channels must be source synchronous with the
+Lock detector that will flag if the recovered Rx clock          provided reference clock when the FIFO is used.
+frequency differs from the reference clock by more                   System Reference Clock
+than ±100ppm in an interval greater than 420µs.
+This condition is cleared when the frequencies are                                       NRZ
+                                                                                                               CKREFP/N
+                                                                                                                                      CMI         Coax
+less than ±100ppm off for more than 500µs.                                            140 / 155 MHz
+                                                                                                    SIxDP/N
+                                                                                                                            CMIxP/N        XFMR
+                                                                                                    SIxCKP/N
+                                                                     Framer/                                      TDK
+     Notes:                                                          Mapper              NRZ                   78P2352
+     1. During Rx Loss of Signal (RLOS), the Rx                                       140 / 155 MHz
+                                                                                                    SOxCKP/N
+                                                                                                    SOxDP/N
+                                                                                                                             RXxP/N
+                                                                                                                                      CMI
+                                                                                                                                           XFMR
+                                                                                                                                                  Coax
+         Loss of Lock indicator is undefined and may
+         report either status.
+                                                                     Figure 1: Synchronous clock and data available
+     2. For reliable operation, the LOLOR bit in the                            (Tx CDR bypassed, FIFO enabled)
+         Signal Control register should be toggled
+         upon power-up and configuration.                       If an off-chip serial transmit clock is not available, as
+                                                                in Figure 2, the 78P2352 can recover a Tx clock
+                                                                from the serial NRZ data input and pass the data
+TRANSMITTER OPERATION                                           through the clock decoupling FIFO. The data is then
+                                                                re-clocked or re-timed using a clean synthesized
+At the media interface, the transmit driver generates           clock generated from the provided reference clock.
+an analog signal for transmission through either a              In this mode, the NRZ transmit source data for both
+transformer and 75Ω coaxial cable or directly to a              channels must be source synchronous with the
+fiber optics transceiver for electrical to optical              reference clock applied at CKREFP/N.
+conversion.
+                                                                     System Reference Clock
+At the host interface, the 78P2352 provides a
+number interface options for compatibility with most                                                               CKREFP/N
+off-the-shelf framers and custom ASICs.               A                                     NRZ
+                                                                                                        SIxDP/N               CMIxP/N
+                                                                                                                                       CMI
+                                                                                                                                             XFMR
+                                                                                                                                                    Coax
+selectable 4-bit parallel or nibble interface is                     Framer/                                        TDK
+                                                                                            NRZ
+available with both slave or master timing options as                Mapper                             SOxCKP/N 78P2352
+                                                                                        140 / 155 MHz                                  CMI          Coax
+well a serial LVPECL interface with various timing                                                      SOxDP/N                RXxP/N        XFMR
+recovery modes.
+                                                                                 Figure 2: Synchronous data only
+                                                                                  (Tx CDR enabled, FIFO enabled)
+Page: 5 of 42                            2006 Teridian Semiconductor Corporation                                                             Rev. 2.4
+
+
+                                                                                                                                                    78P2352
+                                                                                                                                              Dual Channel
+                                                                                                                             OC-3/ STM1-E/ E4 LIU
+Plesiochronous Tx Serial Mode                                                          Reference
+                                                                                         Clock
+Figure 3 represents a common condition where a
+serial transmit clock is not available and/or the data                                                                         CKREFP/N
+is not source synchronous to the reference clock                                                   4-bit CMOS TTL    PIx[3:0]D
+                                                                                                                                        CMIxP/N
+                                                                                                                                                CMI
+                                                                                                                                                     XFMR
+                                                                                                                                                           Coax
+input. In this mode, the 78P2352 will recover a
+                                                                                                                     PIxCK
+                                                                                                        34/39 MHz
+                                                                                        Framer/                                   TDK
+transmit clock from the serial plesiochronous data                                      Mapper       4-bit CMOS TTL  POx[3:0]D
+                                                                                                                               78P2352
+                                                                                                                                                CMI        Coax
+and bypass the internal FIFO and re-timing block.                                                       34/39 MHz
+                                                                                                                     POxCK               RXxP/N      XFMR
+This mode is commonly used for mezzanine cards,
+modules, and any application where the reference
+clock cannot always be synchronous to the transmit                                                       Figure 4: Slave Parallel Mode
+source clock/data.                                                                     Reference
+                                                                                         Clock
+    Reference
+      Clock
+                                                       XO                                                                      CKREFP/N
+                                                                                                   4-bit CMOS TTL    PIx[3:0]D                  CMI        Coax
+                                             CKREFP
+                                                                                                                     PTOxCK
+                                                                                                                                        CMIxP/N      XFMR
+                                                                                                        34/39 MHz
+                      NRZ                                       CMI         Coax        Framer/                                    TDK
+                                  SIxDP/N              CMIxP/N       XFMR
+                                                                                        Mapper        4-bit CMOS TTL POx[3:0]D
+                                                                                                                                78P2352
+                                                                                                                                                CMI        Coax
+     Framer/          NRZ
+                                               TDK                                                                   POxCK               RXxP/N      XFMR
+     Mapper                       SOxCKP/N  78P2352                                                     34/39 MHz
+                    140 / 155 MHz                               CMI         Coax
+                                  SOxDP/N               RXxP/N       XFMR
+                                                                                                       Figure 5: Master Parallel Mode
+                                                                                      Transmit FIFO Description
+              Figure 3: Plesiochronous; data only                                     Since the reference clock and transmit clock/data go
+               (Tx CDR enabled, FIFO bypassed)                                        through different delay paths, it is inevitable that the
+                                                                                      phase relationship between the two clocks can vary
+Synchronous Parallel Modes                                                            in a bounded manner due to the fact that the
+In parallel modes, 4-bit CMOS data segments are                                       absolute delays in the two paths can vary over time.
+                                                                                      The transmit FIFO allows long-term clock phase drift
+input to the chip with a 34.816MHz (E4 ÷ 4) or
+                                                                                      between the Tx clock and system reference clock,
+38.88MHz (STM1 ÷ 4) synchronous clock. These
+                                                                                      not exceeding +/- 25.6ns, to be handled without
+inputs are re-timed in a 4x8 clock decoupling FIFO
+                                                                                      transmit error. If the clock wander exceeds the
+and then to a serializer for transmission. Because
+                                                                                      specified limits, the FIFO will over or under flow, and
+the data is passed through the FIFO and re-timed
+                                                                                      the FERRx register signal will be asserted. This
+using a synthesized clock, the transmit nibble clock
+                                                                                      signal can be used to trigger an interrupt. This
+and data for both channels must be source
+                                                                                      interrupt event is automatically cleared when a FIFO
+synchronous to the provided reference clock.
+                                                                                      Reset (FRSTx) pulse is applied, and the FIFO is re-
+For maximum compatibility with legacy ASICs, the                                      centered.
+78P2352 can operate in both slave and master clock
+                                                                                             Notes:
+modes as shown in Figures 4 and 5 respectively.
+                                                                                             1) External remote loopbacks (i.e. loopback
+      Note: A loop-timing mode is also available to                                              within framer) are not possible in
+      allow external remote loopbacks (i.e. line                                                 synchronous operation (FIFO enabled)
+      loopback in framer). In this mode, the FIFO is                                             unless the data is re-justified to be
+      still enabled, but the transmit data will be re-                                           synchronous to the system reference clock
+      timed using the recovered receive clock                                                    or the 78P2352 is configured for loop-timing.
+  Parallel         HW Control Pins                     SW Control Bits                       2) Most E4 applications will not allow the use of
+  Mode                                                                                           the dual channel 78P2352 as each channel
+                  SDI_PAR         CKMODE               PAR          PMODE
+                                                                                                 is asynchronous to each other. Teridian
+  Slave              High             Low                 1            0                         recommends using the single channel
+                                                                                                 78P2351 if one cannot control the E4 timing
+  Slave +
+                     High             Float               1            0
+                                                                                                 reference for each channel.
+  *Loop-timing
+                                                                                             3) During IC power-up or transmit power-up,
+                                                                                                 the clocks going to the FIFO may not be
+  Master             High             High                1            1
+                                                                                                 stable and cause the FIFO to overflow or
+*To enable Loop-timing                     in      software      mode      set                   underflow. As such, the FIFO should be
+SMOD[1:0]=11                                                                                     manually reset using FRST anytime the
+                                                                                                 transmitter is powered-up.
+Page: 6 of 42                                                  2006 Teridian Semiconductor Corporation                                                   Rev. 2.4
+
+
+                                                                                                                                                                   78P2352
+                                                                                                                                                   Dual Channel
+                                                                                                                         OC-3/ STM1-E/ E4 LIU
+Transmit Driver                                                    POWER-DOWN FUNCTION
+In CMI (electrical) mode, the CMIxP/N pins are                     Power-down controls are provided to allow the
+biased and terminated off-chip. They interface to                  78P2352 to be shut off. Transmit and receive
+75Ω coaxial cable through a 1:1 wideband                           power-down can be set independently through SW
+transformer and coaxial RF connectors. Reference                   control. Total power-down is achieved by powering
+application notes for schematic and layout                         down both the transmitter and receiver.
+guidelines.
+                                                                         Note: The serial interface and configuration
+The transmitter encodes the data using CMI line                          registers are not affected by power-down.
+coding and shapes an analog signal to meet the
+appropriate ITU-T G.703 template. The CMI outputs                  In HW mode, both transmitters can also be globally
+are tri-stated during transmit disable and transmit                powered down using the TXPD control pin.
+power-down for redundancy applications and power-                  LOOPBACK MODES
+savings.
+                                                                   In SW mode, LLBKx and RLBKx bits in the Signal
+     Note: To avoid reflections causing unwanted                   Control Register are provided to activate the local
+     board noise, it’s recommended to power-down                   and remote loopback modes respectively.
+     unused transmit ports that are not terminated
+                                                                   In HW mode, the LPBKx pins can be used to
+     with cable to an Rx input port.
+                                                                   activate local and remote analog loopback modes as
+When the CMI pin is low, the chip is in Fiber                      shown in the table below.
+(NRZ pass-through) mode and interfaces directly to
+an optical transceiver module. The ECLxP/N pins                        LPBK pin                      Analog Loopback Mode
+are internally biased and output NRZ data at                                   Low                   Normal operation
+LVPECL levels. The CMI driver, encoder and                                                           Remote (analog) Loopback:
+decoder are disabled in Fiber (NRZ) mode.                                                            Recovered receive clock and data
+Clock Synthesizer                                                             Float                  looped back directly to the transmit
+The transmit clock synthesizer is a low-jitter DLL that                                              driver. The CMI decoder and most of
+generates a 278.528/311.04 MHz clock for the CMI                                                     transmit path is bypassed.
+encoder. It is also used in both the receive and                                                     Local (analog) Loopback:
+transmit sides for clock and data recovery.                                   High                   Transmit clock and data looped back to
+This 2x line rate clock is also available at the                                                     receiver at the analog media interface.
+TXCKxP/N pins for downstream synchronization or
+system debug.                                                                               Lock Detect
+                                                                                                                            EACH CHANNEL: Tx
+                                                                                                                                                                                         ECLxP/N
+                                                                                             Tx CDR                                                                                      TXxCKP/N
+Transmit Backplane Equalizer
+                                                                           SIxDP/N                                      FIFO                 CMI
+                                                                                                                                           Encoder
+                                                                         SIxCKP/N
+An optional fixed LVPECL equalizer is integrated in                          PIxCK
+                                                                                                                                                                                          CMIxP/N
+the transmit path for architectures that use LIUs on                      PIx[3:0]D
+                                                                           PTOxCK
+                                                                                                                     PMOD, SMOD[1:0], PAR
+                                                                                                                                                                            RLBK
+active interface cards. The fixed equalizer can
+compensate for up to 1.5m of FR4 trace and can be                       SOxCKP/N
+                                                                          SOxDP/N                           CMI
+enabled by the TXOUT1 pin or TXEQ bit as follows:                        POx[3:0]D
+                                                                                                           Decoder
+                                                                                                                          Rx CDR
+                                                                                                                                                        Adaptive
+                                                                                                                                                          Eq.
+                                                                                                                                                                                           RXxP/N
+                                                                                                                        Lock Detect
+                                                                            POxCK
+                                                                                                                                                                 LOS Detect
+  TXOUT1 pin           TXEQ bit         Tx Equalizer                                                                                   CMI
+                                                                                                                             EACH CHANNEL: Rx
+                                                                                                                                                                              LLBK
+  Low                      1               Enabled                                        Figure 6: Local (Analog) Loopback
+  Float                    0               Disabled
+Transmit Loss of Lock                                                               Lock Detect
+                                                                                                                     EACH CHANNEL: Tx
+In transmit modes using the integrated CDR, the                  SIxDP/N             Tx CDR                     FIFO
+                                                                                                                                                                                 ECLxP/N
+                                                                                                                                                                                 TXxCKP/N
+78P2352 will declare a loss of lock condition when
+                                                                                                                                     CMI
+                                                                                                                                   Encoder
+                                                                SIxCKP/N
+there is no valid signal detected at the SIxDP/N data
+                                                                                                                                                                                 CMIxP/N
+                                                                    PIxCK
+inputs.                                                          PIx[3:0]D
+                                                                 PTOxCK
+                                                                                                             PMOD, SMOD[1:0], PAR
+                                                                                                                                                                     RLBK
+     Note: The Tx LOL indicator is invalid and                 SOxCKP/N
+     undefined when the parallel (nibble) interface is          SOxDP/N
+                                                                POx[3:0]D
+                                                                                                       CMI
+                                                                                                    Decoder
+                                                                                                                   Rx CDR
+                                                                                                                                               Adaptive                            RXxP/N
+     selected.
+                                                                                                                                                 Eq.
+                                                                                                                Lock Detect
+                                                                  POxCK
+                                                                                                                                                         LOS Detect
+                                                                                                                               CMI                                      LLBK
+                                                                                                                      EACH CHANNEL: Rx
+                                                                                     Figure 7: Remote (Analog) Loopback
+Page: 7 of 42                            2006 Teridian Semiconductor Corporation                                                                                             Rev. 2.4
+
+
+                                                                                                                                                   78P2352
+                                                                                                                                             Dual Channel
+                                                                                                                                 OC-3/ STM1-E/ E4 LIU
+In SW mode only, a Full Remote (digital) Loopback                                                     SERIAL CONTROL INTERFACE
+bit FLBK is also available in the Advanced Tx                                                         The serial port controlled registers allows a generic
+Control register. This loopback exercises the entire                                                  controller to interface with the 78P2352. It is used
+Rx and Tx paths of the 78P2352 including the Tx                                                       for mode settings, diagnostics and test, retrieval of
+clock recovery unit. As such, the user must enable                                                    status and performance information, and for on-chip
+either Serial Plesiochronous or Serial Loop-timing                                                    fuse trimming during production test. The SPSL pin
+transmit modes to utilize the Full Remote (digital)                                                   must be high in order to use the serial port.
+Loopback.
+                                            EACH CHANNEL: Tx
+                                                                                                      The serial interface consists of four pins: Serial Port
+                                                                                                      Enable (SEN_CMI), Serial Clock (SCK_MON), Serial
+                 Lock Detect
+                                                                                            ECLxP/N
+   SIxDP/N        Tx CDR                                                                    TXxCKP/N
+                                                                                                      Data In (SDI_PAR), and Serial Data Out (SDO_E4).
+                                       FIFO                CMI
+                                                         Encoder
+  SIxCKP/N
+                                                                                            CMIxP/N
+      PIxCK
+   PIx[3:0]D
+                                                                                                            The SEN_CMI pin initiates the read and write
+                                     PMOD, SMOD[1:0], PAR
+   PTOxCK                                                                            RLBK                   operations. It can also be used to select a
+ SOxCKP/N
+                                                                                                            particular device allowing SCK_MON, SDI_PAR
+  SOxDP/N
+  POx[3:0]D
+                               CMI
+                             Decoder
+                                         Rx CDR
+                                                                 Adaptive                    RXxP/N
+                                                                                                            and SDO_E4 to be bussed together.
+                                                                   Eq.
+    POxCK
+                                       Lock Detect
+                                                      CMI
+                                                                          LOS Detect
+                                                                                       LLBK
+                                                                                                            SCK_MON is the clock input that times the data
+                                             EACH CHANNEL: Rx                                               on SDI_PAR and SDO_E4. Data on SDI_PAR
+                 Figure 8: Remote (Digital) Loopback
+                                                                                                            is latched in on the rising-edge of SCK_MON,
+                                                                                                            and data on SDO_E4 is clocked out using the
+                                                                                                            falling edge of SCK_MON.
+                                                                                                            SDI_PAR is used to insert mode, address, and
+INTERNAL POWER-ON RESET
+                                                                                                            register data into the chip. Address and Data
+Power-On Reset (POR) function is provided on chip.                                                          information are input least significant bit (LSB)
+Roughly 50µs after Vcc reaches 2.4V at power up, a                                                          first. The mode and address bit assignment and
+reset pulse is internally generated. This resets all                                                        register table are shown in the following section.
+registers to their default values as well as all state
+                                                                                                            SDO_E4 is a tri-state capable output. It is used
+machines within the transceiver to known initial
+                                                                                                            to output register data during a read operation.
+values. The reset signal is also brought out to the
+                                                                                                            SDO_E4 output is normally high impedance,
+PORB pin. The PORB pin is a special function
+                                                                                                            and is enabled only during the duration when
+analog pin that allows for the following:
+                                                                                                            register data is being clocked out. Read data is
+•           Override the internal POR signal by driving in                                                  clocked out least significant bit (LSB) first.
+            an external active low reset signal;                                                      If SDI_PAR coming out of the micro-controller chip is
+•           Use the internally generated POR signal to                                                also tri-state capable, SDI_PAR and SDO_E4 can
+            trigger other resets;                                                                     be connected together to simplify connections. The
+•           Add external capacitor to slow down the                                                   maximum clock frequency for register access is
+            release of power-on reset (approximately 8µs                                              20MHz.
+            per nF added).                                                                            PROGRAMMABLE INTERRUPTS
+NOTE: Do not pull-up the PORB pin to Vcc or drive                                                     In addition to the receiver LOS and LOL status pins,
+this pin high during power-up. This will prevent the                                                  the 78P2352 provides a programmable interrupt for
+internal reset generator from resetting the entire chip                                               each transmitter.
+and may result in errors.
+                                                                                                      In HW control mode, the default events that trigger
+                                                                                                      the Tx interrupt is a transmit Loss of Lock (TXLOL)
+                                                                                                      or FIFO error (FERR).
+Page: 8 of 42                                                                  2006 Teridian Semiconductor Corporation                                    Rev. 2.4
+
+
+                                                                                                                 78P2352
+                                                                                                         Dual Channel
+                                                                                               OC-3/ STM1-E/ E4 LIU
+REGISTER DESCRIPTION
+  REGISTER ADDRESSING
+    Address Bits      Bit 7      Bit 6         Bit 5        Bit 4       Bit 3       Bit 2     Bit 1     Bit 0
+                                                                                                        Read/
+                                   Port Address                                  Sub-Address
+                                                                                                        Write
+     Assignment      PA[3]       PA[2]        PA[1]        PA[0]        SA[2]       SA[1]     SA[0]     R/W*
+  REGISTER TABLE
+a) PA[3:0] = 0 : Global Registers
+  Sub      Reg.
+                    Description         Bit 7        Bit 6        Bit 5      Bit 4      Bit 3     Bit 2    Bit 1     Bit 0
+  Addr    Name
+          MSCR                           E4             --        PAR     CKSL[1]     CKSL[0]       --       --     SRST
+    0            Master Control
+          (R/W)                         <0>           <0>         <0>        <X>         <X>      <X>      <X>       <0>
+          INTC                        INPOL             --         --         --          --        --   MTLOL     MFERR
+    1            Interrupt Control
+          (R/W)                         <0>           <0>         <1>        <0>         <0>      <X>      <1>       <1>
+            --                            --            --         --         --          --        --       --       --
+    2            Reserved
+          (R/W)                         <X>          <X>          <X>        <X>         <X>      <X>      <X>       <0>
+b) PA[3:0] = 1, 2 : Port-Specific Registers
+  Sub      Reg.
+                    Description        Bit 7         Bit 6        Bit 5      Bit 4      Bit 3     Bit 2    Bit 1     Bit 0
+  Addr    Name
+    0     MDCR   Mode Control        PDTX          PDRX        PMODE      SMOD[1] SMOD[0]        MON         --       --
+          (R/W)                        <0>           <0>          <X>        <X>         <X>      <0>      <0>       <1>
+    1     SGCR   Signal Control    TCMIINV       RCMIINV        LOLOR       RLBK        LLBK   RCLKP     TCLKP      FRST
+          (R/W)                        <0>           <0>          <0>        <0>         <0>      <0>      <0>       <0>
+    2     ACR1   Advanced Tx            --             --          --         --          --        --     TPK      TXEQ
+          (R/W)  Control 1             <0>           <0>          <0>        <0>         <0>      <0>      <0>       <0>
+    3     ACR0   Advanced Tx            --             --          --         --          --    BST[1]   BST[0]     FLBK
+          (R/W)  Control 0             <1>           <0>          <1>        <0>         <1>      <0>      <0>       <0>
+    4     MCR2                         CMI             --          --         --          --        --       --       --
+                 Mode Control 2
+          (R/W)                        <1>           <X>          <X>        <0>         <0>      <0>      <0>       <0>
+    5     STAT   Status Monitor         --             --          --      RXLOS      RXLOL         --   TXLOL      FERR
+          (R/C)                        <X>           <X>          <X>        <X>         <X>      <X>      <X>       <X>
+   6-7      --   Reserved               --             --          --         --          --        --       --       --
+Page: 9 of 42                                2006 Teridian Semiconductor Corporation                                Rev. 2.4
+
+
+                                                                                                 78P2352
+                                                                                          Dual Channel
+                                                                               OC-3/ STM1-E/ E4 LIU
+REGISTER DESCRIPTION (CONTINUED)
+LEGEND
+ TYPE      DESCRIPTION                         TYPE      DESCRIPTION
+  R/O      Read only                            R/W      Read or Write
+   R/C     Read and Clear
+GLOBAL REGISTERS
+ADDRESS 0-0: MASTER CONTROL REGISTER
+                           DFLT
+ BIT      NAME     TYPE         DESCRIPTION
+                          VALUE
+                                Line Rate Selection:
+                                Selects the line rate of all channels as well as the input clock frequency
+   7        E4       R/W     0  at the CKREFP/N pins.
+                                    0: OC-3, STS-3, STM-1 (155.52MHz)
+                                    1: E4 (139.264MHz)
+   6         --      R/W     0  Unused
+                                Serial/Parallel Interface Selection:
+                                Selects the interface to the framer.
+   5       PAR       R/W     0
+                                    0: Serial LVPECL
+                                    1: 4-bit Parallel CMOS
+                                Reference Clock Frequency Selection:
+                                Selects the reference clock frequency input at CKREFP/N pins.
+                                    11: 155.52MHz / 139.264MHz (differential LVPECL)
+          CKSL
+  4:3                R/W    XX      10: 77.76MHz / NA (single-ended CMOS)
+           [1:0]
+                                    00: 19.44MHz / 17.408MHz (single-ended CMOS)
+                                Secondary values correspond to E4 frequencies. Default values depend
+                                on the CKSL pin selection upon reset.
+  2:1        --      R/W    X0  Reserved.
+                                Register Soft-Reset:
+   0      SRST       R/W     0  When this bit is set, all registers are reset to their default values. This
+                                register bit is self-clearing.
+Page: 10 of 42                  2006 Teridian Semiconductor Corporation                              Rev. 2.4
+
+
+                                                                                                      78P2352
+                                                                                                Dual Channel
+                                                                                       OC-3/ STM1-E/ E4 LIU
+REGISTER DESCRIPTION (CONTINUED)
+ADDRESS 0-1: INTERRUPT CONTROL REGISTER
+This register selects the events that would cause the interrupt pins to be activated. User may set as many bits as
+required.
+                              DFLT
+  BIT     NAME       TYPE               DESCRIPTION
+                             VALUE
+                                        Interrupt Pin Polarity Selection:
+   7      INPOL       R/W        0      0 : Interrupt output is active-low (default)
+                                        1 : Interrupt output is active-high
+  6:2        --       R/W     01000     Reserved for future use
+                                        TXLOL Error Mask (active low):
+                                        Gates the TXLOL register bit to the INTTXxB interrupt pin.
+   1      MTLOL       R/W        1
+                                            0: Mask
+                                            1: Pass
+                                        FIERR Error Mask (active low):
+                                        Gates the respective FIERR register bit to the INTTXxB interrupt pin.
+   0     MFERR        R/W        1
+                                            0: Mask
+                                            1: Pass
+ADDRESS 0-2: RESERVED
+                                  DFLT
+  BIT      NAME      TYPE                     DESCRIPTION
+                                VALUE
+  7:0         --      R/W     XXXXXXX0        Reserved.
+Page: 11 of 42                           2006 Teridian Semiconductor Corporation                            Rev. 2.4
+
+
+                                                                                                          78P2352
+                                                                                                   Dual Channel
+                                                                                        OC-3/ STM1-E/ E4 LIU
+REGISTER DESCRIPTION (CONTINUED)
+PORT-SPECIFIC REGISTERS
+For PA[3:0] = 1-2 = N only. Accessing a register with port address greater than 2 constitutes an invalid command,
+and the read/write operation will be ignored.
+ADDRESS N-0: MODE CONTROL REGISTER
+                              DFLT
+ BIT     NAME       TYPE                DESCRIPTION
+                             VALUE
+                                        Transmitter Power-Down:
+  7      PDTX        R/W         0          0 : Normal Operation
+                                            1 : Power-Down. CMI Transmit output is tri-stated.
+                                        Receiver Power-Down:
+  6      PDRX        R/W         0          0 : Normal Operation
+                                            1 : Power-Down
+                                        Parallel Mode Interface Selection:
+                                          When PAR=0, PMODE is invalid and defaults to logic ‘1’;
+                                          When PAR=1, (Master Control Register: bit 5), PMODE selects the
+                                          source of the transmit parallel clock, either taken from the framer
+  5     PMODE        R/W         X
+                                          externally or generated internally. Default value is determined by
+                                          CKMODE pin setting upon power up or reset.
+                                               0: Slave Timing. PIxCK clock input to the transmitter
+                                               1: Master Timing. PTOxCK clock output from the transmitter
+                                        Serial Mode Interface Selection:
+                                          When PAR=0 (Master Control Register: bit 5), SMOD[1:0] configures
+                                          the transmitter’s system interface. Default values determined by
+                                          CKMODE pin setting upon power up or reset.
+                                          SMOD[1] SMOD[0]
+  4    SMOD[1]       R/W         X          0           0     Synchronous clock and data are passed through a
+                                                              FIFO. The CDR is bypassed.
+                                            1           0     Synchronous data is passed through the CDR and
+                                                              then through the FIFO.
+                                            0           1     Plesiochronous data is passed through the CDR to
+                                                              recover a clock. FIFO is bypassed because the
+                                                              data is not synchronous with the reference clock.
+                                            1           1     Loop Timing Mode Enable: The recovered receive
+                                                              clock is used as the reference for the transmit DLL
+                                                              and FIFO.
+  3    SMOD[0]       R/W         X        When PAR=1 (Master Control Regsiter: bit 5), setting SMOD[1:0] = 11
+                                          will enable Loop Timing Mode. Default values are determined by
+                                          CKMODE pin setting upon power up or reset as follows:
+                                                 CKMODE Low          SMOD[1:0] default = 00 (no effect)
+                                                 CKMODE Float        SMOD[1:0] default = 11 (loop-timing enable)
+                                                 CKMODE High          SMOD[1:0] default = 01 (no effect)
+                                        Receive Monitor Mode Enable:
+                                            0: Normal Operation
+  2       MON        R/W         0
+                                            1: Adds 20dB of flat gain to the receive signal before equalization
+                                        NOTE: Monitor mode is only available in CMI mode.
+ 1:0        --       R/W        00      Reserved
+Page: 12 of 42                          2006 Teridian Semiconductor Corporation                               Rev. 2.4
+
+
+                                                                                                 78P2352
+                                                                                           Dual Channel
+                                                                               OC-3/ STM1-E/ E4 LIU
+REGISTER DESCRIPTION (CONTINUED)
+ADDRESS N-1: SIGNAL CONTROL REGISTER
+                      DFLT
+ BIT     NAME  TYPE         DESCRIPTION
+                     VALUE
+                            Transmit CMI Inversion:
+                            This bit will flip the polarity of the transmit CMI data outputs at CMIxP/N.
+  7    TCMIINV  R/W    0    For debug use only.
+                                 0: Normal
+                                 1: Invert
+                            Receive CMI Inversion:
+                            This bit will flip the polarity of the receive CMI data inputs at RXxP/N. For
+  6    RCMIINV  R/W    0    debug use only.
+                                 0: Normal
+                                 1: Invert
+                            Receive Loss of Lock/Signal Override:
+                            When high, the RXLOL and RXLOS signals will always remain low.
+                                 0: Normal
+  5     LOLOR   R/W    0         1: Forces LOS and LOL outputs to be low and resets counters
+                            NOTE: For reliable operation of the Rx LOL detection circuitry, one must
+                            manually reset the LOL counter by toggling this bit upon power-up or
+                            initialization.
+                            Analog Loopback Selection:
+                            RLBK LLBK
+  4      RLBK   R/W    0
+                              0          0      Normal operation
+                              1          0      Remote Loopback Enable: Recovered receive data
+                                                is looped back to the transmit driver for retransmission.
+  3       LLBK  R/W    0      0          1      Local Loopback Enable: The transmit data is
+                                                looped back and used as the input to the receiver.
+                            Receive Clock Inversion Select:
+                            This bit will invert the receive output clock.
+  2      RCLKP  R/W    0
+                                 0: Normal. Data clocked out on falling edge of receive clock.
+                                 1: Invert. Data clocked out on the rising edge of receive clock.
+                            Transmit Clock Inversion Select:
+                            This bit will invert the transmit input system clock.
+  1      TCLKP  R/W    0
+                                 0: Normal. Data is clocked in on rising edge of the transmit clock.
+                                 1: Invert. Data is clocked in on the falling edge of the transmit clock.
+                            FIFO Reset:
+                                 0: Normal operation
+                                 1: Reset FIFO pointers to default locations.
+  0      FRST   R/W    0    This reset should be initiated anytime the transmitter or IC powers up to
+                            ensure the FIFO is centered after internal VCO clocks and external
+                            transmit clocks are stable.
+                            *Not required for Plesiochronous Serial Mode
+Page: 13 of 42               2006 Teridian Semiconductor Corporation                                 Rev. 2.4
+
+
+                                                                                                   78P2352
+                                                                                            Dual Channel
+                                                                                 OC-3/ STM1-E/ E4 LIU
+REGISTER DESCRIPTION (CONTINUED)
+ADDRESS N-2: ADVANCED TRANSMIT CONTROL REGISTER 1
+                           DFLT
+ BIT     NAME     TYPE             DESCRIPTION
+                         VALUE
+  7:1        --    R/W   0000000   Reserved.
+                                   Transmit Fixed Equalizer Enable:
+                                   When enabled, compensates for between 0.75m and 1.5m of FR4 trace
+   0      TXEQ     R/W       0     to the serial LVPECL data inputs SIxDP/N
+                                        0: Normal Operation
+                                        1: Enable equalizer
+ADDRESS N-3: ADVANCED TRANSMIT CONTROL REGISTER 0
+                           DFLT
+ BIT      NAME      TYPE          DESCRIPTION
+                          VALUE
+  7:3         --     R/W   10101  Reserved.
+                                  Transmit Driver Amplitude Boost:
+                                  Adds roughly 5% or 10% of boost to the CMI output. Limits not tested
+                                  during production test.
+  2:1    BST[1:0]    R/W     00       00 : Normal amplitude
+                                      01 : 5% boost
+                                      10 : Reserved
+                                  11 : 10% boost
+                                  Full Remote (digital) Loopback Enable:
+                                  When enabled the recovered receive data is decoded and looped back
+                                  to the transmit clock recovery unit exercising the entire receive and
+   0       FLBK      R/W     0
+                                  transmit paths.
+                                  NOTE: Must be used in conjunction with Serial Plesiochronous Mode or
+                                  Serial Loop-Timing Mode.
+ADDRESS N-4: MODE CONTROL REGISTER 2
+                            DFLT
+ BIT      NAME      TYPE             DESCRIPTION
+                           VALUE
+                                     Line Interface Mode Selection:
+                                        0: Optical fiber (LVPECL, NRZ). CMI ENDEC and line driver are
+                                            disabled. Use RXxP/N and ECLxP/N pins for line interface.
+   7        CMI      R/W       1
+                                        1: Coaxial cable (CMI encoded). CMI ENDEC enabled. Optical
+                                            (NRZ) interface disabled. Use RXxP/N and CMIxP/N pins for
+                                            line interface.
+  6:0         --     R/W  XX00000    Reserved.
+Page: 14 of 42                    2006 Teridian Semiconductor Corporation                              Rev. 2.4
+
+
+                                                                                               78P2352
+                                                                                         Dual Channel
+                                                                              OC-3/ STM1-E/ E4 LIU
+REGISTER DESCRIPTION (continued)
+ADDRESS N-5: STATUS MONITOR REGISTER
+                        DFLT
+ BIT      NAME   TYPE        DESCRIPTION
+                       VALUE
+  7:5        --   R/C   XXX  Reserved.
+                             Receive Loss of Signal Indication:
+   4      RXLOS   R/C    X        0: Normal operation
+                                  1: Loss of signal condition detected
+                             Receive Loss of Lock Indication:
+                             This status bit is only defined during a valid input signal at RxP/N or
+                             when RXLOS=0
+   3      RXLOL   R/C    X
+                                  0: Normal operation
+                                  1: Recovered receive clock frequency differs from the reference by
+                                       more than +/- 100ppm.
+   2         --   R/C    X   Unused
+                             Transmit Loss of Lock Indication:
+                             This status bit is only defined and valid when using one of the serial
+   1      TXLOL   R/C    X   transmit modes utilizing the Tx CDR.
+                                  0: Valid transmit input signal detected at SIxDP/N
+                                  1: No valid signal detected at SIxDP/N
+                             Transmit FIFO Error Indication:
+                             This bit is set whenever the internal FERR signal is asserted, indicating
+                             that the FIFO is operating at its depth limit. It is reset to 0 when the
+   0       FERR   R/C    X   FRST pin is asserted.
+                                  0: Normal operation
+                                  1: Transmit FIFO phase error
+ADDRESS N-6, N-7: RESERVED
+                        DFLT
+ BIT      NAME   TYPE        DESCRIPTION
+                       VALUE
+  7:0     RSVD    R/O    0   Reserved for test.
+Page: 15 of 42               2006 Teridian Semiconductor Corporation                               Rev. 2.4
+
+
+                                                                                                                 78P2352
+                                                                                                          Dual Channel
+                                                                                             OC-3/ STM1-E/ E4 LIU
+  PIN DESCRIPTION
+LEGEND
+TYPE      DESCRIPTION                                           TYPE      DESCRIPTION
+          Analog Pin                                                      LVPECL-Compatible Differential Output
+  A                                                              PO
+          (Tie unused pins to ground)                                     (Tie unused pins to supply or leave floating)
+                                                                          CMOS Digital Output
+ CIT      3-State CMOS Digital Input                             CO
+                                                                          (Leave unused pins floating)
+          CMOS Digital Input                                              CMOS Tristate Digital Output
+  CI                                                             COZ
+          (Tie unused pins to ground)                                     (Leave unused pins floating)
+                                                                          Open-drain Digital Output
+ CIU      CMOS Digital Input w/ Pull-up                          OD
+                                                                          (Leave unused pins floating)
+ CID      CMOS Digital Input w/ Pull-down                         S       Supply
+          CMOS Schmitt Trigger Input
+ CIS                                                              G       Ground
+          (Tie unused pins to ground)
+          LVPECL-Compatible Differential Input
+  PI
+          (Tie unused pins to ground)
+TRANSMITTER PINS
+NAME              PIN       TYPE      DESCRIPTION
+PIx0D            31, 66               Transmit (Parallel Mode) Data Input:
+PIx1D            32, 65               Four-bit CMOS parallel (nibble) inputs. Data is latched in on the rising edge
+                               CI
+PIx2D            33, 64               (default) of the transmit parallel clock and serialized with the MSB (PIx3D)
+PIx3D            34, 63               transmitted first.
+                                      Transmit (Parallel Mode) Clock Input:
+PIxCK            30, 67       CIS     A 34.816 MHz (E4) or 38.88 MHz (STM1) CMOS clock input that must be
+                                      source synchronous with the reference clock supplied at the CKREFP/N pins.
+                                      Used only in Slave Parallel Mode and Loop-timing Parallel Mode.
+                                      Transmit (Parallel Mode) Clock Output:
+PTOxCK           35, 62       CO      A 34.816 MHz (E4) or 38.88 MHz (STM1) CMOS clock output that is
+                                      intended to latch in synchronous parallel data. Active during reset. Used only
+                                      in Master Parallel Mode (output disabled in all other transmit modes).
+                                      Transmit (Serial Mode) Data Input:
+SIxDP            10, 87
+                               PI     Differential NRZ data input. See Transmitter Operation section for more info
+SIxDN            11, 86
+                                      on different clocking/timing modes.
+                                      Transmit (Serial Mode) Clock Input:
+SIxCKP            7, 90
+                               PI     A 155.52MHz synchronous differential input clock used to clock in the serial
+SIxCKN            8, 89
+                                      NRZ data. By default, data is clocked in on the rising edge of SIxCKP.
+                                      Transmit (Serial Mode) CMI Data Output:
+CMIxP           121, 104              A CMI encoded data signal conforming to the relevant ITU-T G.703 pulse
+                               A      templates when properly terminated and transformer coupled to 75Ω cable.
+CMIxN           122, 103
+                                      Outputs are tri-stated when transmitter is disabled. Active, but undefined
+                                      during reset.
+                                      Transmit (Serial Mode) Clock Output:
+TXxCKP          124, 101
+                              PO      A 2x line rate LVPECL clock output used to clock out the transmit CMI data.
+TXxCKN          125, 100
+                                      Used for diagnostics or far end re-timing. Active during reset.
+                                      Transmit (Serial Mode) LVPECL Data Output:
+ECLxP           127, 98
+                              PO      Transmit NRZ data outputs used for interfacing with optical transceiver
+ECLxN           128, 97
+                                      modules when in Fiber (NRZ) mode.
+Page: 16 of 42                             2006 Teridian Semiconductor Corporation                                     Rev. 2.4
+
+
+                                                                                                  78P2352
+                                                                                           Dual Channel
+                                                                                OC-3/ STM1-E/ E4 LIU
+  PIN DESCRIPTION (CONTINUED)
+RECEIVER PINS
+NAME             PIN    TYPE DESCRIPTION
+                46, 51       Receive (Parallel Mode) Data Output:
+POx0D
+                45, 52       Recovered receive data deserialized into four-bit CMOS parallel (nibble)
+POx1D
+                         CO  outputs. The MSB (POx3D) is received first. Active, but undefined during
+POx2D           42, 55       reset.
+POx3D           41, 56       Note: During Loss of Signal conditions, data outputs are held low.
+                             Receive (Parallel Mode) Clock Output:
+                             A 34.816 MHz (E4) or 38.88 MHz (STM1) CMOS clock output generated by
+                             dividing down the recovered receive clock. By default, receive data is
+POxCK           38, 59   CO
+                             clocked out on the falling edge. Active during reset.
+                             Note: During Loss of Signal conditions, the clock will remain on the last
+                             divided down phase selection of the Rx DLL and output a steady clock.
+                             Receive (Serial Mode) Data Output:
+SOxDP           28, 69       Recovered receive serial NRZ data at LVPECL levels. Active, but undefined
+                         PO
+SOxDN           29, 68       during reset.
+                             Note: During Loss of Signal conditions, data outputs are held at logic 0.
+                             Receive (Serial Mode) Clock Output:
+                25, 72       Recovered receive serial clock. By default, recovered serial NRZ data is
+SOxCKP
+                         PO  clocked out the falling edge of SOxCKP. Active during reset.
+SOxCKN          26, 71
+                             Note: During Loss of Signal conditions, the clock will remain on the last
+                             phase selection of the Rx DLL and output a steady clock.
+                             Receiver CMI or LVPECL Input:
+RXxP           118, 107  A/
+                             The input is either transformer-coupled to coaxial cable for CMI data or AC-
+RXxN           119, 106  PI
+                             coupled at LVPECL levels to an optical transceiver module for NRZ data.
+Page: 17 of 42                    2006 Teridian Semiconductor Corporation                             Rev. 2.4
+
+
+                                                                                                            78P2352
+                                                                                                     Dual Channel
+                                                                                         OC-3/ STM1-E/ E4 LIU
+  PIN DESCRIPTION (CONTINUED)
+REFERENCE AND STATUS PINS
+Note: The LOSx, LOLx, and INTxXxB pins are configurable at final test (default open-drain outputs). If CMOS
+level outputs are required, please refer to alternate 70Pxxxx ordering numbers at the end of the data sheet.
+NAME              PIN      TYPE     DESCRIPTION
+                                    Reference Clock Input:
+                                    A required reference clock input used for clock/data recovery and frequency
+                                    synthesizer. Options include :
+CKREFP           111         PI/        • 139.264 MHz (E4) or 155.52 MHz (STM1) differential LVPECL clock
+CKREFN           110         CI            input at CKREFP/N
+                                        • 17.408 MHz (E4), 19.44 MHz (STM1), or 77.78 MHz (STM1) single-
+                                           ended CMOS clock input at CKREFP. Tie CKREFN to ground when
+                                           unused.
+LOS1              80        OD/     Receive Loss of Signal (active-high):
+LOS2              19        CO      See Receiver Loss of Signal description for conditions.
+                                    Receive Loss of Lock (active-high):
+LOL1              79        OD/
+                                    This condition is met when the recovered clock frequency differs from the
+LOL2              20        CO
+                                    reference clock frequency by more than +/- 100ppm.
+                                    Transmitter Fault Interrupt Flag (active low):
+                                    When a transmitter error event occurs (as defined in the Interrupt Control
+                  88        OD/     Register Description), the INTTXxB pin will change state to indicate an
+INTTX1B
+                                    interrupt. The interrupt is cleared by a read to the STAT Register, an issue
+INTTX2B            9        CO      of a FRSTx FIFO reset pulse (if the FIERRx signal caused the interrupt), or
+                                    when the TXLOL register bit transitions from high to low.
+                                    Note: The default interrupt condition is a loss of lock in the transmitter CDR.
+INTRX1B           70        OD/     Receiver Fault Interrupt Flag (active low):
+INTRX2B           27        CO      Reserved for future use.
+                                    Power-On Reset (active low):
+PORB              83         A
+                                    See Power-On Reset description on use of this pin.
+Page: 18 of 42                           2006 Teridian Semiconductor Corporation                               Rev. 2.4
+
+
+                                                                                                78P2352
+                                                                                          Dual Channel
+                                                                                 OC-3/ STM1-E/ E4 LIU
+  PIN DESCRIPTION (CONTINUED)
+CONTROL PINS
+NAME            PIN   TYPE DESCRIPTION
+                           FIFO Phase-Initialization Control:
+                           When asserted, the transmit FIFO pointers are reset to the respective
+                           “centered” states. Also resets the FIERR interrupt bit. De-assertion edge of
+                           FRSTx will resume FIFO operation.
+                               •   Low: Channel 1 FRST assertion
+FRST            78     CIT     •   Float: Normal operation
+                               • High: Channel 2 FRST assertion
+                           Because the internal VCO clock and off-chip transmit clocks may not be
+                           stable during transmit power-up, it is recommended to always reset the FIFOs
+                           after powering up the IC or the transmitter.
+                           Not valid during Plesiochronous Serial Mode.
+                           Analog Loopback Selection:
+                               •   Low: Normal operation
+               17, 18  CIT     •   Float: Remote Loopback Enable: Recovered receive data and clock
+LPBKx
+                                   are looped back to the transmitter for retransmission.
+                               •   High: Local Loopback Enable: The serial transmit data is looped back
+                                   and used as the input to the receiver.
+                           Clock Mode Selection:
+                           Selects the method of inputting transmit data into the chip. See
+                           TRANSMITTER OPERATION section for more information.
+                           In PARALLEL mode (SDI_PAR high):
+                               •   Low: Parallel transmit clock is input to the 78P2352.
+                               •   Float: Parallel transmit clock is input to the 78P2352. Loop-timing
+                                          mode enabled.
+CKMODE          15     CIT     • High: Parallel transmit clock is output from the 78P2352
+                           In SERIAL mode (SDI_PAR low):
+                               •   Low: Reference clock is synchronous to transmit clock and data.
+                                   Data is clocked in with SIxCKP/N and passed through a FIFO
+                               •   Float: Reference clock is synchronous to transmit data. Clock is
+                                   recovered with a CDR and data is passed through a FIFO
+                               •   High: Reference clock is plesiochronous to transmit data. Clock is
+                                   recovered with a CDR and the FIFO is bypassed
+Page: 19 of 42                  2006 Teridian Semiconductor Corporation                             Rev. 2.4
+
+
+                                                                                             78P2352
+                                                                                        Dual Channel
+                                                                            OC-3/ STM1-E/ E4 LIU
+  PIN DESCRIPTION (CONTINUED)
+CONTROL PINS (continued)
+NAME           PIN   TYPE DESCRIPTION
+                          Advanced Tx Control 1:
+                              Low: Enables fixed LVPECL equalizer at the transmit inputs SIDP/N for
+TXOUT1          1     CIT            FR4 trace lengths up to 1.5m.
+                              Float: Normal operation
+                              High: Normal operation
+                          Advanced Tx Control 0:
+                              Low: Nominal amplitude
+TXOUT0          2     CIT
+                              Float: 5% amplitude boost
+                              High: 10% amplitude boost
+                          Transmitter Power Down:
+TXPD           14     CID
+                          When high, powers down and tr-states the transmitt driver on both channels.
+                          Serial Port Selection:
+SPSL           77     CID
+                          When high, chip is software controlled through the serial port.
+                          Reference Clock Frequency Selection:
+                          Selects the reference frequency that is supplied at the CKREFP/N pins. Its
+                          level is read in only at power-up or on the rising edge of a reset signal at the
+CKSL           81     CIT PORB pin.
+                              •    Low: 19.44MHz or 17.408MHz
+                              •    Float: 77.76MHz
+                              •    High: 155.52MHz or 139.264MHz
+Page: 20 of 42                 2006 Teridian Semiconductor Corporation                           Rev. 2.4
+
+
+                                                                                                          78P2352
+                                                                                                   Dual Channel
+                                                                                         OC-3/ STM1-E/ E4 LIU
+   PIN DESCRIPTION (CONTINUED)
+SERIAL-PORT PINS
+NAME                PIN    TYPE      DESCRIPTION
+                                     [SPSL=1] Serial-Port Enable:
+                                             High during read and write operations. Low disables the serial port.
+                                             While SEN is low, SDO remains in high impedance state, and SDI and
+SEN_CMI              95      CIU             SCK activities are ignored.
+                                     [SPSL=0] Medium Select:
+                                             Low: Fiber (NRZ pass-through) mode
+                                             High: CMI mode
+                                     [SPSL=1] Serial Clock:
+                                             Controls the timing of SDI and SDO.
+                                     [SPSL=0] Receive Monitor Mode Enable:
+SCK_MON              96      CIS             When high, adds 20dB of flat gain to the incoming signal of both
+                                             channels before equalization.
+                                             NOTE: Channel specific monitor modes can be enabled through the
+                                             serial port. Rx Monitor Mode is only available in CMI mode
+                                     [SPSL=1] Serial Data Input:
+                                             Inputs mode and address information. Also inputs register data during
+                                             a Write operation. Both address and data are input least significant bit
+SDI_PAR              94       CI             first.
+                                     [SPSL=0] Data Width Select:
+                                             Selects 4 bit parallel transmit modes (input high) or serial transmit
+                                             modes (input low)
+                                     [SPSL=1] Serial Data Output:
+                                             Outputs register information during a Read operation. Data is output
+                            COZ/
+SDO_E4               93                      least significant bit first
+                             CI
+                                     [SPSL=0] Rate Select:
+                                             Selects E4 operation (input high) or STM1/STS3 operation (input low)
+POWER AND GROUND PINS
+It is recommended that all supply pins be connected to a single power supply plane and all ground pins be
+connected to a single ground plane. See application note for decoupling guidelines.
+NAME           PIN                                    TYPE      DESCRIPTION
+                 5, 12, 21, 74, 85, 92, 99, 105,
+VCC                                                     S       Power Supply
+                       109, 116, 120, 126
+VDD            23, 37, 40, 44, 48, 49, 53, 57, 60       S       CMOS I/O Driver Supply
+                 6, 13, 16, 22, 73, 84, 91, 102,
+GND              108, 112, 113, 114, 115, 117,          G       Ground
+                               123
+VSS            24, 36, 39, 43, 47, 50, 54, 58, 61       G       CMOS I/O Driver Ground
+                                                                Trim Ground
+TGND                            82                      G       Used during production test. Connect directly to
+                                                                ground. Do not decouple to supply or PORB.
+Page: 21 of 42                            2006 Teridian Semiconductor Corporation                               Rev. 2.4
+
+
+                                                                                                     78P2352
+                                                                                               Dual Channel
+                                                                                     OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS
+  ABSOLUTE MAXIMUM RATINGS
+  Operation beyond these limits may permanently damage the device.
+ PARAMETER                                                RATING
+ Supply Voltage (Vdd)                                     -0.5 to 4.0 VDC
+ Storage Temperature                                      -65 to 150 °C
+ Junction Temperature                                     -40 to 150 °C
+ Pin Voltage (CMIxP,CMIxN)                                Vdd + 1.5 VDC
+ Pin Voltage (all other pins)                             -0.3 to (Vdd+0.6) VDC
+ Pin Current                                              ±100 mA
+  RECOMMENDED OPERATING CONDITIONS
+  Unless otherwise noted all specifications are valid over these temperatures and supply voltage ranges.
+ PARAMETER                                                RATING
+ DC Voltage Supply (Vdd)                                  3.15 to 3.45 VDC
+ Ambient Operating Temperature                            -40 to 85 °C
+ Junction Temperature                                     -40 to 125 °C
+  DC CHARACTERISTICS:
+ PARAMETER                          SYMBOL       CONDITIONS                      MIN NOM        MAX      UNIT
+ Total Supply Current (CMI)                      STM-1 mode;
+ (including transmitter current        Idd       CMI mode;                            325        350      mA
+ through transformer)                            Max. cable length
+                                                 STM-1 mode;
+ Total Supply Current (NRZ)           Idde                                            290        310      mA
+                                                 Fiber (NRZ) mode
+                                                 Transmitter disabled;
+                                                 STM-1 mode;
+ Receive-only Supply Current          Iddr                                            190        205      mA
+                                                 CMI mode;
+                                                 Max. cable length
+ Supply Current per Port (CMI)                   STM-1 mode;
+ (including transmitter current       Iddx       CMI mode;                            160        180      mA
+ through transformer)                            Max. cable length
+ Power down Current                   Iddq       PDTX = 1, PDRX = 1                    7          10      mA
+Page: 22 of 42                          2006 Teridian Semiconductor Corporation                         Rev. 2.4
+
+
+                                                                                                     78P2352
+                                                                                               Dual Channel
+                                                                                        OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  ANALOG PINS CHARACTERISTICS:
+  The following table is provided for informative purpose only. Not tested in production.
+ PARAMETER                           SYMBOL         CONDITIONS                     MIN  NOM     MAX     UNIT
+ RXxP and RXxN                                      Ground Reference
+                                        Vblin                                      1.9   2.1     2.6      V
+ Common-Mode Bias Voltage
+ RXxP and RXxN Differential
+                                         Rilin                                           20              kΩ
+ Input Impedance
+ Analog Input/Output
+                                          Cin                                             8              pF
+ Capacitance
+ PORB Input Impedance                      --                                             5              kΩ
+  DIGITAL I/O CHARACTERISTICS:
+  Pins of type CI, CIU, CID:
+ PARAMETER                           SYMBOL         CONDITIONS                     MIN  NOM     MAX     UNIT
+                                                    Type CI, CID only                            0.8
+ Input Voltage Low                        Vil                                                             V
+                                                    Type CIU only                                0.4
+ Input Voltage High                       Vih                                      2.0                    V
+ Input Current                          Iil, Iih                                    -1    0       1      µA
+ Pull-up Resistance                      Rpu        Type CIU only                  53    70     113      kΩ
+ Pull-down Resistance                    Rpd        Type CID only                  40    58     120      kΩ
+ Input Capacitance                        Cin                                             8              pF
+ Pins of type CIT:
+ PARAMETER                           SYMBOL         CONDITIONS                     MIN  NOM     MAX     UNIT
+ Input Voltage Low                        Vtil                                                   0.4      V
+ Input Voltage High                      Vtih                                   Vcc-0.6                   V
+ Minimum impedance to be
+                                         Rtiz                                      30                    kΩ
+ considered as “float” state
+  Pins of type CIS:
+ PARAMETER                           SYMBOL         CONDITIONS                     MIN  NOM     MAX     UNIT
+ Low-to-High Threshold                    Vt+                                      1.3           1.7      V
+ High-to-Low Threshold                    Vt-                                      0.8           1.2      V
+ Input Current                          Iil, Iih                                    -1            1      µA
+ Input Capacitance                        Cin                                             8              pF
+Page: 23 of 42                            2006 Teridian Semiconductor Corporation                      Rev. 2.4
+
+
+                                                                                           78P2352
+                                                                                     Dual Channel
+                                                                              OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  Pins of type CO and COZ:
+ PARAMETER                  SYMBOL       CONDITIONS                     MIN   NOM     MAX     UNIT
+ Output Voltage Low           Vol        Iol = 8mA                                     0.4      V
+ Output Voltage High          Voh        Ioh = -8mA                      2.4                    V
+ Output Transition Time        Tt        CL = 20pF, 10-90%                              2      ns
+ Effective Source Impedance   Rscr                                              30              Ω
+ Tri-state Output Leakage                Type COZ only
+                               Iz                                         -1            1      µA
+ Current
+  Pins of type PO:
+ PARAMETER                  SYMBOL       CONDITIONS                      MIN  NOM     MAX     UNIT
+                                                                          0.5   0.8    1.1
+ Signal Swing                 Vpk                                                               V
+                                         TXxCKP/N pins                   0.35         0.95
+ Common Mode Level            Vcm        Vdd referenced                 -1.55  -1.2   -1.1      V
+ Effective Source Impedance   Reff                                              20              Ω
+ Rise Time                     Tr        10-90%                                 0.8    1.2     ns
+ Fall Time                     Tf        10-90%                                 0.8    1.2     ns
+  Pins of type PI:
+ PARAMETER                  SYMBOL       CONDITIONS                      MIN  NOM     MAX     UNIT
+ Signal Swing                 Vpki                                        0.3                   V
+ Common Mode Level            Vcm        Vdd referenced                  -1.6  -1.2   -0.8      V
+  Pins of type OD:
+ PARAMETER                  SYMBOL       CONDITIONS                      MIN  NOM     MAX     UNIT
+ Output Voltage Low           Vol        Iol = 8mA                                     0.4      V
+ Pull-down Leakage Current    Ipd        Logic high output                              1      µA
+ Pull-up Resistor             Rpu                                         4.7          10      kΩ
+Page: 24 of 42                 2006 Teridian Semiconductor Corporation                       Rev. 2.4
+
+
+                                                                                                                  78P2352
+                                                                                                            Dual Channel
+                                                                                              OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  SERIAL-PORT TIMING CHARACTERISTICS:
+ PARAMETER                            SYMBOL            CONDITION                   MIN         TYP          MAX         UNIT
+ SDI to SCK setup time                     tsu                                       4                                      ns
+ SDI to SCK hold time                       th                                       4                                      ns
+ SCK to SDO propagation                  tprop                                                                 10           ns
+ delay
+ SCK Frequency                            SCK                                                                  20         MHz
+  CS
+           tsu                                                                                                            th
+ SCK
+                   tsu th
+                                                                  tprop
+  SDI  X        1    SA0   SA1  SA2   PA0      PA1     PA2  PA3                                X or Z
+ SDO                               Z                                  D0    D1    D2      D3    D4       D5    D6    D7        Z
+                                                   Figure 9: Read Operation
+  CS
+          tsu                                                                                                           th
+ SCK
+                  tsu th
+ SDI  X        0    SA0   SA1  SA2   PA0      PA1     PA2  PA3     D0    D1    D2      D3    D4       D5    D6    D7         X
+ SDO                                                            Z
+                                                 Figure 10: Write Operation
+Page: 25 of 42                             2006 Teridian Semiconductor Corporation                                      Rev. 2.4
+
+
+                                                                                         78P2352
+                                                                                    Dual Channel
+                                                                             OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  TRANSMITTER TIMING CHARACTERISTICS:
+ PARAMETER                   SYMBOL       CONDITIONS                     MIN NOM     MAX     UNIT
+ Clock Duty Cycle            TTCF/TTC     PTOxCK                         40           60      %
+ Setup Time                    TPS        Parallel mode                   4                   ns
+ Hold Time                     TPH        Parallel mode                   4                   ns
+ Setup Time                    TSS        Serial mode                     2                   ns
+ Hold Time                     TSH        Serial mode                     2                   ns
+TIMING DIAGRAM: Transmitter Waveforms
+         SIxCKN
+          SIxCKP
+           SIxDP
+           SIxDN
+                                                      TSS                    TSH
+             PIxCK
+         PIxD<0:3>
+                                                       TPS                    TPH
+                                  TRC = 25.72ns                               TTCT
+                      TRCF = 12.86ns
+           PTOxCK
+         PIxD<0:3>
+                                                       TPS                    TPH
+Page: 26 of 42                  2006 Teridian Semiconductor Corporation                     Rev. 2.4
+
+
+                                                                                                         78P2352
+                                                                                                  Dual Channel
+                                                                                       OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  REFERENCE CLOCK CHARACTERISTICS:
+ PARAMETER                      SYMBOL      CONDITIONS                           MIN    NOM        MAX       UNIT
+ CKREF Duty Cycle                    --                                           40                60         %
+                                            Synchronous mode; E4                 -15                +15
+ CKREF Frequency Stability           --     Synchronous mode; STM1               -20                +20       ppm
+                                            Plesiochronous or Loop-timing
+                                            mode. (see Note 1)
+                                                                                 -75                +75
+  Note 1: In Plesiochronous mode, the transmit clock/data source (i.e. framer/system reference clock) must still
+           be of +/-20ppm quality (+/-15ppm for E4) in order to meet the ITU-T (or Telcordia) bit rate requirements.
+  RECEIVER TIMING CHARACTERISTICS:
+ PARAMETER                        SYMBOL       CONDITIONS                        MIN    NOM        MAX       UNIT
+ RCLK Duty Cycle                 TRCF/TRC                                         40                60         %
+                                    RSCQ       Serial mode                        0                  1
+ Clock to Q                                                                                                    ns
+                                    RPCQ       Parallel mode                      -1                 2
+TIMING DIAGRAM: Receive Waveforms
+                                        TRC = 6.43ns
+                         TRCF = 3.215ns
+       SOxCKN
+       SOxCKP
+         SOxDP
+         SOxDN
+                                                                TRCT
+                                      RSCQ
+                                          TRC = 25.72ns
+                           TRCF = 12.86ns
+           POxCK
+      POxD<0:3>
+                                        RPCQ                                         TRCT
+Page: 27 of 42                          2006 Teridian Semiconductor Corporation                              Rev. 2.4
+
+
+                                                                                                        78P2352
+                                                                                                  Dual Channel
+                                                                                        OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  TRANSMITTER SPECIFICATIONS FOR CMI INTERFACE
+  Bit Rate: 139.264Mbps ± 15ppm or 155.52Mbps ± 20ppm
+  Code: Coded Mark Inversion (CMI)
+  Relevant Specification: ITU-T G.703, Telcordia GR-253, ANSI T1.102
+  With the coaxial output port driving a 75Ω load, the output pulses conform to the templates in Figures 11, 12,
+  13, and 14. These specifications are tested during production test. Consult application note for reference
+  schematic, layout guidelines, and recommended transformers.
+ PARAMETER                              CONDITION                                  MIN  NOM       MAX         UNIT
+ Peak-to-peak Output Voltage
+ (Fuse-trimmed to nominal target at     Template, steady state                     0.9   1.05      1.1          V
+ final test)
+ Rise/ Fall Time                        10-90%                                                      2          ns
+                                        Negative Transitions                       -0.1            0.1
+                                        Positive Transitions at Interval
+ Transition Timing Tolerance                                                       -0.5            0.5         ns
+                                        Boundaries
+                                        Positive Transitions at mid-
+                                                                                  -0.35           0.35
+                                        interval
+ Transmit clock frequency stability
+                                        With respect to CKREF                        0              0         ppm
+ (PIxCK or SIxCKP/N )
+  The following specifications are not tested during production test. They are included for information only.
+ PARAMETER                              CONDITION                                  MIN  NOM       MAX         UNIT
+                                                                                           1                   MΩ
+ Output Impedance                       Driver is open drain
+                                                                                           8                   pF
+ Return Loss                            7MHz to 240MHz                              15                         dB
+Page: 28 of 42                           2006 Teridian Semiconductor Corporation                             Rev. 2.4
+
+
+                                                                                                                                      78P2352
+                                                                                                                             Dual Channel
+                                                                                                                OC-3/ STM1-E/ E4 LIU
+    ELECTRICAL SPECIFICATIONS (continued)
+                     V                                                        T = 7.18ns
+                0.60
+                                 (Note 1)                                                         (Note 1)                   Nominal
+                0.55
+                                                                                                                              Pulse
+                0.50
+                                     1ns                                                 1.795 ns          1.795 ns
+                0.45
+                                                                                          1ns                   1ns
+                0.40               0.1ns         0.1ns
+                                                                                                               0.1ns          0.1ns
+                                                                      0.35ns              0.35ns
+                0.05         Nominal
+                           Zero Level
+                             (Note 2)
+               -0.05
+               -0.40
+                                                1ns                      1ns                                                 1ns
+               -0.45
+                                                 1.795 ns            1.795 ns
+               -0.50
+               -0.55
+                                                            (Note 1)                                                         (Note 1)
+               -0.60
+Note 1 – The maximum “steady state” amplitude should not exceed the 0.55V limit. Overshoots and other transients are permitted to fall into
+the shaded area bounded by the amplitude levels 0.55V and 0.6V, provided that they do not exceed the steady state level by more than
+0.05V.
+Note 2 – For all measurements using these masks, the signal should be AC coupled, using a capacitor of not less than 0.01 µF, to the input of
+the oscilloscope used for measurements. The nominal zero level for both masks should be aligned with the oscilloscope trace with no input
+signal. With the signal then applied, the vertical position of the trace can be adjusted with the objective of meeting the limits of the masks. Any
+such adjustment should be the same for both masks and should not exceed ±0.05V. This may be checked by removing the input signal again
+and verifying that the trace lies with ±0.05V of the nominal zero level of the masks.
+Note 3 – Each pulse in a coded pulse sequence should meet the limits of the relevant mask, irrespective of the state of the preceding or
+succeeding pulses, with both pulse masks fixed in the same relation to a common timing reference, i.e. with their nominal start and finish
+edges coincident. The masks allow for HF jitter caused by intersymbol interference in the output stage, but not for jitter present in the timing
+signal associated with the source of the interface signal. When using an oscilloscope technique to determine pulse compliance with the mask,
+it is important that successive traces of the pulses overlay in order to suppress the effects of low frequency jitter. This can be accomplished by
+several techniques [e.g. a) triggering the oscilloscope on the measured waveform or b) providing both the oscilloscope and the pulse output
+circuits with the same clock signal].
+Note 4 – For the purpose of these masks, the rise time and decay time should be measured between –0.4V and 0.4V, and should not exceed
+2ns.
+                               Figure 11 – Mask of a Pulse corresponding to a binary Zero in E4 mode
+Page: 29 of 42                                       2006 Teridian Semiconductor Corporation                                              Rev. 2.4
+
+
+                                                                                                                                      78P2352
+                                                                                                                             Dual Channel
+                                                                                                               OC-3/ STM1-E/ E4 LIU
+ELECTRICAL SPECIFICATIONS (continued)
+                   V                                                       T = 7.18ns
+              0.60
+                                (Note 1)                                                                                 (Note 1)
+              0.55
+              0.50
+              0.45                  1ns                                                                                       1ns
+              0.40                0.1ns         0.1ns                                                  0.5ns                   0.5ns
+                                                                                                      Nominal
+                                                                                                        Pulse
+              0.05         Nominal
+                          Zero Level
+                           (Note 2)
+             -0.05
+                                                          3.59ns                                3.59ns
+                                                                       1.35ns       1.35ns
+             -0.40
+                                               1ns                                                         1ns
+             -0.45
+                                               1.795 ns                                                  1.795 ns
+             -0.50
+             -0.55
+                                                                              (Note 1)
+             -0.60
+Note 1 – The maximum “steady state” amplitude should not exceed the 0.55V limit. Overshoots and other transients are permitted to fall into
+the shaded area bounded by the amplitude levels 0.55V and 0.6V, provided that they do not exceed the steady state level by more than
+0.05V.
+Note 2 – For all measurements using these masks, the signal should be AC coupled, using a capacitor of not less than 0.01 µF, to the input of
+the oscilloscope used for measurements. The nominal zero level for both masks should be aligned with the oscilloscope trace with no input
+signal. With the signal then applied, the vertical position of the trace can be adjusted with the objective of meeting the limits of the masks. Any
+such adjustment should be the same for both masks and should not exceed ±0.05V. This may be checked by removing the input signal again
+and verifying that the trace lies with ±0.05V of the nominal zero level of the masks.
+Note 3 – Each pulse in a coded pulse sequence should meet the limits of the relevant mask, irrespective of the state of the preceding or
+succeeding pulses, with both pulse masks fixed in the same relation to a common timing reference, i.e. with their nominal start and finish
+edges coincident. The masks allow for HF jitter caused by intersymbol interference in the output stage, but not for jitter present in the timing
+signal associated with the source of the interface signal. When using an oscilloscope technique to determine pulse compliance with the mask,
+it is important that successive traces of the pulses overlay in order to suppress the effects of low frequency jitter. This can be accomplished by
+several techniques [e.g. a) triggering the oscilloscope on the measured waveform or b) providing both the oscilloscope and the pulse output
+circuits with the same clock signal].
+Note 4 – For the purpose of these masks, the rise time and decay time should be measured between –0.4V and 0.4V, and should not exceed
+2ns.
+Note 5 –The inverse pulse will have the same characteristics, noting that the timing tolerance at the level of the negative and positive
+transitions are ± 0.1ns and ±0.5ns respectively.
+                         Figure 12 – Mask of a Pulse corresponding to a binary One in E4 mode.
+Page: 30 of 42                                        2006 Teridian Semiconductor Corporation                                             Rev. 2.4
+
+
+                                                                                                                                      78P2352
+                                                                                                                             Dual Channel
+                                                                                                               OC-3/ STM1-E/ E4 LIU
+    ELECTRICAL SPECIFICATIONS (continued)
+                 V                                                          T = 6.43ns
+            0.60
+                              (Note 1)                                                         (Note 1)                      Nominal
+            0.55
+                                                                                                                              Pulse
+            0.50
+                                  1ns                                                  1.608ns            1.608ns
+            0.45
+                                                                                        1ns                    1ns
+            0.40                0.1ns          0.1ns
+                                                                                                              0.1ns           0.1ns
+                                                                     0.35ns             0.35ns
+            0.05          Nominal
+                         Zero Level
+                          (Note 2)
+           -0.05
+           -0.40
+                                              1ns                       1ns                                                  1ns
+           -0.45
+                                               1.608ns              1.608ns
+           -0.50
+           -0.55
+                                                          (Note 1)                                                           (Note 1)
+           -0.60
+Note 1 – The maximum “steady state” amplitude should not exceed the 0.55V limit. Overshoots and other transients are permitted to fall into
+the shaded area bounded by the amplitude levels 0.55V and 0.6V, provided that they do not exceed the steady state level by more than
+0.05V.
+Note 2 – For all measurements using these masks, the signal should be AC coupled, using a capacitor of not less than 0.01 µF, to the input of
+the oscilloscope used for measurements. The nominal zero level for both masks should be aligned with the oscilloscope trace with no input
+signal. With the signal then applied, the vertical position of the trace can be adjusted with the objective of meeting the limits of the masks. Any
+such adjustment should be the same for both masks and should not exceed ±0.05V. This may be checked by removing the input signal again
+and verifying that the trace lies with ±0.05V of the nominal zero level of the masks.
+Note 3 – Each pulse in a coded pulse sequence should meet the limits of the relevant mask, irrespective of the state of the preceding or
+succeeding pulses, with both pulse masks fixed in the same relation to a common timing reference, i.e. with their nominal start and finish
+edges coincident. The masks allow for HF jitter caused by intersymbol interference in the output stage, but not for jitter present in the timing
+signal associated with the source of the interface signal. When using an oscilloscope technique to determine pulse compliance with the mask,
+it is important that successive traces of the pulses overlay in order to suppress the effects of low frequency jitter. This can be accomplished by
+several techniques [e.g. a) triggering the oscilloscope on the measured waveform or b) providing both the oscilloscope and the pulse output
+circuits with the same clock signal].
+Note 4 – For the purpose of these masks, the rise time and decay time should be measured between –0.4V and 0.4V, and should not exceed
+2ns.
+                  Figure 13 – Mask of a Pulse corresponding to a binary Zero in STS-3/STM-1 mode.
+Page: 31 of 42                                       2006 Teridian Semiconductor Corporation                                              Rev. 2.4
+
+
+                                                                                                                                       78P2352
+                                                                                                                             Dual Channel
+                                                                                                               OC-3/ STM1-E/ E4 LIU
+    ELECTRICAL SPECIFICATIONS (continued)
+                     V                                                         6.43ns
+                0.60
+                                 (Note 1)                                                                                  (Note 1)
+                0.55
+                0.50
+                0.45                 1ns                                                                                        1ns
+                0.40               0.1ns         0.1ns                                                  0.5ns                    0.5ns
+                                                                                                        Nominal
+                                                                                                         Pulse
+                0.05         Nominal
+                           Zero Level
+                             (Note 2)
+               -0.05
+                                                           3.215ns                              3.215ns
+                                                                         1.2ns        1.2ns
+               -0.40
+                                                1ns                                                         1ns
+               -0.45
+                                                 1.608ns                                                   1.608ns
+               -0.50
+               -0.55
+                                                                                (Note 1)
+               -0.60
+Note 1 – The maximum “steady state” amplitude should not exceed the 0.55V limit. Overshoots and other transients are permitted to fall into
+the shaded area bounded by the amplitude levels 0.55V and 0.6V, provided that they do not exceed the steady state level by more than
+0.05V.
+Note 2 – For all measurements using these masks, the signal should be AC coupled, using a capacitor of not less than 0.01 µF, to the input of
+the oscilloscope used for measurements. The nominal zero level for both masks should be aligned with the oscilloscope trace with no input
+signal. With the signal then applied, the vertical position of the trace can be adjusted with the objective of meeting the limits of the masks. Any
+such adjustment should be the same for both masks and should not exceed ±0.05V. This may be checked by removing the input signal again
+and verifying that the trace lies with ±0.05V of the nominal zero level of the masks.
+Note 3 – Each pulse in a coded pulse sequence should meet the limits of the relevant mask, irrespective of the state of the preceding or
+succeeding pulses, with both pulse masks fixed in the same relation to a common timing reference, i.e. with their nominal start and finish
+edges coincident. The masks allow for HF jitter caused by intersymbol interference in the output stage, but not for jitter present in the timing
+signal associated with the source of the interface signal. When using an oscilloscope technique to determine pulse compliance with the mask,
+it is important that successive traces of the pulses overlay in order to suppress the effects of low frequency jitter. This can be accomplished by
+several techniques [e.g. a) triggering the oscilloscope on the measured waveform or b) providing both the oscilloscope and the pulse output
+circuits with the same clock signal].
+Note 4 – For the purpose of these masks, the rise time and decay time should be measured between –0.4V and 0.4V, and should not exceed
+2ns.
+Note 5 –The inverse pulse will have the same characteristics, noting that the timing tolerance at the level of the negative and positive
+transitions are ± 0.1ns and ±0.5ns respectively.
+                   Figure 14 – Mask of a Pulse corresponding to a binary One in STS-3/STM-1 mode
+Page: 32 of 42                                       2006 Teridian Semiconductor Corporation                                              Rev. 2.4
+
+
+                                                                                                        78P2352
+                                                                                              Dual Channel
+                                                                                      OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  TRANSMITTER OUTPUT JITTER
+  The transmit jitter specification ensures compliance with ITU-T G.813, G.823, G.825 and G.958; ANSI T1.102-
+  1993 and T1.105.03-1994; and GR-253-CORE for all supported rates. Transmit output jitter is not tested during
+  production test.
+                             Jitter                                                        Measured Jitter
+                          Detector                                                           Amplitude
+                                                            20dB/decade
+             Transmitter
+               Output
+                                                         f1              f2
+ PARAMETER                              CONDITION                                 MIN NOM      MAX         UNIT
+                                        CMI Mode;
+                                        200 Hz to 3.5 MHz, measured                            0.075       UIpp
+                                        with respect to CKREF for 60s
+ Transmitter Output Jitter
+                                        NRZ (optical) Mode;
+                                        12 kHz to 1.3 MHz, measured                            0.01        UIrms
+                                        with respect to CKREF
+Page: 33 of 42                           2006 Teridian Semiconductor Corporation                           Rev. 2.4
+
+
+                                                                                                                                 78P2352
+                                                                                                                            Dual Channel
+                                                                                                                     OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  RECEIVER SPECIFICATIONS FOR CMI INTERFACE (Transformer-coupled)
+  Consult application note for reference schematic, layout guidelines, and recommended transformers.
+ PARAMETER                                            CONDITION                                                MIN    TYP       MAX    UNIT
+ Peak Differential Input                              CMI mode; MON=0;
+                                                                                                               70               550    mVpk
+ Amplitude, RXxP and RXxN                             12.7dB of cable loss
+ Peak Differential Input                              CMI mode; MON=1;
+                                                                                                               25               80     mVpk
+ Amplitude, RXxP and RXxN                             20dB flat loss w/ 6dB of cable loss
+                                                      CMI mode; MON=0;
+ Flat-loss Tolerance                                                                                           -2                6      dB
+                                                      All valid cable lengths.
+                                                      STM-1 mode; CMI mode;
+                                                      12.7 dB cable loss
+ Receive Clock Jitter
+                                                      a) Normal receive mode                                                     0.1   UIpp
+                                                      b) Remote loopback mode                                                   0.07   UIpp
+ Latency                                                                                                                5        10     UI
+ PLL Lock Time                                                                                                          1        10     µs
+ Return Loss                                          7MHz to 240MHz                                           15                       dB
+  The input signal is assumed compliant with ITU-T G.703 and can be attenuated by the dispersive loss of a
+  cable. The minimum cable loss is 0dB and the maximum is –12.7dB at 78MHz.
+  The “Worst Case” line corresponds to the ITU-T G.703 recommendation. The “Typical” line corresponds to a
+  typical installation referred to in ANSI T1.102-1993. The receiver is tested using the cable model. It is a lumped
+  element approximation of the “Worst Case” line.
+                                           30
+                                           25
+                                           20
+                        Attenuation (dB)
+                                           15
+                                           10
+                                            5
+                                             0
+                                           1.00E+05        1.00E+06         1.00E+07                1.00E+08         1.00E+09
+                                                                         Frequency (Hz)
+                                                                       Worst Case         Typical
+                                                Figure 15: Typical and worst-case Cable attenuation
+Page: 34 of 42                                           2006 Teridian Semiconductor Corporation                                      Rev. 2.4
+
+
+                                                                                                                               78P2352
+                                                                                                                          Dual Channel
+                                                                                                                   OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  RECEIVER JITTER TOLERANCE
+  The 78P2352 exceeds all relevant jitter tolerance specifications shown in Figures 16, 17. STS-3/OC-3 jitter
+  tolerance specifications are in ANSI T1.105.03-1994 and Telcordia GR-253-CORE. STM-1 (optical) jitter
+  tolerance specifications are in ITU-T G.813, G.825, and G.958. STM-1e (electrical) jitter tolerance
+  specifications are in ITU-T G.825. E4 specifications are found in ITU-T G.823. Receive jitter tolerance is not
+  tested during production test.
+                                      100
+                                                                                                      Electrical (CMI) Interfaces
+                                                                                                         G.825 - STM-1e Tolerance
+                                                                                                         (for 2048 kbps networks)
+                                                                                                         G.825 - STM-1e Tolerance
+                                       10                                                                (for 1544 kbps networks)
+                                                                                                         G.823 - E4 Tolerance
+          Jitter Tolerance ( UIpp )
+                                        1
+                                       0.1
+                                      0.01
+                                        1.E+00   10Hz       100Hz         1kHz         10kHz             100kHz          1MHz             10MHz
+                                                                        Jitter Frequency
+                                                  Figure 16: Jitter Tolerance - electrical (CMI) interfaces
+ PARAMETER                                                 CONDITION                              MIN             NOM               MAX       UNIT
+                                                           200Hz to 500Hz                         1.5                                         UIpp
+ E4 Jitter Tolerance                                       500Hz to 10kHz                                         750 f-1                         µs
+                                                           10kHz to 3.5MHz                       0.075                                        UIpp
+                                                           10Hz to 19.3Hz                        38.9                                         UIpp
+                                                           19.3Hz to 500Hz                                        750 f-1                         µs
+ STM-1e Jitter Tolerance                                   500Hz to 6.5kHz                        1.5                                         UIpp
+                                                           6.5kHz to 65kHz                                     9800 f-1                           µs
+                                                           65kHz to 1.3MHz                       0.15                                         UIpp
+Page: 35 of 42                                             2006 Teridian Semiconductor Corporation                                               Rev. 2.4
+
+
+                                                                                                                              78P2352
+                                                                                                                         Dual Channel
+                                                                                                                  OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+                                      100
+                                                                                                       Optical (NRZ) Interfaces
+                                                                                                        G.813, G.958, T1.105.03, GR-253
+                                                                                                        STM-1 / STS-3 / OC-3 Tolerance
+                                                                                                        G.825 - STM-1 Tolerance
+                                       10
+          Jitter Tolerance ( UIpp )
+                                        1
+                                       0.1
+                                      0.01
+                                        1.E+00   10Hz       100Hz         1kHz         10kHz            100kHz         1MHz           10MHz
+                                                                        Jitter Frequency
+                                                   Figure 17: Jitter Tolerance - optical (NRZ) interfaces
+ PARAMETER                                                 CONDITION                             MIN             NOM          MAX         UNIT
+                                                           10Hz to 19.3Hz                        38.9                                     UIpp
+                                                           19.3Hz to 68.7Hz                                  750 f-1                       µs
+ OC-3/STS-3/STM-1 (optical)                                68.7Hz to 6.5kHz                      1.5                                      UIpp
+ Jitter Tolerance
+                                                           6.5kHz to 65kHz                                  9800 f-1                       µs
+                                                           65kHz to 1.3MHz                       0.15                                     UIpp
+Page: 36 of 42                                             2006 Teridian Semiconductor Corporation                                           Rev. 2.4
+
+
+                                                                                                         78P2352
+                                                                                                   Dual Channel
+                                                                                          OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  RECEIVER JITTER TRANSFER FUNCTION
+  The receiver clock recovery loop filter characteristics such that the receiver has the following transfer function.
+  The corner frequency of the Rx DLL is approximately 120 kHz. Receiver jitter transfer function is not tested
+  during production test.
+                     0
+                    -1
+                    -2
+                    -3
+                    -4
+                    -5
+                    -6
+                    -7
+                    -8
+                    -9
+                   -10
+                   1.00E+03         1.00E+04              1.00E+05               1.00E+06       1.00E+07
+                                              Figure 18: Jitter Transfer
+ PARAMETER                              CONDITION                                   MIN   NOM       MAX       UNIT
+ Receiver Jitter transfer function      below 120 kHz                                                0.1       dB
+                                                                                                             dB per
+ Jitter transfer function roll-off                                                         20
+                                                                                                            decade
+Page: 37 of 42                           2006 Teridian Semiconductor Corporation                             Rev. 2.4
+
+
+                                                                                                          78P2352
+                                                                                                     Dual Channel
+                                                                                            OC-3/ STM1-E/ E4 LIU
+  ELECTRICAL SPECIFICATIONS (continued)
+  CMI MODE LOSS OF SIGNAL CONDITION
+ PARAMETER                          CONDITION                                        MIN        TYP   MAX       UNIT
+                                    Combination of cable loss at 78MHz
+ LOS threshold                                                                       -35         -19   -15       dB
+                                    and flat loss
+ LOS timing                                                                           10        110    255        UI
+                                    Nominal value
+                                                       Maximum
+                                                       cable loss
+                                       3 dB
+                            15dB                              Loss of Signal must be cleared
+                                                Tolerance range
+                                         LOS can be detected or cleared
+                             35dB                              Loss of Signal must be declared
+  APPLICATION INFORMATION
+  EXTERNAL COMPONENTS:
+ COMPONENT                                               PIN(S)           VALUE            UNITS      TOLERANCE
+                                                          RXxP
+ Receiver Termination Resistor, CMI Mode                                     75               Ω            1%
+                                                          RXxN
+                                                         CMIxP
+ Transmitter Termination Resistor, CMI Mode                                  75               Ω            1%
+                                                         CMIxN
+  (CMI) TRANSFORMER SPECIFICATIONS:
+ COMPONENT                                                                VALUE            UNITS      TOLERANCE
+ Turns Ratio for the Receiver                                                                1:1
+ Turns Ratio for the Transmitter (center-tapped)                                           1:1CT
+  Suggested Manufacturers: Halo, Tamura, MiniCircuits, Belfuse
+  THERMAL INFORMATION:
+ PACKAGE                                                                     CONDITIONS                  ΘJA ( ˚C/W)
+                                                                No forced air;
+ Standard 128-pin JEDEC LQFP (78P2352-IGT)                                                                   46
+                                                                4-layer JEDEC test board
+                                                                No forced air;
+ (Recommended) Thernally enhanced
+                                                                4-layer JEDEC test board;                   24.8
+ Exposed Pad 128-pin JEDEC LQFP (78P2352-IEL)
+                                                                Die attach pad soldered to PCB
+  SCHEMATICS
+For reference schematics, layout guidelines, recommended transformer part numbers, etc. please check Teridian
+Semiconductor's website or contact your local sales representative for the latest application note(s) and/or demo
+board manuals.
+Page: 38 of 42                         2006 Teridian Semiconductor Corporation                                 Rev. 2.4
+
+
+                                                                                                                            78P2352
+                                                                                                                       Dual Channel
+                                                                                                                OC-3/ STM1-E/ E4 LIU
+MECHANICAL SPECIFICATIONS
+                                                         16.000 +/- 0.200
+                                                         14.000 +/- 0.100
+                                                          12.400 REF.
+                                                                                      128
+                                                                                              1
+                                                                                                   14.000 +/- 0.100   16.000 +/- 0.200
+                          5.00 REF.
+                     MAX.
+                 EXPOSED
+                 PAD AREA
+                                                            5.00 REF.
+                                      13.950 +/- 0.100                  MAX. 1.600
+                                                                                 1.400 +/- 0.050
+                 0.180 +/- 0.050
+                                                                     0.400
+                                                                                            0.100 +/- 0.050
+                                                                                                                                         0.600 +/- 0.150
+                                                        78P2352-IEL
+                                              128-pin Exposed Pad JEDEC LQFP
+                                                        (Bottom View)
+Page: 39 of 42                                 2006 Teridian Semiconductor Corporation                                                           Rev. 2.4
+
+
+                                                                                                              78P2352
+                                                                                                         Dual Channel
+                                                                                                  OC-3/ STM1-E/ E4 LIU
+MECHANICAL SPECIFICATIONS
+                                            15.8 (0.622)
+                                            16.2 (0.637)
+                                                                                   15.8 (0.622)
+                                                                                   16.2 (0.637)
+                                              Top View
+                                             13.8 (0.543)
+                                             14.2 (0.559)
+                                                                                            0.05 (0.002)
+                                                                                            0.15 (0.006)
+                             0.40 Typ. .                                1.60 Max
+                              (0.015)                                    (0.063)
+                                               0.13 (0.005)
+                 0.60 Typ.
+                  (0.024)                      0.23 (0.009)
+                                             Side View
+                                              78P2352-IGT
+                               128-pin Standard JEDEC LQFP (Top View)
+Page: 40 of 42                        2006 Teridian Semiconductor Corporation                                    Rev. 2.4
+
+
+                                                                                                    78P2352
+                                                                                               Dual Channel
+                                                                                        OC-3/ STM1-E/ E4 LIU
+PACKAGE INFORMATION
+(Top View)
+                                  ECL1N
+                                  ECL1P
+                                  VCC
+                                  TX1CKN
+                                  TX1CKP
+                                  GND
+                                  CMI1N
+                                  CMI1P
+                                  VCC
+                                  RX1N
+                                  RX1P
+                                  GND
+                                  VCC
+                                  GND
+                                  GND
+                                  GND
+                                  GND
+                                  CKREFP
+                                  CKREFN
+                                  VCC
+                                  GND
+                                  RX2P
+                                  RX2N
+                                  VCC
+                                  CMI2P
+                                  CMI2N
+                                  GND
+                                  TX2CKP
+                                  TX2CKN
+                                  VCC
+                                  ECL2P
+                                  ECL2N
+                                  128
+                                  127
+                                  126
+                                  125
+                                  124
+                                  123
+                                  122
+                                  121
+                                  120
+                                  119
+                                  118
+                                  117
+                                  116
+                                  115
+                                  114
+                                  113
+                                  112
+                                  111
+                                  110
+                                  109
+                                  108
+                                  107
+                                  106
+                                  105
+                  TXOUT1                                                                           SCK_MON
+                                  104
+                                  103
+                                  102
+                                  101
+                                  100
+                                   99
+                             1                                                              96
+                                   98
+                                   97
+                  TXOUT0     2                                                              95     SEN_CMI
+                       N/C   3                                                              94     SDI_PAR
+                       N/C   4                                                              93     SDO_E4
+                      VCC    5                                                              92     VCC
+                      GND    6                                                              91     GND
+                   SI1CKP    7                                                              90     SI2CKP
+                   SI1CKN    8                                                              89     SI2CKN
+                 INTTX2B     9                                                              88     INTTX1B
+                    SI1DP    10                                                             87     SI2DP
+                    SI1DN    11                                                             86     SI2DN
+                      VCC    12                                                             85     VCC
+                      GND    13                                                             84     GND
+                     TXPD    14                                                             83     PORB
+                 CKMODE      15                                                             82     TGND
+                      GND
+                    LPBK1
+                             16
+                             17                        78P2352                              81
+                                                                                            80
+                                                                                                   CKSL
+                                                                                                   LOS1
+                    LPBK2    18                                                             79     LOL1
+                     LOS2    19                                                             78     FRST
+                     LOL2    20                                                             77     SPSL
+                      VCC    21                                                             76     N/C
+                      GND    22                                                             75     N/C
+                      VDD    23                                                             74     VCC
+                      VSS    24                                                             73     GND
+                 SO1CKP      25                                                             72     SO2CKP
+                 SO1CKN      26                                                             71     SO2CKN
+                 INTRX2B     27                                                             70     INTRX1B
+                   SO1DP     28                                                             69     SO2DP
+                   SO1DN     29                                                             68     SO2DN
+                    PI1CK    30                                                             67     PI2CK
+                     PI10D   31                                                             66     PI20D
+                     PI11D   32   33
+                                  34   37   39
+                                            40    43
+                                                  44
+                                                  45
+                                                  46
+                                                  47
+                                                                     52
+                                                                     53
+                                                                     54
+                                                                     55
+                                                                     56
+                                                                     57                62
+                                                                                       63
+                                                                                            65     PI21D
+                                  35
+                                  36   38   41
+                                            42    48
+                                                  49
+                                                  50
+                                                  51                 58
+                                                                     59
+                                                                     60
+                                                                     61                64
+                                    PI12D
+                                    PI13D
+                                  PTO1CK
+                                     VSS
+                                     VDD
+                                   PO1CK
+                                     VSS
+                                     VDD
+                                   PO13D
+                                   PO12D
+                                     VSS
+                                     VDD
+                                   PO11D
+                                   PO10D
+                                     VSS
+                                     VDD
+                                     VDD
+                                     VSS
+                                   PO20D
+                                   PO21D
+                                     VDD
+                                     VSS
+                                   PO22D
+                                   PO23D
+                                     VDD
+                                     VSS
+                                   PO2CK
+                                     VDD
+                                     VSS
+                                  PTO2CK
+                                    PI23D
+                                    PI22D
+ORDERING INFORMATION
+             PART DESCRIPTION                                 ORDER NUMBER                  PACKAGE MARK
+ 128-pin LQFP,                                                                                78P2352-IGT
+                                                                 78P2352-IGT
+ Open-drain outputs for LOSx, LOLx, INTTRx                                                    xxxxxxxxxxP6
+ 128-pin LQFP,                                                                                   70P2352-IGT
+                                                                 70P2352-IGT
+ CMOS type outputs for LOSx, LOLx, INTTRx                                                        xxxxxxxxxxP6
+ 128-pin LQFP w/ Exposed Solder Pad,                                                             78P2352-IEL
+                                                                 78P2352-IEL
+ Open-drain outputs for LOSx, LOLx, INTTRx                                                       xxxxxxxxxxP6
+ Tape & Reel option                                               append ‘R’                           n/a
+                                                                                                   xxxxxxx-xxx
+ Lead-free option                                                 append ‘/F’
+                                                                                                 xxxxxxxxxxP6F
+Page: 41 of 42                              2006 Teridian Semiconductor Corporation                             Rev. 2.4
+
+
+                                                                                                                             78P2352
+                                                                                                                      Dual Channel
+                                                                                                          OC-3/ STM1-E/ E4 LIU
+                                                           Revison History
+    --     Contact Teridian for revision history of earlier releases
+ v2-0      March 14, 2005: Final Datasheet Release
+                      Updated Ordering Numbers to reflect production silicon revision A06
+                      Improved/modified Functional Descriptions for:
+                           o Reference Clock, Rx LOS & LOL detectors, Synchronous (Re-Timing) Transmit
+                                 Modes, Tx FIFO, Tx Driver, Tx LOL detector, and Power-on Reset description
+                      Improved/modified Register Descriptions for:
+                            o xCMIINV invert bits, FRST, RxLOL, and TxLOL
+                      Improved/modified Pin Descriptions for:
+                            o PTOCK, FRST, SEN_CMI, GND pin 63
+                      Updated Electrical Specification min/max limits for:
+                            o DC Characteristics,
+                            o CID, CIU, CIT, and PO pin types
+                            o CMI Loss of Signal Conditions
+ v2-2      August 12, 2005:
+                      Changed name and logo from TDK to Teridian
+                      Updated Rx and Tx Loss of Lock descriptions
+                      Added Full Remote (digital) Loopback and updated Remote (analog) Loopback descriptions
+ v2-3      August 15, 2006
+                      Updated Ordering Numbers to remove silicon revision A06
+                      Updated Package Mark from C6 to P6
+ v2-4      September 20, 2006
+                      Corrected several typos in the mechanical drawing of IGT package
+ If and when manufactured and sold, this product is sold subject to the terms and conditions of sale supplied at the time of order
+ acknowledgment, including those pertaining to warranty, patent infringement and limitation of liability. Teridian Semiconductor Corporation
+ (TSC) reserves the right to make changes in specifications at any time without notice. Accordingly, the reader is cautioned to verify that a
+ data sheet is current before placing orders. TSC assumes no liability for applications assistance.
+                                      Teridian Semiconductor Corp., 6440 Oak Canyon, Irvine, CA 92618
+                               TEL (714) 508-8800, FAX (714) 508-8877, http://www.teridiansemiconductor.com
+Page: 42 of 42                                  2006 Teridian Semiconductor Corporation                                            Rev. 2.4
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Maxim Integrated:
+ 78P2352-IGT/F 78P2352-IGTR/F 78P2352-IEL/F 78P2352-IGT 78P2352-IEL 78P2352-IELR 78P2352-IELR/F

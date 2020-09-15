@@ -1,0 +1,523 @@
+                                 Automotive Sensor Signal                                                                                           ZSSC4151
+                                 Conditioner with Analog Output                                                                                         Datasheet
+Contents
+1    Brief Description ............................................................................................................................................... 2
+2    Electrical Characteristics .................................................................................................................................. 3
+   2.1. Absolute Maximum Ratings ....................................................................................................................... 3
+   2.2. Operating Conditions ................................................................................................................................. 4
+   2.3. Electrical Parameters ................................................................................................................................ 5
+     2.3.1. Supply Current and System Operation Conditions ............................................................................. 5
+     2.3.2. Analog Front-End Characteristics ....................................................................................................... 5
+     2.3.3. Temperature Measurement ................................................................................................................ 5
+     2.3.4. Sensor Diagnostics ............................................................................................................................. 6
+     2.3.5. A2D Conversion .................................................................................................................................. 6
+     2.3.6. DAC and Analog Output (AOUT Pin) .................................................................................................. 6
+     2.3.7. System Response ............................................................................................................................... 7
+   2.4. Interface Characteristics and Nonvolatile Memory .................................................................................... 8
+     2.4.1. I2CTM Interface ..................................................................................................................................... 8
+     2.4.2. ZACwire™ One-Wire Interface (OWI at AOUT pin) ............................................................................ 8
+     2.4.3. Nonvolatile Memory (NVM) ................................................................................................................. 9
+3    ESD Protection and EMC Specification ......................................................................................................... 10
+   3.1. ESD Protection ........................................................................................................................................ 10
+   3.2. Latch-Up Immunity .................................................................................................................................. 10
+   3.3. Electromagnetic Emission ....................................................................................................................... 10
+   3.4. Conducted Susceptibility (DPI) ................................................................................................................ 10
+4    Reliability and RoHS Conformity .................................................................................................................... 11
+5    Glossary ......................................................................................................................................................... 11
+6    Document Revision History ............................................................................................................................ 12
+List of Figures
+Figure 1.1     ZSSC4151 Block Diagram .................................................................................................................. 2
+List of Tables
+Table 2.1      Absolute Maximum Ratings ................................................................................................................ 3
+Table 2.2      Operating Conditions .......................................................................................................................... 4
+Table 2.3      Electrical Parameters .......................................................................................................................... 5
+Table 2.4      Interface Characteristics and Nonvolatile Memory ............................................................................. 8
+Table 3.1      Conducted Susceptibility (DPI) Tests ............................................................................................... 10
+  © 2016 Integrated Device Technology, Inc.                                        1                                                                     April 20, 2016
+
+
+                                                                                                        ZSSC4151 Datasheet
+1        Brief Description
+The ZSSC4151 sensor signal conditioner (SSC) is a CMOS integrated circuit for highly accurate amplification and
+sensor-specific correction of bridge sensor signals. Digital compensation of sensor offset, sensitivity, temperature
+drift, and non-linearity is accomplished via an internal 16-bit RISC microcontroller running a correction algorithm
+with calibration coefficients stored in an EEPROM.
+The ZSSC4151 is adjustable to nearly all bridge sensor types. Measured values are provided at the analog
+voltage output and at the digital I2C™* or ZACwire™ interface, also referred to as the One-Wire Interface (OWI).
+The digital interfaces can be used for a simple PC-controlled calibration procedure in order to program a set of
+calibration coefficients into an on-chip EEPROM. The specific sensor and the ZSSC4151 can be quickly
+calibrated together. The ZSSC4151 and the calibration equipment communicate digitally, so the noise sensitivity
+is greatly reduced. Digital calibration helps keep assembly cost low as no trimming by external devices or lasers is
+needed.
+The ZSSC4151 is optimized for automotive environments by overvoltage and reverse-polarity protection circuitry,
+excellent electromagnetic compatibility, full automotive temperature range, and multiple diagnostic features.
+Figure 1.1 provides a block diagram of the ZSSC4151. Refer to section 5 for definitions of abbreviations.
+Figure 1.1 ZSSC4151 Block Diagram
+                                     ZSSC4151                                                                 SCL
+                                                                                                  I2CTM       SDA
+                                 TS1
+         External PN                                                                                         VDDA
+        Temp Sensor                                                                              Power
+                                TOP
+                                                                                             Management
+                                                                                                             VSSA
+                                         Mode                                      NVM
+                                                  Input                     ADC
+                               BR1P              Select     Gain           Mode
+                Sensor                                      Select
+                Bridge
+                                                                                   RAM       ZACwireTM
+                                                                                                             AOUT
+                                              MUX       PGA             ADC
+                                                                                                              OWI
+                                      SCCM
+                                                                                               DAC /
+                                                                                   CMC
+                                                                                               BAMP
+                               BR1N
+                                                                Analog                       Interfaces
+                                                  Temp
+                                                              Front-End            ROM
+                                                 Sensor                                                      VDDE
+                                                                (AFE)                        Overvoltage
+                                BOT
+                                                                                              Protection
+                                                                                Digital Core                 VSSE
+            Alternate External   TS2
+               Temperature
+                 Sensor 2
+* I2C™ is a trademark of NXP.
+   © 2016 Integrated Device Technology, Inc.                  2                                             April 20, 2016
+
+
+                                                                                                     ZSSC4151 Datasheet
+2       Electrical Characteristics
+Important note: The absolute maximum ratings given in section 2.1 are stress ratings only. The ZSSC4151 might
+not function or be operable above the recommended operating conditions. Stresses exceeding the absolute
+maximum ratings might also damage the device. In addition, extended exposure to stresses above the
+recommended operating conditions might affect device reliability. IDT does not recommend designing to the
+specifications given under “Absolute Maximum Ratings.”
+Important note: The operating conditions given in section 2.2 set the conditions over which IDT specifies device
+operation. These are the conditions that the application circuit should provide to the device for it to function as
+intended. Unless otherwise noted, the limits for parameters that appear in the operating conditions section are
+used as test conditions for the limits given in the electrical characteristics (section 2.3), operating conditions, and
+interface characteristics and nonvolatile memory sections.
+2.1.     Absolute Maximum Ratings
+Table 2.1     Absolute Maximum Ratings
+    No.      Parameter                      Symbol          Conditions                Min           Max           Unit
+  2.1.1      Supply voltage                  VDDE                                     -40             40          VDC
+  2.1.2      Voltage at AOUT pin             VAOUT                                    -40             40          VDC
+  2.1.3      Analog supply voltage           VDDA                                     -0.3           6.5          VDC
+  2.1.4      Digital supply voltage          VDD                                      -0.3          1.98          VDC
+  2.1.5      Voltage at all other pins        VPIN                                    -0.3       VDDA +0.3          V
+  2.1.6      Storage temperature              TSTG                                    -55            160           C
+  © 2016 Integrated Device Technology, Inc.                 3                                             April 20, 2016
+
+
+                                                                                                                          ZSSC4151 Datasheet
+2.2.     Operating Conditions
+All voltages in this section are relative to VSSA.
+Table 2.2       Operating Conditions
+Note: See important notes at the end of the table.
+    No.       Parameter                            Symbol                  Conditions                   Min       Typical   Max         Unit
+ 2.2.1        Supply voltage                        VDDE          To VSSE                                4.5        5        5.5          V
+                                                    VDDA          To VSSA                            (VDDE – 0.1)          VDDE           V
+                                                                  VDDE minus drop through
+                                                                  protection switch
+ 2.2.2        Junction temperature                   TTQE         Extended Temperature                   -40                150          C
+                                                                  Range (TQE)
+                                                  TAMB_TQA        Advanced-Performance                   -40                125          C
+                                                                  Temperature Range (TQA)
+                                                   TAMB_TQI       Best-Performance                       -25                 85          C
+                                                                  Temperature Range (TQI)
+ 2.2.3        Bridge resistance 1), 2)                RBR                                                 2                  10          k
+                                                  RBR_10-90       Output range 10-90%                     1                  15          k
+ 1)   No measurement in mass production; parameter is guaranteed by design and/or quality observation.
+ 2)   RBR greater than the maximum limit results in higher noise.
+ © 2016 Integrated Device Technology, Inc.                                   4                                                  April 20, 2016
+
+
+                                                                                                 ZSSC4151 Datasheet
+2.3.      Electrical Parameters
+All parameter values in this section are valid under the operating conditions specified in section 2.2. All voltages
+referenced to VSSA.
+Note: All parameters measured/validated for rADC = 14-bit; segmentation of 1st and 2nd ADC stage = 8/6;
+        fOSC = 8MHz; analog gain = ~100; TAMB_TQE (see specification 2.2.2).
+Table 2.3      Electrical Parameters
+Note: See important table notes at the end of the table (page 7).
+    No.      Parameter                        Symbol                  Conditions      Min   Typ     Max        Unit
+ 2.3.1.     Supply Current and System Operation Conditions
+  2.3.1.1    Supply current 1)                    IS       Oscillator adjusted              5.5       7          mA
+                                                           (typical fOSC = 8MHz).
+  2.3.1.2    Sensor bridge supply              VSENS       VSENS = VTOP - VBOT         0.9            1       VDDA
+             voltage                                       at RBR ≥ 2k
+  2.3.1.3    Oscillator frequency 2)             fOSC                                  7.2    8      8.8       MHz
+  2.3.1.4    Oscillator frequency              TCOSC                                  -200          200       ppm/K
+             temperature coefficient
+ 2.3.2.     Analog Front-End Characteristics
+  2.3.2.1    Input span                       VIN_SPAN     Analog gain = 1 to 200        1          800        mV/V
+  2.3.2.2    Common mode input range           VIN_CM      Depends on gain adjustment 0.25          0.75       VSENS
+  2.3.2.3    External capacitance at           CIN_EXT     Capacitance at pins BR1P      0           12          nF
+             input                                         and BR1N to VSSA
+  2.3.2.4    Input leakage current 3)          IIN_leak                                -15           15          nA
+ 2.3.3.     Temperature Measurement
+  2.3.3.1    PTAT internal temperature          STTSI      Raw values, without          20                    LSB14
+             sensitivity                                   conditioning calculation                              /K
+                                                           Analog gain setting= 6
+  2.3.3.2    External temperature diode        ATSE_D                                   10                    LSB14
+             channel gain                                                                                       /mV
+  2.3.3.3    External temperature diode        ITSE_D                                   10   20      40          A
+             bias current
+  2.3.3.4    External temperature diode        VTSE_D      Relative to VTOP             -1          -0.2         V
+             input range 3)
+  © 2016 Integrated Device Technology, Inc.                      5                                     April 20, 2016
+
+
+                                                                                                ZSSC4151 Datasheet
+   No.      Parameter                        Symbol               Conditions           Min  Typ    Max         Unit
+ 2.3.3.5    External RTD channel gain       ATSE_RTD                                    10                     LSB
+                                                                                                               /mV
+ 2.3.3.6    External RTD input range 3)     VTSE_RTD   Relative to VDDA                 -2         -0.2          V
+2.3.4.     Sensor Diagnostics
+ 2.3.4.1    Sensor connection loss         RSCC_open                                   100                      k
+            threshold
+ 2.3.4.2    Sensor short threshold to      RSCC_SH_BT                                               50           
+            BOT or TOP pin
+ 2.3.4.3    Sensor short threshold         RSCC_SH_IN                                              150           
+            between inputs
+2.3.5.     A2D Conversion
+ 2.3.5.1    ADC resolution 3)                  rADC    Selection: 12, 14, 16 or 18 bit  12          18          Bit
+                 3)
+ 2.3.5.2    DNL                              DNLADC    Best fit; overall AFE;                      0.95        LSB
+                                                       VADC_IN according to 2.3.6.4.
+ 2.3.5.3    INL TQA temperature range       INLADC_TQA Best fit                                      4         LSB
+            (specified in 2.2.2) 3)
+ 2.3.5.4    INL TQE temperature range       INLADC_TQE At 14-bit resolution                          8         LSB
+            (specified in 2.2.2)
+ 2.3.5.5    ADC input range                  VADC_IN                                    0.1         0.9       VSENS
+2.3.6.     DAC and Analog Output (AOUT Pin)
+ 2.3.6.1    DAC resolution                     rDAC    Analog output                         12                 Bit
+ 2.3.6.2    Output current sink/source         IOUT    VAOUT: 5-95%, RLOAD ≥ 5k                    2.5         mA
+                                                       VAOUT: 10-90%, RLOAD ≥ 1k                    5          mA
+ 2.3.6.3    Short-circuit current            IOUT_max  Short to VSSE or VDDE           -25          25          mA
+            (AOUT to VSSE or VDDE)
+ 2.3.6.4    Addressable output range          VR_OUT                                   0.01        0.99       VDDE
+ 2.3.6.5    Load capacitance                  CLOAD    Defined for best EMC              4   10    150          nF
+                                                       performance
+ 2.3.6.6    Output slew rate                  SROUT    CLOAD < 50nF                     0.1                    V/µs
+                                             LowLim    Configurable 8-bit value          0          25       %VDDE
+                                                       stored in NVM
+ 2.3.6.7    Clipping levels
+                                             UppLim    Configurable 8-bit value         75         100       %VDDE
+                                                       stored in NVM
+ 2.3.6.8    Clipping adjustment step                                                                0.1      %VDDE
+ 2.3.6.9    Output resistance in             ROUT_DIA  Diagnostic Range:                            80           
+            Diagnostic Mode                            4% to 96%, RLOAD ≥ 5k
+                                                       8% to 92%, RLOAD ≥ 1k
+ © 2016 Integrated Device Technology, Inc.                  6                                         April 20, 2016
+
+
+                                                                                                                                    ZSSC4151 Datasheet
+    No.        Parameter                                  Symbol                       Conditions                  Min        Typ        Max        Unit
+ 2.3.6.10      DNL                                        DNLOUT            rDAC =12 bit                           -1.5                  1.5         LSB
+ 2.3.6.11      INL TQA temperature range                   INLOUT           Best fit, rDAC =12-Bit                   -5                    5         LSB
+               (specified in 2.2.2) 3)
+ 2.3.6.12      INL TQE temperature range                   INLOUT           Best fit, rDAC =12-Bit                   -8                    8         LSB
+               (specified in 2.2.2)
+ 2.3.6.13      Output leakage current                    ILEAK_OUT          In the event of power or               -12                    12          µA
+               at 125°C                                                     ground loss
+ 2.3.6.14      Output leakage current                    ILEAK_OUT          In the event of power or               -20                    20          µA
+               at 150°C                                                     ground loss
+2.3.7.       System Response
+ 2.3.7.1       Startup time 3), 4)                        tSTARTUP          fOSC = 8MHz;                                                   5          ms
+               (time to first valid output                                  ADC: 14-bit and 2nd order
+               after power-on)                                              conversion
+               Response time 3)        4) 5)
+ 2.3.7.2                                                 tRESPONSE          100% input step,                                             1.1          ms
+                                                                            excluding transmission time
+ 2.3.7.3       Bandwidth 3)                                                 In comparison to analog                            1                     kHz
+                                                                            signal conditioners;
+                                                                            66% jump
+ 2.3.7.4       Analog output noise                       VNOISE,PP          DAC and output buffer only;                                   10         mV
+               peak-to-peak 3)                                              bandwidth  10kHz
+ 2.3.7.5       Analog output noise                      VNOISE,RMS          DAC and output buffer only;                                    3         mV
+               RMS 3)                                                       bandwidth  10kHz
+ 2.3.7.6       Ratiometricity error 3)                    REOUT_5           Maximum error of                      -1000                 1000        ppm
+                                                                            VDDE range = 4.5V to 5.5V
+ 2.3.7.7       Overall error 6)                                             TQA temperature range                             0.35                 % FSO
+                                                                            (specified in 2.2.2)
+                                                            FALL
+                                                                            TQE temperature range                             0.5
+                                                                            (specified in 2.2.2)
+ 1)   Excluding bridge supply current and excluding output current at AOUT pin.
+ 2)   Oscillator frequency can be trimmed via a setting in nonvolatile memory (NVM).
+ 3)   No measurement in mass production; parameter is guaranteed by design and/or quality observation.
+ 4)   No bridge settling included in timing.
+ 5)   Dependent on the configuration. The specified limit is valid only for ADC resolutions 15 bits.
+ 6)   FSO: full-scale output. No sensor-caused effects included in overall error. ADC input range from 10% to 90% of VSENS; DAC from 5% to 95% of output
+      range.
+ © 2016 Integrated Device Technology, Inc.                                        7                                                         April 20, 2016
+
+
+                                                                                                 ZSSC4151 Datasheet
+2.4.     Interface Characteristics and Nonvolatile Memory
+Table 2.4      Interface Characteristics and Nonvolatile Memory
+Note: See important table notes at the end of the table.
+   No.      Parameter                           Symbol            Conditions           Min  Typ     Max         Unit
+2.4.1.     I2CTM Interface
+ 2.4.1.1    I2C™ voltage level HIGH 1)          VI2C_HIGH                              0.5                    VDDA
+             2                            1)
+ 2.4.1.2    I C™ voltage level LOW              VI2C_LOW                                            0.2       VDDA
+ 2.4.1.3    Slave output level LOW 1)        VI2C_LOW_OUT  Open drain, IOL < 4mA                    0.1       VDDA
+                                      1)
+ 2.4.1.4    SDA load capacitance                 CI2C_SDA                                           400          pF
+                                   1)
+ 2.4.1.5    SCL clock frequency                     fI2C                                            400         kHz
+                                       1)
+ 2.4.1.6    Internal pull-up resistor         RI2C_PULLUP                               25          100         k
+2.4.2.     ZACwire™ One-Wire Interface (OWI at AOUT pin)
+ 2.4.2.1    OWI voltage level HIGH 1)           VOWI_IN_H  Master to slave             0.75                   VDDE
+                                        1)
+ 2.4.2.2    OWI voltage level LOW               VOWI_IN_L  Master to slave                          0.2       VDDE
+                                         1)
+ 2.4.2.3    Slave output level LOW            VOWI_OUT_L   Open drain, IOL ≤ 2mA                    0.1       VDDE
+                            1)
+ 2.4.2.4    Start window                     tOWI_STARTWIN                             100          300         ms
+ 2.4.2.5    Bus free time                        tOWI_IDLE Between stop and next        25                       µs
+                                                           start
+ 2.4.2.6    Hold time start condition          tOWI_START  Valid minimum fclk           25                       µs
+ 2.4.2.7    Bit time                              tOWI_BIT Maximum range                20         8000          µs
+                                                           Typical operating range      40         4000          µs
+ 2.4.2.8    Duty ratio bit ‘0’                     tOWI_0                             0.125 0.25   0.375      tOWI_BIT
+ 2.4.2.9    Duty ratio bit ‘1’                     tOWI_1                             0.625 0.75   0.875      tOWI_BIT
+ 2.4.2.10   Hold time stop condition            tOWI_STOP  tOWI_BIT_L is the bit time    2                   tOWI_BIT_L
+                                                           of the last valid bit
+ 2.4.2.11   Bit period deviation              tOWI_BIT_DEV                             0.55 1.0     1.5       tOWI_BIT
+ © 2016 Integrated Device Technology, Inc.                       8                                     April 20, 2016
+
+
+                                                                                                               ZSSC4151 Datasheet
+    No.        Parameter                               Symbol                  Conditions              Min Typ   Max        Unit
+2.4.3.        Nonvolatile Memory (NVM)
+ 2.4.3.1       Junction temperature for                TAMB_NVM                                        -40       150         C
+               NVM programming 2)
+ 2.4.3.2       Re-write cycles 1)                      NNVM_TQA         For TTQA (see range in         100
+                                                                        specification 2.2.2)
+ 2.4.3.3       Re-write cycles at 150°C                NNVM_TQE         For TTQE (see range in          10
+                                                                        specification 2.2.2)
+ 2.4.3.4       Data retention 1)                        tNVM_RET        Temperature profile:            15                  Year
+                                                                        22h bake at 250C
+ 2.4.3.5       Programming time 1)                     tNVM_WRI         Per written word                   2.2    5          ms
+ 1)   No measurement in mass production; parameter is guaranteed by design and/or quality observation.
+ 2)   Valid for dice. Note: Additional package and temperature range cause restrictions.
+ © 2016 Integrated Device Technology, Inc.                                    9                                     April 20, 2016
+
+
+                                                                                               ZSSC4151 Datasheet
+3      ESD Protection and EMC Specification
+3.1.     ESD Protection
+All pins have an ESD protection of ≥ 2000V according to the Human Body Model (HBM, based on MIL883,
+Method 3015.7). The VDDE, VSSE, and AOUT pins have an additional ESD protection of ≥ 4000V (HBM).
+In addition, Charged Device Model (CDM) tests are processed with protection levels of ≥ 750V for corner pins and
+≥ 500V for all other pins.
+The level of ESD protection has been tested with devices in QFN24 4X4mm packages during the product
+qualification.
+3.2.     Latch-Up Immunity
+All pins pass ±100mA latch-up test based on testing that conforms to the standard EIA/JESD 78.
+3.3.     Electromagnetic Emission
+The wired emission of externally connected pins of the device is measured according to the following standard:
+IEC 61967_4:2002 + A1:2006.
+Measurements must be performed with the application circuits described in the ZSSC4151 Application Descrip-
+tion.
+For the off-board pins, the spectral power measured with the 150Ω method must not exceed the limits according
+to IEC 61967_4k, Annex B.4 code H10kN. For the VSSE pin, the spectral power measured with the 1Ω method
+must not exceed the limits according to IEC 61967_4k, Annex B.4 code 15KmO.
+3.4.     Conducted Susceptibility (DPI)
+The conducted susceptibility of externally connected pins of the device is measured according to the IEC 62132-4
+standard, which describes the direct power injection (DPI) test method.
+Measurements must be performed with the application circuit described in the ZSSC4151 Application Description.
+Measurements are performed with an internal reference capacitor and internal temperature sensor. The sensing
+element is replaced by a resistive divider. Calibration is parameterized so that ~50% VDDA is output.
+Table 3.1 gives the specifications for the DPI tests. RES refers to the coupling impedance.
+Table 3.1      Conducted Susceptibility (DPI) Tests
+                                            Target                                    Error
+      Test         Frequency Range                    Load Pins         Protocol                   Comment
+                                            (dBm)                                     Band
+  DPI, direct     1MHz to 300MHz              26   VDDE, AOUT          Analog out     ± 1%     LOAD RES = 5kΩ
+  coupled                                                                                      LOAD CAP = 10nF
+  DPI, direct     300MHz to                   32   VDDE, AOUT          Analog out     ± 1%     LOAD RES = 5kΩ
+  coupled         1000MHz                                                                      LOAD CAP = 10nF
+  © 2016 Integrated Device Technology, Inc.                 10                                        April 20, 2016
+
+
+                                                                                                 ZSSC4151 Datasheet
+4       Reliability and RoHS Conformity
+The ZSSC4151 is qualified according to the AEC-Q100 standard, operating temperature grade 0. The qualifica-
+tion is extended to 3000h for the High Temperature Operating Life (HTOL) Test for one lot. Two manufacturing
+lots of extended HTOL qualification data (minimum of 3000h test time) for the ZSSC4151 or other products using
+identical technology (metallization), the same package supplier, the same package style, and the same die size
+within a specific tolerance are used to prove the package and bond reliability in the range of 3000h HTOL.
+A FIT rate ≤ 10 FIT (temperature = 55°C, confidence level = 60%) is guaranteed. A typical FIT rate of TSMC’s
+CV018BCD technology, which is used for the ZSSC4151, is 1 FIT.
+The ZSSC4151 complies with the RoHS directive and does not contain hazardous substances.
+5       Glossary
+   Term                 Description
+   ADC                  Analog-to-Digital Converter
+   AEC                  Automotive Electronics Council
+   AFE                  Analog Front-End
+   BAMP                 Buffer Amplifier
+   BR                   Bridge Sensor
+   CDM                  Charged Device Model
+   CM                   Command Mode
+   CMC                  Calibration Microcontroller
+   DAC                  Digital-to-Analog Converter
+   DNL                  Differential Nonlinearity
+   DPI                  Direct Power Injection
+   EMC                  Electromagnetic Compatibility
+   ESD                  Electrostatic Discharge
+   FIT                  Failures in Time
+   FSO                  Full Scale Output
+   HBM                  Human Body Model
+   HTOL                 High Temperature Operating Life
+   I²CTM                Inter-Integrated Circuit—serial two-wire data bus, trademark of NXP
+   INL                  Integral Nonlinearity
+   LSB                  Least Significant Bit
+   MUX                  Multiplexer
+   NVM                  Nonvolatile Memory
+  © 2016 Integrated Device Technology, Inc.                     11                                    April 20, 2016
+
+
+                                                                                                            ZSSC4151 Datasheet
+  Term                  Description
+  OWI                   One-Wire Interface
+  PGA                   Programmable Gain Amplifier
+  PTAT                  Proportional-to-Absolute Temperature
+  PTC                   Thermistor – Positive Temperature Coefficient Resistor
+  PWR                   Power Management and Protection Unit
+  QFN                   Quad-Flat No-Leads – IC package
+  RAM                   Random Access Memory
+  RISC                  Reduced Instruction Set Computing
+  ROM                   Read-Only Memory
+  RMS                   Root-Mean-Square
+  RTD                   Resistance Temperature Device
+  SCCM                  Sensor Check and Common Mode Adjustment Unit
+  SCL                   Serial Clock
+  SDA                   Serial Data
+  SSC                   Sensor Short Check (diagnostic feature) or Sensor Signal Conditioner
+  TQA, TQE, TQI         Temperature range identifier. See specification 2.2.2 for definition.
+          TM
+  ZACwire               IDT-specific One-Wire Interface
+6      Document Revision History
+ Revision                Date             Description
+    1.00      September 13, 2015          First release.
+    1.01      November 10, 2015           Extended leakage current description in section 2.3.6 for specifications 2.3.6.13
+                                          and 2.3.6.14
+                                          Updates for table notes for Table 2.3.
+                                          Revision of pin names BRP to BR1P and BRN to BR1N.
+    1.02      April 12, 2016              Added minimum value for ratiometricity error in Table 2.3.
+                                          Updated section 4 regarding completion of AEC-Q100 qualification and extension
+                                          of the minimum test time to 3000h.
+                                          Updated specification 2.3.7.7 for improved accuracy of ±0.35% of FSO at -40°C to
+                                          125°C and 0.5% FSO at -40°C to 150°C.
+              April 20, 2016              Changed to IDT branding.
+ © 2016 Integrated Device Technology, Inc.                     12                                                 April 20, 2016
+
+
+                                                                                                                                                                                      ZSSC4151 Datasheet
+                                            Corporate Headquarters                                               Sales                                                           Tech Support
+                                            6024 Silver Creek Valley Road                                        1-800-345-7015 or 408-284-8200                                  www.IDT.com/go/support
+                                            San Jose, CA 95138                                                   Fax: 408-284-2775
+                                            www.IDT.com                                                          www.IDT.com/go/sales
+DISCLAIMER Integrated Device Technology, Inc. (IDT) reserves the right to modify the products and/or specifications described herein at any time, without notice, at IDT's sole discretion. Performance
+specifications and operating parameters of the described products are determined in an independent state and are not guaranteed to perform the same way when installed in customer pro ducts. The
+information contained herein is provided without representation or warranty of any kind, whether express or implied, in cluding, but not limited to, the suitability of IDT's products for any particular purpose, an
+implied warranty of merchantability, or non-infringement of the intellectual property rights of others. This document is presented only as a guide and does not co nvey any license under intellectual property
+rights of IDT or any third parties.
+IDT's products are not intended for use in applications involving extreme environmental conditions or in life support systems or similar devices where the failure or malfunction of an IDT product can be
+reasonably expected to significantly affect the health or safety of users. Anyone using an IDT product in such a manner does so at their own risk, absent an express, written agreement by IDT.
+Integrated Device Technology, IDT and the IDT logo are trademarks or registered trademarks of IDT and its subsidiaries in the United States and other countries. Other trademarks used herein are the
+property of IDT or their respective third party owners. For datasheet type definitions and a glossary of common terms, visit www.idt.com/go/glossary. All contents of this document are copyright of Integrated
+Device Technology, Inc. All rights reserved.
+   © 2016 Integrated Device Technology, Inc.                                                                 13                                                                                  April 20, 2016
+
+
+1RWLFH
+     'HVFULSWLRQVRIFLUFXLWVVRIWZDUHDQGRWKHUUHODWHGLQIRUPDWLRQLQWKLVGRFXPHQWDUHSURYLGHGRQO\WRLOOXVWUDWHWKHRSHUDWLRQRIVHPLFRQGXFWRUSURGXFWV
+       DQGDSSOLFDWLRQH[DPSOHV<RXDUHIXOO\UHVSRQVLEOHIRUWKHLQFRUSRUDWLRQRUDQ\RWKHUXVHRIWKHFLUFXLWVVRIWZDUHDQGLQIRUPDWLRQLQWKHGHVLJQRI\RXU
+       SURGXFWRUV\VWHP5HQHVDV(OHFWURQLFVGLVFODLPVDQ\DQGDOOOLDELOLW\IRUDQ\ORVVHVDQGGDPDJHVLQFXUUHGE\\RXRUWKLUGSDUWLHVDULVLQJIURPWKHXVHRI
+       WKHVHFLUFXLWVVRIWZDUHRULQIRUPDWLRQ
+ 5HQHVDV(OHFWURQLFVKHUHE\H[SUHVVO\GLVFODLPVDQ\ZDUUDQWLHVDJDLQVWDQGOLDELOLW\IRULQIULQJHPHQWRUDQ\RWKHUFODLPVLQYROYLQJSDWHQWVFRS\ULJKWVRU
+       RWKHULQWHOOHFWXDOSURSHUW\ULJKWVRIWKLUGSDUWLHVE\RUDULVLQJIURPWKHXVHRI5HQHVDV(OHFWURQLFVSURGXFWVRUWHFKQLFDOLQIRUPDWLRQGHVFULEHGLQWKLV
+       GRFXPHQWLQFOXGLQJEXWQRWOLPLWHGWRWKHSURGXFWGDWDGUDZLQJVFKDUWVSURJUDPVDOJRULWKPVDQGDSSOLFDWLRQH[DPSOHV
+ 1ROLFHQVHH[SUHVVLPSOLHGRURWKHUZLVHLVJUDQWHGKHUHE\XQGHUDQ\SDWHQWVFRS\ULJKWVRURWKHULQWHOOHFWXDOSURSHUW\ULJKWVRI5HQHVDV(OHFWURQLFVRU
+       RWKHUV
+ <RXVKDOOQRWDOWHUPRGLI\FRS\RUUHYHUVHHQJLQHHUDQ\5HQHVDV(OHFWURQLFVSURGXFWZKHWKHULQZKROHRULQSDUW5HQHVDV(OHFWURQLFVGLVFODLPVDQ\
+       DQGDOOOLDELOLW\IRUDQ\ORVVHVRUGDPDJHVLQFXUUHGE\\RXRUWKLUGSDUWLHVDULVLQJIURPVXFKDOWHUDWLRQPRGLILFDWLRQFRS\LQJRUUHYHUVHHQJLQHHULQJ
+ 5HQHVDV(OHFWURQLFVSURGXFWVDUHFODVVLILHGDFFRUGLQJWRWKHIROORZLQJWZRTXDOLW\JUDGHV6WDQGDUGDQG+LJK4XDOLW\7KHLQWHQGHGDSSOLFDWLRQVIRU
+       HDFK5HQHVDV(OHFWURQLFVSURGXFWGHSHQGVRQWKHSURGXFW VTXDOLW\JUDGHDVLQGLFDWHGEHORZ
+          6WDQGDUG         &RPSXWHUVRIILFHHTXLSPHQWFRPPXQLFDWLRQVHTXLSPHQWWHVWDQGPHDVXUHPHQWHTXLSPHQWDXGLRDQGYLVXDOHTXLSPHQWKRPH
+                              HOHFWURQLFDSSOLDQFHVPDFKLQHWRROVSHUVRQDOHOHFWURQLFHTXLSPHQWLQGXVWULDOURERWVHWF
+          +LJK4XDOLW\ 7UDQVSRUWDWLRQHTXLSPHQW DXWRPRELOHVWUDLQVVKLSVHWF WUDIILFFRQWURO WUDIILFOLJKWV ODUJHVFDOHFRPPXQLFDWLRQHTXLSPHQWNH\
+                              ILQDQFLDOWHUPLQDOV\VWHPVVDIHW\FRQWUROHTXLSPHQWHWF
+       8QOHVVH[SUHVVO\GHVLJQDWHGDVDKLJKUHOLDELOLW\SURGXFWRUDSURGXFWIRUKDUVKHQYLURQPHQWVLQD5HQHVDV(OHFWURQLFVGDWDVKHHWRURWKHU5HQHVDV
+       (OHFWURQLFVGRFXPHQW5HQHVDV(OHFWURQLFVSURGXFWVDUHQRWLQWHQGHGRUDXWKRUL]HGIRUXVHLQSURGXFWVRUV\VWHPVWKDWPD\SRVHDGLUHFWWKUHDWWR
+       KXPDQOLIHRUERGLO\LQMXU\ DUWLILFLDOOLIHVXSSRUWGHYLFHVRUV\VWHPVVXUJLFDOLPSODQWDWLRQVHWF RUPD\FDXVHVHULRXVSURSHUW\GDPDJH VSDFHV\VWHP
+       XQGHUVHDUHSHDWHUVQXFOHDUSRZHUFRQWUROV\VWHPVDLUFUDIWFRQWUROV\VWHPVNH\SODQWV\VWHPVPLOLWDU\HTXLSPHQWHWF 5HQHVDV(OHFWURQLFVGLVFODLPV
+       DQ\DQGDOOOLDELOLW\IRUDQ\GDPDJHVRUORVVHVLQFXUUHGE\\RXRUDQ\WKLUGSDUWLHVDULVLQJIURPWKHXVHRIDQ\5HQHVDV(OHFWURQLFVSURGXFWWKDWLV
+       LQFRQVLVWHQWZLWKDQ\5HQHVDV(OHFWURQLFVGDWDVKHHWXVHU VPDQXDORURWKHU5HQHVDV(OHFWURQLFVGRFXPHQW
+ :KHQXVLQJ5HQHVDV(OHFWURQLFVSURGXFWVUHIHUWRWKHODWHVWSURGXFWLQIRUPDWLRQ GDWDVKHHWVXVHU VPDQXDOVDSSOLFDWLRQQRWHV*HQHUDO1RWHVIRU
+       +DQGOLQJDQG8VLQJ6HPLFRQGXFWRU'HYLFHVLQWKHUHOLDELOLW\KDQGERRNHWF DQGHQVXUHWKDWXVDJHFRQGLWLRQVDUHZLWKLQWKHUDQJHVVSHFLILHGE\
+       5HQHVDV(OHFWURQLFVZLWKUHVSHFWWRPD[LPXPUDWLQJVRSHUDWLQJSRZHUVXSSO\YROWDJHUDQJHKHDWGLVVLSDWLRQFKDUDFWHULVWLFVLQVWDOODWLRQHWF5HQHVDV
+       (OHFWURQLFVGLVFODLPVDQ\DQGDOOOLDELOLW\IRUDQ\PDOIXQFWLRQVIDLOXUHRUDFFLGHQWDULVLQJRXWRIWKHXVHRI5HQHVDV(OHFWURQLFVSURGXFWVRXWVLGHRIVXFK
+       VSHFLILHGUDQJHV
+ $OWKRXJK5HQHVDV(OHFWURQLFVHQGHDYRUVWRLPSURYHWKHTXDOLW\DQGUHOLDELOLW\RI5HQHVDV(OHFWURQLFVSURGXFWVVHPLFRQGXFWRUSURGXFWVKDYHVSHFLILF
+       FKDUDFWHULVWLFVVXFKDVWKHRFFXUUHQFHRIIDLOXUHDWDFHUWDLQUDWHDQGPDOIXQFWLRQVXQGHUFHUWDLQXVHFRQGLWLRQV8QOHVVGHVLJQDWHGDVDKLJKUHOLDELOLW\
+       SURGXFWRUDSURGXFWIRUKDUVKHQYLURQPHQWVLQD5HQHVDV(OHFWURQLFVGDWDVKHHWRURWKHU5HQHVDV(OHFWURQLFVGRFXPHQW5HQHVDV(OHFWURQLFVSURGXFWV
+       DUHQRWVXEMHFWWRUDGLDWLRQUHVLVWDQFHGHVLJQ<RXDUHUHVSRQVLEOHIRULPSOHPHQWLQJVDIHW\PHDVXUHVWRJXDUGDJDLQVWWKHSRVVLELOLW\RIERGLO\LQMXU\
+       LQMXU\RUGDPDJHFDXVHGE\ILUHDQGRUGDQJHUWRWKHSXEOLFLQWKHHYHQWRIDIDLOXUHRUPDOIXQFWLRQRI5HQHVDV(OHFWURQLFVSURGXFWVVXFKDVVDIHW\
+       GHVLJQIRUKDUGZDUHDQGVRIWZDUHLQFOXGLQJEXWQRWOLPLWHGWRUHGXQGDQF\ILUHFRQWURODQGPDOIXQFWLRQSUHYHQWLRQDSSURSULDWHWUHDWPHQWIRUDJLQJ
+       GHJUDGDWLRQRUDQ\RWKHUDSSURSULDWHPHDVXUHV%HFDXVHWKHHYDOXDWLRQRIPLFURFRPSXWHUVRIWZDUHDORQHLVYHU\GLIILFXOWDQGLPSUDFWLFDO\RXDUH
+       UHVSRQVLEOHIRUHYDOXDWLQJWKHVDIHW\RIWKHILQDOSURGXFWVRUV\VWHPVPDQXIDFWXUHGE\\RX
+ 3OHDVHFRQWDFWD5HQHVDV(OHFWURQLFVVDOHVRIILFHIRUGHWDLOVDVWRHQYLURQPHQWDOPDWWHUVVXFKDVWKHHQYLURQPHQWDOFRPSDWLELOLW\RIHDFK5HQHVDV
+       (OHFWURQLFVSURGXFW<RXDUHUHVSRQVLEOHIRUFDUHIXOO\DQGVXIILFLHQWO\LQYHVWLJDWLQJDSSOLFDEOHODZVDQGUHJXODWLRQVWKDWUHJXODWHWKHLQFOXVLRQRUXVHRI
+       FRQWUROOHGVXEVWDQFHVLQFOXGLQJZLWKRXWOLPLWDWLRQWKH(85R+6'LUHFWLYHDQGXVLQJ5HQHVDV(OHFWURQLFVSURGXFWVLQFRPSOLDQFHZLWKDOOWKHVH
+       DSSOLFDEOHODZVDQGUHJXODWLRQV5HQHVDV(OHFWURQLFVGLVFODLPVDQ\DQGDOOOLDELOLW\IRUGDPDJHVRUORVVHVRFFXUULQJDVDUHVXOWRI\RXUQRQFRPSOLDQFH
+       ZLWKDSSOLFDEOHODZVDQGUHJXODWLRQV
+ 5HQHVDV(OHFWURQLFVSURGXFWVDQGWHFKQRORJLHVVKDOOQRWEHXVHGIRURULQFRUSRUDWHGLQWRDQ\SURGXFWVRUV\VWHPVZKRVHPDQXIDFWXUHXVHRUVDOHLV
+       SURKLELWHGXQGHUDQ\DSSOLFDEOHGRPHVWLFRUIRUHLJQODZVRUUHJXODWLRQV<RXVKDOOFRPSO\ZLWKDQ\DSSOLFDEOHH[SRUWFRQWUROODZVDQGUHJXODWLRQV
+       SURPXOJDWHGDQGDGPLQLVWHUHGE\WKHJRYHUQPHQWVRIDQ\FRXQWULHVDVVHUWLQJMXULVGLFWLRQRYHUWKHSDUWLHVRUWUDQVDFWLRQV
+ ,WLVWKHUHVSRQVLELOLW\RIWKHEX\HURUGLVWULEXWRURI5HQHVDV(OHFWURQLFVSURGXFWVRUDQ\RWKHUSDUW\ZKRGLVWULEXWHVGLVSRVHVRIRURWKHUZLVHVHOOVRU
+       WUDQVIHUVWKHSURGXFWWRDWKLUGSDUW\WRQRWLI\VXFKWKLUGSDUW\LQDGYDQFHRIWKHFRQWHQWVDQGFRQGLWLRQVVHWIRUWKLQWKLVGRFXPHQW
+ 7KLVGRFXPHQWVKDOOQRWEHUHSULQWHGUHSURGXFHGRUGXSOLFDWHGLQDQ\IRUPLQZKROHRULQSDUWZLWKRXWSULRUZULWWHQFRQVHQWRI5HQHVDV(OHFWURQLFV
+ 3OHDVHFRQWDFWD5HQHVDV(OHFWURQLFVVDOHVRIILFHLI\RXKDYHDQ\TXHVWLRQVUHJDUGLQJWKHLQIRUPDWLRQFRQWDLQHGLQWKLVGRFXPHQWRU5HQHVDV
+       (OHFWURQLFVSURGXFWV
+ 1RWH        5HQHVDV(OHFWURQLFVDVXVHGLQWKLVGRFXPHQWPHDQV5HQHVDV(OHFWURQLFV&RUSRUDWLRQDQGDOVRLQFOXGHVLWVGLUHFWO\RULQGLUHFWO\FRQWUROOHG
+              VXEVLGLDULHV
+ 1RWH        5HQHVDV(OHFWURQLFVSURGXFW V PHDQVDQ\SURGXFWGHYHORSHGRUPDQXIDFWXUHGE\RUIRU5HQHVDV(OHFWURQLFV
+                                                                                                                                              5HY1RYHPEHU
+   &RUSRUDWH+HDGTXDUWHUV                                                                    &RQWDFW,QIRUPDWLRQ
+   72<268)25(6,$7R\RVX                                                            )RUIXUWKHULQIRUPDWLRQRQDSURGXFWWHFKQRORJ\WKHPRVWXSWRGDWH
+      Corporate Headquarters
+   .RWRNX7RN\R-DSDQ                                                               Contact Information
+                                                                                             YHUVLRQRIDGRFXPHQWRU\RXUQHDUHVWVDOHVRIILFHSOHDVHYLVLW
+   ZZZUHQHVDVFRP                                                                           ZZZUHQHVDVFRPFRQWDFW
+      TOYOSU FORESIA, 3-2-24 Toyosu,                                                            For further information on a product, technology, the most up-to-date version
+      Koto-ku, Tokyo 135-0061, Japan                                                            of a document, or your nearest sales office, please visit:
+   7UDGHPDUNV
+      www.renesas.com                                                                           www.renesas.com/contact/
+   5HQHVDVDQGWKH5HQHVDVORJRDUHWUDGHPDUNVRI5HQHVDV(OHFWURQLFV
+   &RUSRUDWLRQ$OOWUDGHPDUNVDQGUHJLVWHUHGWUDGHPDUNVDUHWKHSURSHUW\
+   RIWKHLUUHVSHFWLYHRZQHUV
+      Trademarks
+      Renesas and the Renesas logo are trademarks of Renesas Electronics
+      Corporation. All trademarks and registered trademarks are the property of
+      their respective owners.
+                                                                                                         205HQHVDV(OHFWURQLFV&RUSRUDWLRQ$OOULJKWVUHVHUYHG
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Renesas Electronics:
+ ZSSC4151BE2R ZSSC4151AE2W ZSSC4151AE2R ZSSC4151AE2V ZSSC4151KE2R ZSSC4151KE2V
+ZSSC4151CE4R ZSSC4151CE4V ZSSC4151CE4W

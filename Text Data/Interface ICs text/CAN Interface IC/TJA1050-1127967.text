@@ -1,0 +1,709 @@
+                        INTEGRATED CIRCUITS
+  DATA SHEET
+  TJA1050
+  High speed CAN transceiver
+Product specification                       2003 Oct 22
+Supersedes data of 2002 May 16
+
+
+Philips Semiconductors                                                                                  Product specification
+   High speed CAN transceiver                                                                                  TJA1050
+FEATURES                                                           GENERAL DESCRIPTION
+• Fully compatible with the “ISO 11898” standard                   The TJA1050 is the interface between the Controller Area
+• High speed (up to 1 Mbaud)                                       Network (CAN) protocol controller and the physical bus.
+                                                                   The device provides differential transmit capability to the
+• Very low ElectroMagnetic Emission (EME)
+                                                                   bus and differential receive capability to the CAN
+• Differential receiver with wide common-mode range for            controller.
+   high ElectroMagnetic Immunity (EMI)
+                                                                   The TJA1050 is the third Philips high-speed CAN
+• An unpowered node does not disturb the bus lines                 transceiver after the PCA82C250 and the PCA82C251.
+• Transmit Data (TXD) dominant time-out function                   The most important differences are:
+• Silent mode in which the transmitter is disabled                 • Much lower electromagnetic emission due to optimal
+• Bus pins protected against transients in an automotive              matching of the output signals CANH and CANL
+   environment                                                     • Improved behaviour in case of an unpowered node
+• Input levels compatible with 3.3 V and 5 V devices               • No standby mode.
+• Thermally protected                                              This makes the TJA1050 eminently suitable for use in
+• Short-circuit proof to battery and to ground                     nodes that are in a power-down situation in partially
+                                                                   powered networks.
+• At least 110 nodes can be connected.
+QUICK REFERENCE DATA
+     SYMBOL                     PARAMETER                                CONDITIONS                    MIN.     MAX.     UNIT
+ VCC               supply voltage                                                                     4.75      5.25    V
+ VCANH             DC voltage at pin CANH                    0 < VCC < 5.25 V; no time limit          −27       +40     V
+ VCANL             DC voltage at pin CANL                    0 < VCC < 5.25 V; no time limit          −27       +40     V
+ Vi(dif)(bus)      differential bus input voltage            dominant                                 1.5       3       V
+ tPD(TXD-RXD)      propagation delay TXD to RXD              VS = 0 V; see Fig.7                      −         250     ns
+ Tvj               virtual junction temperature                                                       −40       +150    °C
+ORDERING INFORMATION
+        TYPE                                                         PACKAGE
+     NUMBER             NAME                                      DESCRIPTION                                      VERSION
+ TJA1050T                SO8          plastic small outline package; 8 leads; body width 3.9 mm                    SOT96-1
+ TJA1050U                   −         bare die; die dimensions 1700 × 1280 × 380 µm                                   −
+2003 Oct 22                                                     2
+
+
+Philips Semiconductors                                                                                           Product specification
+   High speed CAN transceiver                                                                                          TJA1050
+BLOCK DIAGRAM
+ handbook, full pagewidth                                                                      VCC
+                                                                                                  3
+                                 8
+                             S
+                                                  30 µA
+                                       VCC   GND                 TEMPERATURE
+                                  200                             PROTECTION
+                                   µA
+                                                   TXD
+                                 1             DOMINANT
+                         TXD                                               DRIVER
+                                                TIME-OUT
+                                                  TIMER
+                                      VCC                                                                  7
+                                                                                                                  CANH
+                                                                                                         25
+                                 4                                                                       kΩ
+                         RXD
+                                                                                           0.5VCC        25
+                                                                RECEIVER
+                                                                                                         kΩ
+                                      GND                                                         GND
+                                                                                                                  CANL
+                                                                                                           6
+                                 5            REFERENCE             TJA1050
+                          Vref
+                                                VOLTAGE
+                                                                                                  2
+                                                                                                       MGS374
+                                                                                               GND
+                                                          Fig.1 Block diagram.
+PINNING
+   SYMBOL               PIN                DESCRIPTION
+ TXD                       1   transmit data input; reads in data
+                               from the CAN controller to the bus
+                               line drivers
+ GND                       2   ground                                  handbook, halfpage
+                                                                                          TXD 1                 8 S
+ VCC                       3   supply voltage
+                                                                                          GND 2                 7  CANH
+ RXD                       4   receive data output; reads out                                       TJA1050T
+                               data from the bus lines to the                             VCC  3                6  CANL
+                               CAN controller                                             RXD  4                5  Vref
+ Vref                      5   reference voltage output                                                  MGS375
+ CANL                      6   LOW-level CAN bus line
+ CANH                      7   HIGH-level CAN bus line
+ S                         8   select input for high-speed mode                            Fig.2 Pin configuration.
+                               or silent mode
+2003 Oct 22                                                         3
+
+
+Philips Semiconductors                                                                                    Product specification
+   High speed CAN transceiver                                                                                  TJA1050
+FUNCTIONAL DESCRIPTION                                            Control pin S allows two operating modes to be selected:
+                                                                  high-speed mode or silent mode.
+The TJA1050 is the interface between the CAN protocol
+controller and the physical bus. It is primarily intended for     The high-speed mode is the normal operating mode and is
+high-speed automotive applications using baud rates from          selected by connecting pin S to ground. It is the default
+60 kbaud up to 1 Mbaud. It provides differential transmit         mode if pin S is not connected. However, to ensure EMI
+capability to the bus and differential receiver capability to     performance in applications using only the high-speed
+the CAN protocol controller. It is fully compatible to the        mode, it is recommended that pin S is connected to
+“ISO 11898” standard.                                             ground.
+A current-limiting circuit protects the transmitter output        In the silent mode, the transmitter is disabled. All other
+stage from damage caused by accidental short-circuit to           IC functions continue to operate. The silent mode is
+either positive or negative supply voltage, although power        selected by connecting pin S to VCC and can be used to
+dissipation increases during this fault condition.                prevent network communication from being blocked, due
+                                                                  to a CAN controller which is out of control.
+A thermal protection circuit protects the IC from damage
+by switching off the transmitter if the junction temperature      A ‘TXD dominant time-out’ timer circuit prevents the bus
+exceeds a value of approximately 165 °C. Because the              lines being driven to a permanent dominant state (blocking
+transmitter dissipates most of the power, the power               all network communication) if pin TXD is forced
+dissipation and temperature of the IC is reduced. All other       permanently LOW by a hardware and/or software
+IC functions continue to operate. The transmitter off-state       application failure. The timer is triggered by a negative
+resets when pin TXD goes HIGH. The thermal protection             edge on pin TXD. If the duration of the LOW-level on
+circuit is particularly needed when a bus line short-circuits.    pin TXD exceeds the internal timer value, the transmitter is
+                                                                  disabled, driving the bus into a recessive state. The timer
+The pins CANH and CANL are protected from automotive
+                                                                  is reset by a positive edge on pin TXD.
+electrical transients (according to “ISO 7637”; see Fig.4).
+Table 1     Function table of the CAN transceiver; X = don’t care
+           VCC                 TXD             S               CANH                   CANL             BUS STATE       RXD
+   4.75 V to 5.25 V           LOW          LOW (or             HIGH                    LOW              dominant       LOW
+                                           floating)
+   4.75 V to 5.25 V             X            HIGH             0.5VCC                  0.5VCC            recessive      HIGH
+   4.75 V to 5.25 V        HIGH (or            X              0.5VCC                  0.5VCC            recessive      HIGH
+                            floating)
+  <2 V (not powered)            X              X       0 V < VCANH < VCC        0 V < VCANL < VCC       recessive        X
+  2 V < VCC < 4.75 V          >2 V             X       0 V < VCANH < VCC        0 V < VCANL < VCC       recessive        X
+2003 Oct 22                                                     4
+
+
+Philips Semiconductors                                                                                    Product specification
+   High speed CAN transceiver                                                                                 TJA1050
+LIMITING VALUES
+In accordance with the Absolute Maximum Rating System (IEC 60134). All voltages are referenced to GND (pin 2).
+Positive currents flow into the IC.
+     SYMBOL                       PARAMETER                             CONDITIONS            MIN.         MAX.        UNIT
+ VCC               supply voltage                                                           −0.3        +6          V
+ VCANH             DC voltage at pin CANH                         0 < VCC < 5.25 V;         −27         +40         V
+                                                                  no time limit
+ VCANL             DC voltage at pin CANL                         0 < VCC < 5.25 V;         −27         +40         V
+                                                                  no time limit
+ VTXD              DC voltage at pin TXD                                                    −0.3        VCC + 0.3 V
+ VRXD              DC voltage at pin RXD                                                    −0.3        VCC + 0.3 V
+ Vref              DC voltage at pin Vref                                                   −0.3        VCC + 0.3 V
+ VS                DC voltage at pin S                                                      −0.3        VCC + 0.3 V
+ Vtrt(CANH)        transient voltage at pin CANH                  note 1                    −200        +200        V
+ Vtrt(CANL)        transient voltage at pin CANL                  note 1                    −200        +200        V
+ Vesd              electrostatic discharge voltage at all pins note 2                       −4000       +4000       V
+                                                                  note 3                    −200        +200        V
+ Tstg              storage temperature                                                      −55         +150        °C
+ Tvj               virtual junction temperature                   note 4                    −40         +150        °C
+Notes
+1. The waveforms of the applied transients shall be in accordance with “ISO 7637 part 1”, test pulses 1, 2, 3a and 3b
+     (see Fig.4).
+2. Human body model: C = 100 pF and R = 1.5 kΩ.
+3. Machine model: C = 200 pF, R = 10 Ω and L = 0.75 µH.
+4. In accordance with “IEC 60747-1”. An alternative definition of Tvj is: Tvj = Tamb + P × Rth(vj-a), where Rth(vj-a) is a fixed
+     value to be used for the calculation of Tvj. The rating for Tvj limits the allowable combinations of power dissipation (P)
+     and ambient temperature (Tamb).
+THERMAL CHARACTERISTICS
+According to IEC 60747-1.
+     SYMBOL                       PARAMETER                             CONDITIONS              VALUE              UNIT
+ Rth(vj-a)         thermal resistance from junction to            in free air                     145               K/W
+                   ambient in SO8 package
+ Rth(vj-s)         thermal resistance from junction to            in free air                      50               K/W
+                   substrate of bare die
+QUALITY SPECIFICATION
+Quality specification “SNW-FQ-611 part D” is applicable.
+2003 Oct 22                                                      5
+
+
+Philips Semiconductors                                                                             Product specification
+    High speed CAN transceiver                                                                          TJA1050
+CHARACTERISTICS
+VCC = 4.75 V to 5.25 V; Tvj = −40 °C to +150 °C; RL = 60 Ω unless specified otherwise; all voltages are referenced to
+GND (pin 2); positive currents flow into the IC; see notes 1 and 2.
+     SYMBOL              PARAMETER                      CONDITIONS           MIN.        TYP.        MAX.       UNIT
+ Supply (pin VCC)
+ ICC             supply current                   dominant; VTXD = 0 V    25         50            75          mA
+                                                  recessive; VTXD = VCC   2.5        5             10          mA
+ Transmitter data input (pin TXD)
+ VIH             HIGH-level input voltage         output recessive        2.0        −             VCC + 0.3 V
+ VIL             LOW-level input voltage          output dominant         −0.3       −             +0.8        V
+ IIH             HIGH-level input current         VTXD = VCC              −5         0             +5          µA
+ IIL             LOW-level input current          VTXD = 0 V              −100       −200          −300        µA
+ Ci              input capacitance                not tested              −          5             10          pF
+ Mode select input (pin S)
+ VIH             HIGH-level input voltage         silent mode             2.0        −             VCC + 0.3 V
+ VIL             LOW-level input voltage          high-speed mode         −0.3       −             +0.8        V
+ IIH             HIGH-level input current         VS = 2 V                20         30            50          µA
+ IIL             LOW-level input current          VS = 0.8 V              15         30            45          µA
+ Receiver data output (pin RXD)
+ IOH             HIGH-level output current        VRXD = 0.7VCC           −2         −6            −15         mA
+ IOL             LOW-level output current         VRXD = 0.45 V           2          8.5           20          mA
+ Reference voltage output (pin Vref)
+ Vref            reference output voltage         −50 µA < IVref < +50 µA 0.45VCC    0.5VCC        0.55VCC     V
+ Bus lines (pins CANH and CANL)
+ Vo(reces)(CANH) recessive bus voltage at         VTXD = VCC; no load     2.0        2.5           3.0         V
+                 pin CANH
+ Vo(reces)(CANL) recessive bus voltage at         VTXD = VCC; no load     2.0        2.5           3.0         V
+                 pin CANL
+ Io(reces)(CANH) recessive output current at      −27 V < VCANH < +32 V; −2.0        −             +2.5        mA
+                 pin CANH                         0 V < VCC < 5.25 V
+ Io(reces)(CANL) recessive output current at      −27 V < VCANL < +32 V;  −2.0       −             +2.5        mA
+                 pin CANL                         0 V < VCC < 5.25 V
+ Vo(dom)(CANH)   dominant output voltage at       VTXD = 0 V              3.0        3.6           4.25        V
+                 pin CANH
+ Vo(dom)(CANL)   dominant output voltage at       VTXD = 0 V              0.5        1.4           1.75        V
+                 pin CANL
+ Vi(dif)(bus)    differential bus input voltage   VTXD = 0 V; dominant;   1.5        2.25          3.0         V
+                 (VCANH − VCANL)                  42.5 Ω < RL < 60 Ω
+                                                  VTXD = VCC; recessive;  −50        0             +50         mV
+                                                  no load
+2003 Oct 22                                                  6
+
+
+Philips Semiconductors                                                                             Product specification
+   High speed CAN transceiver                                                                            TJA1050
+     SYMBOL              PARAMETER                    CONDITIONS                MIN.        TYP.     MAX.        UNIT
+ Io(sc)(CANH)    short-circuit output current at VCANH = 0 V; VTXD = 0 V −45             −70       −95         mA
+                 pin CANH
+ Io(sc)(CANL)    short-circuit output current at VCANL = 36 V;               45          70        100         mA
+                 pin CANL                        VTXD = 0 V
+ Vi(dif)(th)     differential receiver threshold −12 V < VCANL < +12 V; 0.5              0.7       0.9         V
+                 voltage                         −12 V < VCANH < +12 V;
+                                                 see Fig.5
+ Vi(dif)(hys)    differential receiver input     −12 V < VCANL < +12 V; 50               70        100         mV
+                 voltage hysteresis              −12 V < VCANH < +12 V;
+                                                 see Fig.5
+ Ri(cm)(CANH)    common mode input                                           15          25        35          kΩ
+                 resistance at pin CANH
+ Ri(cm)(CANL)    common mode input                                           15          25        35          kΩ
+                 resistance at pin CANL
+ Ri(cm)(m)       matching between                VCANH = VCANL               −3          0         +3          %
+                 pin CANH and pin CANL
+                 common mode input
+                 resistance
+ Ri(dif)         differential input resistance                               25          50        75          kΩ
+ Ci(CANH)        input capacitance at            VTXD = VCC; not tested      −           7.5       20          pF
+                 pin CANH
+ Ci(CANL)        input capacitance at            VTXD = VCC; not tested      −           7.5       20          pF
+                 pin CANL
+ Ci(dif)         differential input capacitance VTXD = VCC; not tested       −           3.75      10          pF
+ ILI(CANH)       input leakage current at        VCC = 0 V; VCANH = 5 V      100         170       250         µA
+                 pin CANH
+ ILI(CANL)       input leakage current at        VCC = 0 V; VCANL = 5 V      100         170       250         µA
+                 pin CANL
+ Thermal shutdown
+ Tj(sd)          shutdown junction                                           155         165       180         °C
+                 temperature
+ Timing characteristics (see Figs.6 and 7)
+ td(TXD-BUSon)   delay TXD to bus active         VS = 0 V                    25          55        110         ns
+ td(TXD-BUSoff)  delay TXD to bus inactive       VS = 0 V                    25          60        95          ns
+ td(BUSon-RXD)   delay bus active to RXD         VS = 0 V                    20          50        110         ns
+ td(BUSoff-RXD)  delay bus inactive to RXD       VS = 0 V                    45          95        155         ns
+ tdom(TXD)       TXD dominant time for           VTXD = 0 V                  250         450       750         µs
+                 time-out
+Notes
+1. All parameters are guaranteed over the virtual junction temperature range by design, but only 100 % tested at 125 °C
+     ambient temperature for dies on wafer level and in addition to this 100 % tested at 25 °C ambient temperature for
+     cased products, unless specified otherwise.
+2. For bare die, all parameters are only guaranteed if the backside of the bare die is connected to ground.
+2003 Oct 22                                                 7
+
+
+Philips Semiconductors                                                                                                          Product specification
+   High speed CAN transceiver                                                                                                       TJA1050
+APPLICATION AND TEST INFORMATION
+ handbook, full pagewidth
+                                                         +5 V                                                         47 nF
+                                                                         100
+                                                                         nF
+                                                                                                           60 Ω         60 Ω
+                                                                                 VCC
+                                                                               3
+                                                               TXD
+                                            TX0                       1
+                                                                                          CANH
+                                                                                       7
+                                  SJA1000                      Vref
+                                     CAN                              5    TJA1050                                CAN
+                               CONTROLLER                                                                       BUS LINE
+                                                                                          CANL
+                                                               RXD                     6
+                                            RX0                       4
+                                                                           2      8
+                                                                             GND    S
+                                                                                                           60 Ω         60 Ω
+                                   MICRO-
+                               CONTROLLER                                                                             47 nF
+                                                                                                                         MGS380
+                                                           Fig.3 Application information.
+                                      +5 V
+ handbook, full pagewidth
+                                                         100
+                                                          nF
+                                                                VCC
+                                                              3
+                                              TXD                                   1 nF
+                                                      1                    CANH
+                                                                        7
+                                              Vref
+                                                      5                                                 TRANSIENT
+                                                          TJA1050
+                                                                                                       GENERATOR
+                                                                                    1 nF
+                                             RXD                           CANL
+                                                      4                 6
+                                                           2     8                                               MGS379
+                                                             GND    S
+                                             15 pF
+    The waveforms of the applied transients shall be in accordance with “ISO 7637 part 1”, test pulses 1, 2, 3a and 3b.
+                                                  Fig.4 Test circuit for automotive transients.
+2003 Oct 22                                                                   8
+
+
+Philips Semiconductors                                                                                Product specification
+   High speed CAN transceiver                                                                             TJA1050
+ handbook, full pagewidth                                                                     MGS378
+                          VRXD
+                                                                                                 HIGH
+                                                                                                 LOW
+                                                         hysteresis
+                                           0.5                              0.9     Vi(dif)(bus) (V)
+                                                Fig.5 Hysteresis of the receiver.
+                                     +5 V
+                               handbook, halfpage
+                                                      100
+                                                      nF
+                                                             VCC
+                                                           3
+                                               TXD
+                                                    1                  CANH
+                                                                     7
+                                               Vref                           RL       CL
+                                                    5  TJA1050
+                                                                              60 Ω     100 pF
+                                              RXD                      CANL
+                                                    4                6
+                                                       2       8
+                                                         GND     S
+                                              15 pF
+                                                                                   MGS376
+                                         Fig.6 Test circuit for timing characteristics.
+2003 Oct 22                                                        9
+
+
+Philips Semiconductors                                                                                                      Product specification
+   High speed CAN transceiver                                                                                                   TJA1050
+                                                                                                                 HIGH
+ handbook, full pagewidth
+                                               TXD
+                                                                                                                 LOW
+                                               CANH
+                                               CANL
+                                                                                                                 dominant
+                                                                                                                 (BUS on)
+                                                                                                 0.9 V
+                                           Vi(dif)(bus)(1)
+                                                                                                0.5 V
+                                                                                                                 recessive
+                                                                                                                 (BUS off)
+                                                                                                                 HIGH
+                                                                                                        0.7VCC
+                                               RXD                      0.3VCC
+                                                                                                                 LOW
+                                      t d(TXD-BUSon)                                              t d(TXD-BUSoff)
+                                             t d(BUSon-RXD)                                               t d(BUSoff-RXD)
+                                                           t PD(TXD-RXD)                t PD(TXD-RXD)           MGS377
+    (1) Vi(dif)(bus) = VCANH − VCANL.
+                                                     Fig.7 Timing diagram for AC characteristics.
+ handbook, full pagewidth
+                                                                 CANL            6.2 kΩ
+                                                                                                 10 nF
+                                     TX            TJA1050 CANH                  6.2 kΩ                      ACTIVE PROBE
+                                                                        30    30
+                                                                         Ω     Ω
+                                                                                                              SPECTRUM-
+                                                                                                               ANALYZER
+                                                                           47 nF
+                                               test PCB                                                                 GND
+                                                                                         MGT229
+     Fig.8 Basic test set-up (with split termination) for electromagnetic emission measurement (see Figs 9 and 10).
+2003 Oct 22                                                                  10
+
+
+Philips Semiconductors                                                                                 Product specification
+   High speed CAN transceiver                                                                               TJA1050
+                                                                                                             MGT231
+          80
+ handbook, full pagewidth
+        A
+     (dBµV)
+          60
+          40
+          20
+            0
+               0                     10                 20                 30                 40    f (MHz)      50
+    Data rate of 500 kbits/s.
+                         Fig.9 Typical electromagnetic emission up to 50 MHz (peak amplitude measurement).
+                                                                                                             MGT233
+          80
+ handbook, full pagewidth
+        A
+     (dBµV)
+          60
+          40
+          20
+            0
+               0                      2                  4                  6                 8     f (MHz)      10
+    Data rate of 500 kbits/s.
+    Fig.10 Typical electromagnetic emission up to 10 MHz (peak amplitude measurement and envelope on peak
+                 amplitudes).
+2003 Oct 22                                                      11
+
+
+Philips Semiconductors                                                                                           Product specification
+   High speed CAN transceiver                                                                                        TJA1050
+ handbook, full pagewidth
+                                                                 CANL     30 Ω
+                                                                                  4.7 nF       RF VOLTMETER
+                                     TX            TJA1050       CANH     30 Ω                  AND POWER
+                                                                                                 AMPLIFIER
+                                                                                           50
+                                                                                           Ω     RF SIGNAL
+                                                                                                GENERATOR
+                                     RX            TJA1050
+                                                                                                         GND
+                                                                               test PCB
+                                                                                    MGT230
+                           Fig.11 Basic test set-up for electromagnetic immunity measurement (see Fig.12).
+                                                                                                                       MGT232
+          30
+ handbook, full pagewidth
+   VRF(rms)
+      (V)
+                 max RF voltage reached with no errors
+          20
+          10
+            0
+              10−1                               1                          10                    102                      103
+                                                                                                             f (MHz)
+    Data rate of 500 kbits/s.
+                                                       Fig.12 Typical electromagnetic immunity.
+2003 Oct 22                                                                12
+
+
+Philips Semiconductors                                                                                      Product specification
+   High speed CAN transceiver                                                                                      TJA1050
+BONDING PAD LOCATIONS
+                                 COORDINATES(1)
+    SYMBOL         PAD
+                                 x                 y                                      8     7         6        5
+                                                               handbook, halfpage
+ TXD                 1          103               103
+ GND                 2          740                85
+ VCC                 3         886.5              111
+                                                                                                TJA1050U
+ RXD                 4        1371.5              111
+                                                                                                                        test pad
+ Vref                5         1394              1094
+ CANL                6          998              1115                           x
+                                                                                    0     1
+ CANH                7         538.5             1115                                 0
+                                                                                                     2 3           4
+                                                                                                               MGS381
+ S                   8          103              1097                                   y
+Note
+                                                                  The backside of the bare die must be connected to ground.
+1. All x/y coordinates represent the position of the centre
+    of each pad (in µm) with respect to the lefthand bottom                       Fig.13 Bonding pad locations.
+    corner of the top aluminium layer (see Fig.13).
+2003 Oct 22                                                 13
+
+
+Philips Semiconductors                                                                                                        Product specification
+  High speed CAN transceiver                                                                                                        TJA1050
+PACKAGE OUTLINE
+SO8: plastic small outline package; 8 leads; body width 3.9 mm                                                                                SOT96-1
+                                                  D                                               E                A
+                                                                                                                            X
+                                                                           c
+                                       y                                                         HE                         v M A
+                                    Z
+                                   8                          5
+                                                                                                              Q
+                                                                                 A2
+                                                                                                                (A 3)     A
+                                                                                      A1
+                                     pin 1 index
+                                                                                                                       θ
+                                                                                                           Lp
+                                   1                          4                                           L
+                                          e                        w M                             detail X
+                                                           bp
+                                                              0            2.5              5 mm
+                                                                          scale
+  DIMENSIONS (inch dimensions are derived from the original mm dimensions)
+               A
+     UNIT    max.      A1      A2      A3       bp     c     D (1) E (2)    e       HE       L     Lp       Q       v     w      y      Z (1)   θ
+                      0.25    1.45             0.49  0.25    5.0   4.0              6.2            1.0      0.7                         0.7
+      mm      1.75                    0.25                                 1.27            1.05                   0.25   0.25   0.1               o
+                      0.10    1.25             0.36  0.19    4.8   3.8              5.8            0.4      0.6                         0.3     8
+                     0.010 0.057              0.019 0.0100  0.20   0.16            0.244         0.039 0.028                           0.028    0o
+    inches   0.069                    0.01                                 0.05           0.041                   0.01   0.01  0.004
+                     0.004 0.049              0.014 0.0075  0.19   0.15            0.228         0.016 0.024                           0.012
+  Notes
+  1. Plastic or metal protrusions of 0.15 mm (0.006 inch) maximum per side are not included.
+  2. Plastic or metal protrusions of 0.25 mm (0.01 inch) maximum per side are not included.
+        OUTLINE                                            REFERENCES                                            EUROPEAN
+                                                                                                                                    ISSUE DATE
+        VERSION                   IEC                 JEDEC              JEITA                                  PROJECTION
+                                                                                                                                      99-12-27
+         SOT96-1                076E03               MS-012
+                                                                                                                                      03-02-18
+2003 Oct 22                                                                14
+
+
+Philips Semiconductors                                                                                      Product specification
+   High speed CAN transceiver                                                                                    TJA1050
+SOLDERING                                                           If wave soldering is used the following conditions must be
+                                                                    observed for optimal results:
+Introduction to soldering surface mount packages
+                                                                    • Use a double-wave soldering method comprising a
+This text gives a very brief insight to a complex technology.          turbulent wave with high upward pressure followed by a
+A more in-depth account of soldering ICs can be found in               smooth laminar wave.
+our “Data Handbook IC26; Integrated Circuit Packages”
+                                                                    • For packages with leads on two sides and a pitch (e):
+(document order number 9398 652 90011).
+                                                                       – larger than or equal to 1.27 mm, the footprint
+There is no soldering method that is ideal for all surface                longitudinal axis is preferred to be parallel to the
+mount IC packages. Wave soldering can still be used for                   transport direction of the printed-circuit board;
+certain surface mount ICs, but it is not suitable for fine pitch
+SMDs. In these situations reflow soldering is                          – smaller than 1.27 mm, the footprint longitudinal axis
+recommended.                                                              must be parallel to the transport direction of the
+                                                                          printed-circuit board.
+Reflow soldering                                                       The footprint must incorporate solder thieves at the
+                                                                       downstream end.
+Reflow soldering requires solder paste (a suspension of
+fine solder particles, flux and binding agent) to be applied        • For packages with leads on four sides, the footprint must
+to the printed-circuit board by screen printing, stencilling or        be placed at a 45° angle to the transport direction of the
+pressure-syringe dispensing before package placement.                  printed-circuit board. The footprint must incorporate
+Driven by legislation and environmental forces the                     solder thieves downstream and at the side corners.
+worldwide use of lead-free solder pastes is increasing.             During placement and before soldering, the package must
+Several methods exist for reflowing; for example,                   be fixed with a droplet of adhesive. The adhesive can be
+convection or convection/infrared heating in a conveyor             applied by screen printing, pin transfer or syringe
+type oven. Throughput times (preheating, soldering and              dispensing. The package can be soldered after the
+cooling) vary between 100 and 200 seconds depending                 adhesive is cured.
+on heating method.                                                  Typical dwell time of the leads in the wave ranges from
+Typical reflow peak temperatures range from                         3 to 4 seconds at 250 °C or 265 °C, depending on solder
+215 to 270 °C depending on solder paste material. The               material applied, SnPb or Pb-free respectively.
+top-surface temperature of the packages should                      A mildly-activated flux will eliminate the need for removal
+preferably be kept:                                                 of corrosive residues in most applications.
+• below 220 °C (SnPb process) or below 245 °C (Pb-free
+   process)                                                         Manual soldering
+   – for all BGA and SSOP-T packages                                Fix the component by first soldering two
+   – for packages with a thickness ≥ 2.5 mm                         diagonally-opposite end leads. Use a low voltage (24 V or
+                                                                    less) soldering iron applied to the flat part of the lead.
+   – for packages with a thickness < 2.5 mm and a
+                                                                    Contact time must be limited to 10 seconds at up to
+      volume ≥ 350 mm3 so called thick/large packages.
+                                                                    300 °C.
+• below 235 °C (SnPb process) or below 260 °C (Pb-free
+   process) for packages with a thickness < 2.5 mm and a            When using a dedicated tool, all other leads can be
+   volume < 350 mm3 so called small/thin packages.                  soldered in one operation within 2 to 5 seconds between
+                                                                    270 and 320 °C.
+Moisture sensitivity precautions, as indicated on packing,
+must be respected at all times.
+Wave soldering
+Conventional single wave soldering is not recommended
+for surface mount devices (SMDs) or printed-circuit boards
+with a high component density, as solder bridging and
+non-wetting can present major problems.
+To overcome these problems the double-wave soldering
+method was specifically developed.
+2003 Oct 22                                                      15
+
+
+Philips Semiconductors                                                                                 Product specification
+   High speed CAN transceiver                                                                               TJA1050
+Suitability of surface mount IC packages for wave and reflow soldering methods
+                                                                                       SOLDERING METHOD
+                               PACKAGE(1)
+                                                                                   WAVE                   REFLOW(2)
+ BGA, LBGA, LFBGA, SQFP, SSOP-T(3), TFBGA, VFBGA                          not suitable              suitable
+ DHVQFN, HBCC, HBGA, HLQFP, HSQFP, HSOP, HTQFP,                           not suitable(4)           suitable
+ HTSSOP, HVQFN, HVSON, SMS
+ PLCC(5), SO, SOJ                                                         suitable                  suitable
+ LQFP, QFP, TQFP                                                          not recommended(5)(6)     suitable
+ SSOP, TSSOP, VSO, VSSOP                                                  not recommended(7)        suitable
+ PMFP(8)                                                                  not suitable              not suitable
+Notes
+1. For more detailed information on the BGA packages refer to the “(LF)BGA Application Note” (AN01026); order a copy
+    from your Philips Semiconductors sales office.
+2. All surface mount (SMD) packages are moisture sensitive. Depending upon the moisture content, the maximum
+    temperature (with respect to time) and body size of the package, there is a risk that internal or external package
+    cracks may occur due to vaporization of the moisture in them (the so called popcorn effect). For details, refer to the
+    Drypack information in the “Data Handbook IC26; Integrated Circuit Packages; Section: Packing Methods”.
+3. These transparent plastic packages are extremely sensitive to reflow soldering conditions and must on no account
+    be processed through more than one soldering cycle or subjected to infrared reflow soldering with peak temperature
+    exceeding 217 °C ± 10 °C measured in the atmosphere of the reflow oven. The package body peak temperature
+    must be kept as low as possible.
+4. These packages are not suitable for wave soldering. On versions with the heatsink on the bottom side, the solder
+    cannot penetrate between the printed-circuit board and the heatsink. On versions with the heatsink on the top side,
+    the solder might be deposited on the heatsink surface.
+5. If wave soldering is considered, then the package must be placed at a 45° angle to the solder wave direction.
+    The package footprint must incorporate solder thieves downstream and at the side corners.
+6. Wave soldering is suitable for LQFP, TQFP and QFP packages with a pitch (e) larger than 0.8 mm; it is definitely not
+    suitable for packages with a pitch (e) equal to or smaller than 0.65 mm.
+7. Wave soldering is suitable for SSOP, TSSOP, VSO and VSSOP packages with a pitch (e) equal to or larger than
+    0.65 mm; it is definitely not suitable for packages with a pitch (e) equal to or smaller than 0.5 mm.
+8. Hot bar or manual soldering is suitable for PMFP packages.
+REVISION HISTORY
+   REV          DATE               CPCN                                       DESCRIPTION
+ 4         20031013          −                    Product specification (9397 750 12157)
+                                                  Modification:
+                                                  • Added recommendation to connect unused pin S to ground
+                                                  • Added Chapter REVISION HISTORY
+ 3         20020516          −                    Product specification (9397 750 09778)
+2003 Oct 22                                                   16
+
+
+Philips Semiconductors                                                                                      Product specification
+     High speed CAN transceiver                                                                                  TJA1050
+DATA SHEET STATUS
+             DATA SHEET          PRODUCT
+  LEVEL                                                                          DEFINITION
+               STATUS(1)        STATUS(2)(3)
+  I         Objective data     Development      This data sheet contains data from the objective specification for product
+                                                development. Philips Semiconductors reserves the right to change the
+                                                specification in any manner without notice.
+  II        Preliminary data Qualification      This data sheet contains data from the preliminary specification.
+                                                Supplementary data will be published at a later date. Philips
+                                                Semiconductors reserves the right to change the specification without
+                                                notice, in order to improve the design and supply the best possible
+                                                product.
+  III       Product data       Production       This data sheet contains data from the product specification. Philips
+                                                Semiconductors reserves the right to make changes at any time in order
+                                                to improve the design, manufacturing and supply. Relevant changes will
+                                                be communicated via a Customer Product/Process Change Notification
+                                                (CPCN).
+Notes
+1. Please consult the most recently issued data sheet before initiating or completing a design.
+2. The product status of the device(s) described in this data sheet may have changed since this data sheet was
+      published. The latest information is available on the Internet at URL http://www.semiconductors.philips.com.
+3. For data sheets describing multiple type numbers, the highest-level product status determines the data sheet status.
+DEFINITIONS                                                       DISCLAIMERS
+Short-form specification  The data in a short-form               Life support applications  These products are not
+specification is extracted from a full data sheet with the        designed for use in life support appliances, devices, or
+same type number and title. For detailed information see          systems where malfunction of these products can
+the relevant data sheet or data handbook.                         reasonably be expected to result in personal injury. Philips
+                                                                  Semiconductors customers using or selling these products
+Limiting values definition  Limiting values given are in
+                                                                  for use in such applications do so at their own risk and
+accordance with the Absolute Maximum Rating System
+                                                                  agree to fully indemnify Philips Semiconductors for any
+(IEC 60134). Stress above one or more of the limiting
+                                                                  damages resulting from such application.
+values may cause permanent damage to the device.
+These are stress ratings only and operation of the device         Right to make changes  Philips Semiconductors
+at these or at any other conditions above those given in the      reserves the right to make changes in the products -
+Characteristics sections of the specification is not implied.     including circuits, standard cells, and/or software -
+Exposure to limiting values for extended periods may              described or contained herein in order to improve design
+affect device reliability.                                        and/or performance. When the product is in full production
+                                                                  (status ‘Production’), relevant changes will be
+Application information  Applications that are
+                                                                  communicated via a Customer Product/Process Change
+described herein for any of these products are for
+                                                                  Notification (CPCN). Philips Semiconductors assumes no
+illustrative purposes only. Philips Semiconductors make
+                                                                  responsibility or liability for the use of any of these
+no representation or warranty that such applications will be
+                                                                  products, conveys no licence or title under any patent,
+suitable for the specified use without further testing or
+                                                                  copyright, or mask work right to these products, and
+modification.
+                                                                  makes no representations or warranties that these
+                                                                  products are free from patent, copyright, or mask work
+                                                                  right infringement, unless otherwise specified.
+2003 Oct 22                                                    17
+
+
+Philips Semiconductors – a worldwide company
+Contact information
+For additional information please visit http://www.semiconductors.philips.com.                                         Fax: +31 40 27 24825
+For sales offices addresses send e-mail to: sales.addresses@www.semiconductors.philips.com.
+ © Koninklijke Philips Electronics N.V. 2003                                                                                                        SCA75
+ All rights are reserved. Reproduction in whole or in part is prohibited without the prior written consent of the copyright owner.
+ The information presented in this document does not form part of any quotation or contract, is believed to be accurate and reliable and may be changed
+ without notice. No liability will be accepted by the publisher for any consequence of its use. Publication thereof does not convey nor imply any license
+ under patent- or other industrial or intellectual property rights.
+Printed in The Netherlands                    R16/04/pp18                        Date of release: 2003 Oct 22              Document order number: 9397 750 12157
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+NXP:
+ TJA1050T/N1,518 TJA1050T/N1,112 TJA1050T/N1,118 TJA1050T/H/V,112 TJA1050T/H/V,118 TJA1050T/V,112
+TJA1050T/V,118 TJA1050T/N1M,112 TJA1050T/N1M,118 TJA1050T/VM,112 TJA1050T/VM,118 TJA1050T/CM,118

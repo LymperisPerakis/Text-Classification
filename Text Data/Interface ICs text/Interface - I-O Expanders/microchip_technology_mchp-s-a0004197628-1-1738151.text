@@ -1,0 +1,1826 @@
+                                                                                                               ECE1105
+  GPIO Expansion, PS/2, 23x8 Keyscan Matrix Interface via
+                SMBus or BC-Link Bus
+Highlights                                                                                Features
+The ECE1105 is a 48-Pin 3.3V Keyboard Scan Expan-                                         • Up to 23x8 Keyboard Scan Matrix
+sion or GPIO Expansion device. The device supports a                                      • Two PS/2 Ports
+keyboard scan matrix of 23x8 and has two PS/2 ports                                         - Touch Pad Support
+for touchpad and/or pointer stick support. The device is                                    - Pointer Stick Support
+connected to a Master via the BC-Link interface or via
+                                                                                          • 40 Multiplexed General Purpose I/O pins
+the SMBus.
+                                                                                            - All are MCU addressable I/O Pins
+KSI and KSO signals are multiplexed with GPIOs.
+                                                                                          • BC-Link Interconnect Bus
+                                                                                            - Link to embedded controller
+                                                                                          • SMBus Interconnect
+                                                                                            - One of two address selection
+                                                                                          • 3.3V Operation
+                                                                                            - 48-Pin, QFN RoHS Compliant package
+                                                                                            - 0.5mm Pitch
+                                                                                            - 7x7m Body size
+                                                          Block Diagram
+                                                                                           GPIO[0:39]
+                                                                                            Registers
+                                                                                           Muxed with
+                                                                                           KSO & KSI
+                                                                                            Status
+                                            LSBC Bus                                        Mask
+                                             Interface
+                 BC Bus                                                                    Expander
+                                                            Internal Address / Data
+                                                                                                                   5 to 23
+                                                                                             Base                                   KSO[22:00]
+                                                                                                          5         Mux
+                                                                                            register
+                 SMBus
+                                               SMBus                                         Output
+                                                                      Bus
+                                              Interface                                      Control
+                                                                                            registers
+                           BC Bus /
+                           SMBus
+                          Autodetect
+                                                                                              KSI
+                                                                                            register                KSI[7:0]
+                            LSBC_INT#
+                            SMBus_INT#                                                8
+                                                                                      8
+                                                                                            Mask
+                                                                                                        KSI[7:0]
+                                                                                           Register
+                                                                                                                                           PS2_CLK
+                                                                                               PS2                                         PS2_DAT
+                                                                                            Interface                                      TB_CLK
+                                                                                                                                           TP_DAT
+                                         Internal VCC1
+                                            PWRGD
+                                                          VCC1 POR
+                                                                                                                             TEST   VCC1
+ 2008-2018 Microchip Technology Inc.                                                                                                         DS00002622A-page 1
+
+
+ECE1105
+                                            TO OUR VALUED CUSTOMERS
+ It is our intention to provide our valued customers with the best documentation possible to ensure successful use of your Microchip
+ products. To this end, we will continue to improve our publications to better suit your needs. Our publications will be refined and
+ enhanced as new volumes and updates are introduced.
+ If you have any questions or comments regarding this publication, please contact the Marketing Communications Department via
+ E-mail at docerrors@microchip.com. We welcome your feedback.
+ Most Current Data Sheet
+ To obtain the most up-to-date version of this data sheet, please register at our Worldwide Web site at:
+        http://www.microchip.com
+ You can determine the version of a data sheet by examining its literature number found on the bottom outside corner of any page.
+ The last character of the literature number is the version number, (e.g., DS30000000A is version A of document DS30000000).
+ Errata
+ An errata sheet, describing minor operational differences from the data sheet and recommended workarounds, may exist for cur-
+ rent devices. As device/documentation issues become known to us, we will publish an errata sheet. The errata will specify the
+ revision of silicon and revision of document to which it applies.
+ To determine if an errata sheet exists for a particular device, please check with one of the following:
+ • Microchip’s Worldwide Web site; http://www.microchip.com
+ • Your local Microchip sales office (see last page)
+ When contacting a sales office, please specify which device, revision of silicon and data sheet (include -literature number) you are
+ using.
+ Customer Notification System
+ Register on our web site at www.microchip.com to receive the most current information on all of our products.
+DS00002622A-page 2                                                                              2008-2018 Microchip Technology Inc.
+
+
+                                                                                                                                                             ECE1105
+Table of Contents
+1.0 Pin Functions .................................................................................................................................................................................. 4
+2.0 Product Description ....................................................................................................................................................................... 12
+3.0 Operational Description ................................................................................................................................................................ 35
+4.0 Timing Diagrams ........................................................................................................................................................................... 38
+5.0 Package Outline ............................................................................................................................................................................ 43
+Appendix A: Data sheet Revision History ........................................................................................................................................... 45
+The Microchip Web Site ...................................................................................................................................................................... 46
+Customer Change Notification Service ............................................................................................................................................... 46
+Customer Support ............................................................................................................................................................................... 46
+Product Identification System ............................................................................................................................................................. 47
+ 2008-2018 Microchip Technology Inc.                                                                                                                              DS00002622A-page 3
+
+
+ECE1105
+1.0     PIN FUNCTIONS
+TABLE 1-1:      ECE1105 PIN TABLE
+                Pin #         Name  Pin #             Name
+                  1   GPIO41         25   GPIO45/TPCLK
+                  2   GPIO12/KSI2    26   GPIO35/KSO13
+                  3   GPIO13/KSI3    27   GPIO36/KSO14
+                  4   GPIO14/KSI4    28   GPIO37/KSO15
+                  5   GPIO15/KSI5    29   GPIO00/KSO16
+                  6   GPIO16/KSI6    30   GPIO01/KSO17
+                  7   GPIO17/KSI7    31   GPIO02/KSO18
+                  8   GPIO20/KSO00   32   GPIO03/KSO19
+                  9   VCC1           33   VCC1
+                 10   GPIO21/KSO01   34   GPIO04/KSO20
+                 11   GPIO22/KSO02   35   GPIO05/KSO21
+                 12   GPIO42         36   GPIO46/PSDATA
+                 13   GPIO43         37   GPIO47/PSCLK
+                 14   GPIO23/KSO03   38   GPIO06/KSO22
+                 15   GPIO24/KSO04   39   BC_DAT/SMB_DATA
+                 16   GPIO25/KSO05   40   BC_CLK/SMB_CLK
+                 17   GPIO26/KSO06   41   BC_INT#/SMB_INT#
+                 18   GPIO27/KSO07   42   SMB_ADDR
+                 19   GPIO30/KSO08   43   GPIO07
+                 20   GPIO31/KSO09   44   RESERVED
+                 21   GPIO32/KSO10   45   TEST_PIN
+                 22   GPIO33/KSO11   46   GPIO10/KSI0
+                 23   GPIO34/KSO12   47   GPIO11/KSI1
+                 24   GPIO44/TPDATA  48   GPIO40
+DS00002622A-page 4                                     2008-2018 Microchip Technology Inc.
+
+
+                                                                                                                                                                                                                             ECE1105
+FIGURE 1-1:            ECE1105 PIN DIAGRAM (TOP VIEW, EXPOSED PAD IS ON THE BOTTOM)
+                                                                                                                                   BC_INT#/SMB_INT#   BC_CLK/SMB_CLK   BC_DAT/SMB_DATA
+                                         GPIO11/KSI1    GPIO10/KSI0                   RESERVED                      SMB_ADDR                                                             GPIO06/KSO22   GPIO47/PSCLK
+                                GPIO40                                 TEST_PIN                      GPIO07
+                                48       47             46             45             44             43             42              41                40               39                38             37
+             GPIO41      1                                                                                                                                                                                              36   GPIO46/PSDATA
+        GPIO12/KSI2      2                                                                                                                                                                                              35   GPIO05/KSO21
+        GPIO13/KSI3      3                              ECE1105-HZH                                                                                                                                                     34   GPIO04/KSO20
+        GPIO14/KSI4      4                                                                                                                                                                                              33   VCC1
+        GPIO15/KSI5      5                              48 Pin QFN                                                                                                                                                      32   GPIO03/KSO19
+        GPIO16/KSI6      6                                                                                                                                                                                              31   GPIO02/KSO18
+        GPIO17/KSI7      7                                        7mm x 7mm Body                                                                                                                                        30   GPIO01/KSO17
+      GPIO20/KSO00       8                                                                                                                                                                                              29   GPIO00/KSO16
+               VCC1      9                                                                                                                                                                                              28   GPIO37/KSO15
+      GPIO21/KSO01       10                                                                                                                                                                                             27   GPIO36/KSO14
+      GPIO22/KSO02       11                                                                                                                                                                                             26   GPIO35/KSO13
+             GPIO42      12    Exposed pad must be connected to VSS                                                                                                                                                     25   GPIO45/TPCLK
+                                13       14             15             16             17             18             19              20                21               22                23             24
+                                                                                                                                                                                                        GPIO44/TPDATA
+                                GPIO43
+                                         GPIO23/KSO03   GPIO24/KSO04   GPIO25/KSO05   GPIO26/KSO06   GPIO27/KSO07   GPIO30/KSO08   GPIO31/KSO09       GPIO32/KSO10     GPIO33/KSO11      GPIO34/KSO12
+ 2008-2018 Microchip Technology Inc.                                                                                                                                                                                          DS00002622A-page 5
+
+
+ECE1105
+TABLE 1-2:       ECE1105 PIN DESCRIPTIONS
+          Pin #       Name      Signal Sescription                              Buffer    Notes
+            1   GPIO41          General Purpose IO.                              IP/O8       3
+                                General Purpose IO. May be configured as an
+            2   GPIO12/KSI2                                                     ISP/O8       3
+                                OD output Keyboard Scan Input
+                                General Purpose IO. May be configured as an
+            3   GPIO13/KSI3                                                     ISP/O8       3
+                                OD output Keyboard Scan Input
+                                General Purpose IO. May be configured as an
+            4   GPIO14/KSI4                                                     ISP/O8       3
+                                OD output Keyboard Scan Input
+                                General Purpose IO. May be configured as an
+            5   GPIO15/KSI5                                                     ISP/O8       3
+                                OD output Keyboard Scan Input
+                                General Purpose IO. May be configured as an
+            6   GPIO16/KSI6                                                     ISP/O8       3
+                                OD output Keyboard Scan Input
+                                General Purpose IO. May be configured as an
+            7   GPIO17/KSI7                                                     ISP/O8       3
+                                OD output Keyboard Scan Input
+                                General Purpose IO. May be configured as an
+            8   GPIO20/KSO00                                                     IP/O8       3
+                                OD output Keyboard Scan Output
+            9   VCC1            PWR                                              PWR
+                                General Purpose IO. May be configured as an
+           10   GPIO21/KSO01                                                     IP/O8       3
+                                OD output Keyboard Scan Output
+                                General Purpose IO. May be configured as an
+           11   GPIO22/KSO02                                                     IP/O8       3
+                                OD output Keyboard Scan Output
+           12   GPIO42          General Purpose IO.                              IP/O8       3
+           13   GPIO43          General Purpose IO.                              IP/O8       3
+DS00002622A-page 6                                                        2008-2018 Microchip Technology Inc.
+
+
+                                                                                       ECE1105
+           Pin #         Name         Signal Sescription                          Buffer  Notes
+                                      General Purpose IO. May be configured as an
+            14   GPIO23/KSO03                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            15   GPIO24/KSO04                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            16   GPIO25/KSO05                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            17   GPIO26/KSO06                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            18   GPIO27/KSO07                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            19   GPIO30/KSO08                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            20   GPIO31/KSO09                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            21   GPIO32/KSO10                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            22   GPIO33/KSO11                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      General Purpose IO. May be configured as an
+            23   GPIO34/KSO12                                                      IP/O8    3
+                                      OD output Keyboard Scan Output
+                                      PS/2 Touch Pad Data IO, General Purpose IO.
+            24   GPIO44/TPDATA                                                    IP/O12    3
+                                      May be configured as an OD Output.
+ 2008-2018 Microchip Technology Inc.                                                    DS00002622A-page 7
+
+
+ECE1105
+          Pin #       Name    Signal Sescription                               Buffer   Notes
+                              PS/2 Touch Pad Clock IO, General Purpose IO.
+           25   GPIO45/TPCLK                                                  IP/O12       3
+                              May be configured as an OD Output.
+                              General Purpose IO. May be configured as an
+           26   GPIO35/KSO13                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              General Purpose IO. May be configured as an
+           27   GPIO36/KSO14                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              General Purpose IO. May be configured as an
+           28   GPIO37/KSO15                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              General Purpose IO. May be configured as an
+           29   GPIO00/KSO16                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              General Purpose IO. May be configured as an
+           30   GPIO01/KSO17                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              General Purpose IO. May be configured as an
+           31   GPIO02/KSO18                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              General Purpose IO. May be configured as an
+           32   GPIO03/KSO19                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+           33   VCC1          PWR                                              PWR
+                              General Purpose IO. May be configured as an
+           34   GPIO04/KSO20                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              General Purpose IO. May be configured as an
+           35   GPIO05/KSO21                                                   IP/O8       3
+                              OD output Keyboard Scan Output
+                              PS/2 Data IO, General Purpose IO. May be
+           36   GPIO46/PSDATA                                                 IP/O12       3
+                              configured as an OD Output.
+                              PS/2 Clock IO, General Purpose IO. May be
+           37   GPIO47/PSCLK                                                  IP/O12       3
+                              configured as an OD Output.
+DS00002622A-page 8                                                      2008-2018 Microchip Technology Inc.
+
+
+                                                                                               ECE1105
+           Pin #         Name          Signal Sescription                                Buffer    Notes
+                                       General Purpose IO. May be configured as an
+            38   GPIO06/KSO22                                                             IP/O8      3
+                                       OD output Keyboard Scan Output
+            39   BC_DAT/SMB_DATA BC_DAT IO. SMBus Data IO                                  I/O8
+            40   BC_CLK/SMB_CLK        BC_CLK. SMBus Slave Clock I                           I
+                                       BC_INT# Output Active Low . SMBus Interrupt
+            41   BC_INT#/SMB_INT#                                                           O8       4
+                                       Output Active Low
+                                       SMBus Address Select Strap. Selects between
+            42   SMB_ADDR                                                                    I
+                                       one of two SMBus Slave Addresses
+                                       General Purpose IO. May be configured as an
+            43   GPIO07                                                                   IP/O8      3
+                                       OD output
+            44   RESERVED              Reserved                                             NC       2
+            45   TEST_PIN              Test Pin Input                                        I       1
+                                       General Purpose IO. May be configured as an
+            46   GPIO10/KSI0                                                             ISP/O8      3
+                                       OD output Keyboard Scan Input
+                                       General Purpose IO. May be configured as an
+            47   GPIO11/KSI1                                                             ISP/O8      3
+                                       OD output Keyboard Scan Input
+            48   GPIO40                General Purpose IO.                                IP/O8      3
+                                      Exposed pad must be connected to VSS
+  Note 1: This pin requires an external pull-down resister to ensure that the pin remains de-asserted.
+        2: NC Not Connected.
+        3: Full Function GPIO Refer to Table 2-4, “GPIO Configuration Register,” on page 17.
+        4: SMB_INT# is Open Drain / BC_INT# is Push-pull. SMBus is default.
+ 2008-2018 Microchip Technology Inc.                                                            DS00002622A-page 9
+
+
+ECE1105
+TABLE 1-3:         ALTERNATE PIN FUNCTIONS
+          Pin #            Primary         Alternate           Pin #          Primary            Alternate
+             1       GPIO41                                     25       GPIO45             TPCLK
+             2       GPIO12            KSI2                     26       GPIO35             KSO13
+             3       GPIO13            KSI3                     27       GPIO36             KSO14
+             4       GPIO14            KSI4                     28       GPIO37             KSO15
+             5       GPIO15            KSI5                     29       GPIO00             KSO16
+             6       GPIO16            KSI6                     30       GPIO01             KSO17
+             7       GPIO17            KSI7                     31       GPIO02             KSO18
+             8       GPIO20            KSO00                    32       GPIO03             KSO19
+             9       VCC1              VCC1                     33       VCC1               VCC1
+            10       GPIO21            KSO01                    34       GPIO04             KSO20
+            11       GPIO22            KSO02                    35       GPIO05             KSO21
+            12       GPIO42                                     36       GPIO46             PSDATA
+            13       GPIO43                                     37       GPIO47             PSCLK
+            14       GPIO23            KSO03                    38       GPIO06             KSO22
+            15       GPIO24            KSO04                    39       BC_DAT             SMB_DATA
+            16       GPIO25            KSO05                    40       BC_CLK             SMB_CLK
+            17       GPIO26            KSO06                    41       BC_INT#            SMB_INT#
+            18       GPIO27            KSO07                    42       SMB_ADDR
+            19       GPIO30            KSO08                    43       GPIO07
+            20       GPIO31            KSO09                    44       RESERVED
+            21       GPIO32            KSO10                    45       TEST_PIN
+            22       GPIO33            KSO11                    46       GPIO10             KSI0
+            23       GPIO34            KSO12                    47       GPIO11             KSI1
+            24       GPIO44            TPDATA                   48       GPIO40
+1.1       XNOR Chain Test Mode
+An XNOR Chain test structure is in to the ECE1105 to allow users to confirm that all pins are in contact with the moth-
+erboard during assembly and test operations (Figure 1-2, "XNOR Chain Test Structure").
+The XNOR Chain test structure must be activated to perform these tests. When the XNOR Chain is activated, the
+ECE1105 pin functions are disconnected from the device pins, which all become input pins except for one output pin at
+the end of XNOR Chain.
+The tests that are performed when the XNOR Chain test structure is activated require the board-level test hardware to
+control the device pins and observe the results at the XNOR Chain output pin.
+1.2       Pins in XNOR Chain Structure
+All pins are inputs into the XNOR Chain with the exception of the following pins:
+•  TEST_PIN (this is the XNOR Chain enable input)
+•  RESERVED
+•  SMB_ADDR
+•  BC_INT#/SMB_INT#
+1.3       Entering and Exiting the XNOR Chain
+The XNOR Chain test is entered by setting TEST_PIN to 1 while SMB_ADDR is 0.
+When activated, the test mode allows one single input pin, when switched, to toggle the BC_INT#/SMB_INT# output.
+The XNOR Chain is exited by setting TEST_PIN to 0, independent of the value of SMB_ADDR.
+DS00002622A-page 10                                                                2008-2018 Microchip Technology Inc.
+
+
+                                                       ECE1105
+FIGURE 1-2:            XNOR CHAIN TEST STRUCTURE
+   I/O#1                  I/O#2          I/O#3   I/O#n            XNor
+                                                                   Out
+ 2008-2018 Microchip Technology Inc.                   DS00002622A-page 11
+
+
+ECE1105
+2.0       PRODUCT DESCRIPTION
+2.1       Summary
+The ECE1105 is a 48-pin 3.3V GPIO and Keyboard Scan Expansion device.The device supports a keyboard scan
+matrix of 23x8 and has two PS/2 ports for touchpad and/or pointer stick support. The device is connected to a Master
+via the BC-Link interface or via the SMBus.
+KSI and KSO signals are multiplexed with GPIOs.
+2.2       Interrupt Generation
+Interrupts can be generated by an edge detection on a GPIO pin or an edge detection on one of the bus interface pins.
+and the two PS/2 ports. The bus interrupt pin (BC_INT# or SMBUS_INT#) is asserted if any bit in one of the Interrupt
+Status registers is 1 and the corresponding Interrupt Mask bit is also 1. Interrupt generation is illustrated in Figure 2-1,
+"Interrupt Generation".
+DS00002622A-page 12                                                                   2008-2018 Microchip Technology Inc.
+
+
+                                                                                      ECE1105
+FIGURE 2-1:               INTERRUPT GENERATION
+              Other Status      Other Mask  GPIO Status
+                                                47-40
+                                                            GPIO Mask
+                                                              47-40   ··· GPIO Status
+                                                                            07-00
+                                                                                         GPIO Mask
+                                                                                           07-00
+                                                        ···                           ···
+            KSI Status       KSI Mask
+                                                 ···
+                                              Group
+                                            Int Status
+                                           BC_INT# or
+                                           SMBus_Int#
+ 2008-2018 Microchip Technology Inc.                                                   DS00002622A-page 13
+
+
+ECE1105
+In order for software to determine which device is the source of an interrupt, it should first read the Group Interrupt Status
+Register to determine which Status register group is a source for the interrupt. Software should read both the Status
+register and the associated Mask register, then AND the two values together. Bits that are 1 in the result of the AND are
+active interrupts.
+Software clears an interrupt by writing a 1 to the corresponding bit in the Status register.
+   Note:     Although the ECE1105 can generate the SMBus interrupt signal SMBUS_INT# as described above, it will
+             not respond to the SMBus Alert Response Address transaction unless Bit4 ARA in the Clock Control Reg-
+             ister (Register FAh) is set to 1.
+2.3       Integrated VCC1 Reset Generator
+When VCC1 power is applied to the ECE1105, a VCC1 POR will be generated. This VCC1 POR will reset the device.
+2.4       Register Address Table
+TABLE 2-1:          REGISTER SUMMARY
+    Address (HEX)                                    Register                                       VCC1 POR Default
+           00h                                    GPIO[7:0] Input                                           00h
+           01h                                   GPIO[17:10] Input                                          00h
+           02h                                   GPIO[27:20] Input                                          00h
+           03h                                   GPIO[37:30] Input                                          00h
+           04h                                   GPIO[47:40] Input                                          00h
+           05h                                   GPIO[7:0] Output                                           00h
+           06h                                  GPIO[17:10] Output                                          00h
+           07h                                  GPIO[27:20] Output                                          00h
+           08h                                  GPIO[37:30] Output                                          00h
+           09h                                  GPIO[47:40] Output                                          00h
+          0Ah                                  GPIO00 Configuration                                         00h
+          0Bh                                  GPIO01 Configuration                                         00h
+          0Ch                                  GPIO02 Configuration                                         00h
+          0Dh                                  GPIO03 Configuration                                         00h
+          0Eh                                  GPIO04 Configuration                                         00h
+           0Fh                                 GPIO05 Configuration                                         00h
+           10h                                 GPIO06 Configuration                                         00h
+           11h                                 GPIO07 Configuration                                         00h
+           12h                                 GPIO10 Configuration                                         00h
+           13h                                 GPIO11 Configuration                                         00h
+           14h                                 GPIO12 Configuration                                         00h
+           15h                                 GPIO13 Configuration                                         00h
+           16h                                 GPIO14 Configuration                                         00h
+           17h                                 GPIO15 Configuration                                         00h
+           18h                                 GPIO16 Configuration                                         00h
+           19h                                 GPIO17 Configuration                                         00h
+          1Ah                                  GPIO20 Configuration                                         00h
+          1Bh                                  GPIO21 Configuration                                         00h
+          1Ch                                  GPIO22 Configuration                                         00h
+          1Dh                                  GPIO23 Configuration                                         00h
+DS00002622A-page 14                                                                      2008-2018 Microchip Technology Inc.
+
+
+                                                                    ECE1105
+TABLE 2-1:        REGISTER SUMMARY (CONTINUED)
+   Address (HEX)                               Register            VCC1 POR Default
+         1Eh                            GPIO24 Configuration             00h
+         1Fh                            GPIO25 Configuration             00h
+         20h                            GPIO26 Configuration             00h
+         21h                            GPIO27 Configuration             00h
+         22h                            GPIO30 Configuration             00h
+         23h                            GPIO31 Configuration             00h
+         24h                            GPIO32 Configuration             00h
+         25h                            GPIO33 Configuration             00h
+         26h                            GPIO34 Configuration             00h
+         27h                            GPIO35 Configuration             00h
+         28h                            GPIO36 Configuration             00h
+         29h                            GPIO37 Configuration             00h
+         2Ah                            GPIO40 Configuration             00h
+         2Bh                            GPIO41 Configuration             00h
+         2Ch                            GPIO42 Configuration             00h
+         2Dh                            GPIO43 Configuration             00h
+         2Eh                            GPIO44 Configuration             00h
+         2Fh                            GPIO45 Configuration             00h
+         30h                            GPIO46 Configuration             00h
+         31h                            GPIO47 Configuration             00h
+         32h                           GPIO[7:0] Interrupt Status        00h
+         33h                          GPIO[17:10] Interrupt Status       00h
+         34h                          GPIO[27:20] Interrupt Status       00h
+         35h                          GPIO[37:30] Interrupt Status       00h
+         36h                          GPIO[47:40] Interrupt Status       00h
+         37h                           GPIO[7:0] Interrupt Mask          00h
+         38h                          GPIO[17:10] Interrupt Mask         00h
+         39h                          GPIO[27:20] Interrupt Mask         00h
+         3Ah                          GPIO[37:30] Interrupt Mask         00h
+         3Bh                          GPIO[47:40] Interrupt Mask         00h
+       3C-3Fh                                 Reserved                   00h
+         40h                                 KSO Select                  40h
+         41h                                   KSI Input                 00h
+         42h                                  KSI Status                 00h
+         43h                              KSI Interrupt Mask             00h
+         50h                             PS/2 Transmit Buffer             00
+         50h                             PS/2 Receive Buffer             FFh
+         51h                                PS/2 Control                 00h
+         52h                                 PS/2 Status                 10h
+          53                                  Reserved                   00h
+         54h                              TP Transmit Buffer              00
+         54h                              TP Receive Buffer              FFh
+         55h                                  TP Control                 00h
+         56h                                  TP Status                  10h
+ 2008-2018 Microchip Technology Inc.                                 DS00002622A-page 15
+
+
+ECE1105
+TABLE 2-1:        REGISTER SUMMARY (CONTINUED)
+   Address (HEX)                                 Register                                    VCC1 POR Default
+      57h-F4h                                    Reserved                                           00h
+        F5h                                        Reset                                            00h
+        F6h                                     MCHP test                                           00h
+        F7h                               Other Interrupt Status                                    00h
+        F8h                               Other Interrupt Mask                                      00h
+        F9h                                   Group Interrupt                                       00h
+        FAh                                   Clock Control                                         00h
+        FBh                                  Wakeup Control                                         00h
+        FCH                                      Device ID                                          42h
+        FDh                              Device Version Number                                 Current version
+        FEh                                  Vendor ID (LSB)                                        55h
+        FFh                                  Vendor ID (MSB)                                        10h
+2.5     Detailed Register Descriptions
+2.5.1     GPIO REGISTERS
+  Note:   When the GPIO function is selected, the buffer has full GPIO functionality. When KSO is selected the buffer
+          is set to Open-Drain output operation.
+2.5.2     GPIO INPUT REGISTER
+TABLE 2-2:        GPIO INPUT REGISTER
+         ADDRESS REFER        TO Table 2-1, "Register                                    8-bit SIZE
+                      Summary"
+                                                                                               VCC1 POR
+            POWER VCC1                                                                    N/A
+                                                                                               DEFAULT
+                 BIT     D7          D6           D5          D4          D3           D2         D1           D0
+     BC-LINK TYPE         R           R           R           R           R             R          R           R
+         BIT NAME      GPIOx7     GPIOx6       GPIOx5      GPIOx4      GPIOx3        GPIOx2     GPIOx1      GPIOx0
+2.5.3     GPIO OUTPUT REGISTER
+TABLE 2-3:        GPIO OUTPUT REGISTER
+         ADDRESS REFER        TO Table 2-1, "Register                                    8-bit SIZE
+                      Summary"
+                                                                                               VCC1 POR
+            POWER VCC1                                                                    00h
+                                                                                               DEFAULT
+                 BIT     D7          D6           D5          D4          D3           D2         D1           D0
+     BC-LINK TYPE       R/W         R/W          R/W        R/W          R/W           R/W        R/W         R/W
+         BIT NAME      GPIOx7     GPIOx6       GPIOx5      GPIOx4      GPIOx3        GPIOx2     GPIOx1      GPIOx0
+DS00002622A-page 16                                                                2008-2018 Microchip Technology Inc.
+
+
+                                                                                                      ECE1105
+2.5.4        GPIO CONFIGURATION REGISTER
+TABLE 2-4:          GPIO CONFIGURATION REGISTER
+           ADDRESS REFER          TO Table 2-1, "Register                                       8-bit SIZE
+                         Summary"
+                                                                                                      VCC1 POR
+              POWER VCC1                                                                        00h
+                                                                                                      DEFAULT
+                   BIT        D7          D6           D5          D4           D3           D2            D1           D0
+       BC-LINK TYPE           R          R/W           R/W        R/W          R/W          R/W            R           R/W
+           BIT NAME          RES         ALT           DIR              TYPE                POL           RES           PU
+2.5.4.1        ALT
+Alternate Function select. When this bit is 0, the primary pin function is selected. When this bit is 1, the alternate function
+is selected. See Table 1-3, "Alternate Pin Functions".
+2.5.4.2        DIR, TYPE
+The level/edge and output type are controlled by these fields. The effects are defined in Table 2-5, "Direction,
+Level/Edge, Output Type Bit Definition".
+TABLE 2-5:          DIRECTION, LEVEL/EDGE, OUTPUT TYPE BIT DEFINITION
+         Direction                  Type                 Type
+                                                                                       Selected Function
+            Bit 5                   Bit 4                Bit 3
+             0                        0                    0          Input, Level Sensitive Low
+             0                        0                    1          Input, Rising Edge Triggered
+             0                        1                    0          Input, Falling Edge Triggered
+             0                        1                    1          Input, Both Edge Triggered
+             1                        0                    x          Output, Push-Pull
+             1                        1                    x          Output, Open Drain
+In order to enable oscillator wakeup from Low Power Mode for any GPIO pin, the GPIO Configuration Register for that
+GPIO must be configured for Input in Bit 5). To enable oscillator wakeup from Low Power Mode for any pin that is an
+alternate function, the GPIO Configuration Register must still be configured for input. This applies to Keyscan pin func-
+tions and also PS/2 pin functions. PS/2 pin functions should be configured for edge triggering (TYPE field 01, 10 or 11).
+See Section 2.6.4, "Clock Control".
+2.5.4.3        POL
+When the POL bit is set to ‘1’’ the signal output is inverted when routed to its pin and the interrupt level sense is inverted
+when a level-sensitive interrupt is selected by the DIR, TYPE fields. POL does not affect any output when the ALT bit
+is “1”.The state of the pin is always reported without inversion in the GPIO Input Register.
+2.5.4.4        PU
+When this bit is 1, an internal pull-up resistor is connected to the pin. When this bit is 0, the pullup is disabled.
+ 2008-2018 Microchip Technology Inc.                                                                   DS00002622A-page 17
+
+
+ECE1105
+2.5.5         GPIO INTERRUPT STATUS REGISTER
+TABLE 2-6:          GPIO INTERRUPT STATUS REGISTER
+             ADDRESS REFER           TO Table 2-1, "Register                                     8-bit SIZE
+                         Summary"
+                                                                                                       VCC1 POR
+               POWER VCC1                                                                        00h
+                                                                                                       DEFAULT
+                    BIT       D7            D6         D5          D4           D3           D2            D1          D0
+       BC-LINK TYPE         R/WC          R/WC       R/WC        R/WC        R/WC          R/WC          R/WC        R/WC
+             BIT NAME      GPIOX7        GPIOX6      GPIOX5      GPIOX4      GPIOX3       GPIOX2         GPIOX1      GPIOX0
+A bit in a GPIOX Interrupt Status Register is set to 1 when the DIRECTION field for that bit in the corresponding GPIOXn
+Configuration Register is set for Input and the bit in the corresponding GPIOX Input Register matches the conditions
+defined by the TYPE field in the GPIOX Configuration Register. For example, if the TYPE field for GPIO Xn is set for
+Level Sensitive Low, then bit n in the GPIOX Interrupt Status Register is set to 1 when bit n in the GPIOX Input Register
+is 0. If the TYPE field specifies edge triggering, then the Status Register bit is set when the Input Register bit transitions
+with the specified edge.
+Writing a bit in a GPIOX Interrupt Status Register clears that bit. Writing a bit with a 0 has no effect.
+2.5.6         GPIO INTERRUPT MASK REGISTER
+TABLE 2-7:          GPIO INTERRUPT MASK REGISTER
+             ADDRESS REFER           TO Table 2-1, "Register                                     8-bit SIZE
+                         Summary"
+                                                                                                       VCC1 POR
+               POWER VCC1                                                                        00h
+                                                                                                       DEFAULT
+                    BIT       D7            D6         D5          D4           D3           D2            D1          D0
+       BC-LINK TYPE          R/W           R/W        R/W         R/W          R/W          R/W           R/W         R/W
+                           GPIOX7        GPIOX6      GPIOX5      GPIOX4      GPIOX3       GPIOX2         GPIOX1      GPIOX0
+             BIT NAME       0 No Int      0 No Int   0 No Int    0 No Int    0 No Int      0 No Int      0 No Int    0 No Int
+                              1 Int         1 Int      1 Int       1 Int        1 Int        1 Int         1 Int       1 Int
+An interrupt is signaled on either BC_INT# or SMBus_INT# when a GPIOX bit in a GPIO Interrupt Status Register is 1
+and the corresponding GPIOX bit in the GPIO Interrupt Mask Register is also 1.
+2.6         Other Control Registers
+2.6.1         OTHER INTERRUPT STATUS REGISTER
+TABLE 2-8:          OTHER INTERRUPT STATUS REGISTER
+             ADDRESS F7h                                                                         8-bit SIZE
+                                                                                                       VCC1 POR
+               POWER VCC1                                                                        00h
+                                                                                                       DEFAULT
+                    BIT       D7            D6         D5          D4           D3           D2            D1          D0
+       BC-LINK TYPE            R             R       R/WC        R/WC        R/WC          R/WC             R           R
+                           Reserved      Reserved      TP         PS/2          TP          PS/2        Reserved    Reserved
+             BIT NAME
+                                                     WAKE        WAKE
+DS00002622A-page 18                                                                      2008-2018 Microchip Technology Inc.
+
+
+                                                                                                       ECE1105
+2.6.1.1         Bit5 TP WAKE
+This bit is set to 1 if there is a TP Wakeup event, which occurs when there is TP activity and the TP bit is set in the
+Wakeup Control register. It is cleared when written with a 1.
+    Note:     An interrupt triggered by TP activity will automatically set the OSC Control bit in the Clock Control register
+              to ‘0b’. This enables the ring oscillator, which will remain on until software clears the OSC Control bit.
+2.6.1.2         Bit4 PS/2 WAKE
+This bit is set to 1 if there is a PS/2 Wakeup event, which occurs when there is PS/2 activity and the PS/2 bit is set in
+the Wakeup Control register. It is cleared when written with a 1.
+    Note:     An interrupt triggered by PS/2 activity will automatically set the OSC Control bit in the Clock Control register
+              to ‘0b’. This enables the ring oscillator, which will remain on until software clears the OSC Control bit.
+2.6.1.3         Bit5 TP
+This bit is set to 1 if an interrupt is signaled (as defined by Note 2-7, Note 2-6 and Note 2-5) in the TP Status Register .
+It is cleared when written with a 1.
+2.6.1.4         Bit4 PS/2
+This bit is set to 1 if an interrupt is signaled (as defined by Note 2-7, Note 2-6 and Note 2-5) in the PS/2 Status Register.
+It is cleared when written with a 1.
+2.6.2         OTHER INTERRUPT MASK REGISTER
+TABLE 2-9:            OTHER INTERRUPT MASK REGISTER
+            ADDRESS F8h                                                                         8-bit SIZE
+                                                                                                       VCC1 POR
+               POWER VCC1                                                                        00h
+                                                                                                       DEFAULT
+                     BIT        D7           D6           D5          D4          D3          D2           D1          D0
+       BC-LINK TYPE              R            R          R/W         R/W         R/W         R/W           R            R
+                             Reserved      Reserved       TP         PS/2         TP         PS/2       Reserved    Reserved
+            BIT NAME
+                                                       WAKE         WAKE
+2.6.2.1         Bit5 TP WAKE
+The interrupt signal (BC_INT# in BC-LINK mode or SMB_INT# in SMBus mode) is asserted when this bit is 1 and Bit5
+TP WAKE in the Other Interrupt Status Register is 1.
+2.6.2.2         Bit4 PS/2 WAKE
+The interrupt signal (BC_INT# in BC-LINK mode or SMB_INT# in SMBus mode) is asserted when this bit is 1 and Bit4
+PS/2 WAKE in the Other Interrupt Status Register is 1.
+2.6.2.3         Bit3 TP
+The interrupt signal (BC_INT# in BC-LINK mode or SMB_INT# in SMBus mode) is asserted when this bit is 1 and Bit3
+TP in the Other Interrupt Status Register is 1.
+2.6.2.4         Bit2 PS/2
+The interrupt signal (BC_INT# in BC-LINK mode or SMB_INT# in SMBus mode) is asserted when this bit is 1 and Bit2
+PS/2 in the Other Interrupt Status Register is 1.
+ 2008-2018 Microchip Technology Inc.                                                                    DS00002622A-page 19
+
+
+ECE1105
+2.6.3        GROUP INTERRUPT STATUS
+TABLE 2-10:         GROUP INTERRUPT STATUS REGISTER
+           ADDRESS F9h                                                                        8-bit SIZE
+                                                                                                    VCC1 POR
+              POWER VCC1                                                                      00h
+                                                                                                    DEFAULT
+                    BIT      D7          D6            D5          D4          D3          D2          D1          D0
+      BC-LINK TYPE            R          R              R           R          R            R           R           R
+                           Reserved      KSI          Other       Grp4        Grp3         Grp2        Grp1        Grp0
+           BIT NAME                                  Interrup
+2.6.3.1        Bit6 KSI
+0 No KSI interrupts asserted
+1 At least one KSI interrupt asserted
+2.6.3.2        Bi5 Other Interrupt
+0 No interrupts detected in the Other Interrupt Status Register
+1 Interrupt enabled in at least one of the bits in the Other Interrupt Status Register
+2.6.3.3        Bit4 Grp4
+0 No interrupts in GPIO Group 4
+1 Interrupt in at least one of GPIO47-GPIO40
+2.6.3.4        Bit3 Grp3
+0 No interrupts in GPIO Group 3
+1 Interrupt in at least one of GPIO37-GPIO30
+2.6.3.5        Bit2 Grp2
+0 No interrupts in GPIO Group2
+1 Interrupt in at least one of GPIO27-GPIO20
+2.6.3.6        Bit1 Grp1
+0 No interrupts in GPIO Group1
+1 Interrupt in at least one of GPIO17-GPIO10
+2.6.3.7        Bit0 Grp0
+0 No interrupts in GPIO Group0
+1 Interrupt in at least one of GPIO07-GPIO00
+DS00002622A-page 20                                                                     2008-2018 Microchip Technology Inc.
+
+
+                                                                                                     ECE1105
+2.6.4           CLOCK CONTROL
+TABLE 2-11:           CLOCK CONTROL REGISTER
+              ADDRESS FAh                                                                     8-bit SIZE
+                                                                                                     VCC1 POR
+                 POWER VCC1                                                                    00h
+                                                                                                     DEFAULT
+                      BIT     D7          D6         D5          D4            D3          D2             D1          D0
+        BC-LINK TYPE           R           R          R         R/W           R/W         R/W            R/W         R/W
+                                      Reserved                  ARA        Reserved       OSC          Interface Selection
+              BIT NAME
+                                                                                         Control
+2.6.4.1          Bit4 ARA
+If this bit is 1b and the SMBus interface is enabled (either by setting the Interface Selection field to 11b or by setting the
+Interface Selection field to 0xb and an SMBus transaction is detected), the ECE1105 will respond to an SMBus Alert
+Response Address Read Byte command as defined in the SMBus specification. If this bit is 0b, the ECE1105 will ignore
+the Alert Response Address at all times.
+APPLICATION NOTE: Software must insure that the field Interface Selection in this register is ‘11b’ (SMBus
+                            Interface enabled) before setting ARA to ‘1b’.
+2.6.4.2          Bit2 OSC Control
+0b Oscillator Enabled (Default)
+1b Oscillator Low Power Enable.
+The Oscillator may be stopped and once stopped may be restarted by activity on either the bus interface pins or on
+inputs that are enabled for interrupts. See Section 2.6.5, "Wakeup Control" for conditions that restart the Oscillator
+When OSC Control is set to Low Power Enable (1b) the Oscillator will stop only when the SMBus or BC-Link and PS/2
+are idle. This means:
+      No Interrupts are pending
+      No traffic is on the bus
+      Transactions on the bus have completed
+APPLICATION NOTE: When OSC Control is set to ‘1b’, the ring oscillator will be shut down after every BC-Link or
+                            SMBus transaction completes and no interrupts are pending. The oscillator will restart when
+                            a wakeup enabled by the Wakeup Control registers occurs. The Wakeup Control register
+                            must be configured properly before setting OSC Control to ‘1b’.
+2.6.4.3          Bit[1:0] Interface Selection
+0Xb Autodetect Mode (default)
+10b BC-Link interface enabled.
+11b SMBus interface enabled
+APPLICATION NOTE: The first access to the ECE1088ECE1105 must be a write to the Clock Control register to
+                            configure the Interface Selection field to the desired interface type (10b or 11b). This is
+                            required so that Oscillator control works properly and so that the bus type does not
+                            inadvertently switch during use.
+ 2008-2018 Microchip Technology Inc.                                                                   DS00002622A-page 21
+
+
+ECE1105
+2.6.5         WAKEUP CONTROL
+The Wakeup Control Register determines which events restart the Oscillator when the Oscillator is in Low Power Mode.
+TABLE 2-12:           WAKEUP CONTROL REGISTER
+    ADDRESS FBh                                                                             8-bit SIZE
+                                                                                                  VCC1 POR
+       POWER VCC1                                                                            00h
+                                                                                                  DEFAULT
+             BIT       D7             D6            D5           D4          D3           D2            D1           D0
+      BC-LINK           R             R            R/W          R/W          R/W         R/W           R/W           R/W
+          TYPE
+    BIT NAME        Reserved       Reserved         TP          PS/2      Keyscan        GPIO      BUS_DAT        BUS_CLK
+2.6.5.1          Bit5 TP
+0 TP START bit detection wakeup events do not affect the Oscillator
+1 A TP START bit detection wakeup event will restart the Oscillator when the Oscillator is stopped in Low Power mode.
+For edge detection on any TP pin the direction and edge configuration must be set in the GPIO Configuration registers
+for the GPIO pins that correspond to the TP pins.
+   Note:      If the TP bit is 1 and TP interrupts are not enabled, an edge on the TP pins may cause the internal Oscillator
+              to start without an interrupt informing the Master device that the Oscillator is operating.
+2.6.5.2          Bit4 PS/2
+0 PS/2 START bit detection wakeup events do not affect the Oscillator
+1 A PS/2 START bit detection wakeup event will restart the Oscillator when the Oscillator is stopped in Low Power mode.
+For edge detection on any PS/2 pin the direction and edge configuration must be set in the GPIO Configuration registers
+for the GPIO pins that correspond to the PS/2 pins.
+   Note:      If the PS/2 bit is 1 and PS/2 interrupts are not enabled, an edge on the PS/2 pins may cause the internal
+              Oscillator to start without an interrupt informing the Master device that the Oscillator is operating.
+A Keyscan interrupt that is requested on any Keyscan pin for which Keyscan interrupts are enabled will restart the Oscil-
+lator when the Oscillator is stopped in Low Power mode.
+For edge detection on any Keyscan pin the direction and edge configuration must be set in the GPIO Configuration reg-
+isters for the GPIO pins that correspond to each Keyscan pin.
+2.6.5.3          Bit2 GPIO
+0 GPIO Interrupts do not affect the Oscillator
+1 A GPIO interrupt that is requested on any GPIO pin for which GPIO function is selected and a GPIO interrupt is
+enabled will restart the Oscillator when the Oscillator is stopped in Low Power mode.
+In order for edge detection to work on any GPIO pin the pin must be selected for input and the desired edges configured,
+as described in Table 2-5, "Direction, Level/Edge, Output Type Bit Definition", in the GPIO configuration register.
+2.6.5.4          Bit1 BUS_DAT
+0 The BUS_DAT signal (BC_DAT or SMB_DAT) does not affect the Oscillator
+1 Either a rising edge or a falling edge on the BUS_DAT signal will restart the Oscillator when the Oscillator is stopped
+in Low Power mode.
+DS00002622A-page 22                                                                      2008-2018 Microchip Technology Inc.
+
+
+                                                                                                    ECE1105
+2.6.5.5        Bit0 BUS_CLK
+0 The BUS_Clk signal (BC_CLK or SMB_CLK) does not affect the Oscillator
+1 Either a rising edge or a falling edge on the BUS_Clk signal will restart the Oscillator when the Oscillator is stopped
+in Low Power mode.
+2.6.6        KEYBOARD SCAN REGISTERS
+2.6.6.1        KSO Select
+TABLE 2-13:         KSO SELECT REGISTER
+           ADDRESS 40h                                                                      8-bit SIZE
+                                                                                                    VCC1 POR
+              POWER VCC1                                                                     40h
+                                                                                                    DEFAULT
+                   BIT        D7        D6          D5         D4            D3           D2            D1         D0
+      BC-LINK TYPE           R/W        R/W        R/W        R/W           R/W          R/W            R/W       R/W
+                              KSO      KSEN       KSO ALL                        KSO Driver Select[4:0]
+           BIT NAME         INVERT
+2.6.6.1.1         Bit[7] KSO INVERT
+KSO INVERT = 1 inverts KSO[22:0]. When KSO INVERT = 0 KSO[22:00] operate normally See Table 2-15, “Keyboard
+Scan Out Control Summary,” on page 24.
+2.6.6.1.2         Bit[6] KSEN
+KSEN = 1 disables keyboard scan and drives. KSEN = 0 enables keyboard scan.
+2.6.6.1.3         Bit[5] KSO ALL
+KSO ALL = 1, drives all KSO lines according to KSO INVERT bit. See Table 3.9, “Keyboard Scan Out Control summary,”
+on page 23.
+2.6.6.1.4         Bits[4:0] KSO Driver Select
+KSO Driver Select controls the corresponding KSO line (00000b = KSO[0] etc.) according to KSO INVERT. See
+Table 2-14, "KSO Select Decode".
+TABLE 2-14:         KSO SELECT DECODE
+                             KSO Select [4:0]                                            KSO Selected
+                                   00h                                                       KSO00
+                                   01h                                                       KSO01
+                                   02h                                                       KSO02
+                                   03h                                                       KSO03
+                                   04h                                                       KSO04
+                                   05h                                                       KSO05
+                                   06h                                                       KSO06
+                                   07h                                                       KSO07
+                                   08h                                                       KSO08
+                                   09h                                                       KSO09
+                                   0Ah                                                       KSO10
+                                   0Bh                                                       KSO11
+                                   0Ch                                                       KSO12
+                                   0Dh                                                       KSO13
+ 2008-2018 Microchip Technology Inc.                                                                  DS00002622A-page 23
+
+
+ECE1105
+TABLE 2-14:      KSO SELECT DECODE (CONTINUED)
+                         KSO Select [4:0]                                    KSO Selected
+                               0Eh                                               KSO14
+                               0Fh                                               KSO15
+                               10h                                               KSO16
+                               11h                                               KSO17
+                               12h                                               KSO18
+                               13h                                               KSO19
+                               14h                                               KSO20
+                               15h                                               KSO21
+                               16h                                               KSO22
+                             17h - 1Fh                                          Reserved
+TABLE 2-15:      KEYBOARD SCAN OUT CONTROL SUMMARY
+                                                       D[5:0]
+       D7              D6                D5
+                                                    KSO Drivers                    Description
+  KSO Invert        KSEN               KSO ALL
+                                                      Address
+        X               1                 x               x          Keyboard Scan disabled KSO[22:00]
+                                                                     driven high.
+        0               0                 0        10110b-00000b     KSO[Drive Selected] asserted low. All
+                                                                     others de-asserted high
+        1               0                 0        10110b-00000b     KSO[Drive Selected] de-asserted
+                                                                     high. All others asserted low
+        0               0                 0        11111b-10111b     ALL KSO’s de-asserted high
+        1               0                 -        11111b-10111b     All KSO’s asserted low
+        0               0                 1               x          KSO[22:0] drive low
+        1               0                 1               x          KSO[22:00] driven high
+2.6.6.2      KSI Input
+TABLE 2-16:      KSI INPUT REGISTER
+          ADDRESS 41h                                                           8-bit SIZE
+                                                                                      VCC1 POR
+            POWER VCC1                                                           00h
+                                                                                      DEFAULT
+                BIT       D7         D6        D5     D4         D3          D2          D1          D0
+     BC-LINK TYPE          R          R         R      R          R           R           R           R
+          BIT NAME        KS7        KS6       KS5    KS4        KS3         KS2         KS1         KS0
+DS00002622A-page 24                                                       2008-2018 Microchip Technology Inc.
+
+
+                                                                                                      ECE1105
+2.6.6.3         KSI Status
+TABLE 2-17:           KSI STATUS REGISTER
+             ADDRESS 42h                                                                        8-bit SIZE
+                                                                                                       VCC1 POR
+                POWER VCC1                                                                       00h
+                                                                                                       DEFAULT
+                     BIT       D7          D6              D5        D4         D3            D2           D1            D0
+        BC-LINK TYPE          R/WC        R/WC           R/WC       R/WC       R/WC        R/WC          R/WC          R/WC
+                           Status of KI7 Status of      Status of  Status of  Status of    Status of    Status of      Status of
+             BIT NAME                      KSI6           KSI5       KSI4       KSI3         KSI2         KSI1           KSI0
+   Note 2-1       The status bit is set by a falling edge of the KS input.
+   Note 2-2       Writing a 1 to a bit will clear that bit to 0.
+2.6.6.3.1          Operation:
+KSI interrupt is generated when one of the KSI signals transitions from High to Low (Edge Triggered). This interrupt will
+not be signalled again until all KSI signals are brought high and one then transitions low.
+2.6.6.4         KSI Mask
+TABLE 2-18:           KSI INTERRUPT MASK REGISTER
+             ADDRESS 43h                                                                        8-bit SIZE
+                                                                                                       VCC1 POR
+                POWER VCC1                                                                       00h
+                                                                                                       DEFAULT
+                     BIT       D7          D6              D5        D4         D3            D2           D1            D0
+        BC-LINK TYPE           R/W         R/W            R/W        R/W        R/W          R/W          R/W            R/W
+                               KSI7        KSI6           KSI5       KSI4       KSI3         KSI2         KSI1           KSI0
+             BIT NAME        1= Inten    1= Inten        1= Inten  1= Inten   1= Inten     1= Inten      1= Inten      1= Inten
+                             0= No Int   0= No Int      0= No Int  0= No Int  0= No Int   0= No Int     0= No Int     0= No Int
+2.6.7         PS/2 INTERFACE
+The PS/2 Device Interface has two independent Hardware Driven PS/2 ports. Each PS/2 serial channels use a synchro-
+nous serial protocol to communicate with an auxiliary device. Each PS/2 channel has Clock and Data signal lines. The
+signal lines are bi-directional and employ open drain outputs capable of sinking 16mA. A pull-up resistor, typically 10K,
+is connected to both lines. This allows either the ECE1105 PS/2 logic or the auxiliary device to drive the lines. Regard-
+less of the drive source, the auxiliary device always provides the clock for transmit and receive operations. The serial
+packet is made up of eleven bits, listed in the order they appear on the data line: start bit, eight data bits (least significant
+bit first), odd parity, and stop bit. Each bit cell is from 60S to 100S long.
+All PS/2 Serial Channel signals (CLK and DAT) are driven by open drain drivers which can be pulled to VCC1 or VCC2
+(+3.3V nominal) through 10K-ohm resistors.
+The ECE1105 supports a PS/2 Wake Interface The Wake interface restarts the internal Oscillator, which is used to con-
+trol the PS/2 state machine.
+The PS/2 Wake Interface is only active when the PS/2 signals and external pull-up resisters are powered by the VCC1
+supply. The external pull-up resister must always be powered by the same source as the PS/2 signals.
+ 2008-2018 Microchip Technology Inc.                                                                    DS00002622A-page 25
+
+
+ECE1105
+2.6.7.1       Block Diagram
+FIGURE 2-2:             PORT PS/2 BLOCK DIAGRAM
+                            B C - L in k /
+                             SM Bus
+                                  I/F
+                         P S 2 A c tiv ity
+                            in t e r r u p t    C o n tr o l
+                                               R e g is t e r s       S ta t e     P S /2       PS2DAT
+                         PS2 START                                  M a c h in e C hannel       PS2C LK
+                         W ake E vent
+                          O s c illa to r
+2.6.7.2       PS/2 Port Physical Layer Byte Transmission Protocol
+The PS/2 physical layer transfers a byte of data via an eleven bit serial stream as shown in Table 3.13. A logic 1 is sent
+at an active high level. Data sent from a Keyboard or mouse device to the host is read on the falling edge of the clock
+signal. The Keyboard or mouse device always generates the signal. The Host may inhibit communication by pulling the
+Clock line low. The Clock line must be continuously high for at least 50 microseconds before the Keyboard or mouse
+device can begin to transmit its data. See Table 3.14, "PS/2 Port Physical Layer Bus States".
+TABLE 2-19:        PS/2 PORT PHYSICAL LAYER BYTE TRANSMISSION PROTOCOL
+                         Bit                                                                   Function
+                          1                                    Start bit (always 0)
+                          2                                    Data bit 0 (least significant bit)
+                          3                                    Data bit 1
+                          4                                    Data bit 2
+                          5                                    Data bit 3
+                          6                                    Data bit 4
+                          7                                    Data bit 5
+                          8                                    Data bit 6
+                          9                                    Data bit 7 (most significant bit)
+                         10                                    Parity bit (odd / even or no parity)
+                         11                                    Stop Bit (1, 0 or ignored)
+FIGURE 2-3:             PS/2 PORT PHYSICAL LAYER BYTE TRANSMISSION PROTOCOL
+   PS2CLK       CLK 1                 CLK2           CLK3                               CLK9          CLK10           CLK11
+ PS2DATA        Start Bit                Bit 0           Bit 1                            Bit 7         Parity        Stop Bit
+DS00002622A-page 26                                                                                2008-2018 Microchip Technology Inc.
+
+
+                                                                                                    ECE1105
+TABLE 2-20:           PS/2 PORT PHYSICAL LAYER BUS STATES
+               Data                           Clock                                        State
+                high                           high               Idle
+                high                           low                Communication Inhibited
+                low                            low                Request to Send
+2.6.7.3          Interrupts
+Each of the two PS/2 Channels has both a PS/2 activity interrupt event and a START Bit detection Wake-up event. The
+activity interrupt event is routed to the Other Interrupt Status Register. The START Bit detection wakeup event is routed
+to the Wakeup Control Register.
+APPLICATION NOTE: The GPIO Configuration registers for the pins that correspond to the PS/2 and the TP ports
+                            should be programmed to Input, Falling Edge Triggered, non-inverted polarity detection in
+                            order to enable PS/2 or TP START Bit detection wakeup events.
+2.6.7.4          Registers
+2.6.7.4.1           PS/2 TX/RX
+The byte written to this register, when PS/2_T/R, PS/2_EN, and XMIT_IDLE are set, is transmitted automatically by the
+PS/2 channel control logic. If any of these three bits (PS/2_T/R, PS/2_EN, and XMIT_IDLE) are not set, then writes to
+this register are ignored. On successful completion of this transmission or upon a Transmit Time-out condition, the
+PS/2_T/R bit is automatically cleared and the XMIT_IDLE bit is automatically set. The PS/2_T/R bit must be written to
+a ‘1’ before initiating another transmission to the remote device.
+2.6.7.5          Transmit Buffer
+TABLE 2-21:           TRANSMIT BUFFER REGISTER
+             ADDRESS PS/2:        50h                                                         8-bit SIZE
+                           TP: 54h
+                                                                                                    VCC1 POR
+                POWER VCC1                                                                    00h
+                                                                                                    DEFAULT
+            BYTE0 BIT         D7           D6          D5           D4          D3          D2         D1           D0
+                   TYPE                                                    W
+             BIT NAME                                            Transmit Data PS/2
+Even if PS/2_T/R, PS/2_EN, and XMIT_IDLE are all set, writing the Transmit Register will not kick off a transmission if
+RDATA_RDY is set. The automatic PS/2 logic forces data to be read from the Receive Register before allowing a trans-
+mission.
+An interrupt is generated on the low to high transition of XMIT_IDLE.
+All bits of this register are write only.
+2.6.7.6          Receive Buffer
+When PS/2_EN=1 and PS/2_T/R=0, the PS/2 Channel is configured to automatically receive data on that channel (both
+the CLK and DATA lines will float waiting for the peripheral to initiate a reception by sending a start bit followed by the
+data bits). After a successful reception, data is placed in this register and the RDATA_RDY bit is set and the CLK line is
+forced low by the PS/2 channel logic. RDATA_RDY is cleared and the CLK line is released to hi-z following a read of
+this register. This automatically holds off further receive transfers until the Master has had a chance to get the data.
+ 2008-2018 Microchip Technology Inc.                                                                 DS00002622A-page 27
+
+
+ECE1105
+TABLE 2-22:           RECEIVE BUFFER REGISTER
+             ADDRESS PS/2:        50h                                                        8-bit SIZE
+                           TP: 54h
+                                                                                                   VCC1 POR
+                POWER VCC1                                                                   FFh
+                                                                                                   DEFAULT
+            BYTE0 BIT          D7         D6           D5         D4          D3           D2         D1          D0
+                   TYPE                                                  R
+             BIT NAME                                              Receive Data
+The Receive Register is initialized to FFh after a read or after a Time-out has occurred.
+The channel can be enabled to automatically transmit data (PS/2_EN=1) by setting PS/2_T/R while RDATA_RDY is set,
+however a transmission can not be kicked off until the data has been read from the Receive Register.
+An interrupt is generated on the low to high transition of RDATA_RDY.
+If a receive time-out (REC_TIMEOUT=1) or a transmit time-out (XMIT_TIMEOUT=1) occurs the channel is busied (CLK
+held low) for 300us (Hold Time) to ensure that the peripheral aborts. Writing to the Transmit Register will be allowed,
+however the data written will not be transmitted until the Hold Time expires.
+All bits in this register are read only.
+   Note 2-3        In receive mode the RX_BUSY bit for a particular channel is set in the PS/2 Status Register.
+2.6.7.7          Control
+TABLE 2-23:           CONTROL REGISTER
+             ADDRESS PS/2:        51h                                                        8-bit SIZE
+                           TP: 55h
+                                                                                                   VCC1 POR
+                POWER VCC1                                                                   00h
+                                                                                                   DEFAULT
+            BYTE0 BIT          D7         D6           D5         D4          D3           D2         D1          D0
+                   TYPE         R         R                R/W                      R/W               R/W         R/W
+                              RES        RES              STOP                    PARITY             PS/2_       PS/2_
+             BIT NAME
+                                                                                                      EN          T/R
+2.6.7.7.1           STOP
+These bits are used to set the level of the stop bit expected by the PS/2 channel state machine. These bits are therefore
+only valid when PS/2_EN is set.
+00=Receiver expects an active high stop bit.
+01=Receiver expects an active low stop bit.
+10=Receiver ignores the level of the Stop bit (11th bit is not interpreted as a stop bit).
+11=Reserved.
+2.6.7.7.2           PARITY
+These bits are used to set the parity expected by the PS/2 channel state machine. These bits are therefore only valid
+when PS/2_EN is set.
+00=Receiver expects Odd Parity (default).
+01=Receiver expects Even Parity.
+DS00002622A-page 28                                                                    2008-2018 Microchip Technology Inc.
+
+
+                                                                                                          ECE1105
+10=Receiver ignores level of the parity bit (10th bit is not interpreted as a parity bit).
+11=Reserved
+This register should be read to determine the status of Bits[1:0] prior to clearing by writing a 1 to that bit.
+2.6.7.7.3           PS/2_EN
+PS/2 Channel ENable (default = 0). When PS/2_EN is set, the PS/2 State machine is enabled allowing the channel to
+perform automatic reception or transmission depending on the bit value of PS/2_T/R. When PS/2_EN is cleared, the
+channel’s automatic PS/2 state machine is disabled and the PW/2 channel’s CLK pin driven low and DATA pin not
+driven.
+   Note:      If the PS/2_EN bit is cleared prior to the leading edge (falling edge) of the 10th (parity bit) clock edge the
+              receive data is discarded (RDATA_RDY remains low). If the PS/2_EN bit is cleared following the leading
+              edge of the 10th clock signal, then the receive data is saved in the Receive Register (RDATA_RDY goes
+              high) assuming no parity error.
+2.6.7.7.4           PS/2_T/R
+PS/2 Channel Transmit/Receive (default = 0). Configures the PS/2 logic for automatic transmission when set or recep-
+tion when cleared. This bit is only valid when PS/2_EN is set.
+When set the PS/2 channel is enabled to transmit data. To properly initiate a transmit operation, this bit must be set prior
+to writing to the Transmit Register. Writes to the Transmit Register are blocked when this bit is cleared. Upon setting the
+PS/2_T/R bit, the channel will drive its CLK line low and then float the DATA line and hold this state until a write occurs
+to the Transmit Register or until the PS/2_T/R bit is cleared. Writing to the Transmit Register initiates the transmit oper-
+ation. ECE1105 drives the data line low and, within 80ns, floats the clock line (externally pulled high by the pull-up resis-
+tor) to signal to the external PS/2 device that data is now available. The PS/2_T/R bit is cleared on the 11th clock edge
+of the transmission or if a Transmit Time-out error condition occurs.
+   Note:      If the PS/2_T/R bit is set while the channel is actively receiving data prior to the leading edge of the 10th
+              (parity bit) clock edge, the receive data is discarded. If this bit is not set prior to the 10th clock signal, then
+              the receive data is saved in the Receive Register.
+When the PS/2_T/R bit is cleared, the PS/2 channel is enabled to receive data. Upon clearing this bit, if RDATA_RDY
+is also cleared, the channel’s CLK and DATA will float waiting for the external PS/2 device to signal the start of a trans-
+mission. If the PS/2_T/R bit is set while RDATA_RDY is set, then the channel’s DATA line will float but its CLK line will
+be held low, holding off the peripheral, until the Receive Register is read.
+2.6.7.8          Status
+TABLE 2-24:           STATUS REGISTER
+            ADDRESS PS/2:          52h                                                              8-bit SIZE
+                            TP: 56h
+                                                                                                          VCC1 POR
+                POWER VCC1                                                                          10h
+                                                                                                          DEFAULT
+           BYTE0 BIT            D7          D6          D5           D4             D3           D2           D1          D0
+                   TYPE       R/WC           R        R/WC            R          R/WC          R/WC         R/WC           R
+                               XMIT_        RX_        XMIT_       XMIT_            FE           PE          REC_        RDAT_
+            BIT NAME          START_      BUSY A     TIMEOUT        IDLE                                   TIMEOUT        RDY
+                             TIMEOUT
+ PROGRAMMER’S NOTE: This register should be read to determine the status of Bits[7,5,3,2,1] prior to clearing
+                                 by writing a 1 to that bit.
+ 2008-2018 Microchip Technology Inc.                                                                       DS00002622A-page 29
+
+
+ECE1105
+2.6.7.8.1           XMIT_START_TIMEOUT
+When the XMIT_START_TIMEOUT bit is set, a start bit was not received within 25 ms following the transmit start event.
+Writing a ‘1’ to the bit clears the XMIT_START_TIMEOUT bit. The XMIT_START_TIMEOUT bit is a ‘sticky’ bit and is
+intended to uniquely indicate the status of the transmit start bit time-out condition. These bit affect no other logic. Note
+that the transmit start bit time-out condition is also indicated by the XMIT_TIMEOUT bit.
+ PROGRAMMER’S NOTE: Always check that a PS/2 channel is idle, i.e. the RX_BUSY bit is clear, before
+                                 attempting to transmit on that channel. Receive data may be lost by setting a PS/2
+                                 channel to transmit while the RX_BUSY bit is set depending where in the message
+                                 frame the transmit mode change occurs.
+This bit is cleared when written with a 1.
+2.6.7.8.2           RX_BUSY
+When a RX_BUSY bit is set, the associated channel is actively receiving PS/2 data; when a RX_BUSY bit is clear, the
+channel is idle. See Note 2-3 on page 28.
+   Note 2-4        The Busy bit is set upon detection of a Start bit.
+2.6.7.8.3           XMIT_TIMEOUT
+When the XMIT_TIMEOUT bit is set, the PS/2_T/R bit is held clear, the PS/2 channel’s CLK line is pulled low for a min-
+imum of 300us until the PS/2 Status register is read. The XMIT_TIMEOUT bit is set on one of three transmit conditions:
+when the transmitter bit time (time between falling edges) exceeds 300us, when the transmitter start bit is not received
+within 25ms from signaling a transmit start event or if the time from the first bit (start) to the 10th bit (parity) exceeds 2ms.
+This bit is cleared when written with a 1.
+2.6.7.8.4           XMIT_IDLE
+Transmitter Idle: When low, the XMIT_IDLE bit is a status bit indicating that the PS/2 channel is actively transmitting
+data to the PS/2 peripheral device. Writing to the Transmit Register when the channel is ready to transmit will cause the
+XMIT_IDLE bit to clear and remain clear until one of the following conditions occur: the falling edge of the 11th CLK,
+XMIT_TIMEOUT is set; the PS/2_T/R bit is cleared or the PS/2_EN bit is cleared.
+   Note 2-5        An interrupt is generated on the low-to-high transition of XMIT_IDLE.
+2.6.7.8.5           FE
+Framing Error: When receiving data, the stop bit is clocked in on the falling edge of the 11th CLK edge. If the channel
+is configured to expect either a high or low stop bit and the 11th bit is contrary to the expected stop polarity, then the FE
+and REC_TIMEOUT bits are set following the falling edge of the 11th CLK edge and an interrupt is generated.
+This bit is cleared when written with a 1.
+2.6.7.8.6           PE
+Parity Error: When receiving data, the parity bit is clocked in on the falling edge of the 10th CLK edge. If the channel is
+configured to expect either even or odd parity and the 10th bit is contrary to the expected parity, then the PE and REC_-
+TIMEOUT bits are set following the falling edge of the 10th CLK edge and an interrupt is generated.
+This bit is cleared when written with a 1.
+2.6.7.8.7           REC_TIMEOUT
+Following assertion of the REC_TIMEOUT bit, the channel’s CLK line is automatically pulled low for a minimum of 300us
+until the PS/2 status register is read. Under PS/2 automatic operation, PS/2_EN is set, this bit is set on one of three
+receive error conditions:
+      When the receiver bit time (time between falling edges) exceeds 300us.
+      If the time from the first bit (start) to the 10th bit (parity) exceeds 2ms.
+      On a receive parity error along with the Parity Error (PE) bit.
+      On a receive framing error due to an incorrect STOP bit along with the framing error (FE) bit.
+This bit is cleared when written with a 1.
+DS00002622A-page 30                                                                         2008-2018 Microchip Technology Inc.
+
+
+                                                                                                     ECE1105
+  Note 2-6       An Interrupt is generated on the low-to-high transition of the REC_TIMEOUT bit.
+2.6.7.8.8        RDATA_RDY
+Receive Data Ready: Under normal operating conditions, this bit is set following the falling edge of the 11th clock given
+successful reception of a data byte from the PS/2 peripheral (i.e., no parity, framing, or receive time-out errors) and indi-
+cates that the received data byte is available to be read from the Receive Register. This bit may also be set in the event
+that the PS/2_EN bit is cleared following the 10th CLK edge. Reading the Receive Register clears this bit.
+  Note 2-7       An Interrupt is generated on the low-to-high transition of the RDATA_RDY bit.
+2.6.8        DEVICE ID REGISTER
+TABLE 2-25:         DEVICE ID REGISTER
+           ADDRESS FCH                                                                        8-bit SIZE
+                                                                                               42h VCC1 POR
+              POWER VCC1
+                                                                                                     DEFAULT
+                   BIT      D7          D6            D5         D4             D3          D2          D1           D0
+      BC-LINK TYPE          R            R            R           R             R            R           R           R
+             ECE1105 42h
+TABLE 2-26:        DEVICE REVISION REGISTER
+           ADDRESS FDh                                                                        8-bit SIZE
+                                                                                                     VCC1 POR
+              POWER VCC1                                                                       00h
+                                                                                                     DEFAULT
+                   BIT      D7          D6            D5         D4             D3          D2          D1           D0
+      BC-LINK TYPE          R            R            R           R             R            R           R           R
+           BIT NAME                                         Current Revision Number
+TABLE 2-27:        VENDOR ID (LSB) REGISTER
+           ADDRESS FEh                                                                        8-bit SIZE
+                                                                                                     VCC1 POR
+              POWER VCC1                                                                       55h
+                                                                                                     DEFAULT
+                   BIT      D7          D6            D5         D4             D3          D2          D1           D0
+      BC-LINK TYPE          R            R            R           R             R            R           R           R
+           BIT NAME                                                    55h
+ 2008-2018 Microchip Technology Inc.                                                                 DS00002622A-page 31
+
+
+ECE1105
+TABLE 2-28:          VENDOR ID (MSB) REGISTER
+           ADDRESS FFh                                                                       8-bit SIZE
+                                                                                                    VCC1 POR
+              POWER VCC1                                                                      10h
+                                                                                                    DEFAULT
+                     BIT        D7        D6           D5          D4           D3         D2           D1            D0
+      BC-LINK TYPE              R          R           R           R            R           R            R             R
+           BIT NAME                                                      10h
+2.6.9        RESET REGISTER
+TABLE 2-29:           RESET REGISTER
+           ADDRESS F5H                                                                       8-bit SIZE
+                                                                                              00h VCC1 POR
+              POWER VCC1
+                                                                                                    DEFAULT
+                     BIT        D7        D6           D5          D4           D3         D2           D1            D0
+      BC-LINK TYPE              R          R           R           R            R           R            R             W
+                                                                Reserved                                            Force_
+           BIT NAME
+                                                                                                                     POR
+2.6.9.1        Force_POR
+Writing this bit with a 1 will force a VCC1 POR. All registers and state machines in the device will be reset to their default
+power-on values. Writing a 0 to this bit has no effect. This is a self clearing bit.
+  Note:      The Force_POR bit does not affect the Interface Selection setting of the Clock Control register. Whichever
+             bus interface is in effect at the time Force_POR is set (BC-Link or SMBus) will remain in effect after the
+             POR.
+2.6.10       MCHP TEST REGISTER
+TABLE 2-30:           MCHP TEST REGISTER
+           ADDRESS F6H                                                                       8-bit SIZE
+                                                                                              00h VCC1 POR
+              POWER VCC1
+                                                                                                    DEFAULT
+                     BIT        D7        D6           D5          D4           D3         D2           D1            D0
+      BC-LINK TYPE              R          R           R           R            R           R            R             R
+           BIT NAME        Reserved     Reserved   Reserved     Reserved     Reserved   Reserved     Reserved      Reserved
+2.6.10.1       RESERVED
+Reserved for Microchip test purposes. Should not be written.
+DS00002622A-page 32                                                                     2008-2018 Microchip Technology Inc.
+
+
+                                                                                                      ECE1105
+2.7         SMBus / BC-Link Autodetect Circuit
+2.7.1         OVERVIEW
+For either the SMBus or the BC-Link, by detecting difference in start conditions, the Bus type is indicated. From an idle
+condition, the device will sample the data line on the first falling edge of the clock. If it is low, a SMBus interface is
+selected; if it is high, a BC-Link interface is selected. The idle condition is defined as a POR or no activity for 75 ms. To
+safeguard against glitches selecting the wrong bus and locking the system, the device use time-outs that reload on a
+start from the respective bus interface. For SMBus, the timeout is 75 ms. For BC-Link, the timeout is 75 s.
+2.8         SMBus Slave Interface
+The host processor communicates with the ECE1105 device through a series of read/write registers via the SMBus
+interface. SMBus is a serial communication protocol between a computer host and its peripheral devices.
+The SMBus data rate is 10KHz minimum to 400 KHz maximum.
+2.8.1         CLOCKING
+The SMBus Slave interface is driven by an internal Ring Oscillator. This oscillator runs at a nominal frequency of 32MHz.
+The oscillator is also used to drive the PS/2 state machine used in the PS/2 and TP ports.
+The Ring Oscillator may be started and stopped through firmware interactions. The that controls the operation of the
+Oscillator is described in Section 2.6.4, "Clock Control" and Section 2.6.5, "Wakeup Control".
+2.8.2         SLAVE ADDRESS
+Upon power up, the ECE1105 device will be placed into Address Select mode and assign itself an SMBus address
+according to the Address Select input. The device will latch the address during the first valid SMBus transaction in which
+the first five bits of the targeted address match those of the ECE1105 address. This feature eliminates the possibility of
+a glitch on the SMBus interfering with address selection.
+TABLE 2-31:            SMBUS SLAVE ADDRESS OPTIONS
+ Address Select                            Board Implementation                                SMBus Address [7:1]
+           0            Address Select Pulled to ground through a 10k resistor                        0111 000b
+           1            Address Select pulled to VCC1 through a 10k resistor                          0111 001b
+2.8.3         SLAVE BUS INTERFACE
+The ECE1105 device SMBus implementation is a subset of the SMBus interface to the host. The device is a slave-only
+SMBus device. The implementation in the device is a subset of SMBus since it only supports four protocols.
+The Write Byte, Read Byte, Send Byte, and Receive Byte protocols are the only valid SMBus protocols for the device.
+This part responds to other protocols as described in the Invalid Protocol Section. Reference the System Management
+Bus Specification, Rev 2.0.
+The SMBus interface is used to read and write the registers in the device. The register set is shown in Table 2-1, "Reg-
+ister Summary".
+2.8.4         WRITE BYTE
+The Write Byte protocol is used to write data to the registers. The data will only be written if the protocol shown in
+Table 2-32, "SMBus Write Byte Protocol" is performed correctly. Only one byte is transferred at time for a Write Byte
+protocol.
+TABLE 2-32:            SMBUS WRITE BYTE PROTOCOL
+    Field        Start         Slave Addr       Wr     Ack         Reg. Addr        Ack       Reg. Data      Ack       Stop
+    Bits           1               7            1       1             8              1           8            1         1
+ 2008-2018 Microchip Technology Inc.                                                                   DS00002622A-page 33
+
+
+ECE1105
+2.8.5         READ BYTE
+The Read Byte protocol is used to read data from the registers. The data will only be read if the protocol shown in
+Table 2-33, "SMBus Read Byte Protocol" is performed correctly. Only one byte is transferred at time for a Read Byte
+protocol.
+TABLE 2-33:           SMBUS READ BYTE PROTOCOL
+    Field:      Start     Slave Wr     Ack      Reg.      Ack    Start     Slave   Rd      Ack   Reg. Data   Nack     Stop
+                          Addr                  Addr                       Addr
+    Bits:         1          7  1       1        8         1       1         7      1       1       8          1        1
+2.8.6         SEND BYTE
+The Send Byte protocol is used to set the Internal Address Register to the correct register in the ECE1105. No data is
+transferred for a Send Byte protocol.The send byte protocol is shown in Table 2-34, "SMBus Send Byte Protocol".
+TABLE 2-34:           SMBUS SEND BYTE PROTOCOL
+       Field:             Start          Slave Addr           Wr       Ack        Reg. Addr            Ack         Stop
+       Bits:                1                7                1         1              8                1            1
+2.8.7         RECEIVE BYTE
+The Receive Byte protocol is used to read data from the registers when the register address is known to be at the
+desired address (using the Internal Address Register). Only one byte is transferred at time for a Receive Byte protocol.
+TABLE 2-35:           SMBUS RECEIVE BYTE PROTOCOL
+      Field:           Start        Slave Addr            Rd       Ack           Reg. Data          Nack           Stop
+      Bits:             1                7                1          1              8                  1            1
+   Note:      Some simple devices do not contain a clock low drive circuit; this simple kind of device typically may reset
+              its communications port after a start or stop condition.
+2.8.8         STRETCHING THE SCLK SIGNAL
+The ECE1105 supports stretching of the SCLK by other devices on the SMBus.
+2.8.9         SMBUS TIMING
+The SMBus Slave Interface complies with the SMBus AC Timing Specification. See the SMBus timing diagram shown
+in Section 4.2, "SMBus Timing".
+2.8.10        SMBUS ALERT RESPONSE ADDRESS
+This device responds to protocols with the SMBus Alert Response Address of 0001_100 if the ARA bit in the Clock Con-
+trol register is set.
+2.8.11        SMBUS TIME-OUT
+The ECE1105 includes an SMBus time-out feature. Following a 30 ms period of inactivity on the SMBus, the device
+time-out and reset the SMBus interface.
+2.9         BC-LinkInterface
+The BC-Link is a proprietary bus that allows communication between a Master device and a Companion device. The
+Master device uses this serial bus to read and write registers located on the Companion device.
+The bus comprises three signals, BC_CLK, BC_DAT and BC_INT#. The Master device always provides the clock, BC_-
+CLK, and the Companion device is the source for an independent asynchronous interrupt signal, BC_INT#.
+The ECE1105 supports BC-Link speeds up to 24MHz.
+DS00002622A-page 34                                                                      2008-2018 Microchip Technology Inc.
+
+
+                                                                                                                                            ECE1105
+3.0      OPERATIONAL DESCRIPTION
+3.1      Maximum Ratings
+Maximum Vcc1 .............................................................................................................................................................+5V
+Negative Voltage on any pin, with respect to Ground ...............................................................................................-0.3V
+Operating Temperature Range.....................................................................................................................0oC to +70oC
+Storage Temperature Range..................................................................................................................... -55o to +150oC
+Lead Temperature Range .......................................................................................... Refer to JEDEC Spec. J-STD-020
+   Note:    Stresses above those listed above and below could cause permanent damage to the device. This is a
+            stress rating only and functional operation of the device at any other condition above those indicated in the
+            operation sections of this specification is not implied. When powering this device from laboratory or system
+            power supplies, it is important that the Absolute Maximum Ratings not be exceeded or device failure can
+            result. Some power supplies exhibit voltage spikes on their outputs when the AC power is switched on or
+            off. In addition, voltage transients on the AC power line may appear on the DC output. If this possibility
+            exists, it is suggested that a clamp circuit be used.
+3.2      DC Electrical Characteristics
+TABLE 3-1:          DC ELECTRICAL CHARACTERISTICS TA = 0OC – 70OC, VCC1 = +3.3 V ± 10%
+           Parameter                         Symbol                MIN               TYP                MAX               Units                    Comments
+ I Type Input Buffer
+ Low Input Level                          VILI                                                     0.8                  V               TTL Levels
+ High Input Level                         VIHI                                                     5.5                  V
+                                                               2.0
+ ISP Type Input Buffer with                                                                                                             Note 3-1
+ 90A Pull-up                                                                                                                           Schmitt Trigger
+                                                                                                   0.8                  V
+ Low Input Level                          VILIS
+                                                                                                                                        Schmitt Trigger
+ High Input Level                         VIHIS                2.2                                 5.5                  V
+ Schmitt Trigger Hysteresis               VHYS                                  100                                     mV
+ IP/O8 Type Buffer with 90A                                                                                                            Note 3-1
+ Pull-up                                                                                                                                TTL Levels
+                                                                                                   0.8                  V
+ Low Input Level                          VILI
+                                                                                                   5.5                  V
+ High Input Level                         VIHI                 2.0                                                                      IOL = 8mA
+ Low Output Level                         VOL                                                      0.4                  V               IOH = -4mA
+ High Output Level                        VOH                  2.4                                 Vcc1 + 0.3           V
+ I/O8 Type Buffer                                                                                                                       TTL Levels
+ Low Input Level                          VILI                                                     0.8                  V
+ High Input Level                         VIHI                                                     5.5                  V
+                                                               2.0
+ Low Output Level                         VOL                                                      0.4                  V               IOL = 8mA
+ High Output Level                        VOH                  2.4                                 Vcc1 + 0.3           V               IOH = -4mA
+ O8 Type Buffer
+ Low Output Level                         VOL                                                      0.4                  V               IOL = 8mA
+ High Output Level                        VOH                  2.4                                 Vcc1 + 0.3           V               IOH = -4mA
+ 2008-2018 Microchip Technology Inc.                                                                                                          DS00002622A-page 35
+
+
+ECE1105
+TABLE 3-1:         DC ELECTRICAL CHARACTERISTICS TA = 0OC – 70OC, VCC1 = +3.3 V ± 10%
+            Parameter               Symbol        MIN         TYP          MAX          Units          Comments
+ IP/O12 Type Buffer with 90A                                                                   Note 3-1
+ Pull-up
+                                      VILI                             0.8            V         TTL Levels
+ Low Input Level
+                                      VIHI
+ High Input Level                              2.0                     5.5            V
+                                                                                                IOL = 12mA
+ Low Output Level                     VOL                              0.4            V
+                                                                                                IOH = -6mA
+ High Output Level                    VOH      2.4                     Vcc1 + 0.3     V
+ Leakage Current (ALL –                                                                         Note 3-2
+ except Buffers)
+ Input High Current               ILEAKIH                              10             µA        VIN = Vcc1
+ Input Low Current                ILEAKIL                              -10            µA        VIN = 0V
+ 5V Tolerant Pins                                                                               Vcc1 = 3.3V
+ Input High Current               ILEAKIH                              100            µA        VIN =5.5V Max
+ Input High Current               ILEAKIH                              10             µA        VIN <= Vcc1
+ Input Low Current                ILEAKIL                              -10            µA        VIN = 0V
+ VCC1 Supply Current Active       ICC                      3           8              mA        measured with
+                                                                                                SMBus/BC-Link traffic
+ VCC1 Supply Current Active       ICC                                  500            A        measured with Ring
+ with Ring Oscillator Off                                                                       Oscillator off (OCS
+                                                                                                Control bit set to
+                                                                                                Oscillator Low Power
+                                                                                                Enable mode)
+ Reset Voltage                    VRST         1.6         1.8         2.1            V         Device is in internal
+                                                                                                reset state when Vcc1 is
+                                                                                                below min VRST
+ • Voltages are measured from the local ground potential, unless otherwise specified.
+ • Typicals are at TA=25°C and represent most likely parametric norm.
+ • The maximum allowable power dissipation at any temperature is PD = (TJmax - TA) / QJA.
+ • Timing specifications are tested at the TTL logic levels, VIL=0.4V for a falling edge and VIH=2.4V for a rising
+   edge. TRI-STATE output voltage is forced to 1.4V.
+ • All pins except power and ground are 5V tolerant.
+   Note 3-1     90A Pull-up with +/- 40% variation
+   Note 3-2     leakage currents are measured with all pins in high impedance.
+3.3       AC Timing Specifications
+Refer to the LSBC Bus Specification.
+3.4       Capacitance Values for Pins
+CAPACITANCE TA = 25oC; fc = 1MHz; VCC1 = 3.3V ±10%
+DS00002622A-page 36                                                                    2008-2018 Microchip Technology Inc.
+
+
+                                                                                       ECE1105
+TABLE 3-2:        CAPACITANCE VALUES FOR PINS
+                                                           Limits
+           Parameter                   Symbol                                    Unit      Test Condition
+                                                    MIN     TYP      MAX
+ Clock Input Capacitance           CIN                              20       pF       All pins except pin
+                                                                                      under test tied to AC
+                                                                                      ground
+ Input Capacitance                 CIN                              10       pF
+ Output Capacitance                COUT                             20       pF
+   Note 3-3     The input capacitance of a port is measured at the connector pins.
+ 2008-2018 Microchip Technology Inc.                                                     DS00002622A-page 37
+
+
+ECE1105
+4.0     TIMING DIAGRAMS
+4.1     VCC1 Power
+FIGURE 4-1:         VCC1 POWER
+                                         tR
+      VCC1
+TABLE 4-1:       VCC1 POWER PARAMETERS
+                                                                       Limits
+  Symbol                          Parameter                                               Units       Comments
+                                                                    Min          Max
+     tR      VCC1 Rise time, 10% to 90%                            0.150          30      msec
+4.2     SMBus Timing
+FIGURE 4-2:         SMBUS TIMING
+                          t LOW          tR              tF                   t HD;STA
+  SCLK
+                      t HD;STA  t HD;DAT                   t SU;STA                                tSU;STO
+                                            tHIGH t SU;DAT
+  SDA
+            tBUF
+        P         S                                                     S                                      P
+DS00002622A-page 38                                                              2008-2018 Microchip Technology Inc.
+
+
+                                                                                                  ECE1105
+TABLE 4-2:           SMBUS TIMING PARAMETERS
+                                                                                Limits
+   Symbol                             Parameter                                                 Units         Comments
+                                                                            Min         Max
+     Fsmb       SMB Operating Frequency                                      10         400     KHz            Note 4-1
+      Tsp       Spike Suppression                                                         50      ns           Note 4-2
+      Tbuf      Bus free time between Stop and Start Condition              1.3                   s
+   Thd:sta      Hold time after (Repeated) Start Condition. After           0.6                   s
+                this period, the first clock is generated.
+   Tsu:sta      Repeated Start Condition setup time                         0.6                   s
+   Tsu:sto      Stop Condition setup time                                   0.6                   s
+   Thd:dat      Data hold time                                              0.3          0.9      s
+   Tsu:dat      Data setup time                                             100                   ns           Note 4-3
+     Tlow       Clock low period                                            1.3                   s
+     Thigh      Clock high period                                           0.6                   s
+       Tf       Clock/Data Fall Time                                     20+0.1Cb       300       ns
+       Tr       Clock/Data Rise Time                                     20+0.1Cb       300       ns
+       Cb       Capacitive load for each bus line                                       400      pF
+  Note 4-1        The max SMBus timing operating frequency exceeds that specified in the System Management Bus
+                  Specification, Rev 1.1, but corresponds to the maximum clock frequency for fast mode devices on
+                  the I2C bus (see the I2C Bus Specification).
+  Note 4-2        At 400kHz, the input filter suppresses spikes of a maximum pulse width of 50ns.
+  Note 4-3        if using 100 KHz clock frequency, the next data bit output to the SDA line will be 1250 ns (1000 ns
+                  (TR max) + 250 ns (TSU:DAT min) @ 100 kHz) before the SCLK line is released.
+4.3         PS/2 Interface Timing Diagrams
+FIGURE 4-3:                PS/2 TRANSMIT TINNING
+                                                                     t10
+                                                               t8 t9
+                                                        t7
+                        t2                                                                                        t17
+                                       t5    t6
+   PS/2_CLK                                        1    2                                          10      11
+                                                         t11                                           t14
+                 t1                       t4                                                                           t16
+   PS/2_DAT                                    s     B0     B1 B2     B3   B4    B5    B6    B7 P
+    PS/2_EN
+                                                                                                               t12
+    PS/2_T/R
+                                                t3
+                                                                                                                 t13
+  XMIT_IDLE
+ RDATA_RDY
+ Write Tx Reg                                                                                                      t15
+                                                                                                                     Note 1
+     Interrupt
+ 2008-2018 Microchip Technology Inc.                                                                DS00002622A-page 39
+
+
+ECE1105
+TABLE 4-3:        PS/2 CHANNEL TRANSMISSION TIMING PARAMETERS
+  NAME                   DESCRIPTION                    MIN  TYP          MAX             UNITS
+ t1      The PS/2 Channel’s CLK and DATA lines                            1000              ns
+         are floated following PS/2_EN=1 and
+         PS/2_T/R=0.
+ t2      PS/2_T/R bit set to CLK driven low
+         preparing the PS/2 Channel for data
+         transmission.
+ t3      CLK line floated to XMIT_IDLE bit                                 1.7              µs
+         deasserted.
+ t4      Trailing edge of 8051 WR of Transmit            45                 90              ns
+         Register to DATA line driven low.
+ t5      Trailing edge of EC WR of Transmit              90                130
+         Register to CLK line floated.
+ t6      Initiation of Start of Transmit cycle by the  0.002             25.003             ms
+         PS/2 channel controller to the auxiliary
+         peripheral’s responding by latching the
+         Start bit and driving the CLK line low.
+ t7      Period of CLK                                  60                 302              µs
+ t8      Duration of CLK high (active)                  30                 151
+ t9      Duration of CLK low (inactive)
+ t10     Duration of Data Frame. Falling edge of                          2.002             ms
+         Start bit CLK (1st clk) to falling edge of
+         Parity bit CLK (10th clk).
+ t11     DATA output by ECE1105 following the           3.5                7.1              µs
+         falling edge of CLK. The auxiliary
+         peripheral device samples DATA following
+         the rising edge of CLK.
+ t12     Rising edge following the 11th falling clock     0                800              ns
+         edge to PS_T/R bit driven low.
+ t13     Trailing edge of PS_T/R to XMIT_IDLE bit                          500
+         asserted.
+ t14     DATA released to high-Z following the
+         PS/2_T/R bit going low.
+ t15     XMIT_IDLE bit driven high to interrupt
+         generated.
+         Note1- Interrupt is cleared by writing a 1 to
+         the status bit2 in Table 2-8, "Other
+         Interrupt Status Register".
+ t16     The PS/2 Channel’s CLK and DATA lines
+         are driven to the values stored in the
+         WR_CLK and WR_DATA bits of the
+         Control Register when PS/2_EN is written
+         to 0.
+ t17     Trailing edge of CLK is held low prior to
+         going high-Z
+DS00002622A-page 40                                               2008-2018 Microchip Technology Inc.
+
+
+                                                                                          ECE1105
+FIGURE 4-4:            PS/2 RECEIVE TIMING
+                                                      t7
+                                                t3
+                                                   t4
+                                      t2                    t5                                        t11
+                                                                                              t10
+ PS2_CLK       WR_CLK                                                                                WR_DATA
+                         t1                                    t6
+ PS2_DATA WR_DATA                 D0     D1  D2    D3    D4    D5    D6 D7 P  S                      WR_DATA
+ PS2_EN
+ PS2_T/R
+                                                                                t8           t9
+ RDATA_RDY
+ Read Rx Reg
+                                                                                   t12
+ Interrupt
+TABLE 4-4:         PS/2 CHANNEL RECEIVE TIMING DIAGRAM PARAMETERS
+ Name                      Description                           MIN        TYP        MAX           Units
+ t1        The PS/2 Channel’s CLK and DATA lines                                       1000            ns
+           are floated following PS/2_EN=1 and
+           PS/2_T/R=0.
+ t2        Period of CLK                                          60                    302            µs
+ t3        Duration of CLK high (active)                          30                    151
+ t4        Duration of CLK low (inactive)
+ t5        DATA setup time to falling edge of CLK.                 1
+           ECE1105 samples the data line on the
+           falling CLK edge.
+ t6        DATA hold time from falling edge of CLK.                2
+           ECE1105 samples the data line on the
+           falling CLK edge.
+ t7        Duration of Data Frame. Falling edge of                                     2.002           ms
+           Start bit CLK (1st clk) to falling edge of
+           Parity bit CLK (10th clk).
+ t8        Falling edge of 11th CLK to RDATA_RDY                                        1.6            µs
+           asserted.
+ 2008-2018 Microchip Technology Inc.                                                       DS00002622A-page 41
+
+
+ECE1105
+TABLE 4-4:        PS/2 CHANNEL RECEIVE TIMING DIAGRAM PARAMETERS (CONTINUED)
+ Name                     Description                  MIN TYP          MAX             Units
+ t9       Trailing edge of the EC’s RD signal of the                     500              ns
+          Receive Register to RDATA_RDY bit
+          deasserted.
+ t10      Trailing edge of the EC’s RD signal of the
+          Receive Register to the CLK line
+          released to high-Z.
+ t11      The PS/2 Channel’s CLK and DATA lines
+          are driven to the values stored in the
+          WR_CLK and WR_DATA bits of the
+          Control Register when PS/2_EN is
+          written to 0.
+ t12      RDATA_RDY asserted an interrupt is
+          generated.
+          Note:     Interrupt is cleared by writing a
+                    1 to the bit3 in Table 2-8, "Other
+                    Interrupt Status Register".
+DS00002622A-page 42                                             2008-2018 Microchip Technology Inc.
+
+
+                                                                      ECE1105
+5.0      PACKAGE OUTLINE
+FIGURE 5-1:            PACKAGE OUTLINE: 48-PIN QFN BODY 7X7 MM BODY
+                                                                      Note: For the most current package drawings,
+                                                                                                                     http://www.microchip.com/packaging
+                                                                      see the Microchip Packaging Specification at
+ 2008-2018 Microchip Technology Inc.                                                        DS00002622A-page 43
+
+
+ECE1105
+FIGURE 5-1:           PACKAGE OUTLINE: 48-PIN QFN BODY 7X7 MM BODY (CONTINUED)
+                                                                       Note: For the most current package drawings,
+                                                                                                                      http://www.microchip.com/packaging
+                                                                       see the Microchip Packaging Specification at
+DS00002622A-page 44                                            2008-2018 Microchip Technology Inc.
+
+
+                                                                                         ECE1105
+APPENDIX A:            DATA SHEET REVISION HISTORY
+TABLE A-1:        REVISION HISTORY
+    Revision Level & Date             Section/Figure/Entry                      Correction
+   DS00002622A (01-15-18)        Public Release, REV A replaces previous SMSC version Rev. 1.6 (02-21-11)
+ 2008-2018 Microchip Technology Inc.                                                      DS00002622A-page 45
+
+
+ECE1105
+THE MICROCHIP WEB SITE
+Microchip provides online support via our WWW site at www.microchip.com. This web site is used as a means to make
+files and information easily available to customers. Accessible by using your favorite Internet browser, the web site con-
+tains the following information:
+• Product Support – Data sheets and errata, application notes and sample programs, design resources, user’s
+    guides and hardware support documents, latest software releases and archived software
+• General Technical Support – Frequently Asked Questions (FAQ), technical support requests, online discussion
+    groups, Microchip consultant program member listing
+• Business of Microchip – Product selector and ordering guides, latest Microchip press releases, listing of semi-
+    nars and events, listings of Microchip sales offices, distributors and factory representatives
+CUSTOMER CHANGE NOTIFICATION SERVICE
+Microchip’s customer notification service helps keep customers current on Microchip products. Subscribers will receive
+e-mail notification whenever there are changes, updates, revisions or errata related to a specified product family or
+development tool of interest.
+To register, access the Microchip web site at www.microchip.com. Under “Support”, click on “Customer Change Notifi-
+cation” and follow the registration instructions.
+CUSTOMER SUPPORT
+Users of Microchip products can receive assistance through several channels:
+•   Distributor or Representative
+•   Local Sales Office
+•   Field Application Engineer (FAE)
+•   Technical Support
+Customers should contact their distributor, representative or field application engineer (FAE) for support. Local sales
+offices are also available to help customers. A listing of sales offices and locations is included in the back of this docu-
+ment.
+Technical support is available through the web site at: http://www.microchip.com/support
+DS00002622A-page 46                                                                      2008-2018 Microchip Technology Inc.
+
+
+                                                                                                                        ECE1105
+PRODUCT IDENTIFICATION SYSTEM
+To order or obtain information, e.g., on pricing or delivery, refer to the factory or the listed sales office.
+      PART NO. (1)        [X]         -     XXX (2)        -        [X] (3)
+                                                                                        Examples:
+       Device        Temperature          Package             Tape and Reel             a)    ECE1105-HZH = 48-pin QFN, Commercial
+                        Range                                    Option                 b)    ECE1105I-HZH = 48-pin QFN, Indus-
+                                                                                              trial
+       Device:         ECE1105 (1)
+                                                                                        Note 1:     These products meet the halogen maximum
+                                                                                                    concentration values per IEC61249-2-21.
+    Temperature        Blank =    Commercial 0°C to 70°C                                Note 2:     All package options are RoHS compliant.
+                       I      =    Industrial -40°C to 85°C                                         For RoHS compliance and environmental
+       Range:                                                                                       information, please visit http://www.micro-
+                                                                                                    chip.com/pagehandler/en-us/aboutus/
+                                                                                                    ehs.html .
+      Package:         HZH    =    48 pin QFN (2)
+                                                                                        Note 3:     Tape and Reel identifier only appears in the
+                                                                                                    catalog part number description. This identi-
+                                                                                                    fier is used for ordering purposes and is not
+   Tape and Reel       Blank = Tray packaging                                                       printed on the device package. Check with
+       Option:         TR     = Tape and Reel (3)                                                   your Microchip Sales Office for package
+                                                                                                    availability with the Tape and Reel option.
+ 2008-2018 Microchip Technology Inc.                                                                                     DS00002622A-page 47
+
+
+ECE1105
+    Note the following details of the code protection feature on Microchip devices:
+    •     Microchip products meet the specification contained in their particular Microchip Data Sheet.
+    •     Microchip believes that its family of products is one of the most secure families of its kind on the market today, when used in the
+          intended manner and under normal conditions.
+    •     There are dishonest and possibly illegal methods used to breach the code protection feature. All of these methods, to our
+          knowledge, require using the Microchip products in a manner outside the operating specifications contained in Microchip’s Data
+          Sheets. Most likely, the person doing so is engaged in theft of intellectual property.
+    •     Microchip is willing to work with the customer who is concerned about the integrity of their code.
+    •     Neither Microchip nor any other semiconductor manufacturer can guarantee the security of their code. Code protection does not
+          mean that we are guaranteeing the product as “unbreakable.”
+    Code protection is constantly evolving. We at Microchip are committed to continuously improving the code protection features of our
+    products. Attempts to break Microchip’s code protection feature may be a violation of the Digital Millennium Copyright Act. If such acts
+    allow unauthorized access to your software or other copyrighted work, you may have a right to sue for relief under that Act.
+    Information contained in this publication regarding device applications and the like is provided only for your convenience and may be
+    superseded by updates. It is your responsibility to ensure that your application meets with your specifications. MICROCHIP MAKES NO
+    REPRESENTATIONS OR WARRANTIES OF ANY KIND WHETHER EXPRESS OR IMPLIED, WRITTEN OR ORAL, STATUTORY OR
+    OTHERWISE, RELATED TO THE INFORMATION, INCLUDING BUT NOT LIMITED TO ITS CONDITION, QUALITY, PERFORMANCE,
+    MERCHANTABILITY OR FITNESS FOR PURPOSE. Microchip disclaims all liability arising from this information and its use. Use of Micro-
+    chip devices in life support and/or safety applications is entirely at the buyer’s risk, and the buyer agrees to defend, indemnify and hold
+    harmless Microchip from any and all damages, claims, suits, or expenses resulting from such use. No licenses are conveyed, implicitly or
+    otherwise, under any Microchip intellectual property rights unless otherwise stated.
+   Trademarks
+   The Microchip name and logo, the Microchip logo, AnyRate, AVR, AVR logo, AVR Freaks, BeaconThings, BitCloud, CryptoMemory, CryptoRF,
+   dsPIC, FlashFlex, flexPWR, Heldo, JukeBlox, KEELOQ, KEELOQ logo, Kleer, LANCheck, LINK MD, maXStylus, maXTouch, MediaLB, megaAVR,
+   MOST, MOST logo, MPLAB, OptoLyzer, PIC, picoPower, PICSTART, PIC32 logo, Prochip Designer, QTouch, RightTouch, SAM-BA, SpyNIC,
+   SST, SST Logo, SuperFlash, tinyAVR, UNI/O, and XMEGA are registered trademarks of Microchip Technology Incorporated in the U.S.A. and
+   other countries.
+   ClockWorks, The Embedded Control Solutions Company, EtherSynch, Hyper Speed Control, HyperLight Load, IntelliMOS, mTouch, Precision
+   Edge, and Quiet-Wire are registered trademarks of Microchip Technology Incorporated in the U.S.A.
+   Adjacent Key Suppression, AKS, Analog-for-the-Digital Age, Any Capacitor, AnyIn, AnyOut, BodyCom, chipKIT, chipKIT logo, CodeGuard,
+   CryptoAuthentication, CryptoCompanion, CryptoController, dsPICDEM, dsPICDEM.net, Dynamic Average Matching, DAM, ECAN,
+   EtherGREEN, In-Circuit Serial Programming, ICSP, Inter-Chip Connectivity, JitterBlocker, KleerNet, KleerNet logo, Mindi, MiWi, motorBench,
+   MPASM, MPF, MPLAB Certified logo, MPLIB, MPLINK, MultiTRAK, NetDetach, Omniscient Code Generation, PICDEM, PICDEM.net, PICkit,
+   PICtail, PureSilicon, QMatrix, RightTouch logo, REAL ICE, Ripple Blocker, SAM-ICE, Serial Quad I/O, SMART-I.S., SQI, SuperSwitcher,
+   SuperSwitcher II, Total Endurance, TSHARC, USBCheck, VariSense, ViewSpan, WiperLock, Wireless DNA, and ZENA are trademarks of
+   Microchip Technology Incorporated in the U.S.A. and other countries.
+   SQTP is a service mark of Microchip Technology Incorporated in the U.S.A.
+   Silicon Storage Technology is a registered trademark of Microchip Technology Inc. in other countries.
+   GestIC is a registered trademark of Microchip Technology Germany II GmbH & Co. KG, a subsidiary of Microchip Technology Inc., in other
+   countries.
+   All other trademarks mentioned herein are property of their respective companies.
+   © 2008-2018, Microchip Technology Incorporated, All Rights Reserved.
+   ISBN: 9781522425656
+     QUALITY MANAGEMENT SYSTEM                                                  Microchip received ISO/TS-16949:2009 certification for its worldwide
+                                                                                headquarters, design and wafer fabrication facilities in Chandler and
+                   CERTIFIED BY DNV                                             Tempe, Arizona; Gresham, Oregon and design centers in California
+                                                                                and India. The Company’s quality system processes and procedures
+              == ISO/TS 16949 ==
+                                                                                are for its PIC® MCUs and dsPIC® DSCs, KEELOQ® code hopping
+                                                                                devices, Serial EEPROMs, microperipherals, nonvolatile memory and
+                                                                                analog products. In addition, Microchip’s quality system for the design
+                                                                                and manufacture of development systems is ISO 9001:2000 certified.
+DS00002622A-page 48                                                                                 2008-2018 Microchip Technology Inc.
+
+
+                                Worldwide Sales and Service
+AMERICAS                        ASIA/PACIFIC          ASIA/PACIFIC            EUROPE
+Corporate Office                Australia - Sydney    India - Bangalore       Austria - Wels
+2355 West Chandler Blvd.        Tel: 61-2-9868-6733   Tel: 91-80-3090-4444    Tel: 43-7242-2244-39
+Chandler, AZ 85224-6199         China - Beijing       India - New Delhi       Fax: 43-7242-2244-393
+Tel: 480-792-7200               Tel: 86-10-8569-7000  Tel: 91-11-4160-8631    Denmark - Copenhagen
+Fax: 480-792-7277                                                             Tel: 45-4450-2828
+                                China - Chengdu       India - Pune
+Technical Support:                                                            Fax: 45-4485-2829
+                                Tel: 86-28-8665-5511  Tel: 91-20-4121-0141
+http://www.microchip.com/
+                                China - Chongqing     Japan - Osaka           Finland - Espoo
+support
+                                Tel: 86-23-8980-9588  Tel: 81-6-6152-7160     Tel: 358-9-4520-820
+Web Address:
+www.microchip.com               China - Dongguan      Japan - Tokyo           France - Paris
+                                Tel: 86-769-8702-9880 Tel: 81-3-6880- 3770    Tel: 33-1-69-53-63-20
+Atlanta                                                                       Fax: 33-1-69-30-90-79
+Duluth, GA                      China - Guangzhou     Korea - Daegu
+Tel: 678-957-9614               Tel: 86-20-8755-8029  Tel: 82-53-744-4301     Germany - Garching
+                                                                              Tel: 49-8931-9700
+Fax: 678-957-1455               China - Hangzhou      Korea - Seoul
+Austin, TX                      Tel: 86-571-8792-8115 Tel: 82-2-554-7200      Germany - Haan
+Tel: 512-257-3370                                                             Tel: 49-2129-3766400
+                                China - Hong Kong SAR Malaysia - Kuala Lumpur
+                                Tel: 852-2943-5100    Tel: 60-3-7651-7906     Germany - Heilbronn
+Boston
+                                                                              Tel: 49-7131-67-3636
+Westborough, MA                 China - Nanjing       Malaysia - Penang
+Tel: 774-760-0087               Tel: 86-25-8473-2460  Tel: 60-4-227-8870      Germany - Karlsruhe
+Fax: 774-760-0088                                                             Tel: 49-721-625370
+                                China - Qingdao       Philippines - Manila
+Chicago                         Tel: 86-532-8502-7355 Tel: 63-2-634-9065      Germany - Munich
+Itasca, IL                                                                    Tel: 49-89-627-144-0
+                                China - Shanghai      Singapore
+Tel: 630-285-0071                                                             Fax: 49-89-627-144-44
+                                Tel: 86-21-3326-8000  Tel: 65-6334-8870
+Fax: 630-285-0075                                                             Germany - Rosenheim
+                                China - Shenyang      Taiwan - Hsin Chu
+Dallas                                                                        Tel: 49-8031-354-560
+                                Tel: 86-24-2334-2829  Tel: 886-3-577-8366
+Addison, TX                                                                   Israel - Ra’anana
+                                China - Shenzhen      Taiwan - Kaohsiung
+Tel: 972-818-7423               Tel: 86-755-8864-2200 Tel: 886-7-213-7830     Tel: 972-9-744-7705
+Fax: 972-818-2924                                                             Italy - Milan
+                                China - Suzhou        Taiwan - Taipei
+Detroit                                                                       Tel: 39-0331-742611
+                                Tel: 86-186-6233-1526 Tel: 886-2-2508-8600
+Novi, MI                                                                      Fax: 39-0331-466781
+Tel: 248-848-4000               China - Wuhan         Thailand - Bangkok
+                                Tel: 86-27-5980-5300  Tel: 66-2-694-1351      Italy - Padova
+Houston, TX                                                                   Tel: 39-049-7625286
+Tel: 281-894-5983               China - Xian          Vietnam - Ho Chi Minh
+                                Tel: 86-29-8833-7252  Tel: 84-28-5448-2100    Netherlands - Drunen
+Indianapolis                                                                  Tel: 31-416-690399
+Noblesville, IN                 China - Xiamen                                Fax: 31-416-690340
+                                Tel: 86-592-2388138
+Tel: 317-773-8323                                                             Norway - Trondheim
+Fax: 317-773-5453               China - Zhuhai                                Tel: 47-7289-7561
+Tel: 317-536-2380               Tel: 86-756-3210040
+                                                                              Poland - Warsaw
+Los Angeles                                                                   Tel: 48-22-3325737
+Mission Viejo, CA
+                                                                              Romania - Bucharest
+Tel: 949-462-9523                                                             Tel: 40-21-407-87-50
+Fax: 949-462-9608
+Tel: 951-273-7800                                                             Spain - Madrid
+                                                                              Tel: 34-91-708-08-90
+Raleigh, NC                                                                   Fax: 34-91-708-08-91
+Tel: 919-844-7510
+                                                                              Sweden - Gothenberg
+New York, NY                                                                  Tel: 46-31-704-60-40
+Tel: 631-435-6000
+                                                                              Sweden - Stockholm
+San Jose, CA                                                                  Tel: 46-8-5090-4654
+Tel: 408-735-9110
+Tel: 408-436-4270                                                             UK - Wokingham
+                                                                              Tel: 44-118-921-5800
+Canada - Toronto                                                              Fax: 44-118-921-5820
+Tel: 905-695-1980
+Fax: 905-695-2078
+       2008-2018 Microchip Technology Inc.                                               DS00002622A-page 49
+                                                                                                   10/25/17
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ ECE1105-HZH

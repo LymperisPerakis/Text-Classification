@@ -1,0 +1,1025 @@
+                                                                                           S6BT112A01/S6BT112A02
+                                                                               ASSP CXPI Transceiver IC for
+                                                                                                  Automotive Network
+The S6BT112A01 and S66BT112A02 are integrated transceiver ICs for automotive communication network with Clock Extension
+Peripheral Interface (CXPI). It has a flexible bit rate ranging from 2.4 Kbps to 20 Kbps and is JASO CXPI compliant. This CXPI
+transceiver IC connects the CXPI data link controller and the CXPI Bus line, and enables direct connection to the vehicle battery
+with a high surge protection. Additionally, these devices have an optional Spread Spectrum Clock Generator (SSCG) function.
+During Sleep mode, S6BT112A01 and S6BT112A02 reduce power consumption. The Cypress CXPI transceiver IC supports master
+node and slave node as selected SELMS pins.
+Features
+ Compliant with the JASO CXPI (JASO D 015-3-15) standard                Overtemperature protection
+ Compliant with the SAE CXPI ( J3076_201510) standard                   Low-voltage detection.
+ Supports 2.4 Kbps to 20 Kbps bitrate                                   Supports Sleep and Wakeup modes
+ Waveshaping for low Electromagnetic Interference (EMI)                 Sleep mode current: 6 µA (typical at Slave)
+ Operating voltage range: 5.3 V to 18 V                                 Halogen-free 8-pin SOIC package
+ Direct battery operation with protection against load dump,            ESD protection HBM (1.5 kΩ, 100 pF) ±8 kV (BUS pin, BAT
+  jump start, and transients                                              pin)
+ BUS short to VBAT overcurrent protection.                              Voltage tolerance ±40 V (BUS pin)
+ Loss of ground protection; BUS pin leakage is lower than               S6BT112A01: With SSCG.
+  ±1 mA.                                                                  S6BT112A02: Without SSCG.
+ Easy selection of master node or slave node.
+Cypress Semiconductor Corporation              •    198 Champion Court      •   San Jose, CA 95134-1709         •   408-943-2600
+Document Number: 002-10203 Rev.*D                                                                             Revised June 20, 2017
+
+
+                                  S6BT112A01/S6BT112A02
+S6BT112A Block Diagram
+Document Number: 002-10203 Rev.*D                 Page 2 of 38
+
+
+                                                                                                                          S6BT112A01/S6BT112A02
+Table of Contents
+Features                    ............................................................................................................................................................. 1
+S6BT112A Block Diagram ...................................................................................................................................................... 2
+1. Applications             ............................................................................................................................................................. 4
+2. Pin Assignment           ............................................................................................................................................................. 5
+3. Pin Descriptions         ............................................................................................................................................................. 6
+4. Block Diagram            ............................................................................................................................................................. 7
+5. Function Description .......................................................................................................................................................... 8
+5.1    Operation Modes ........................................................................................................................................................... 8
+5.2    Master Node .................................................................................................................................................................. 9
+5.2.1 Normal Mode.................................................................................................................................................................. 9
+5.2.2 Sleep Mode .................................................................................................................................................................. 10
+5.2.3 Standby Mode .............................................................................................................................................................. 11
+5.2.4 Power-on Sequence..................................................................................................................................................... 11
+5.3    Slave Node .................................................................................................................................................................. 12
+5.3.1 Normal Mode................................................................................................................................................................ 12
+5.3.2 Sleep Mode .................................................................................................................................................................. 13
+5.3.3 Standby Mode .............................................................................................................................................................. 15
+5.3.4 Power-on Sequence..................................................................................................................................................... 15
+5.4    Common Functions ..................................................................................................................................................... 16
+5.4.1 Overtemperature Protection ......................................................................................................................................... 16
+5.4.2 WP_ThermalShutdown ................................................................................................................................................ 16
+5.4.3 Low-voltage Reset ....................................................................................................................................................... 17
+5.4.4 Overcurrent Protection ................................................................................................................................................. 18
+5.4.5 Secondary Clock Master .............................................................................................................................................. 18
+5.4.6 Arbitration ..................................................................................................................................................................... 20
+5.4.7 TXD Toggle .................................................................................................................................................................. 21
+6. Absolute Maximum Ratings ............................................................................................................................................. 23
+7. Recommended Operating Conditions ............................................................................................................................ 24
+8. Electrical Characteristics ................................................................................................................................................. 25
+9. Ordering Information ........................................................................................................................................................ 36
+10. Package Dimensions ...................................................................................................................................................... 36
+Document History            ........................................................................................................................................................... 37
+Sales, Solutions, and Legal Information ............................................................................................................................. 38
+Document Number: 002-10203 Rev.*D                                                                                                                                            Page 3 of 38
+
+
+                                                                                        S6BT112A01/S6BT112A02
+1. Applications
+The following figures illustrate the typical applications of S6BT112A01 or S6BT112A02.
+                                                 S6BT112A AS MASTER
+                        12V Battery
+                                                                     BAT                      CXPI BUS LINE
+                                Regulator              S6BT112A: CXPI Transceiver IC
+                                                              RC
+                                      5V                                  LDO Regulator
+                                                             OSC
+                                     VCC                         Thermal Shutdown
+                                   MCU          SELMS           Low Voltage Detection
+                                                               Over Current Protection
+                                               CLK
+                                                                        CXPI
+                                               TXD
+                                   UART                               Control
+                                               RXD                      Logic
+                                               NSLP
+                                          VSS
+                                                                        CXPI             BUS
+                                                                        PHY
+                                                                            GND
+                                                 S6BT112A AS SLAVE
+                       12V Battery
+                                                                     BAT                      CXPI BUS LINE
+                                Regulator              S6BT112A: CXPI Transceiver IC
+                                                             RC
+                                     5V                                   LDO Regulator
+                                                             OSC
+                                    VCC                          Thermal Shutdown
+                                  MCU           SELMS           Low Voltage Detection
+                                                               Over Current Protection
+                                               CLK
+                                                                        CXPI
+                                               TXD
+                                  UART                                Control
+                                               RXD                      Logic
+                                               NSLP
+                                         VSS
+                                                                        CXPI             BUS
+                                                                        PHY
+                                                                            GND
+Document Number: 002-10203 Rev.*D                                                                           Page 4 of 38
+
+
+                                                       S6BT112A01/S6BT112A02
+2. Pin Assignment
+Figure 2-1 Pin Assignment
+                                        (TOP VIEW)
+                                  RXD 1            8 SELMS
+                                NSLP 2             7 BAT
+                                  CLK 3            6 BUS
+                                  TXD 4            5 GND
+Document Number: 002-10203 Rev.*D                                      Page 5 of 38
+
+
+                                                                               S6BT112A01/S6BT112A02
+3. Pin Descriptions
+Table 3-1 Pin Descriptions
+   Pin         Symbol        Direction                                 Description
+ Number
+                                       Receive data output (open-drain).
+    1           RXD             Output
+                                       Requires external pull-up resistor. (refer to Table 7-1 )
+                                       Sleep control input.
+                                       Low: Sleep mode or Standby mode
+    2           NSLP             Input
+                                       High: Normal mode.
+                                       Refer to section 5.2.2 or section 5.3.2
+                                       When the SELMS pin is Low, the CLK pin is the Baud rate clock input.
+                                       Input clock signal with baud rate frequency.
+                                       (When the input clock frequency is 20 kHz, the bit rate is 20 Kbps)
+                                       When the SELMS pin is High, the CLK pin is Baud rate clock output.
+    3           CLK               I/O
+                                       Outputs clock signal with baud rate frequency.
+                                       (When the output clock frequency is 20 kHz , the bit rate is 20 Kbps)
+                                       Open drain output.
+                                       Requires external pull-up resistor. (refer to Table 7-1)
+    4           TXD              Input Transmit data input
+    5           GND                 -  Ground
+    6           BUS               I/O  CXPI BUS line Input/Output
+    7            BAT                -  Battery (voltage source) supply.
+                                       Master / slave node select input.
+    8          SELMS             Input Low: Master
+                                       High: Slave
+Document Number: 002-10203 Rev.*D                                                                            Page 6 of 38
+
+
+                                                         S6BT112A01/S6BT112A02
+4. Block Diagram
+Figure 4-1 Block Diagram
+   RXD
+                                                                            SELMS
+                        Filter                                              BAT
+                                   Power On Rest
+                                    Low Voltage
+                           RPU_TXD
+                                                                             BUS
+   NSLP
+                                   Control logic
+    CLK
+    TXD
+                                                 Waveform Shaping
+                       RPD_NSLP
+                                                 Thermal Shutdown            GND
+Document Number: 002-10203 Rev.*D                                        Page 7 of 38
+
+
+                                                                                                 S6BT112A01/S6BT112A02
+5. Function Description
+5.1        Operation Modes
+Figure 5-1 State Transition Diagram
+Notes
+ [1] : “Hi-z” means high-impedance.
+ [2] : Switching of the master / slave during operation is prohibited. Refer to section 5.4.5.
+ [3] : The operation mode, after the transceiver powers on, has to start from sleep mode.
+ [4] : If TXD is Low when releasing the thermal shutdown, TXD has to toggle "High" before valid.
+      TXD is a Low signal input. For details, refer to section 5.4.7.
+Document Number: 002-10203 Rev.*D                                                                                Page 8 of 38
+
+
+                                                                                    S6BT112A01/S6BT112A02
+5.2   Master Node
+ There is only one node in a system, which functions as a schedule manager and a primary clock master.
+ The transceiver works in Master mode when low-level is applied on SELMS.
+ The baud rate clock is applied on the CLK pin in the Master state.
+ The transceiver is usually used as the "Master" or "Slave", except for the “Secondary Clock master function”.
+ The SELMS input should not be changed in normal mode.
+ The SELMS input should not be changed during wakeup pulse transmission in Sleep mode.
+ The CLK pin inputs for the baud rate clock in Master state.
+Table 5-1 SELMS Pin State for Master
+    Pin         Input Signal      Master/Slave
+SELMS           Low              Master
+Figure 5-2 CLK Input -> BUS signal (Master)
+5.2.1    Normal Mode
+The Normal mode denotes the state to which communication is possible. The master node transmits the clock to the CXPI BUS,
+which means that the clock is master. During the Normal mode, the transmitted signal is encoded and the received signal is
+decoded. When the transmitting node transmits data to the CXPI BUS, it transmits to the TXD pin after converting the data to UART
+format by 1 byte. The data is transmitted to the CXPI BUS as LSB first.
+When the receiving node receives data from the CXPI BUS, it receives from the RXD pin in the UART format by 1 byte. The UART
+format is listed in Table 5-2. Refer to the JASO CXPI (JASO D 015-3:2015) standard for details of the operation.
+Table 5-2 UART Format
+Start bit    bit 0 (LSB)   bit 1  bit 2   bit 3 bit 4 bit 5 bit 6  bit 7(MSB)    Stop bit
+Document Number: 002-10203 Rev.*D                                                                                  Page 9 of 38
+
+
+                                                                                     S6BT112A01/S6BT112A02
+5.2.2       Sleep Mode
+The Sleep mode denotes a power-saving state during which each node stops transmitting and receiving data. All nodes transition to
+Sleep mode immediately after power-on. The nodes also transition to Sleep mode after the Sleep processing is executed from the
+Normal mode and transition from Standby mode or Normal mode due to CXPI BUS error.
+When each node receives the Wakeup factor during the Sleep mode, it transitions to the Standby mode.The Wakeup factor (for
+example, detecting that the ignition has been turned on) of each node is different from each application (for example, detecting that
+the ignition has been turned on) and the external factor that receives the Wakeup pulse from the CXPI BUS. During the Sleep mode,
+the reception signal is received without decoding. The MCU can detect a wakeup pulse width monitor using the RXD signal.
+The sleep mode is initiated by a falling edge on the NSLP pin while TXD is already set High. The CXPI BUS transmit path is
+immediately disabled when the NSLP pin goes Low. All wake-up events must be maintained for a specific period (refer to the
+TMODE_CHG parameter in Table 8-7).
+Table 5-3 Transition from Normal to Sleep mode
+     Pin              Pin State                   Description
+TXD             High               No data transmitting
+CLK             High               No clock receiving
+NSLP            High to Low        -
+RXD             High impedance     High level with external pull-up resistor.
+BUS             High impedance     High level with external pull-up resistor.
+SELMS           Low                -
+Note: The “Pin State” indicates before the falling edge in the NSLP pin
+Table 5-4 Transition from Sleep to Normal mode
+     Pin              Pin State                   Description
+TXD             High               No data transmitting
+CLK             High               No clock receiving
+NSLP            Low to High        -
+RXD             High impedance     High level with external pull-up resistor.
+BUS             High impedance     High level with external pull-up resistor.
+SELMS           Low                -
+Note: The “Pin State” indicates the state before the rising edge in the NSLP pin
+Figure 5-3 Transition Sequence Between Sleep and Normal Mode
+Note:
+ [1] “Hi-Z” means high-impedance.
+Document Number: 002-10203 Rev.*D                                                                                  Page 10 of 38
+
+
+                                                                                      S6BT112A01/S6BT112A02
+Table 5-5 Bitrate of 20 Kbps (50 µs/Bit)
+UART Receive Data         Number of Bits of L Level     Wakeup Pulse Width
+        FCH                           3-bit                    150 µs
+         F8H                          4-bit                    200 µs
+         F0H                          5-bit                    250 µs
+        E0H                           6-bit                    300 µs
+        C0H                           7-bit                    350 µs
+         80H                          8-bit                    400 µs
+         00H                          9-bit                    450 µs
+5.2.3    Standby Mode
+The Standby mode denotes the prepared state to the Normal mode after releasing the Sleep mode. During the CLK state (in slave
+node), the RXD pin and the BUS pin are in a high-impedance state. After TMODE_CHG, the state changes to the Normal mode.
+5.2.4    Power-on Sequence
+The power-on sequence occurs at power-up while setting up Sleep mode. When VBAT is above 5.3 V, the NSLP pin should be in a
+High state. After transition to the normal mode, activate the BUS pin after a clock input of 33 periods.
+Figure 5-4 Power-on Sequence of Master Node
+Document Number: 002-10203 Rev.*D                                                                               Page 11 of 38
+
+
+                                                                                   S6BT112A01/S6BT112A02
+5.3    Slave Node
+All the nodes, except the master node, are connected with the system. The transceiver works as Slave when High level is applied on
+SELMS. The CLK pin outputs the baud rate clock during the Slave state.
+The transceiver is usually used as the "Master" or "Slave", except for the “Secondary Clock master function”.
+Table 5-6 SELMS Pin State for Slave
+Pin           Input Signal      Master/Slave
+SELMS         High             Slave
+The SELMS input should not be changed during the Normal mode or during wakeup pulse transmission in the Sleep mode. The
+CLK pin outputs the baud rate clock in Slave node.
+Figure 5-5 CLK Pin Clock Output (Slave)
+5.3.1     Normal Mode
+The Normal mode can perform data transmit and receive. During the Normal mode, the signal that is transmitted is encoded and the
+signal that is received is decoded. When the transmitting node transmits data to the CXPI BUS, it transmits to the TXD pin after
+converting the data to UART format by 1 byte. The data is transmitted to the CXPI BUS by LSB first. When the receiving node
+receives data from the CXPI BUS , it revises from the RXD pin in the UART format by 1 byte. The UART format is shown in Table 5-7.
+Refer to the JASO CXPI (JASO D 015-3:2015) standard for details of the operation.
+Table 5-7 UART Format
+Start bit  bit 0 (LSB)   bit 1   bit 2 bit 3  bit 4  bit 5  bit 6  bit 7(MSB)   Stop bit
+Document Number: 002-10203 Rev.*D                                                                                Page 12 of 38
+
+
+                                                                                     S6BT112A01/S6BT112A02
+5.3.2     Sleep Mode
+The Sleep mode denotes a state of power saving during which each node stops transmit and receive of data. All nodes transition to
+the Sleep mode immediately after power-on. They also transition to the Sleep mode after the sleep processing is executed from the
+Normal mode and transition from the Standby mode or the Normal mode due to CXPI BUS error.
+During the Sleep mode, when each node receives the Wakeup factor, it transitions to the Standby mode. The Wakeup factor is
+different from each application and is composed of the internal factor (for example, detecting that the ignition has been turned on)
+and the external factor that receives the Wakeup pulse from the CXPI BUS.
+During the Sleep mode, the reception signal is received without decoding. The sleep mode is initiated by a falling edge on the NSLP
+pin while the TXD pin is already set High. The CXPI BUS transmit path is immediately disabled when the NSLP pin goes Low.
+All wake-up events must be maintained for a specific period (refer to TMODE_CHG in Table 8-7).
+Figure 5-6 Transition Sequence Between Sleep and Normal Mode
+Table 5-8 Transition from Normal to Sleep mode
+    Pin           Pin State                       Description
+TXD           High                 No data transmitting
+CLK           High impedance       High level with external pull-up resistor.
+NSLP          High to Low          -
+RXD           High impedance       High level with external pull-up resistor.
+BUS           High impedance       High level with external pull-up resistor.
+SELMS         High                 -
+Note: The “Pin State” indicates the state before the falling edge of the NSLP pin.
+Table 5-9 Transition from Sleep to Normal mode
+    Pin           Pin State                       Description
+TXD           High                 No data transmitting
+CLK           High impedance       High level with external pull-up resistor.
+NSLP          Low to High          -
+RXD           High impedance       High level with external pull-up resistor.
+BUS           High impedance       High level with external pull-up resistor.
+SELMS         High                 -
+Note: The “Pin State” indicates the state before the rising edge of the NSLP pin.
+■Receiver function in Sleep mode
+Document Number: 002-10203 Rev.*D                                                                                     Page 13 of 38
+
+
+                                                                                    S6BT112A01/S6BT112A02
+During the Sleep mode, the received signal will be output from the CLK pin without decoding a received signal. The RXD pin outputs
+at High level. When the Master node transmits the encoded PWM clock signal to the CXPI BUS during a wake-up sequence, Slave
+MCUs receive shorter low-level width signals than the UART communication period and possibly get errors. This is because the
+Slave node is received without decoding. To avoid these errors, S6BT112A01 or S6BT112A02 CXPI transceiver IC outputs receive
+signals on the CLK pin in the Sleep mode.
+MCU can detect a wake-up pulse width to monitor the CLK signal. (Figure 5-7)
+Figure 5-7 CLK Output of Receive Signal、RXD stays High (for Slave node)
+■Wakeup function
+The WakeupPulseOutput state transmits out the wakeup pulse in the Slave node. When the slave device returns from the Sleep
+mode, it must transmit a wake-up pulse. As the NSLP pin is in a Low state, the TXD pin transmits a Low state. The TXD signal is
+transmitted to the BUS pin without encode. The TXD pin outputs the signal width, which is a value obtained by subtracting the
+TTXD_BT:
+Signal width = TXD signal (“L”) – TTXD_BT(“L”)
+Figure 5-8 Wake-Up Pulse Transmission
+Document Number: 002-10203 Rev.*D                                                                                 Page 14 of 38
+
+
+                                                                                    S6BT112A01/S6BT112A02
+5.3.3    Standby Mode
+This is the standby state during the Normal mode after releasing the Sleep mode. During this state, CLK (in slave node), the RXD
+pin, and the BUS pin enter the high-impedance state. After "TMODE_CHG," this state changes to the Normal mode.
+5.3.4    Power-on Sequence
+This sequence occurs at power-up, while setting up the Sleep mode. When VBAT is above 5.3 V, the NSLP pin should be in a High
+state.
+Figure 5-9 Power-on Sequence of Slave Node
+Document Number: 002-10203 Rev.*D                                                                                Page 15 of 38
+
+
+                                                                                   S6BT112A01/S6BT112A02
+5.4    Common Functions
+5.4.1    Overtemperature Protection
+The overtemperature protection (OTP) monitors the die temperature. If the junction temperature exceeds the shutdown junction
+temperature, TSD_H, the thermal protection circuit disables the output driver.
+The driver is enabled again when the junction temperature falls below TSD_L and theTXD pin is toggled. (see Table 5-10)
+5.4.2    WP_ThermalShutdown
+The WP_ThermalShutdown state detects the "shutdown temperature" during the WakeupPulseOutput mode. The overtemperature
+protection is inactive during the Sleep mode.
+Table 5-10 Input Signal Change after Recovery from thermal shutdown
+ Master/Slave         Pin       Toggle of Input Signal
+     Master           TXD     Required
+      Slave           TXD     Required
+Table 5-11 State Under Thermal Shutdown
+ Master/Slave             Pin                                       Description
+                         TXD          Normal function
+                         NSLP         High: Normal mode / Low: Sleep mode (Thermal protection inactive)
+    Master             CLK(input)     Normal function
+                         RXD          Normal function
+                         BUS          High impedance
+                         TXD          Normal function
+                         NSLP         High: Normal mode / Low: Sleep mode (Thermal protection inactive)
+     Slave               CLK          Normal function
+                         RXD          Normal function
+                         BUS          High impedance
+Figure 5-10 Sequence of Thermal Shutdown
+Document Number: 002-10203 Rev.*D                                                                                 Page 16 of 38
+
+
+                                                                                       S6BT112A01/S6BT112A02
+5.4.3    Low-voltage Reset
+The low-voltage reset state detects the low voltage of the BAT pin. This device has an integrated power-on reset and low-voltage
+detection at the supply BAT.
+If the supply voltage, VBAT, is dropping below the power-on reset level (that is, VBAT<VPOR_L), then change the LowPowerReset mode.
+In the LowPowerReset mode, the output stage is disabled and communication to the CXPI BUS is not possible.
+If the power supply reaches a higher level than the low-voltage reset level, VBAT> VPOR_H, then change the Standby mode (the NSLP
+pin is High) or Sleep mode (the NSLP pin is Low).
+After releasing LowPowerRest mode, enable the Power-up sequence.
+Table 5-12 Input Signal Change after Recovery from Low Voltage Reset
+  Master/Slave         Pin        Toggle of Input Signal
+      Master           TXD        Required
+      Slave            TXD        Required
+Table 5-13 State Under Low voltage Reset
+  Master/Slave          Pin                   Description
+                     SELMS         Reset
+                       TXD         Reset
+                      NSLP         Reset
+      Master
+                       CLK         Reset(High impedance)
+                       RXD         High impedance
+                       BUS         High impedance
+                     SELMS         Reset
+                       TXD         Reset
+                      NSLP         Reset
+      Slave
+                       CLK         Reset(High impedance)
+                       RXD         High impedance
+                       BUS         High impedance
+Document Number: 002-10203 Rev.*D                                                                                   Page 17 of 38
+
+
+                                                                                       S6BT112A01/S6BT112A02
+Figure 5-11 Low-Voltage Detection
+After releasing the low-voltage reset mode, the logical value high is output to the BUS pin after a clock input of 33 periods. The TXD
+data is valid from the falling edge on the TXD pin.
+5.4.4    Overcurrent Protection
+The current in the transmitter output stage is limited to protect the transmitter against short-circuit to BAT or GND pins.
+Table 5-14 Overcurrent Protection
+  Master/Slave         Pin                    Description
+                      TXD       Normal function
+                     NSLP       Normal function
+     Master           CLK       Normal function
+                      RXD       Normal function
+                      BUS       Output current limited by IBUS_LIM
+                      TXD       Normal function
+                     NSLP       Normal function
+      Slave           CLK       Normal function
+                      RXD       Normal function
+                      BUS       Output current limited by IBUS_LIM
+5.4.5    Secondary Clock Master
+The node that detects the wakeup event transmits the wakeup pulse on to the CXPI BUS. If the primary clock master cannot
+transmit the clock to the CXPI BUS due to failure, the wakeup pulse is retransmitted. If the clock is not transmitted to the CXPI BUS,
+each node detects the CXPI BUS error.
+The secondary clock master may transmit the clock to the CXPI BUS instead of the primary clock master if it detects that the clock
+does not exist, and confirms that the clock does not exist on the CXPI BUS for the period during which it transitions from the Sleep
+mode
+■Operation sequence from master to slave
+The TXD input pin is set High and the CLK pin is high-impedance. A Low setting on the NSLP pin initiates a transition to the Sleep
+mode. After the RXD pin is confirmed to High state, the SELMS pin goes to High state. Table 5-15 shows the pin states just before
+the SELMS pin input signal change.
+Document Number: 002-10203 Rev.*D                                                                                      Page 18 of 38
+
+
+                                                                             S6BT112A01/S6BT112A02
+Table 5-15 Pin State Table (from Master to Slave)
+   Pin           Pin State                      Description
+TXD          High                No data transmitting
+CLK          High impedance      High level with external pull-up resistor.
+NSLP         Low                 Sleep mode
+SELMS        Low to High         -
+RXD          High                No data receiving
+BUS          High                No wakeup signal receiving preferred
+Figure 5-12 Application example Secondary Clock Master
+                               S6BT112A AS SLAVE (SECONDARY CLOCK MASTER )
+ 12V Battery
+                                                      BAT                          CXPI BUS LINE
+         Regulator                   S6BT112A: CXPI Transceiver IC
+                                             RC
+                5V                                         LDO Regulator
+                                            OSC
+               VCC                                Thermal Shutdown
+            MCU               SELMS             Low Voltage Detection
+                                               Over Current Protection
+                            CLK
+                                                        CXPI
+                            TXD
+            UART                                       Control
+                            RXD                         Logic
+                            NSLP
+                    VSS
+                                                        CXPI                BUS
+                                                        PHY
+                                                             GND
+Document Number: 002-10203 Rev.*D                                                                Page 19 of 38
+
+
+                                                                                           S6BT112A01/S6BT112A02
+Figure 5-13 Transition Sequence from Master to Slave
+■Operation sequence from slave to master
+The TXD pin inputs high and the slave node transitions to the Sleep mode after the CLK pin was confirmed to High, and the SELMS
+pin goes to Low.
+Table 5-16 Pin State Table (from Slave to Master)
+    Pin           Pin State                         Description
+TXD          High                    No data transmitting
+CLK          High impedance          No wakeup signal receiving
+NSLP         Low                     Sleep mode
+SELMS        High to Low             -
+RXD          High                    -
+BUS          High                    No wakeup signal receiving preferred
+Note: The pin states just before the SELMS input signal change.
+Figure 5-14 Transition Sequence from Slave to Master
+5.4.6    Arbitration
+Transceivers arbitrate bit-by-bit. Arbitration in bytes is done in the MCU.
+In the Normal mode, each node always compares the received bit from the CXPI BUS with the transmitted bit to the CXPI BUS.
+When the value of the bit is corresponding, the node may continuously transmit to the CXPI BUS. When the value of the bit is not
+corresponding, the loss of arbitration is detected, and the transmission of the bit after that shall discontinue. If the transmitting node
+detects the arbitration loss, it behaves as the receiving node. The data of each bit transmitted on the CXPI BUS performs arbitration
+from the start by the bit. Moreover, arbitration is targeted at the entire field of the frame. When two or more nodes begin transmitting
+at the same time, by arbitration only the node that transmits the highest priority frame can complete the transmission.
+The MCU compares between the transmitted data (TXD) and received data (RXD). If the data difference is detected, MCU has to
+stop data transmission until finding IFS.
+Document Number: 002-10203 Rev.*D                                                                                         Page 20 of 38
+
+
+                                                                                      S6BT112A01/S6BT112A02
+5.4.7      TXD Toggle
+If the TXD pin is short to ground or open, the BUS pin output is not fixed Low (logic value). Therefore, it does not interfere with the
+communication of the other device.
+An initial TXD dominant check prevents the bus line being driven to a permanent dominant state (blocking all network
+communications) if the TXD pin is forced permanently Low by a hardware and/or software application failure. The TXD input level is
+checked after a transition to the Normal mode.
+If the TXD pin is Low, the transmit path remains disabled and is only enabled when the TXD pin goes High.
+A TXD toggle is required in the following cases.
+    Data   transmission after recovery from low-voltage reset.
+    Data   transmission after recovery from thermal shutdown.
+    First TXD data transmission in the Normal mode.
+    First wake-up pulse transmission in sleep mode.
+■Short-circuit from the TXD pin to ground.(failure detect)
+In the event of a short-circuit to ground or an open-wire on the TXD pin, the BUS pin output remains High (logical value ‘1’) by this
+toggle function. In this case, by comparing the sent data to the TXD pin and received data from the RXD pin of the transceiver IC,
+the MCU can detect the permanent Low on the TXD pin by the data difference. In this case too, the receiver is active.
+Figure 5-15 Normal Transmission Sequence of Master
+Figure 5-16 TXD Toggle of Master after Transition to Normal mode
+Document Number: 002-10203 Rev.*D                                                                                      Page 21 of 38
+
+
+                                                                   S6BT112A01/S6BT112A02
+Figure 5-17 Slave TXD Toggle after Recovery from Low voltage State
+Document Number: 002-10203 Rev.*D                                                 Page 22 of 38
+
+
+                                                                                S6BT112A01/S6BT112A02
+6. Absolute Maximum Ratings
+Semiconductor devices may be permanently damaged by application of stress (including, without limitation, voltage, current or
+temperature) in excess of absolute maximum ratings. Do not exceed any of these ratings.
+                                                                          Rating
+           Parameters              Symbol         Conditions                            Unit
+                                                                     Min         Max
+  Power supply voltage          VBAT           BAT pin               -0.3         40      V
+                                VNSLP          NSLP pin              -0.3        6.9      V
+                                VSELMS         SELMS pin             -0.3         18      V
+  Input voltage
+                                VCLK           CLK pin               -0.3        6.9      V
+                                VTXD           TXD pin               -0.3        6.9      V
+                                VRXD           RXD pin               -0.3        6.9      V
+  Output voltage
+                                VCLK           CLK pin               -0.3        6.9      V
+  BUS pin voltage               VBUS           BUS pin                -40         40      V
+  BUS pin ESD
+                                VESDBUS        BUS pin                 -8          8     kV
+  (1.5 kΩ, 100 pF)
+  BAT pin ESD
+                                VESDBAT        BAT pin                 -8          8     kV
+  (1.5 kΩ, 100 pF)
+                                               NSLP pin
+                                               SELMS pin
+  ESD
+                                VESD           CLK pin                 -2          2     kV
+  (1.5 kΩ, 100 pF)
+                                               TXD pin
+                                               RXD pin
+  Storage temperature           TSTG           -                      -55        150     °C
+  Maximum
+                                TJMAX          -                      -40        150     °C
+  junction temperature
+Document Number: 002-10203 Rev.*D                                                                           Page 23 of 38
+
+
+                                                                                       S6BT112A01/S6BT112A02
+7. Recommended Operating Conditions
+Table 7-1 Recommended condition
+                                                                                                          Value
+                Parameters                      Symbol               Conditions                                            Unit
+                                                                                                  Min      Typ     Max
+  Power supply voltage                           VBAT   BAT pin [1]                               5.3        -      18       V
+  Operating ambient temperature                   TA                       -                      －40      +25    +125      °C
+  BUS pin pull-up resistance                    RMASTER BUS pin (Master node：SELMS=0V)            900     1000     1100      Ω
+  RXD pin pull-up resistance                     RRXD   RXD pin                                   2.4       10       -      kΩ
+  CLK pin pull-up resistance                     RCLK   CLK pin (SELMS=5V)                        2.4       10       -      kΩ
+Note
+ [1]: (18 V < VBAT ≤ 27 V) less than 2 minutes.
+WARNING:
+1.     The recommended operating conditions are requiredir to ensure the normal operation of the semiconductor device. All of the
+       device's electrical characteristics are warranted when the device is operated under these conditions.
+2.     Any use of semiconductor devices will be under their recommended operating condition.
+3.     Operation under any conditions other than these conditions may adversely affect reliability of device and could result in device
+       failure.
+4.     No warranty is made with respect to any use, operating conditions or combinations not represented on this data sheet. If you
+       are considering application under any conditions other than listed herein, please contact sales representatives beforehand.
+Document Number: 002-10203 Rev.*D                                                                                      Page 24 of 38
+
+
+                                                                               S6BT112A01/S6BT112A02
+8. Electrical Characteristics
+Table 8-1 DC Characteristics
+VBAT = 5.3 V~27 V[1], TA = -40~125 °C; All voltages are referenced to Pin 8 (GND); Positive currents flow into the IC; unless
+otherwise specified.
+                                                 Pin
+       Parameters               Symbol          Name           Conditions           Min      Typ       Max      Unit
+                                                        Normal mode
+                                                          TXD=5 V                    -        1.4      2.9       mA
+                                                          CLK=20 kHz, Duty 50%
+                                                        Normal mode
+                                                        TXD=0 V                      -        2.0      4.0       mA
+                                                        CLK=20 kHz, Duty 50%
+                                                        Sleep mode
+                                                        VBAT =12 V
+                                                        TXD=5 V                      -         6         -       µA
+                                                        SELMS=5 V
+                                                        BUS= VBAT
+                                                        TA=25 °C
+                                                        Sleep mode
+ Power supply current              IBAT          BAT    VBAT =12 V
+                                                        TXD=5 V                      -        16         -       µA
+                                                        SELMS=0 V
+                                                        BUS= VBAT
+                                                        TA=25 °C
+                                                        Sleep mode
+                                                        VBAT =12 V
+                                                        TXD=5 V                      -         -        50       µA
+                                                        SELMS=5 V
+                                                        BUS= VBAT
+                                                        Sleep mode
+                                                        VBAT =12 V
+                                                        TXD=5 V                      -         -        60       µA
+                                                        SELMS=0 V
+                                                        BUS= VBAT
+ BUS pin pull-up
+                                  RBUSpu         BUS    -                           20        30        47       kΩ
+ resistance
+ BUS short circuit
+                                 IBUS_LIM        BUS    VBUS=18 V                   40         -       200       mA
+ current
+Document Number: 002-10203 Rev.*D                                                                            Page 25 of 38
+
+
+                                                                                     S6BT112A01/S6BT112A02
+                                                         Pin
+          Parameters                         Symbol     Name       Conditions           Min  Typ  Max     Unit
+                                                             BUS=18 V
+  BUS input leak current                                     VBAT =5.3 V
+                                           IBUS_PAS_rec BUS                               -   -    20     µA
+  (HIGH)
+                                                             TXD=5 V
+                                                             TA=25 °C
+                                                             BUS=0 V
+  BUS input leak current
+                                          IBUS_PAS_dom  BUS  VBAT =12 V                  -1   -     -     mA
+  (LOW)
+                                                             TXD=5 V
+  loss of ground BUS                                         VBAT =GND=18 V
+                                          IBUS_NO_GND   BUS                              -1   -    1      mA
+  leak current                                               BUS=0 V
+                                                             VBAT =0 V
+  loss of battery BUS
+                                           IBUS_NO_BAT  BUS  BUS=18 V                     -   -    30     µA
+  leak current
+                                                             TA=25 °C
+                                                             VBAT =13.5 V
+  BUS drop voltage                           VBUSDR     BUS                             2.4   -   5.7       V
+                                                             IBUSsource=-100 µA
+                                                             TXD=0 V
+                                                             VBAT =7 V
+                                              VO_dom    BUS                               -   -   1.4       V
+                                                             BUS pull-up resistance=
+  BUS low level output                                       500 Ω
+  voltage                                                    TXD=0 V
+                                                             VBAT =18 V
+                                              VO_dom    BUS                               -   -    2        V
+                                                             BUS pull-up resistance=
+                                                             500 Ω
+  Receiver low level                                                                             0.423
+                                             VBUSdom    BUS  VBAT =12V, TA=25 °C          -   -             V
+  threshold voltage                                                                               VBAT
+  Receiver high level                                                                  0.556
+                                             VBUSrec    BUS  VBAT =12V, TA=25 °C              -     -       V
+  threshold voltage                                                                     VBAT
+  Receiver hysteresis                                                                            0.133
+                                               VHYS     BUS  VBAT =12V, TA=25°C           -   -             V
+  voltage                                                                                         VBAT
+  Low level power-on
+                                              VPOR_L     BAT -                          3.1  3.8  4.7       V
+  reset threshold voltage
+  High level power-on
+    reset threshold                          VPOR_H      BAT -                          3.3  4.1  4.9       V
+    voltage
+  power-on reset
+                                            VPOR_HYS     BAT -                          0.2  0.3  0.5       V
+  hysteresis voltage
+  Temperature shutdown
+                                              TSD_H       -  [2]                        156  165  174      °C
+  threshold
+  Temperature shutdown
+                                              TSD_L       -  [2]                        151  159  168      °C
+  release threshold
+Notes
+ [1]: (18 V < VBAT ≤ 27 V) less than 2 minutes.
+ [2]: Guaranteed by design
+Document Number: 002-10203 Rev.*D                                                                      Page 26 of 38
+
+
+                                                                                     S6BT112A01/S6BT112A02
+Table 8-2 DC Characteristics CLK Pin
+(If SELMS = 5 V, this pin operates as Open Drain Output Pin. If SELMS = 0 V, this pin operates as an input pin)
+VBAT = 5.3 V～27 V[1], TA = -40～125 °C; all voltages are referenced to Pin 8 (GND). Positive current flow into the IC; unless
+otherwise specified.
+                  Parameters                    Symbol       Pin         Conditions       Min     Typ      Max      Unit
+                                                            Name
+  High level input voltage                        VIH_CLK    CLK       SELMS = 0 V          2        -      6         V
+  Low level input voltage                         VIL_CLK    CLK       SELMS = 0 V        -0.3       -     0.8        V
+  Hysteresis range of input voltage             VHYS_CLK     CLK       SELMS = 0 V        0.03       -     0.5        V
+                                                                       ICLK = 2.2 mA
+  Low level output voltage                       VOL_CLK     CLK                            -        -     0.6        V
+                                                                       SELMS = 5 V
+  Low level current                               IOL_CLK    CLK       SELMS = 5 V         1.3       3       -      mA
+  High level leak current                         IILH_CLK   CLK       SELMS = 5 V         -3        -      3        µA
+  Low level leak current                          IILL_CLK   CLK       SELMS = 5 V         -3        -      3        µA
+Note
+ [1]: (18 V < VBAT ≤ 27 V) less than 2 minutes.
+Table 8-3 DC Characteristics NSLP Pin
+VBAT = 5.3 V~27 V[1], TA = -40~125 °C; all voltages are referenced to Pin 8 (GND). Positive current flow into the IC; unless otherwise
+specified.
+                  Parameters                    Symbol       Pin         Conditions       Min     Typ      Max      Unit
+                                                            Name
+  High level input voltage                       VIH_NSLP   NSLP      -                     2        -      6          V
+                                                            NSLP
+  Low level input voltage                        VIL_NSLP             -                   -0.3       -     0.8         V
+                                                            NSLP
+  Hysteresis range of input voltage             VHYS_NSLP             -                   0.03       -     0.5         V
+                                                            NSLP
+  Internal pull-down resistance                 RPD_NSLP              NSLP = 5 V          100     250      650        kΩ
+                                                            NSLP
+  Low level leak current                         IILL_NSLP            NSLP = 0 V           -3        -      3         µA
+Note
+ [1]: (18 V < VBAT ≤ 27 V) less than 2 minutes
+Document Number: 002-10203 Rev.*D                                                                                     Page 27 of 38
+
+
+                                                                                     S6BT112A01/S6BT112A02
+Table 8-4 TXD Pin
+VBAT = 5.3 V~27 V[1], TA = -40~125 °C; all voltages are referenced to Pin 8 (GND). Positive current flow into the IC; unless otherwise
+specified.
+                                                              Pin
+                  Parameters                    Symbol       Name      Conditions       Min      Typ       Max       Unit
+  High level input voltage                       VIH_TXD     TXD              -           2        -         6         V
+  Low level input voltage                        VIL_TXD     TXD              -         -0.3       -        0.8        V
+  Hysteresis range of input voltage             VHYS_TXD     TXD              -         0.03       -        0.5        V
+  Internal pull-up resistance                   RPU_TXD      TXD        TXD = 0 V        50      125       325        kΩ
+  High level leak current                        IILH_TXD    TXD        TXD = 5 V        -3        -         3        µA
+Note
+ [1]: (18V < VBAT ≤ 27V) less than 2 minutes
+Table 8-5 SELMS Pin
+VBAT = 5.3 V~27 V[1], TA = -40~125 °C; all voltages are referenced to Pin 8 (GND). Positive current flow into the IC; unless otherwise
+specified.
+                                                                 Pin
+                 Parameters                        Symbol       Name        Conditions      Min       Typ      Max       Unit
+  High level input voltage                        VIH_SELMS    SELMS      -                   2        -         6        V
+                                                               SELMS
+  Low level input voltage                         VIL_SELMS               -                 -0.3       -        0.8       V
+                                                               SELMS
+  Hysteresis range of input voltage             VHYS_SELMS                -                 0.03       -        0.5       V
+                                                               SELMS
+  Internal pull-up resistance                    RPU_SELMS                SELMS = 0 V       200       500      1300      kΩ
+                                                               SELMS
+  High level leak current                         IILH_SELMS              SELMS = 5 V        -3        -         3       µA
+Note
+ [1]: (18 V < VBAT ≤ 27 V) less than 2 minutes.
+Document Number: 002-10203 Rev.*D                                                                                     Page 28 of 38
+
+
+                                                                                           S6BT112A01/S6BT112A02
+Table 8-6 RXD Pin (Open Drain Output)
+VBAT = 5.3 V~27 V[1], TA = -40~125 °C; all voltages are referenced to Pin 8 (GND). Positive current flow into the IC; unless otherwise
+specified.
+                  Parameters                       Symbol      Pin Name      Conditions     Min     Typ   Max       Unit
+                                                                 RXD
+  Low level output voltage                         VOL_RXD                 IRXD = 2.2 mA      -      -     0.6         V
+                                                                 RXD
+  Low level current                                 IOL_RXD                RXD = 0.4 V      1.3      3      -        mA
+                                                                 RXD
+  High level leak current                          IOLH_RXD                RXD = 5 V         -3      -      3        µA
+                                                                 RXD
+  Low level leak current                           IOLL_RXD                RXD = 0 V         -3      -      3        µA
+Note
+ [1]: (18 V < VBAT≦ 27 V) less than 2 minutes.
+Table 8-7 AC Characteristics
+VBAT = 5.3 V~27 V[1], TA = -40~125 °C BUS Load 1 kΩ /1 nF; unless otherwise specified.
+                                                             Pin
+          Parameters                      Symbol            Name         Conditions             Min     Typ        Max           Unit
+  Bitrate                                   TBUAD           BUS     VTH(bus) [3] = 0.5VBAT      2.4      -          20           kbps
+  Mode transition time
+  (Sleep to Normal or                    TMODE_CHG          NSLP    VTH(5v)[4] = 50%             -       -           1            ms
+  Normal to Sleep.)
+                                                             CLK
+  NSLP wait time                           TSLP_WT                  VTH(5 V) [4] = 50%          100      -           -            µs
+                                                            NSLP
+  Minimum sleep time                       TSLP_MN          NSLP    -                            1       -           -            ms
+                                                                    NLSP = 0 V
+  Driver boot time under                                            SELMS = 5 V
+                                           TTXD_BT          TXD                                  -       -         195            µs
+  sleep mode. [2]
+                                                                    VTH(5v)[4]=50%
+                                                                    VTH(bus)[3]=0.3VBAT
+                                                                    NLSP = 5 V
+                                                                    SELMS = 0 V
+  CLK transmission delay                                            CLK=input clock
+                                           TCLK_PD           CLK                                 -       -          0.9          Tbit[5]
+  time
+                                                                    TXD=5 V
+                                                                    VTH(5v)[4]=50%
+                                                                    VTH(bus)[3]=0.3VBAT
+Document Number: 002-10203 Rev.*D                                                                                     Page 29 of 38
+
+
+                                                                             S6BT112A01/S6BT112A02
+       Parameters               Symbol          Pin      Conditions               Min       Typ   Max           Unit
+                                               Name
+                                                    NLSP = 5 V
+                                                    SELMS = 0 V
+ Time of Low level of                                                                           0.39Tbit
+                                Ttx_1_lo_rec   BUS  CLK=input clock                 -        -                     -
+ logic value '1'                                                                                  +6τ
+                                                    TXD=5 V
+                                                    VTH(bus)[3] = 0.7VBAT
+                                                    NLSP = 5 V
+                                                    SELMS = 0 V
+ Time of Low level of
+                               Ttx_1_lo_dom    BUS  CLK=input clock               0.11       -      -            Tbit
+ logic value '1'
+                                                    TXD=5 V
+                                                    VTH(bus)[3] = 0.3 VBAT
+                                                    NLSP = 5 V                 Ttx_1_lo_rec
+ Time of Low level of
+                                Ttx_0_lo_rec   BUS  TXD = 0 V                                -      -              -
+ logic value '0'                                                               +0.06Tbit
+                                                    VTH(bus) [3] = 0.7 VBAT
+                                                    NLSP = 5 V                Ttx_1_lo_dom
+ Time of Low level of
+                               Ttx_0_lo_dom    BUS  TXD=0 V                                  -      -              -
+ logic value '0'                                                               +0.06Tbit
+                                                    VTH(bus) [3] = 0.3 VBAT
+                                                    NLSP = 5 V
+ High level time at                                 TXD = 0 V
+                                  Ttx_0_hi     BUS                                0.06       -      -            Tbit
+ receiving node.
+                                                    VTH(bus)[3]   =   0.556
+                                                    VBAT
+                                                    NSLP = 5 V
+ Receiver delay time             TRXD_PD       RXD  VTH(bus)[3]            =        -        -    2.4            Tbit
+                                                    VBUSdom
+ Delay time of
+ transmission if logic           TTXD_PD       TXD  NSLP = 5 V                      -        -    3.3            Tbit
+ value '0'.                                         VTH(bus) [3]=0.3 VBAT
+ Input clock duty                TICLK_DY       CLK SELMS = 0 V                    30        -     70             %
+                                                    VTH(5 V)[4] = 50%
+ Output clock duty[6]           TOCLK_DY        CLK SELMS = 5 V                    14        -     50             %
+                                                    VTH(5 V)[4] = 50%
+                                                    NSLP = 0 V
+ Wakeup pulse filter
+                             Trx_wakeup_master BUS  SELMS = 0 V                    30        -    150            µs
+   constant(Master)
+                                                    VTH(bus) [3]=42.3%
+Document Number: 002-10203 Rev.*D                                                                    Page 30 of 38
+
+
+                                                                                         S6BT112A01/S6BT112A02
+           Parameters                         Symbol         Pin      Conditions            Min  Typ   Max           Unit
+                                                            Name
+                                                                 NSLP = 0 V
+  Wakeup pulse filter
+                                           Trx_wakeup_slave BUS  SELMS = 5 V                 0.5  -     5             µs
+  constant(Slave)
+                                                                 VTH(bus) [3] = 42.3%
+                                                                 NSLP = 5 V
+  Time of bus slope from                                         SELMS = 0 V
+                                             Ttx_1_dom_m    BUS                               -   -    0.16           Tbit
+  minimum
+                                                                 VBAT = 7V
+                                                                 VTH(bus) [3] = 0.3 VBAT
+  Recessive level of
+                                              V_rec_0       BUS  NSLP = 5 V                 0.93  -      -         V_rec_1
+  logical value ‘0’.
+Notes
+ [1]: (18 V < VBAT ≤ 27 V) less than 2 minutes
+         RXD pin load: 20 pF
+ [2]: CXPI BUS load (Figure 8-11) : 10 nF/500 Ω
+ [3]: VTH(bus)：threshold of BUS pin
+ [4]: VTH(5v)：threshold of NSLP,CLK,TXD,SELMS,RXD pins.
+ [5]: Tbit stands for 1bit time.(Figure 8-1)
+ [6]: logic '0/1' threshold clock
+Figure 8-1 Definition of Tbit
+Figure 8-2 Mode Transition Time
+Document Number: 002-10203 Rev.*D                                                                         Page 31 of 38
+
+
+                                             S6BT112A01/S6BT112A02
+Figure 8-3 NSLP Wait Time
+Figure 8-4 Minimum Sleep Time
+Figure 8-5 Driver boot Time Under Sleep Mode
+Figure 8-6 CLK Transmission Delay Time
+Document Number: 002-10203 Rev.*D                           Page 32 of 38
+
+
+                                                S6BT112A01/S6BT112A02
+Figure 8-7 Logic low and high CXPI BUS Waveform
+Figure 8-8 Receiver Delay Time
+Document Number: 002-10203 Rev.*D                              Page 33 of 38
+
+
+                                             S6BT112A01/S6BT112A02
+Figure 8-9 Logic low Transmission Delay Time
+Figure 8-10 Wakeup Pulse Waveform
+Document Number: 002-10203 Rev.*D                           Page 34 of 38
+
+
+                                     S6BT112A01/S6BT112A02
+Figure 8-11 CXPI BUS Load Connection
+Document Number: 002-10203 Rev.*D                   Page 35 of 38
+
+
+                                                                            S6BT112A01/S6BT112A02
+9. Ordering Information
+             Part Number                                        Package
+ S6BT112A01SSBB002                      8-pin 150-mil SOIC Tape and Reel (SOA008)
+ S6BT112A02SSBB002                      8-pin 150-mil SOIC Tape and Reel (SOA008)
+10. Package Dimensions
+         Package Type                    Package Code
+            SOP 8                           SOA 008
+                                                                             SIDE VIEW
+                                  TOP VIEW
+                                  SIDE VIEW
+                                                                                       F16-038.3 *I
+Document Number: 002-10203 Rev.*D                                                                Page 36 of 38
+
+
+                                                                                S6BT112A01/S6BT112A02
+Document History
+Document Title: S6BT112A01/S6BT112A02 ASSP CXPI Transceiver IC for Automotive Network
+Document Number: 002-10203
+                         Orig. of   Submission
+ Revision    ECN                                                            Description of Change
+                         Change        Date
+                                               Initial release
+**        5046456     AKFU        12/11/2015
+                                               New Spec.
+                                               Revised the sentence style of the cover page
+                                               Changed all section 5 for easy to understand.
+*A        5208207     AKFU        04/06/2016   Changed figure of application.
+                                               Changed Figure 4-1 and Figure 5-1.
+                                               Removed “Driver recovery time when over-temperature detection is released.”
+                                               Changed figure of application.
+                                               Changed Figure 4-1 Block Diagram
+                                               Changed Figure 5-12 Application example Secondary clock master
+                                               Added the conditions of VBUSdom/VBUSrec/ VHYS/Ttx_1_dom_m.
+*B        5528948     AKFU        11/24/2016
+                                               Removed the prameter of Receiver center level voltage (VBUS_CNT).
+                                               Changed Figure 8-11 CXPI BUS Load Connection
+                                               Changed Ordering Information.
+                                               Changed Package Dimensions.
+                                               Updated Introduction.
+                                               Updated Note [3] (Page 8).
+*C        5547736     AKFU        12/09/2016
+                                               Updated 5.2 Master Node.
+                                               Updated 5.2.2 Sleep Mode.
+                                               Changed figure of 1. Applications
+*D        5757034     AKFU        06/20/2017
+                                               Changed Figure 5-12 Application example Secondary Clock Master
+Document Number: 002-10203 Rev.*D                                                                                Page 37 of 38
+
+
+                                                                                                                                S6BT112A01/S6BT112A02
+Sales, Solutions, and Legal Information
+Worldwide Sales and Design Support
+Cypress maintains a worldwide network of offices, solution centers, manufacturer’s representatives, and distributors. To find the
+office closest to you, visit us at Cypress Locations.
+Products                                                                                                    PSoC® Solutions
+ARM® Cortex® Microcontrollers                                        cypress.com/arm                        PSoC 1 | PSoC 3 | PSoC 4 | PSoC 5LP | PSoC 6
+Automotive                                                cypress.com/automotive                            Cypress Developer Community
+Clocks & Buffers                                                cypress.com/clocks                          Forums | WICED IOT Forums | Projects | Video | Blogs |
+Interface                                                    cypress.com/interface                          Training | Components
+Internet of Things                                                     cypress.com/iot                      Technical Support
+Memory                                                        cypress.com/memory                            cypress.com/support
+Microcontrollers                                                    cypress.com/mcu
+PSoC                                                               cypress.com/psoc
+Power Management ICs                                               cypress.com/pmic
+Touch Sensing                                                     cypress.com/touch
+USB Controllers                                                      cypress.com/usb
+Wireless/RF                                                   cypress.com/wireless
+All other trademarks or registered trademarks referenced herein are the property of their respective owners.
+© Cypress Semiconductor Corporation, 2015-2017. This document is the property of Cypress Semiconductor Corporation and its subsidiaries, including Spansion LLC (“Cypress”). This document,
+including any software or firmware included or referenced in this document (“Software”), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries
+worldwide. Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or
+other intellectual property rights. If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypre ss governing the use of the Software,
+then Cypress hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source
+code form, to modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form
+externally to end users (either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress’s patents that are
+infringed by the Software (as provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products. Any other use, reproduction,
+modification, translation, or compilation of the Software is prohibited.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE
+OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. To the extent
+permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any liability arising out of the application or use of any
+product or circuit described in this document. Any information provided in this document, including any sample design information or programming code, is provided only for reference purposes. It
+is the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this information and any resulting product. Cypress
+products are not designed, intended, or authorized for use as critical components in systems designed or intended for the operation of weapons, weapons systems, nuclear installations, life-support
+devices or systems, other medical devices or systems (including resuscitation equipment and surgical implants), pollution control or hazardous substances management, or other uses where the
+failure of the device or system could cause personal injury, death, or property damage (“Unintended Uses”). A critical component is any component of a device or system whose failure to perform
+can be reasonably expected to cause the failure of the device or system, or to affect its safety or effectiveness. Cypress is not liable, in whole or in part, and you shall and hereby do release Cypress
+from any claim, damage, or other liability arising from or related to all Unintended Uses of Cypress products. You shall indemnify and hold Cypress harmless from and against all claims, costs,
+damages, and other liabilities, including claims for personal injury or death, arising from or related to any Unintended Uses of Cypress products.
+Cypress, the Cypress logo, Spansion, the Spansion logo, and combinations thereof, WICED, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress in
+the United States and other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be claimed as property of their respective owners.
+Document Number: 002-10203 Rev.*D                                                         June 20, 2017                                                                           Page 38 of 38
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Cypress Semiconductor:
+ S6BT112A01SSBB002 S6BT112A02SSBB002 S6BT112A01SSBB202 S6BT112A02SSBB202

@@ -1,0 +1,920 @@
+                                  ZSSC3154 Evaluation Kit and Mass Calibration
+                                  System Description
+  Important Notes
+  Restrictions in Use
+  IDT’s ZSSC3154 SSC Evaluation Kit, consisting of the Communication Board (SSC CB), the ZSSC3154 Evaluation Board
+  (SSC EB), and the calibration software, is designed for sensor module evaluation, laboratory setup, and module calibration
+  development only.
+  The SSC Mass Calibration System is designed only for development, evaluation, and laboratory setup of sensor modules
+  with IDT Sensor Signal Conditioner ICs. The IDT Mass Calibration System hardware and software must not be used for
+  module production and production test setups.
+  IDT’s Evaluation Kit hardware and software must not be used for module production or production test setups.
+  Disclaimer
+  IDT shall not be liable for any damages arising out of defects resulting from
+     (i) delivered hardware or software
+     (ii) non-observance of instructions contained in this manual and in any other documentation provided to user, or
+     (iii) misuse, abuse, use under abnormal conditions, or alteration by anyone other than IDT.
+  To the extent permitted by law, IDT hereby expressly disclaims and user expressly waives any and all warranties, whether
+  express, implied, or statutory, including, without limitation, implied warranties of merchantability and of fitness for a
+  particular purpose, statutory warranty of non-infringement, and any other warranty that may arise by reason of usage of
+  trade, custom, or course of dealing.
+Contents
+1     Introduction ....................................................................................................................................................... 4
+2     SSC Evaluation Kit Contents and Overview .................................................................................................... 4
+3     ZSSC3154 Evaluation Board ........................................................................................................................... 5
+   3.1. Overview .................................................................................................................................................... 5
+   3.2. Schematic .................................................................................................................................................. 5
+   3.3. Connections to the ZSSC3154 .................................................................................................................. 6
+   3.4. Reset Switch .............................................................................................................................................. 6
+4 ZSSC3154 Software ......................................................................................................................................... 7
+   4.1. Overview and Installation .......................................................................................................................... 7
+   4.2. USB Driver Installation .............................................................................................................................. 8
+   4.3. User Files ................................................................................................................................................... 8
+   4.4. General Setup of the Software .................................................................................................................. 9
+     4.4.1. Interface Selection ............................................................................................................................ 10
+     4.4.2. ZSSC3154 Configuration .................................................................................................................. 11
+     4.4.3. Analog Front End (AFE) Adjustment................................................................................................. 11
+     4.4.4. Temperature Sensor Selection ......................................................................................................... 12
+     4.4.5. ADC Settings..................................................................................................................................... 12
+     4.4.6. Application Settings .......................................................................................................................... 13
+  © 2016 Integrated Device Technology, Inc.                                         1                                                                   March 29, 2016
+
+
+                                                                              ZSSC3154 Evaluation Kit and Mass Calibration System Description
+  4.5. Operation Section .................................................................................................................................... 14
+    4.5.1. Normal Operation Mode (NOM) ........................................................................................................ 14
+    4.5.2. Command Mode (CM) ...................................................................................................................... 14
+    4.5.3. Power IC OFF ................................................................................................................................... 14
+    4.5.4. Data Read-Out .................................................................................................................................. 14
+    4.5.5. Enable Error Check ........................................................................................................................... 14
+    4.5.6. Average Count and Statistics............................................................................................................ 14
+  4.6. Operational Modes .................................................................................................................................. 15
+  4.7. Calibration Window .................................................................................................................................. 16
+  4.8. RAM/EEPROM Register Dialog Window ................................................................................................ 17
+  4.9. Get Raw Values Dialog ........................................................................................................................... 18
+  4.10. Send Command ....................................................................................................................................... 19
+5 Calibration Example using the ZSSC3154 Evaluation Kit .............................................................................. 20
+  5.1. Hardware Setup ....................................................................................................................................... 20
+  5.2. Software Startup ...................................................................................................................................... 20
+  5.3. Calibration Data Acquisition .................................................................................................................... 21
+  5.4. Calculation of the Coefficients and Limits ............................................................................................... 22
+  5.5. Displaying Measurement Results in Normal Operating Mode (NOM)..................................................... 23
+6 Mass Calibration System Dry Run ................................................................................................................. 24
+  6.1. The Mass Calibration Reference Board Setup ........................................................................................ 24
+  6.2. ZSSC3154 Mass Calibration System Hardware Setup for the Example Dry Run .................................. 25
+  6.3. Software Startup for Example Dry Run ................................................................................................... 26
+  6.4. Calibration Data Acquisition for Example Dry Run .................................................................................. 27
+  6.5. Calculation of the Coefficients and Limits ............................................................................................... 28
+  6.6. Managing Multiple DUTs with the Mass Calibration System ................................................................... 29
+7 Ordering Information ...................................................................................................................................... 29
+8 Related Documents ........................................................................................................................................ 30
+9 Glossary ......................................................................................................................................................... 30
+10 Document Revision History ............................................................................................................................ 31
+List of Figures
+Figure 2.1 ZSSC3154 SSC Evaluation Kit ........................................................................................................... 4
+Figure 3.1 ZSSC3154 SSC Evaluation Board – Overview .................................................................................. 5
+Figure 3.2 SSC Evaluation Board Schematic ...................................................................................................... 6
+Figure 4.1 Main Window of the Evaluation Software ........................................................................................... 9
+Figure 4.2 Interface Selection Section ............................................................................................................... 10
+                               TM
+Figure 4.3 Additional I²C and OWI Interface Settings in the “Send Command” Menu ................................... 10
+Figure 4.4 IC Configuration Section ...................................................................................................................... 11
+Figure 4.5 Bridge Sensor Adaptation ................................................................................................................. 11
+Figure 4.6 Temperature Sensor ......................................................................................................................... 12
+Figure 4.7 ADC Adjust ....................................................................................................................................... 12
+Figure 4.8 Application and Settings ................................................................................................................... 13
+ © 2016 Integrated Device Technology, Inc.                                      2                                                                   March 29, 2016
+
+
+                                                                       ZSSC3154 Evaluation Kit and Mass Calibration System Description
+Figure 4.9   Normal Operation Section ................................................................................................................ 14
+Figure 4.10  Operation Modes .............................................................................................................................. 15
+Figure 4.11  “Sensor – Calibration” Dialog Window .............................................................................................. 16
+Figure 4.12  Displaying RAM-EEP Register Contents .......................................................................................... 17
+Figure 4.13  “Get Raw Values” Dialog .................................................................................................................. 18
+Figure 4.14  “Send-Command” Dialog .................................................................................................................. 19
+Figure 5.1   Hardware Setup for Calibration Example ......................................................................................... 20
+Figure 5.2   Select Span and Range Shift............................................................................................................ 21
+Figure 5.3   Displaying the Result of the Coefficient Calculation ......................................................................... 22
+Figure 5.4   Displaying Measurement Results via Tools >> Measure Output ..................................................... 23
+Figure 6.1   Mass Calibration Board (MCB) Setup .............................................................................................. 24
+Figure 6.2   Mass Calibration Reference Board (MCR) ....................................................................................... 25
+Figure 6.3   Interface Selection ............................................................................................................................ 26
+Figure 6.4   Displaying the Result of the Coefficient Calculation ......................................................................... 28
+Figure 6.5   “DUT” Section for Managing Multiple DUTs ..................................................................................... 29
+ © 2016 Integrated Device Technology, Inc.                               3                                                                   March 29, 2016
+
+
+                                                                              ZSSC3154 Evaluation Kit and Mass Calibration System Description
+1          Introduction
+This document covers the use of the ZSSC3154 Evaluation Kit and the ZSSC3154 Mass Calibration System
+(MCS) with the ZSSC3154 Evaluation Kit Software including hardware setup. Kit contents for the ZSSC3154
+Evaluation Kit are provided in section 2. Refer to section 7 for the contents of the ZSSC3154 MCS. Also see the
+Mass Calibration Board Data Sheet for full details for the MCS.
+2          SSC Evaluation Kit Contents and Overview
+The ZSSC3154 Evaluation Kit consists of the following parts:
+                                                                                                  †
+     •     SSC Communication Board (SSC CB) V4.1 (including USB cable)
+     •     ZSSC3154 SSC Evaluation Board (SSC EB) V1.0
+     •     SSC Sensor Replacement Board (SRB) V2.0
+     •     5 samples of the ZSSC3154xA2T (QFN32 5x5mm)
+Note: The ZSSC3154 Evaluation Kit Software is downloaded from www.IDT.com/ZSSC3154KIT as described in
+section 4.1.
+If the SSC CB revision is V3.3 or earlier, installation of a USB driver is required before installing the software
+(refer to section 4.2).
+Figure 2.1 ZSSC3154 SSC Evaluation Kit
+                                            SSC Communication                          ZSSC3154 SSC                       SSC Sensor
+                                           Board V4.1 (SSC CB)                        Evaluation Board               Replacement Board
+                                                                                       V1.0 (SSC EB)                       V2.0 (SRB)
+The SSC Evaluation Kit contains the hardware needed for communication and calibration of ZSSC3154 sensor
+signal conditioning ICs. A PC can communicate with the ZSSC3154 via the Communication Board (SSC CB)
+through a USB connection. The Sensor Replacement Board (SRB) provides a replacement for an actual sensor
+and can be used for the first step of calibration or a dry-run calibration as described in section 5. On the SRB, the
+sensor replacement signal is controlled by a potentiometer (see Figure 5.1).
+The software will run under Windows® 98/ME/XP/NT/Vista/Windows® 7/Windows® 8 operation systems.
+†
+    For detailed information about SSC Communication Board, please refer to the SSC Communication Board Data Sheet available on the IDT website at
+    http://www.IDT.com.
+  © 2016 Integrated Device Technology, Inc.                                    4                                                       March 29, 2016
+
+
+                                                            ZSSC3154 Evaluation Kit and Mass Calibration System Description
+3          ZSSC3154 Evaluation Board
+3.1.       Overview
+Figure 3.1 ZSSC3154 SSC Evaluation Board – Overview
+                                                                         MCB DUT Connector K6
+      Status LED D1: Power On                                            AOUT1     n.c.     SDA       SCL      VDDE
+                                                                         AOUT2     n.c.     n.c.      n.c.     VSSE
+      Jumper K4 VDDE                                                      Jumper K7 AOUT2 to MCB
+      Supply Voltage
+                                                                         Connector K8
+                                                                         VDDE    VDDE   VDDE     VDDE     VDDE  VDDE  VDDE
+                                                                         AOUT1   AOUT2  SCL      SDA      VDD   VSSA  VDDA
+      QFN Pin 1 (top right)                                              AOUT1   AOUT2  SCL      SDA      VDD   VSSA  VDDA
+                                                                         VSSE    VSSE   VSSE     VSSE     VSSE  VSSE  VSSE
+                                                                          K2 50-pin Connector to SRB
+      K1 50-pin Connector to CB
+                                                                         Connector K3
+                                                                         VSSE    VSSE   VSSE     VSSE     VSSE  VSSE  VSSE
+                                                                         DFBH    VBRB   VTN2     VTN1     VBN   VBP   VBRT
+                                                                         DFBH    VBRB   VTN2     VTN1     VBN   VBP   VBRT
+                                                                         VDDE    VDDE   VDDE     VDDE     VDDE  VDDE  VDDE
+                                                                          Jumper K5
+                                                                          DFB High or Low Level
+      Screw Terminal KL2
+      Temperature Sensor                                                  Screw Terminal KL1
+      Connection                                                          Bridge Sensor Connection
+The main purpose of the SSC Evaluation Kit is communication between the user’s PC and the ZSSC3154. The
+PC sends commands and data via its USB port (configured as a virtual COM port) to the SSC CB. The
+                                                                                                                             ‡
+microcontroller on the SSC CB interprets these commands and relays them to the ZSSC3154 in the I²C™ or
+OWI (One-Wire Interface) communication mode. The microcontroller will also forward any data bytes from the
+ZSSC3154 back to the PC via the USB connection. These bytes can be sensor and temperature readings to be
+displayed by the PC software, raw ADC data used during calibration, or EEPROM data. The SSC CB micro-
+controller controls the power signals required for entering the Command Mode.
+3.2.       Schematic
+Figure 2.2 shows the schematic of the ZSSC3154 SSC Evaluation Board (SSC EB). The SSC EB is powered by
+the KS5V supply controlled by the μC on the SSC CB. The D1 green LED on the SSC EB displays the status of
+this supply (see Figure 3.1). Its forward current is not included in the measured supply current.
+The SSC EB board type is hard-coded by three resistors on the backside of the PCB on K1 connector pins D5
+(low), D6 (low), and D7 (high). The SSC EB is connected to the SSC CB via the K1 50-pin female connector.
+The SRB can be connected to the SSC EB via its K2 50-pin male connector. Alternatively, an external bridge
+sensor element and external temperature sensors can be connected using the on-board screw terminal KL1/KL2.
+On-board there are several strips for simple access to all IC signals (connectors K3 and K8).
+‡ 2
+  I C™ is a trademark of NXP.
+   © 2016 Integrated Device Technology, Inc.                 5                                                   March 29, 2016
+
+
+                                                          ZSSC3154 Evaluation Kit and Mass Calibration System Description
+The K4 jumper can be used to remove the power supply for the ZSSC3154 manually or for a simple measure-
+ment of the supply current. The K5 jumper is used to determine the Diagnostic Fault Band Mode (DFB) for the
+AOUT voltage level. If left open, the level is low (DFBL); if shorted to ground, the level is high (DFBH).
+The output signal of AOUT2 can also be connected to pin10 on K6 if jumper K7 is shortened.
+Figure 3.2 SSC Evaluation Board Schematic
+3.3.    Connections to the ZSSC3154
+The SSC EB has a QFN-32 socket for inserting the QFN 5x5 ZSSC3154. The K8 connector on the SSC EB can
+be used to connect directly to the ZSSC3154 for in-circuit programming.
+NOTE: Only one ZSSC3154 connection option can be used at a time through the SSC CB or via individual
+connections.
+Multiple ZSSC3154 can be connected through the Mass Calibration Board (MCB) via individual connections or
+through the ZSSC3154 EB connector K6. For more details, see section 6.
+3.4.    Reset Switch
+Use the push button on the SSC CB to reset communications if needed.
+  © 2016 Integrated Device Technology, Inc.                 6                                            March 29, 2016
+
+
+                                                                   ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4        ZSSC3154 Software
+4.1.      Overview and Installation
+The ZSSC3154 Evaluation Software is intended for demonstration purposes and calibration of single units using
+the ZSSC3154 Evaluation Kit. It can also be used for calibrating multiple units using the Mass Calibration System
+(MCS) as described in section 6. This section gives installation instructions and a short overview of the variety of
+ways to use the Evaluation Software. For calibration examples using the complete SSC Evaluation Kit, refer to
+section 5. IDT can provide users with algorithms and assistance in developing their full production calibration
+software.
+Note: If using a previous revision SSC CB, see section 4.2 regarding USB drivers that must be installed prior to
+the ZSSC3154 Evaluation Software.
+The ZSSC3154 Evaluation Kit does not include the software, which must be downloaded from IDT's website to
+ensure receiving the latest release.
+To download and install the software:
+      1. Download the software from the website www.IDT.com/ZSSC3154KIT
+      2. Open the zip file and extract the executable file ZSSC3154_SW_Rev.X.xxx.exe.
+      3. To install the software on the user’s PC hard drive, double-click on the downloaded extracted executable
+           file. Respond to the dialog box to select the installation directory. The default software installation folder
+           is C:\\program files\ZMDI\ZSSC3154.
+The software will automatically complete the installation, which results in a program shortcut on the PC’s desktop:
+The software logs various data and commands into log files as described in section 4.3.
+The software contains five menus that are intended for the following functions:
+   • Main Window:                      IC setup, configuration, and communication via check boxes, entry fields, and
+                                       pull-down menus
+   • RAM/EEPROM Dialog:                Direct access to RAM/EEPROM registers (consecutively numbered)
+   • Calibration Dialog:               Acquisition of raw values from sensor and calculation of coefficients
+                                                                                      §
+   • Get Raw Values Dialog:            Special Dx commands for the ZSSC3154
+                                                                                                **
+   • Send Command Dialog:              Low-level write/read communication with SSC CB
+§
+    For details about the Dx commands, refer to the ZSSC3154 Functional Description.
+**
+    For details about SSC CB command structure, refer to the SSC Communication Board Data Sheet and SSC Command Syntax
+    Spreadsheet.
+   © 2016 Integrated Device Technology, Inc.                        7                                             March 29, 2016
+
+
+                                                                ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.2.         USB Driver Installation
+USB driver installation is not applicable to the current version ZSSC3154 Evaluation Kit because it includes the
+current version of the SSC CB (rev. 4.1). This also applies to the MCS. The USB driver installation is only
+required if the CB revision is the previous version V3.3 or earlier. For more information, refer to the SSC
+Application Note – Communication Board Driver Installation available on http://www.IDT.com.
+4.3.         User Files
+User files are saved in [Program Files]\ZMDI\ZSSC3154 and consist of log files and EEPROM files:
+      •    ZSSC3154_*.log is a communication log file created when the connection between the SSC CB and the
+                                                   2      ††
+           ZSSC3154 is established (via OWI or I C™ interface). To enable logging, after activating the software,
+           navigate to “Calibration” > “Send Command” and check the box for “logFile.” This file is a log of the
+           communication to the ZSSC3154 during the software session, and it can be saved after closing the
+           software by renaming the file. Otherwise, it is overwritten the next time the software is opened.
+      •    save_[date]_[time].3154 is a log file containing the ZSSC3154 settings and acquired RAW data. This file
+           can be used to load/save EEPROM contents.
+      •    save_[date]_[time].3154_txt is a log file in text format containing the ZSSC3154 settings and acquired
+           RAW data. This file can be used to view the EEPROM contents.
+†† 2
+   I C is a registered trademark of NXP.
+  © 2016 Integrated Device Technology, Inc.                      8                                             March 29, 2016
+
+
+                                                       ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.4.    General Setup of the Software
+The software features described in this section are applicable to both the ZSSC3154 Evaluation Kit and the
+ZSSC3154 MCS.
+Because of the large number of different functionalities of the ZSSC3154, the user interface is divided into
+different sections. Within each section, a number of associated functionalities are implemented. Several
+submenus allow access to sub-functionalities. After the ZSSC3154 Evaluation Software is started, the main
+window is displayed (see Figure 4.1). When communication is established with a ZSSC3154 inserted in the
+socket on the SSC EB, the software can be adapted to the IC’s configuration by clicking the RdRAM&Set button
+on the main window in the "IC Configuration” section.
+Figure 4.1 Main Window of the Evaluation Software
+The main window includes all the settings for configuration of the ZSSC3154 in a clear structure that hides the
+corresponding HEX commands behind buttons and drop-down menus. For a detailed description of the com-
+mands, refer to the ZSSC3154 Functional Description. An information box that explains functionality appears
+when the cursor is placed over most buttons, drop-down menus, and check boxes.
+ © 2016 Integrated Device Technology, Inc.              9                                             March 29, 2016
+
+
+                                                                ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.4.1.      Interface Selection
+                                                                  TM
+The ZSSC3154 supports two interfaces: OWI and I²C
+(see Figure 4.2). After starting the software, select the                 Figure 4.2 Interface Selection Section
+interface for the application in the “Interface & Board Ver-
+sion” section. (“USBPort-Kit” refers to the ZSSC3154 Evalu-
+ation Kit.)
+The one-wire digital interface (OWI) combines a simple and
+easy protocol adaptation with a cost-saving pin sharing
+(AOUT1). The communication principle is derived from the
+ 2
+I C™ protocol. An advantage of OWI output signal
+capability is that it enables “end-of-line” calibration. It is
+designed mainly for calibration, but it can also be used to
+digitally read the calibrated sensor signal continuously.
+                                                                                              TM
+Adjacent to the drop-down menu for the interface is a menu for selecting the I²C                  addresses to be used for
+communication.
+If the I²C™ interface is selected, additional settings for the I²C™ interface are enabled in the “Send Command”
+dialog window. For more details about the “Send Command” menu, see section 4.10.
+                              TM
+Figure 4.3 Additional I²C        and OWI Interface Settings in the “Send Command” Menu
+   The “Send Command”        Resulting addition to “Send Command” dialog      Resulting addition to “Send Command” dialog
+   button in the top menu    window if I2C™ interface is selected             window if OWI interface is selected
+  © 2016 Integrated Device Technology, Inc.                      10                                            March 29, 2016
+
+
+                                                                                ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.4.2.        ZSSC3154 Configuration
+The “IC Configuration” section includes the following buttons:
+   • ReadRAM :             reads the complete RAM contents and updates                             Figure 4.4 IC Configuration Section
+                           only the “RAM_Register” menu.
+   • RdRAM&Set : reads the complete RAM contents and updates all
+                           of the ZSSC3154 software.
+   • Write RAM :           copies the current software settings into the RAM
+                           of the ZSSC3154.
+   • RAM-->EEP : copies the RAM contents into EEPROM. The free-
+                           user-memory registers (19HEX & 1AHEX) will also be
+                           copied using the contents of the IDT software
+                                       ‡‡
+                           registers .
+   • EEP-->RAM : copies the EEPROM contents into RAM using the C0HEX command.
+   • Write&Cycle : copies the current software settings into the RAM of the ZSSC3154 and starts the
+                                                                                                                  §§
+                           measurement cycle using the current RAM settings (command: 02HEX ).
+   • RdSaveTrID : Read and save traceability information (the contents of two free-user-memory registers 19HEX
+                           and 1AHEX).
+The “updated” virtual LED in the “IC Configuration” section displays the software configuration status compared to
+the attached ZSSC3154’s register content. If the content is identical, the LED is green (on).
+4.4.3.        Analog Front End (AFE) Adjustment
+                                                                                                         Figure 4.5 Bridge Sensor
+The ZSSC3154 has different options to adapt the analog front end (AFE) to
+                                                                                                                     Adaptation
+the specific sensing element. The “Sensor - Full Bridge” and “Half Bridge”
+sections (shown in Figure 4.5) influence the programmable gain amplifier
+(PGA) and extended zero compensation.
+The sensor’s span or sensitivity is defined by mV/V and is referenced to
+the bridge supply voltage.
+Different reference voltages can be selected for the half bridge, which are
+entered as a percentage of the positive analog supply voltage (VDDA).
+Refer to the ZSSC3154 Data Sheet for details about the AFE and XZC
+settings.
+The polarity of the sensor signal can be selected via the                                 button and
+can be changed if the PCB layout requires swapped input pins.
+‡‡
+   The contents of the “RAM-Register” dialog will be used for free-user-memory registers.
+§§
+    For details about ZSSC3154 commands, refer to the ZSSC3154 Functional Description.
+   © 2016 Integrated Device Technology, Inc.                                    11                                             March 29, 2016
+
+
+                                                          ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.4.4.     Temperature Sensor Selection                                           Figure 4.6 Temperature Sensor
+The next stage in the AFE is the multiplexer that selects the input signal for
+measuring temperature (see Figure 4.6). The ZSSC3154 can use three
+different temperature channels: one internal and two external. Each input
+can be used for calibration calculation. External temperature sensors can
+be used as an optional additional output signal during Normal Operating
+Mode (NOM).
+4.4.5.     ADC Settings
+The last stage of the ZSSC3154’s AFE is the analog-to-digital converter (ADC). The signal path within the AFE is
+designed in fully differential switched capacitor technology with a selectable resolution of 13 or 14 bits. The ADC
+input must be within 10% to 90% of the ADC range of the application.
+Refer to the ZSSC3154 Data Sheet for details about ADC settings.
+If the analog input voltage does not fit the ADC range resulting in an under-          Figure 4.7 ADC Adjust
+flow or overflow, the “FullBridgeRS” or “HalfBridgeRS” drop-down menus in
+the “ADC Adjust” section can be used to fine-tune the range shift of the full
+bridge or half bridge inputs respectively (see Figure 4.7). A lower “Span
+(mV/V)” setting (see section 4.4.3) can also be useful for fitting the ADC
+range.
+The “Resolution in integration phase” drop-down menu allows adjusting the
+ADC resolution for the first step of the conversion integration phase, which
+influences the integration time. Select a conversion time that is as long as
+possible to secure a high degree of noise suppression.
+If enabled, the clock divider makes the ADC operate with half of the clock
+frequency. This increases accuracy and linearity.
+  © 2016 Integrated Device Technology, Inc.               12                                             March 29, 2016
+
+
+                                                          ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.4.6.    Application Settings
+The internal microcontroller of the ZSSC3154 can detect various errors and perform different types of
+measurement cycles. It controls multiple protection options that can be configured by the ZSSC3154 Software.
+Figure 4.8 illustrates all the application options for the ZSSC3154, which
+can be enabled/disabled via the checkboxes. The example in Figure 4.8             Figure 4.8      Application and
+shows the ZSSC3154 settings with no options enabled. For more details                       Settings
+about the related options, refer to the ZSSC3154 Functional Description.
+  SCC :        Enables Sensor Connection Check.
+  SCCHC :      Enables Sensor Connection Check (SCC)
+               high-capacity mode.
+  SSC :        Enables Sensor Short Check.
+  PGAHigh : Main sensor channel data validation upper limit check.
+  PGALow : Main sensor channel data validation lower limit check.
+  TS :         Temperature sensor channel data validation check.
+  PDO:         Power-on Diagnostic Mode. A sequence of upper limit, lower limit, and diagnostic range is output
+               at startup.
+  Chipping : Broken chip check.
+  Aging :      Enables Sensor Aging Check.
+  ROM :        Enables ROM check after power-on. If ROM check is enabled, the start-up time will be increased
+               approximately 10ms.
+  Res@DM : If enabled, the ZSSC3154 is reset if the ZSSC3154 enters the Steady Diagnostic Mode.
+   EEP-Lock : Enables EEPROM lock for OWI communication. If enabled, the EEPROM cannot be changed via
+               the OWI interface and must be reset via the I²C™ interface.
+Oscillator Frequency (OscFreq[MHz] section):
+  %Adjust:     Clock frequency adjustment. An estimate of the clock frequency is displayed in MHz.
+  OscSpreadSpec : Oscillator spread spectrum mode. Using the Oscillator Spread Spectrum Mode reduces
+             electromagnetic emission (EME).
+ © 2016 Integrated Device Technology, Inc.                 13                                            March 29, 2016
+
+
+                                                          ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.5.    Operation Section
+The “Commands” and “ReadOut Data” sections control the collection of data and configuration of the ZSSC3154.
+Figure 4.9 Normal Operation Section
+4.5.1.     Normal Operation Mode (NOM)
+In the “Commands” section, use the CYC_EEP or CYC_RAM button to exit Command Mode (CM) and start NOM
+using either the EEPROM or RAM registers settings, respectively. In NOM, the ZSSC3154 continually performs
+the measurement cycle and displays the results in the adjacent “ReadOut Data” section. The top virtual status
+LED, which is green when the IC is running in NOM, is updated accordingly.
+4.5.2.     Command Mode (CM)
+In the “Commands” section, use the CmdM button to start the Command Mode of the ZSSC3154 by sending the
+Start_CM command (0x7274) to the ZSSC3154.
+4.5.3.     Power IC OFF
+The Off button in the “Commands” section can be used to power off the ZSSC3154. If the Off button is clicked, all
+communication interfaces are disabled, so no further communication is possible until the CmdM button is pressed
+(entering the Command Mode) or an interface is selected. In both cases, the ZSSC3154 will be powered on and
+communication established. The virtual LEDs indicate whether the ZSSC3154 is in Command Mode (CM) or
+running in Normal Operation Mode (NOM).
+4.5.4.     Data Read-Out
+The Read and RdLoop buttons in the “ReadOut Data” section (see Figure 4.1) start a read-out of sensor data.
+When a loop measurement is started, the button text will change to STOP (see Figure 4.9). Clicking again on the
+button stops the loop. The “Loop Delay” field sets the rate in milliseconds of the readouts in the loop mode.
+4.5.5.     Enable Error Check
+The enaErrChk checkbox in the “Read Out Data” section enables the error checks selected in the “Application &
+Settings” section (section 4.4.6). An error message is processed if any of the errors selected occur.
+4.5.6.     Average Count and Statistics
+The Avg Cnt checkbox in the “ReadOut Data” section starts the averaging and statistics calculations. It is only
+enabled if the measurement is in a loop mode. The resulting data is displayed in the adjacent fields after the
+specified cycles in the field are passed.
+  © 2016 Integrated Device Technology, Inc.               14                                             March 29, 2016
+
+
+                                                               ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.6.     Operational Modes
+ZSSC3154 provides several AOUT2 output modes based on the EEPROM settings. The AOUT2 output is
+selected by the “Mode” drop-down menu under “Out2” (see Figure 4.10 and Table 4.1).
+ The AOUT1 output always represents the calibrated sensor signal. Digital filter settings can also be adjusted in
+this section with the LPFAVRG and LPFDIFF fields for each output in the range of 0 to 7. For more details refer to
+the ZSSC3154 Functional Description.
+Note: It is recommended that both outputs have the same filter settings for LPFAVRG and LPFDIFF.
+Table 4.1      Operational Modes for the AOUT2 Output
+                            Mode
+     AOUT2 Mode                             AOUT2 Sensor Output Options
+                           Setting
+ Single Temperature     SingleT&B    Temperature
+ and Bridge Signal                                                                     Figure 4.10     Operation Modes
+                                      1-Bridge
+                                      Bridge/2
+                                      (1-Bridge)/2
+ Single Half Bridge     SingleHB      Half Bridge
+ Sequential             SequTemp      Temperature & Bridge Sensor
+ Temperature
+                                      Temperature & (1 - Bridge Sensor)
+                                      Temperature & (Bridge Sensor)/2
+                                      Temperature & (1 - Bridge Sensor)/2
+ Sequential Half        SequHB       Half Bridge & Bridge Sensor
+ Bridge
+                                      Half Bridge & (1 - Bridge Sensor)
+                                      Half Bridge & (Bridge Sensor)/2
+                                     Half Bridge & (1 - Bridge Sensor)/2
+  © 2016 Integrated Device Technology, Inc.                    15                                             March 29, 2016
+
+
+                                                        ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.7.     Calibration Window
+The “Sensor – Calibration” dialog is used to perform a calibration of the ZSSC3154 device under test (DUT) with
+either the SRB or the user’s sensor module. The MCS allows calibration of multiple DUTs (see section 6).
+The “Sensor – Calibration” dialog (see Figure 4.11) can be accessed by either clicking on the          icon in the top
+banner or selecting “Calibration” on the top menu. Section 4 gives an example calibration using the commands on
+this screen.
+Figure 4.11 “Sensor – Calibration” Dialog Window
+  © 2016 Integrated Device Technology, Inc.              16                                            March 29, 2016
+
+
+                                                           ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.8.    RAM/EEPROM Register Dialog Window
+This dialog window is used to read and write register contents into the
+ZSSC3154 memories and has the same functionality as the “IC Configura- Figure 4.12 Displaying RAM-EEP
+tion” section in the main window.                                                              Register Contents
+Access the RAM/EEPROM dialog window by clicking on the                   icon in
+the top banner or by selecting “Configuration” on the top menu and then
+RAM/EEPROM on the top menu.
+There is also a WriteEEP button to store all register contents into the
+EEPROM of the ZSSC3154. Register indexing numbers correspond to the
+ZSSC3154 memory addresses.
+The configuration of the ZSSC3154 is stored in 28 EEPROM 16-bit words.
+     •   Calibration coefficients for conditioning the sensor signal via
+         conditioning calculations and the output limits are stored in
+         19 registers (registers 0HEX to 12HEX).
+     •   There are 5 words for setting the configuration of the ZSSC3154
+         (registers 13HEX to 17HEX).
+     •   One register is used for storing the EEPROM signature (register
+         18HEX), which is used in NOM to check the validity of the EEPROM
+         contents after power-on.
+     •   Two additional 16-bit registers are available for optional user data
+         (registers 19HEX and 1AHEX).
+For more information regarding the registers, refer to the ZSSC3154 Func-
+tional Description.
+Note: If current settings differ from the memory contents, registers that do
+not correspond to memory will have a red background after the “Read”
+operation; otherwise, the background will be green.
+  © 2016 Integrated Device Technology, Inc.                 17                                            March 29, 2016
+
+
+                                                        ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.9.   Get Raw Values Dialog
+The “Get Raw Values” dialog is used to acquire the RAW values of the mea-
+surements for the following values:                                                Figure 4.13 “Get Raw Values”
+                                                                                                  Dialog
+                 Bridge Signal Raw Data (main channel)
+                 Half-Bridge Signal Raw Data (main channel)
+                 Main Calibration Temperature Raw Data
+                 Calibration Temperature Raw Data
+                 Built In Self-Test Raw Data
+                 Common Mode Voltage
+                 Positive-Biased Sensor Short Check Raw Data
+                 Negative-Biased Sensor Short Check Raw Data
+                 Sensor Signal Auto-Zero Raw Data
+                 Calibration Temperature Auto-Zero Raw Data
+                 Temperature Auto-Zero Raw Data
+                 Half-Bridge Sensor Signal Auto-Zero Raw Data
+                 Positive-Negative Biased Sensor Short Check Raw Data
+                 Common Mode Voltage, Auto-Zero Compensated
+                 Built In Self-Test Raw Data, Auto-Zero Compensated
+                 Sensor Signal Main Channel Raw Data including Auto-Zero Compensation
+                 Half-Bridge Sensor Signal Main Channel Raw Data including Auto-Zero Compensation
+                 Calibration Temperature Raw Data including Auto-Zero Compensation
+                 Temperature Raw Data including Auto-Zero Compensation
+ © 2016 Integrated Device Technology, Inc.               18                                            March 29, 2016
+
+
+                                                             ZSSC3154 Evaluation Kit and Mass Calibration System Description
+4.10. Send Command
+       The “Send Command” dialog is accessed by clicking               Figure 4.14 “Send-Command” Dialog
+this icon on the top banner or clicking on “Calibration” in the
+top menu and then on “Send Command” in the resulting
+drop-down menu (see Figure 4.14). It is used for transferring
+commands from the PC to the microcontroller on the SSC
+CB and reading the result of the commands. A full summary
+and detailed command description of the applicable
+controller commands are given in the ZSSC3154 Functional
+Description.
+For the communication between the SSC CB and the
+ZSSC3154 DUT, the ZSSC3154’s slave address and the
+communication frequency can be selected from the drop-
+down menus in the “Send Command” dialog.
+The “Send Command” dialog includes the following buttons:
+               Sends the command entered in the adjacent field to the SSC CB. Alternatively, a *.3154_cmd
+               command file can be loaded. For more information refer to SSC Command Syntax document.
+               Loads a ZSSC3154 command file (*.3154_cmd).
+               Reads the output data buffer of the ZSSC3154. A loop delay can also be added between the
+               readings.
+               Performs the same function as the “Send” command except that the command field and the data
+               field are separated. The ZSSC3154 software generates the actual instruction to be sent to the
+               SSC CB.
+               Writes text entered in the adjacent field to the log file. The checkboxes can be used to write various
+               data into the log file, such as status, commands, messages, etc.
+Note: For additional functionality, the IDT SSC Terminal Software can be used as an alternative to the ZSSC3154
+Evaluation Software. The SSC Terminal Software can be downloaded from IDT’s web site at
+www.IDT.com/ZSSC3154KIT. This is the lowest level of communication for transferring commands from the PC to
+the microcontroller on the SSC CB. A full summary and detailed command description of the applicable controller
+commands are given in IDT’s SSC Command Syntax Spreadsheet, (see section 8).
+Clicking on the downloaded executable file SSC TermVxyy.exe installs the terminal software and creates a IDT
+SSC Terminal icon on the PC desktop. Click on this icon to activate the terminal program. For the communication
+                                         2
+mode, use the setting explained for I C™.
+  © 2016 Integrated Device Technology, Inc.                  19                                             March 29, 2016
+
+
+                                                          ZSSC3154 Evaluation Kit and Mass Calibration System Description
+5     Calibration Example using the ZSSC3154 Evaluation Kit
+      The following directions perform an example of a simple calibration using the sensor replacement board
+      (SRB). The calibrated output will be displayed as a calibration result by the software.
+5.1.   Hardware Setup
+    a) Connect the SSC CB, SSC EB, and SRB as shown in Figure 5.1.
+    b) Press down on top of the socket on the SSC EB to open it and insert a ZSSC3154 (see Figure 5.1; note
+        pin 1 orientation).
+    c) Connect a USB cable from the USB connector on the SSC CB to an available USB port on the PC. Verify
+        that the green PWR LED is lit on the SSC CB.
+Figure 5.1 Hardware Setup for Calibration Example
+                                                              press
+                                                                                Min.     Max.
+                                                      Pin 1
+                                                              press
+                                      Power LED                         ZSSC3154
+                                                      ZSSC3154 SSC            SSC Sensor
+                          SSC Communication
+                                                     Evaluation Board         Replacement
+                            Board (SSC CB)
+                                                          (SSC EB)            Board (SRB)
+5.2.   Software Startup
+    a) Start the ZSSC3154 Software by clicking on the desktop icon or activate it from the Windows Start Menu
+        folder: #Start_Menu#\ZMDI\ZSSC3154\ZSSC3154.
+    b) Select the “I2C – CB (USBPort-Kit)” or “OWI – CB (USBPort-Kit)” interface from the drop down menu in
+        the “Interface Selection” section of the main window as described in section 4.4.1.
+    c) Select the following settings as shown in Figure 5.2:
+        • In the “Sensor – Full Bridge” and “Half Bridge” sections, set the “Span [mV/V]” (sensor sensitivity) drop-
+            down menu to 50mV/V, which is the typical span when using the SRB. With the 5V supply, this equals
+            a total span of 250mV (5V * 50mV/V = 250mV).
+        • In the “ADC Adjust” section, set the resolution integration phase to 10bits. ADC resolution is set to
+            14bits.
+ © 2016 Integrated Device Technology, Inc.                 20                                            March 29, 2016
+
+
+                                                             ZSSC3154 Evaluation Kit and Mass Calibration System Description
+        • In the “ADC Adjust” section, set the “FullBridgeRS” and “HalfBridgeRS” (range shift) menus to           ¾,
+             which fits the input signal range to the ADC output value (“analog zero”). For example for a range shift
+             of ¾ and 14 bits resolution, the read-out values would be between -4096 and +12287.
+        • Operational mode: for this example, set the “Out2” section mode to “Single HB” (single half bridge; see
+             section 4.6).
+Note: Write the configuration into the RAM by pressing on the WriteRAM button in the “IC Configuration” section
+(see section 4.4.2).
+   Figure 5.2 Select Span and Range Shift
+5.3.    Calibration Data Acquisition
+     a) Click on the          icon or select “Calibration” on the top menu and then “Calibration” from the drop-down
+         menu. The “Sensor – Calibration” dialog window appears as shown in Figure 4.11 and Figure 5.3. Select
+         the calibration mode from the “Calibration” drop-down menu.
+         For this example, the recommended mode is
+             LINEAR (two points only) for the sensor
+             NO calibration for the temperature (temperature calibration requires a chamber with a controlled
+              environment)
+     b) In the “OutTarget” section, enter the target sensor calibration points corresponding in percent to the VDD
+         supply (“[%] VDDA”). It is recommended that the output targets for the sensor points be between 10%
+         and 90%. For this example, use 90% as the maximum and 10% as the minimum for both full bridge and
+         half bridge entry fields (top section).
+     c) Next start data collection. Normally this would be done with a real sensor attached on a remote board in a
+         controlled chamber. Instead, this calibration-example run uses the SRB as the input as follows:
+             Minimum [10%] sensor signal: turn the SRB counter-clockwise (CCW) to the end and click both the
+              P1M button and HB1M buttons.
+             Maximum [90%] sensor signal: turn the SRB clockwise (CW) to the end and click both the P2M
+              button and HB2M buttons.
+         Acquired data will be displayed in the text boxes next to the buttons.
+         Note: only active buttons corresponding to the calibration mode are active as indicated by green shading.
+  © 2016 Integrated Device Technology, Inc.                  21                                             March 29, 2016
+
+
+                                                            ZSSC3154 Evaluation Kit and Mass Calibration System Description
+5.4.    Calculation of the Coefficients and Limits
+    a) Click the calcCoeff button at the right of the “Sensor – Calibration” dialog window to calculate the
+         calibration coefficients. The result of the calculation (if successful) is displayed on the screen as shown in
+         Figure 5.3. The ZSSC3154’s calibration microcontroller (CMC) removes the offset and temperature
+         dependency so that the measured output result is within the target values (user’s %VDDA entries or in
+         this case, between 10% and 90%).
+        Note: The number of calibration points is equal to the number of coefficients to be calculated.
+    b) Click on the Limits CMV Osc button to calculate the sensor aging (CMV) and output limits if the CMV
+         check is enabled.
+    c) Click on writeEEP to make these calculations effective and written in the EEPROM. Option: starting a
+         measuring cycle can be triggered by clicking the cycle button.
+Figure 5.3 Displaying the Result of the Coefficient Calculation
+Note: all active buttons corresponding to the calibration method selected are shaded green.
+ © 2016 Integrated Device Technology, Inc.                   22                                            March 29, 2016
+
+
+                                                        ZSSC3154 Evaluation Kit and Mass Calibration System Description
+5.5.    Displaying Measurement Results in Normal Operating Mode (NOM)
+Close the calibration window and trigger a measurement in the main window (see section 4.5.1 and Figure 4.9) by
+clicking on either the Read or Read Loop button in the “ReadOut Data” section (see Figure 4.9). The ZSSC3154
+is already running in Normal Operation Mode (NOM) if the cycle button was clicked in the calibration window in
+the previous step.
+Measurement results can also be displayed in % by clicking on “Tools” in the top menu and then “Measure Out-
+put” and then selecting the output format in the checkbox in the resulting dialog window.
+Figure 5.4 Displaying Measurement Results via Tools >> Measure Output
+  © 2016 Integrated Device Technology, Inc.              23                                            March 29, 2016
+
+
+                                                           ZSSC3154 Evaluation Kit and Mass Calibration System Description
+6      Mass Calibration System Dry Run
+       The following directions perform an example of a simple calibration using the Mass Calibration System
+(MCS) shown in Figure 6.1. Refer to the SSC Mass Calibration Board Data Sheet for full details of operation. The
+calibrated output will be displayed as a calibration result in the ZSSC3154 Evaluation Software.
+To connect the DUTs to the Mass Calibration Board (MCB), there are several options, which can be combined as
+needed. The ZSSC3154 Mass Calibration Reference Board (MCR) provided with the MCS can be connected
+directly into the DUT terminals on the MCB. User-provided sensor modules and/or the ZSSC3154 SSC Evaluation
+Board (SSC EB) can also be connected to the DUT terminals using the ribbon cable provided with the MCS. For
+the SSC EB, connect the ribbon cable to the K6 connector on the SSC EB (see section 3.1).
+For the dry run example described in the next sections, MCRs and/or the SSC EB with the SRB are used instead
+of actual sensor modules.
+Figure 6.1 Mass Calibration Board (MCB) Setup
+                       DUT Terminals 01 to 12
+                           on the First MCB
+     CB Power LED
+                                                                                                  MCB jumper
+                                                                                                  address
+     To user’s
+     PC running
+     ZMDI software
+                                                                                                  Connect next MCB
+                                                                                                     here (up to 8)
+     Address LEDs:
+     D3, D4, and D5
+                            Communication                                                         External MCB
+                              Board V4.1                                                          power supply
+                       DUT Terminals 13 to 24
+                           on the First MCB
+6.1.     The Mass Calibration Reference Board Setup
+The SSC Mass Calibration System includes four ZSSC3154 MCRs. Each MCR has a sample ZSSC3154 QFN32
+for use as the DUT. See Figure 6.2 for the schematic and layout of the MCR. The MCR simulates a typical appli-
+cation circuit, which allows checking the I²C™ and/or one wire communication (OWI) of the ZSSC3154 and
+simulating an easy 2-point calibration using the P1 jumper on the MCR shorted for the first calibration point and
+then open for the second point.
+If pin 5 of the P2 connector to the SSC Mass Calibration Board of the MCR is soldered, then the MCR is
+preconfigured for I²C communication. OWI communication will fail if this pin is connected to the MCB.
+For OWI communication, unsolder this pin and configure the ZSSC3154 for OWI operation mode as described in
+section 6.3.
+  © 2016 Integrated Device Technology, Inc.                 24                                            March 29, 2016
+
+
+                                                         ZSSC3154 Evaluation Kit and Mass Calibration System Description
+Figure 6.2 Mass Calibration Reference Board (MCR)
+6.2.   ZSSC3154 Mass Calibration System Hardware Setup for the Example Dry Run
+    a) Connect the SSC CB and SSC MCB as shown on Figure 6.1. Up to eight MCBs can be connected in
+        series enabling mass calibration of up to 192 DUTs.
+    b) Starting from terminal #01 on the first Mass Calibration Board (MCB), connect the MCR boards in the
+        DUT terminals and/or use the ribbon cables to connect from the DUT terminals to the SSC EB with the
+        SRB connected.
+    c) Ensure that the board address of the first MCB is set to “0,” subsequent MCBs are set to sequential
+        different addresses, and the MCBs are powered by an external supply as described in the SSC Mass
+        Calibration Board Data Sheet.
+    d) Verify that only the green power LED is lit on the SSC CB (see Figure 3.1) and also the LEDs on the SSC
+        MCB corresponding to the jumper selected address.
+    e) Connect a USB cable from the USB connector on the SSC CB to an available USB port on the PC.
+ © 2016 Integrated Device Technology, Inc.               25                                             March 29, 2016
+
+
+                                                          ZSSC3154 Evaluation Kit and Mass Calibration System Description
+6.3.   Software Startup for Example Dry Run
+    a) Start the ZSSC3154 Evaluation Software by clicking on the desktop icon or activate it from the Windows®
+        Start Menu folder: #Start_Menu#\ZMDI\ZSSC3154\ZSSC3154.
+    b) Select the “I2C – MCB@CB” or “OWI – MCB@CB” interface from the drop-down menu in the “Interface
+        Selection” section of the main window as shown in Figure 6.3.
+    c) Select the following settings as shown in Figure 5.2:
+       • In the “Sensor – Full Bridge” and “Half Bridge” sections, set the “Span [mV/V]” (sensor sensitivity)
+            menu to 50mV/V, which is the typical span when using the MCR. With the 5V supply, this equals a
+            total span of 250mV (5V * 50mV/V = 250mV).
+       • In the “ADC Adjust” section, set the resolution integration phase to 10bits. ADC resolution is 14bits.
+       • In the “ADC Adjust” section, set the “FullBridgeRS” and “HalfBridgeRS” (range shift) menus to ¾,
+            which fits the input signal range to the ADC output value (“analog zero”). For example for a range shift
+            of ¾ and 14 bits resolution, the read-out values would be between -4096 and +12287.
+       • Operational mode: set the “Out2” section mode to “Single T&B” (single temperature & bridge; see
+            section 4.6).
+    d) Write the configuration into the RAM by clicking the WriteRAM button in the “ASIC Configuration” section.
+Figure 6.3 Interface Selection
+ © 2016 Integrated Device Technology, Inc.                26                                             March 29, 2016
+
+
+                                                            ZSSC3154 Evaluation Kit and Mass Calibration System Description
+6.4.   Calibration Data Acquisition for Example Dry Run
+    a) Click on the          icon or select “Calibration” on the top menu and then “Calibration” from the drop-down
+        menu. The “Sensor – Calibration” window appears as shown in Figure 6.4. Select the calibration mode
+        from the drop down menu.
+        For this example, the recommended mode is
+       • LINEAR (two points only) for the sensor
+       • NO calibration for the temperature (temperature calibration requires a chamber with a controlled
+            environment)
+    b) Enter the desired sensor targets corresponding in percent of the VDDA supply as described in section
+        5.3, step b). It is recommended that the output targets for the sensor points be between 10% and 90% for
+        this dry run example.
+    c) Next start data collection. Normally this would be done with a real sensor attached on a remote board in a
+        controlled chamber. Instead, this calibration example run uses an MCR or an SRB connected through the
+        SSC EB as the input as follows:
+       • Minimum [10%] sensor signal: short the P1 jumper on the MCR or turn the SRB counter-clockwise
+            (CCW) to the end and click the P1M button.
+       • Maximum [90%] sensor signal: open the P1 jumper on the MCR or turn the SRB clockwise (CW) to the
+            end and click the P2M button.
+        Acquired data will be displayed in the text boxes next to the buttons.
+        Note: only active buttons corresponding to the calibration mode are active as indicated by green shading.
+ © 2016 Integrated Device Technology, Inc.                  27                                             March 29, 2016
+
+
+                                                            ZSSC3154 Evaluation Kit and Mass Calibration System Description
+6.5.    Calculation of the Coefficients and Limits
+     a) Click the calcCoeff button at the right of the “Sensor – Calibration” dialog window to calculate the
+         calibration coefficients. The result of the calculation (if successful) is displayed on the screen (see Figure
+         6.4). The ZSSC3154’s calibration microcontroller (CMC) removes the offset and temperature dependency
+         so that the measured output result is within the target values (user’s %VDDA entries or in this case,
+         between 10% and 90%).
+        Note: The number of calibration points is equal to the number of coefficients to be calculated.
+     b) Click on the Limits CMV Osc button to calculate the sensor aging (CMV) and output limits if the CMV
+         check is enabled.
+     c) Click on writeEEP to make these calculations effective and written in the EEPROM. Option: starting a
+         measuring cycle can be triggered by clicking the cycle button.
+Close the calibration window and trigger a measurement in the main window (see Figure 6.3) by clicking on either
+the Read or Read Loop button in the “ReadOut Data” section (see Figure 4.9). The ZSSC3154 is already running
+in Normal Operation Mode (NOM) because the cycle button was clicked in the calibration window.
+Measurement results can also be displayed in % by clicking on “Tools” in the top menu and then “Measure Out-
+put” and then selecting the output format in the checkbox in the resulting dialog window.
+Figure 6.4 Displaying the Result of the Coefficient Calculation
+Note: all active buttons corresponding to the calibration method selected are shaded green.
+  © 2016 Integrated Device Technology, Inc.                 28                                             March 29, 2016
+
+
+                                                         ZSSC3154 Evaluation Kit and Mass Calibration System Description
+6.6.    Managing Multiple DUTs with the Mass Calibration System
+Managing multiple DUTs connected to the MCS is handled in the “DUT(s)” section of the calibration dialog
+window (see Figure 6.5). This section is used to select the active DUT (the “active DUT” field) and activate
+options such as loading the current configuration of the DUT into the software or writing a new configuration to the
+DUT from either a default configuration or the current configuration in the software. If the “Loop” checkbox is
+enabled, calibration of a selected set of DUTs is processed in a loop.
+Placing the user’s cursor over the entry fields and checkboxes in this section displays information about their
+functionality.
+Figure 6.5 “DUT” Section for Managing Multiple DUTs
+7      Ordering Information
+Please refer to www.IDT.com/ZSSC3154KIT for current product ordering codes and descriptions. After a
+ZSSC3154 Evaluation Kit or ZSSC3154 Mass Calibration System has been ordered, individual parts can be
+ordered separately.
+  © 2016 Integrated Device Technology, Inc.              29                                             March 29, 2016
+
+
+                                                     ZSSC3154 Evaluation Kit and Mass Calibration System Description
+8      Related Documents
+ Document
+ SSC Evaluation Kit Feature Sheet
+ ZSSC3154 Data Sheet
+ ZSSC3154 Functional Description
+ SSC Communication Board Data Sheet *
+ SSC Sensor Replacement Board Data Sheet *
+ SSC Command Syntax *
+ Mass Calibration System Feature Sheet
+ SSC Mass Calibration Board Data Sheet *
+Visit www.IDT.com/ZSSC3154 and www.IDT.com/ZSSC3154KIT or contact your nearest sales office for the latest
+version of these documents.
+9      Glossary
+ Term               Description
+ ADC                Analog-to-Digital Converter
+ AFE                Analog Front End
+ CB                 Communication Board
+ CMC                Calibration Microcontroller
+ CMV                Common Mode Voltage
+ DUT                Device Under Test
+ OWI                One-Wire Interface
+ PCB                Printed Circuit Board
+ PGA                Programmable Gain Amplifier
+ SRB                Sensor Replacement Board
+ SSC                Sensor Signal Conditioner
+ DFB[L/H]           Diagnostic Fault Band [Mode]
+ MCB                Mass Calibration Board
+ MCS                Mass Calibration System
+ MCR                Mass Calibration Reference Board
+  © 2016 Integrated Device Technology, Inc.          30                                             March 29, 2016
+
+
+                                                                                                            ZSSC3154 Evaluation Kit and Mass Calibration System Description
+10 Document Revision History
+       Revision                                Date                     Description
+           1.00                       March 13, 2012                    First release.
+           2.00                       August 5, 2014                    Mass Calibration Board dry run added.
+                                                                        Updates for section 8 to note that documentation and software are available on
+                                                                        www.IDT.com.
+                                                                        Updates for imagery for cover and headers.
+                                                                        Updates for contacts.
+                                                                        Minor edits for clarity.
+                                      March 29, 2016                    Changed to IDT branding.
+                                            Corporate Headquarters                                               Sales                                                          Tech Support
+                                            6024 Silver Creek Valley Road                                        1-800-345-7015 or 408-284-8200                                 www.IDT.com/go/support
+                                            San Jose, CA 95138                                                   Fax: 408-284-2775
+                                            www.IDT.com                                                          www.IDT.com/go/sales
+DISCLAIMER Integrated Device Technology, Inc. (IDT) reserves the right to modify the products and/or specifications described herein at any time, without notice, at IDT's sole discretion. Performance
+specifications and operating parameters of the described products are determined in an independent state and are not guaranteed to perform the same way when installed in customer products. The
+information contained herein is provided without representation or warranty of any kind, whether express or implied, including, but not limited to, the suitability of IDT's products for any particular purpose, an
+implied warranty of merchantability, or non-infringement of the intellectual property rights of others. This document is presented only as a guide and does not convey any license under intellectual property
+rights of IDT or any third parties.
+IDT's products are not intended for use in applications involving extreme environmental conditions or in life support systems or similar devices where the failure or malfunction of an IDT product can be
+reasonably expected to significantly affect the health or safety of users. Anyone using an IDT product in such a manner does so at their own risk, absent an express, written agreement by IDT.
+Integrated Device Technology, IDT and the IDT logo are trademarks or registered trademarks of IDT and its subsidiaries in the United States and other countries. Other trademarks used herein are the
+property of IDT or their respective third party owners. For datasheet type definitions and a glossary of common terms, visit www.idt.com/go/glossary. All contents of this document are copyright of Integrated
+Device Technology, Inc. All rights reserved.
+   © 2016 Integrated Device Technology, Inc.                                                                 31                                                                              March 29, 2016
+
+
+ IMPORTANT NOTICE AND DISCLAIMER
+ RENESAS ELECTRONICS CORPORATION AND ITS SUBSIDIARIES (“RENESAS”) PROVIDES TECHNICAL
+ SPECIFICATIONS AND RELIABILITY DATA (INCLUDING DATASHEETS), DESIGN RESOURCES (INCLUDING
+ REFERENCE DESIGNS), APPLICATION OR OTHER DESIGN ADVICE, WEB TOOLS, SAFETY INFORMATION, AND
+ OTHER RESOURCES “AS IS” AND WITH ALL FAULTS, AND DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED,
+ INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ PARTICULAR PURPOSE, OR NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY RIGHTS.
+ These resources are intended for developers skilled in the art designing with Renesas products. You are solely responsible
+ for (1) selecting the appropriate products for your application, (2) designing, validating, and testing your application, and (3)
+ ensuring your application meets applicable standards, and any other safety, security, or other requirements. These
+ resources are subject to change without notice. Renesas grants you permission to use these resources only for
+ development of an application that uses Renesas products. Other reproduction or use of these resources is strictly
+ prohibited. No license is granted to any other Renesas intellectual property or to any third party intellectual property.
+ Renesas disclaims responsibility for, and you will fully indemnify Renesas and its representatives against, any claims,
+ damages, costs, losses, or liabilities arising out of your use of these resources. Renesas' products are provided only subject
+ to Renesas' Terms and Conditions of Sale or other applicable terms agreed to in writing. No use of any Renesas resources
+ expands or otherwise alters any applicable warranties or warranty disclaimers for these products.
+                                                                                                               (Rev.1.0 Mar 2020)
+Corporate Headquarters                                                  Contact Information
+TOYOSU FORESIA, 3-2-24 Toyosu,                                          For further information on a product, technology, the most
+Koto-ku, Tokyo 135-0061, Japan                                          up-to-date version of a document, or your nearest sales
+www.renesas.com                                                         office, please visit:
+                                                                        www.renesas.com/contact/
+Trademarks
+Renesas and the Renesas logo are trademarks of Renesas
+Electronics Corporation. All trademarks and registered
+trademarks are the property of their respective owners.
+                                                                      © 2020 Renesas Electronics Corporation. All rights reserved.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Renesas Electronics:
+ ZSSC3154MCSV1P1 ZSSC3154BOARDV1P2S

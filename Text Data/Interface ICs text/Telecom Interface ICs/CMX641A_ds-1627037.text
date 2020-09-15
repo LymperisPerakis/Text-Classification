@@ -1,0 +1,870 @@
+                                                                                  CMX641A
+                                                                      DUAL SPM/SECURITY
+                                                                  DETECTOR/GENERATOR
+D641A/5 January 2002                                                                      Provisional Information
+Features                                                  Applications
+•   Two (12kHz/16kHz) SPM Detectors                       •   SPM for Pair-Gain Systems
+•   Selectable 12kHz/16kHz ASK Generator                  •   Payphone Security Applications
+•   Selectable Tone Follower or Packet                    •   Call Charge Applications in PBX and
+    Mode 3-State Outputs                                      PABX Line Cards
+•   Excellent Speech-Band Rejection                       •   Out-of-Band Signalling Systems
+•   Hardwired Control for Non-µC Systems                  •   Low-Voltage FX/MX641 Replacement
+•   Selectable Bandwidth Limits and Stable                •   µC Software-Programmable Secure
+    Centre Frequency from a Standard Xtal                     Payphone Call Charging Apparatus
+1.1      Brief Description
+The CMX641A is a low power, system selectable Dual Subscriber Pulse Metering (SPM) Detector – two
+detectors on a single chip – to indicate the presence on a telephone line of either 12kHz or 16kHz
+telephone call charge frequencies. The detection sensitivity, frequency and bandwidth are independently
+selectable for each channel, under µC control, as is the frequency of the security tone generator, which
+may be ASK modulated by an external signal. The CMX641A is also backwards compatible with the
+FX641 and MX641 dual SPM detectors, whilst offering a lower (3.0V) operating voltage and power.
+The CMX641A has two modes of operation:
+    (1) Fixed Bandwidth Operating state, in which the two channels are set to the same system
+         frequency and sensitivity setting. Sensitivity and system frequency can be under either µC or
+         external control. This state is fully pin and function compatible with the FX641 and MX641.
+    (2) Enhanced Features Operating state, under µC control, in which each channel has independently
+         controllable sensitivity, bandwidth and system frequency (12kHz or 16kHz). There is also a
+         12kHz/16kHz transmission tone which can be keyed on and off directly by a dedicated logic pin.
+This device is suitable for PBX/PABX line-card installations, payphone security applications and pair-gain
+systems. It is available in 24-pin plastic DIL and SOIC packages and consumes ≈1.2mA at 3V.
+ 2002 Consumer Microcircuits Limited
+
+
+Dual SPM/Security Detector/Generator                                                                                         CMX641A
+                                                           CONTENTS
+       Section                                                                                                          Page
+         1.1       Brief Description..................................................................................1
+         1.3       Signal List ............................................................................................4
+         1.4       External Components..........................................................................8
+         1.5       General Description.............................................................................9
+                   1.5.1 Description of Blocks .............................................................9
+                   1.5.2 Operating States ................................................................... 10
+         1.6       Application Notes .............................................................................. 15
+                   1.6.1 Signal Input Configurations ................................................. 15
+                   1.6.2 Crystal/Clock Distribution .................................................... 15
+                   1.6.3 Channel 1 and Channel 2 Output Format ............................ 15
+                   1.6.4 Setting Level Sensitivity via Input Serial Data Word........... 16
+                   1.6.5 Setting Level Sensitivity via External Components ............ 17
+                   1.6.6 Aliasing.................................................................................. 17
+                   1.6.5 Settng Level Sensitivity via External Components ............. 18
+         1.7       Performance Specification................................................................ 19
+                   1.7.1 Electrical Performance.......................................................... 19
+                   1.7.2 Packaging.............................................................................. 24
+ 2002 Consumer Microcircuits Limited                               2                                                        D/641A/5
+
+
+Dual SPM/Security Detector/Generator                         CMX641A
+1.2      Block Diagram
+                                      Figure 1 Block Diagram
+ 2002 Consumer Microcircuits Limited            3           D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                   CMX641A
+1.3      Signal List
+ Package       Package
+                                            Signal                            Description
+     D2            P4
+ Pin No.        Pin No.              Name          Type
+      1             1                XTAL           I/P   The input of the on-chip oscillator for use with a
+                                                          3.579545MHz Xtal in conjunction with the
+                                                          XTALN output; circuit components are on-chip.
+                                                          When using an Xtal input, the CLOCK OUT pin
+                                                          should be connected directly to the CLOCK IN
+                                                          pin. If an external clock input is employed at
+                                                          the CLOCK IN pin, the XTAL pin must be
+                                                          connected directly to VDD (see Figure 2). See
+                                                          Figure 4 for details of clock frequency
+                                                          distribution.
+      2             2               XTALN          O/P    The inverted output of the on-chip oscillator.
+      3             3           CLOCK OUT          O/P    The buffered output of the on-chip oscillator
+                                                          inverter. If a XTAL input is employed, this
+                                                          output should be connected directly to the
+                                                          CLOCK IN pin. This output can support up to 3
+                                                          additional CMX641A microcircuits. See Figure
+                                                          4 for details of clock distribution.
+      4             4            CLOCK IN           I/P   The 3.579545MHz input to the internal clock
+                                                          dividers. If an externally generated clock pulse
+                                                          input is employed, XTAL input pin should be
+                                                          connected to VDD.
+      5             5          OP ENABLEN           I/P   For multi-chip output multiplexing; controls the
+                                                          state of both Ch1 and Ch2 outputs. When this
+                                                          input is placed high (logic ‘1’) both outputs are
+                                                          set to a high impedance. When placed at logic
+                                                          ‘0’ (low) both outputs are enabled.
+      6             6              CH2 OP          O/P    The digital output of the channel 2 SPM detector
+                                                          when enabled. The format of the signal at this
+                                                          pin, in common with CH1 OP is selectable to
+                                                          either ‘Tone Follower’ or ‘Packet mode’ via the
+                                                          OP SELECT pin. Logic ‘0’ (low) when tone is
+                                                          detected.
+      7             7              CH1 OP          O/P    The digital output of the channel 1 SPM detector
+                                                          when enabled. The format of the signal at this
+                                                          pin, in common with CH2 OP is selectable to
+                                                          either ‘Tone Follower’ or ‘Packet mode’ via the
+                                                          OP SELECT pin. Logic ‘0’ (low) when tone is
+                                                          detected.
+      8             8                 VBIAS        O/P    A bias line for the internal circuitry, held at
+                                                          ½VDD. This pin must be decoupled to VSS by a
+                                                          capacitor mounted close to the device pins.
+ 2002 Consumer Microcircuits Limited                   4                                              D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                CMX641A
+ Package      Package
+                                          Signal                             Description
+     D2            P4
+ Pin No.        Pin No.              Name         Type
+      9             9         CH1 AMP OUT         O/P    The output of the Channel 1 input amplifier.
+                                                         See Figures 2 and 3.
+     10            10         CH1 AMP IN (-)       I/P   The negative input to the Channel 1 input
+                                                         amplifier. See Figures 2 and 3.
+     11            11           CH1 AMP IN         I/P   The positive input to the Channel 1 Input
+                                      (+)                amplifier. See Figures 2 and 3.
+     12            12                 VSS        POWER   The negative supply rail (ground).
+     13            13           ENHANCED           I/P   This pin selects the device application. When
+                                FEATURES                 (logic ‘0’) the CMX641A is in Fixed Bandwidth
+                                                         Operating state. When (logic ‘1’) it is in
+                                                         Enhanced Features Operating state.
+                                                         This pin has an internal pulldown resistor on-
+                                                         chip so that when unconnected, the default state
+                                                         is Fixed Bandwidth Operating state.
+     14            14           CH2 AMP IN         I/P   The positive input to the Channel 2 input
+                                      (+)                amplifier. See Figures 2 and 3.
+     15            15         CH2 AMP IN (-)       I/P   The negative input to the Channel 2 input
+                                                         amplifier. See Figures 2 and 3.
+     16            16         CH2 AMP OUT         O/P    The output of the Channel 2 input amplifier.
+                                                         See Figures 2 and 3.
+     17            17           OP SELECT          I/P   A logic input to set the Channel 1 and Channel 2
+                                                         output format. When high (logic ‘1’), the outputs
+                                                         are in the Tone Follower mode; when low (logic
+                                                         ‘0’), the outputs are in Packet mode.
+ 2002 Consumer Microcircuits Limited                  5                                            D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                            CMX641A
+ Package       Package
+                                       Signal                            Description
+     D2            P4
+ Pin No.        Pin No.          Name         Type
+     18            18                                This is a dual function pin differing between
+                                                     Fixed Bandwidth Operating state and Enhanced
+                                                     Features Operating state.
+                                                     This input has an internal pullup resistor on chip
+                                                     so that the default (open circuit) modes are
+                                                     Fixed Sensitivity (Fixed Bandwidth Operating
+                                                     state) and No Tone (Enhanced Features
+                                                     Operating state).
+                                PRESET               (Fixed Bandwidth Operating state).
+                                 LEVEL               A logic input to set the sensitivity mode of the
+                                                     CMX641A. When high (logic ‘1’), both channels
+                                                     are in the Fixed Sensitivity mode. The external
+                                                     components govern the input sensitivity; the
+                                                     SYSTEM SELECT pin selects 12kHz or 16kHz
+                                                     operation.
+                                                     When low logic (logic ‘0’), the system frequency
+                                                     and sensitivity of both channels are in the
+                                                     Controlled Sensitivity mode. Device
+                                                     sensitivities and system selection are via the
+                                                     CHIP SELECTN/SERIAL DATA/SERIAL
+                                                     CLOCK inputs.
+                              TONE ASK               (Enhanced Features Operating state).
+                                                     A logic input used to ASK modulate the TONE
+                                                     OP pin. A logic high corresponds to no tone
+                                                     and a logic low to tone.
+     19            19             CHIP         I/P   The serial data pins for use in data loading when
+                               SELECTN               using the CMX641A in Controlled Sensitivity
+     20            20           SERIAL         I/P   mode (Fixed Bandwidth Operating state) or in
+                                 CLOCK               Enhanced Features Operating state (See
+     21            21           SERIAL         I/P   Figures 7 & 8). When the device is in Fixed
+                                  DATA               Sensitivity mode (Fixed Bandwidth Operating
+                                                     state), these pins should be connected to VSS or
+                                                     VDD.
+ 2002 Consumer Microcircuits Limited              6                                            D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                       CMX641A
+ Package       Package
+                                          Signal                                   Description
+     D2            P4
+ Pin No.        Pin No.            Name            Type
+     22            22                                         This is a dual function pin differing between
+                                                              Fixed Bandwidth Operating state and Enhanced
+                                                              Features Operating state.
+                                                              This pin has an internal pullup on chip so that
+                                                              the default modes are Detect 12kHz (Fixed
+                                                              Bandwidth Operating state, Fixed Sensitivity
+                                                              mode) or TX Tone = 12kHz (Enhanced Features
+                                                              Operating state).
+                                 SYSTEM             I/P       (Fixed Bandwidth Operating state).
+                                 SELECT                       In the Fixed Sensitivity mode, this pin selects
+                                                              the system frequency. High (logic ‘1’) = 12kHz;
+                                                              Low (logic ‘0’) = 16kHz.
+                                                              In the Controlled Sensitivity mode, this pin may
+                                                              be tied to VDD or may be left unconnected.
+                                                              Future functions of this pin, if tied low, are
+                                                              reserved.
+                                TX TONE             I/P       (Enhanced Features Operating state).
+                                 SELECT                       This pin selects 12kHz or 16kHz as the transmit
+                                                              frequency at the TONE OP pin. When high
+                                                              (logic ‘1’), the Tx tone at the TONE OP pin is
+                                                              12kHz. When low (logic ‘0’), the Tx tone is
+                                                              16kHz.
+     23            23           TONE OP            O/P        Operates in Enhanced Features Operating state
+                                                              only. A 12kHz or 16kHz transmit tone appears
+                                                              at this pin under the control of the TONE ASK
+                                                              and the TX TONE SELECT pin.
+                                                              In Fixed Bandwidth Operating state, this pin is
+                                                              unused and should be left unconnected.
+     24            24                VDD         POWER        The positive supply rail. Critical levels and
+                                                              voltages within the CMX641A are dependent
+                                                              upon this supply. This pin should be decoupled
+                                                              to VSS by a capacitor mounted close to the
+                                                              device pins.
+Notes:     I/P         =     Input                (Note also that SYSTEM SELECT/TX TONE SELECT,
+           O/P         =     Output               ENHANCED FEATURES and PRESET LEVEL/TONE ASK
+           BI          =      Bidirectional       pins should never be simultaneously driven low - to VSS).
+ 2002 Consumer Microcircuits Limited                    7                                                 D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                               CMX641A
+1.4      External Components
+                                 Figure 2 Recommended External Components
+Fixed Bandwidth Operating State, Controlled Sensitivity Mode and
+Enhanced Features Operating State
+ R1     68kΩ                    ±1%                C1   1.0µF                 ±20%
+ R2     68kΩ                    ±1%                C2   1.0µF                 ±20%
+ R3     750kΩ                   ±1%                C3   270pF                 ±5%
+ R4     750kΩ                   ±1%                C4   270pF                 ±5%
+ R5     68kΩ                    ±1%                C5   270pF                 ±5%
+ R6     68kΩ                    ±1%                C6   270pF                 ±5%
+ R7     750kΩ                   ±1%                X1   3.579545MHz
+ R8     750kΩ                   ±1%
+Fixed Bandwidth Operating State, Fixed Sensitivity Mode
+In this mode input amplifier components are chosen to set the required sensitivity of the CMX641A. (See
+section 1.6.5).
+Note that when calculating/selecting gain components, R3, R4, R7 and R8 should always be greater than
+or equal to 100kΩ.
+Particular attention should be paid to decoupling VDD and keeping the power, ground and signal lines free
+from unnecessary noise.
+Telephone systems may have unusually high dc and ac voltages present on the line, as either differential
+or common mode signals. If the CMX641A is part of a host system which does not have its own input
+protection, then protection diodes must be added to both signal inputs (+ and -) so that the voltage on any
+pin is limited to within VSS – 0.3V and Vdd + 0.3V. The breakdown voltage of capacitors and the peak
+inverse voltage of diodes must be sufficient to withstand the sum of the dc and peak-peak ac voltages
+applied.
+ 2002 Consumer Microcircuits Limited               8                                              D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                              CMX641A
+1.5      General Description
+1.5.1 Description of Blocks
+Crystal Oscillator and Clock Dividers
+These circuits derive the internal logic clocks, decode frequencies and transmit frequencies by frequency
+division of a reference frequency which may be generated by the on-chip crystal oscillator or applied from
+an external source.
+If the on-chip oscillator is used, a 3.579545MHz crystal should be connected across the XTAL and XTALN
+pins and CLOCK IN pin should be connected to CLOCK OUT. All other oscillator components are on-
+chip. If an external clock source is used then it should be applied to the CLOCK IN pin and the XTAL pin
+connected to VDD.
+Input Operational Amplifiers
+The input signals are input to the CMX641A via these amplifiers. In Controlled Sensitivity mode of the
+Fixed Bandwidth Operating state, or when in Enhanced Features Operating state, the external
+components shown in Figure 2 should be used. When used in the Fixed Sensitivity mode of the Fixed
+Bandwidth Operating state, external gain setting components should be calculated using Figure 6.
+In Enhanced Features Operating state, with the channels set to 12kHz/16kHz detect, the channel 2
+amplifier can optionally be isolated and may be used as an independent amplifier. In this case, both
+channels are internally connected to amplifier 1. The amplifiers can be connected as differential mode or
+single ended, depending upon the application (see Figure 3).
+SPM Tone Bandpass Filter
+These are tone bandpass/audio reject filters automatically centred on the system frequency (12kHz or
+16kHz) being detected. When in Controlled Sensitivity mode of the Fixed Bandwidth Operating state or
+when in Enhanced Features Operating state, the level sensitivity of the device is set by adjusting the
+passband gain of these filters. When in Fixed Sensitivity mode of the Fixed Bandwidth Operating state,
+their gain is constant so that the internal device sensitivity is also constant.
+Level Detection and Pulse Generator Circuits
+The outputs from the bandpass filters are input to these circuits which perform the signal level
+discrimination function for the CMX641A. Signals which fulfil the system level requirements cause a
+stream of digital pulses, one per 32 cycles of input signal, to be generated. These pulses are sent to the
+period measurement circuitry.
+Period Measurement Logic
+This digital circuit block inputs the stream of pulses from the level detection circuits and measures their
+repetition rate against a predetermined maximum and minimum. Because each pulse from the level
+detect circuit occur once per 32 cycles of input signal, this has the effect of averaging the input signal
+period over this number of cycles. A valid SPM tone is recognised when 3 successive correctly spaced
+pulses are received. If the Tone Follower output format is selected, this causes a signal to appear
+immediately at the relevant channel output signifying receipt of a valid SPM signal. Depending upon the
+frequency, within the legal bandwidth, received, the CMX641A should respond within 10-15ms (see
+section 1.7 and Figure 5).
+Tone Length Logic
+This digital circuit block is used when Packet output format is selected. Its output responds when 40ms
+of valid tone is received within any 48ms window, signifying receipt of a valid packet of SPM tone (see
+section 1.7). Once the CMX641A has responded, within any 48ms window, 40ms of no-tone, or of tone
+outside the chosen bandwidth or below the level threshold will cause the output to derespond. (See
+Figure 5).
+Tx Tone Generator and Shaping Filter
+These are active in Enhanced Features Operating state only. They generate a low distortion sinewave
+for transmission by the CMX641A as an SPM security tone. The output at the TONE OP pin is
+ 2002 Consumer Microcircuits Limited                 9                                           D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                               CMX641A
+modulated on-off by the TONE ASK pin. A high (logic ‘1’) selects no tone and low (logic ‘0’) selects tone.
+The transmission frequency is selected by the TX TONE SELECT pin. A high (logic ‘1’) selects 12kHz
+and a low (logic ‘0’) selects 16kHz. (See Table 7).
+Output Select Circuits
+These drive the output logic pins ‘Channel 1 Output’ (CH1OP) and ‘Channel 2 Output’ (CH2OP). These
+outputs can be made high impedance by setting the OP ENABLEN pin high. When enabled, the format
+at these pins is either Tone Follower or Packet. (See Table 1). A high (logic ‘1’) indicates the tone is
+absent, a low (logic ‘0’) indicates the tone is present.
+1.5.2 Operating States
+There are two operating states for the CMX641A: Fixed Bandwidth and Enhanced Features.
+Fixed Bandwidth Operating State (ENHANCED FEATURES pin = logic ‘0’ or open circuit)
+In this operating state, the CMX641A is function and pin compatible with the FX641 and MX641. It is a
+dual-channel SPM detector with both detectors set to the same level sensitivity and system frequency
+(12kHz or 16kHz) via a 6-bit serial data word from a host µController. Alternatively, for non µController
+systems, the sensitivity and system frequency can be set via external components and logic inputs. In
+this state, the decode bandwidth of both channels is internally fixed at ±1.5% of the nominal centre
+frequency.
+Enhanced Features Operating State (ENHANCED FEATURES pin = logic ‘1’)
+In this state, the following features of the two SPM detector channels are independently controllable via a
+16-bit serial data word from a host µController.
+     (i)      The decode bandwidths, which can be set to ±1.5%, ±3%, ±5% and ±7.5% of the nominal
+              tone frequency.
+     (ii)     The level sensitivity.
+     (iii)    The system frequencies, which have one of three possible settings: 12kHz & 12kHz, 16kHz &
+              16kHz, or 12kHz for Channel 2 and 16kHz for Channel 1.
+When the two channels are set to 12kHz/16kHz mode, there is an option to disconnect the channel 2
+decode path from its own amplifier and have both channels connected to the channel 1 input. The
+channel 2 amplifier is then independent and available for some other use, say gain setting or filtering,
+within the host circuitry.
+There is also a transmit tone, selectable to 12kHz or 16kHz, which is ASK modulated via a logic input pin.
+Features Common to both Operating States
+In both states, three output formats are available for the channel output pins. These output formats are
+selectable via the logic input pins OP SELECT and OP ENABLEN. (See Table 1).
+      (i)      In Tone Follower mode, the logic output has very short response and deresponse times so
+               that it forms an ‘envelope’ of the input tone. Host systems will decide whether the received
+               signal fulfils the system tone pulse length requirements.
+      (ii)     In Packet mode, the channel output only responds after 40ms of received continuous tone.
+               The CMX641A then ignores the erroneous 20ms on, 20ms off “ringing” pattern which occurs
+               on some telephone lines.
+      (iii)
+               The deresponse time is also 40ms, so that the decode output pin forms a delayed envelope
+               of the input tone and host systems can decide, as in the Tone Follower mode, whether the
+               received tone duration fulfils local system requirements.
+ 2002 Consumer Microcircuits Limited                   10                                         D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                CMX641A
+      (iii)   The outputs can be set to a high impedance state for device multiplexing.
+            OP ENABLEN                        OP SELECT                            CH1 & CH2
+                                                                                  OP FORMAT
+                   0                                0                             Packet Mode
+                   0                                1                          Tone Follower Mode
+                   1                                X                                High Z
+              Table 1 Selection of Output Format via OP ENABLEN and OP SELECT pins
+ 1.5.2.1 Fixed Bandwidth Operating State (ENHANCED FEATURES pin = logic ‘0’ or Open Circuit)
+ This state is selected by leaving pin 13 open circuit. In this state, the CMX641 has full pin, function and
+ software compatibility with the FX641 and MX641. There are two operating modes: Controlled and
+ Fixed Sensitivity.
+ 2002 Consumer Microcircuits Limited                11                                             D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                            CMX641A
+ Controlled Sensitivity Mode (PRESET LEVEL pin = logic ‘0’)
+ This mode allows the sensitivity to be set from a µController via a 6-bit serial data input. This same
+ serial input also sets operation (bit 0) for either 12kHz or 16kHz systems. Both channels are set
+ identically.
+                                              12kHz System                                  16kHz System
+                                                Bit D0 = ‘1’                                  Bit D0 = ‘0’
+    Serial        Bandpass         Minimum       Nominal        Maximum         Minimum        Nominal        Maximum
+  Data Bits       Filter Gain     Sensitivity   Sensitivity     Sensitivity    Sensitivity    Sensitivity    Sensitivity
+    D5-D1             (dB)          dB(ref.)     dB(ref.)        dB(ref.)       dB(ref.)        dB(ref.)       dB(ref.)
+    00000               0            -16.2         -17.5          -18.8           -16.9           -18.2          -19.5
+    00001              1.0           -17.2         -18.5          -19.8           -17.9           -19.2          -20.5
+    00010              2.0           -18.2         -19.5          -20.8           -18.9           -20.2          -21.5
+    00011              3.0           -19.2         -20.5          -21.8           -19.9           -21.2          -22.5
+    00100              4.0           -20.2         -21.5          -22.8           -20.9           -22.2          -23.5
+    00101              5.0           -21.2         -22.5          -23.8           -21.9           -23.2          -24.5
+    00110              6.0           -22.2         -23.5          -24.8           -22.9           -24.2          -25.5
+    00111              7.0           -23.2         -24.5          -25.8           -23.9           -25.2          -26.5
+    01000              8.0           -24.2         -25.5          -26.8           -24.9           -26.2          -27.5
+    01001              9.0           -25.2         -26.5          -27.8           -25.9           -27.2          -28.5
+    01010             10.0           -26.2         -27.5          -28.8           -26.9           -28.2          -29.5
+    01011             11.0           -27.2         -28.5          -29.8           -27.9           -29.2          -30.5
+    01100             12.0           -28.2         -29.5          -30.8           -28.9           -30.2          -31.5
+    01101             13.0           -29.2         -30.5          -31.8           -29.9           -31.2          -32.5
+    01110             14.0           -30.2         -31.5          -32.8           -30.9           -32.2          -33.5
+    01111             15.0           -31.2         -32.5          -33.8           -31.9           -33.2          -34.5
+    10000             16.0           -32.2         -33.5          -34.8           -32.9           -34.2          -35.5
+    10001             17.0           -33.2         -34.5          -35.8           -33.9           -35.2          -36.5
+    10010             18.0           -34.2         -35.5          -36.8           -34.9           -36.2          -37.5
+    10011             19.0           -35.2         -36.5          -37.8           -35.9           -37.2          -38.5
+    10100             20.0           -36.2         -37.5          -38.8           -36.9           -38.2          -39.5
+    10101             21.0           -37.2         -38.5          -39.8           -37.9           -39.2          -40.5
+    10110             22.0           -38.2         -39.5          -40.8           -38.9           -40.2          -41.5
+    10111             23.0           -39.2         -40.5          -41.8           -39.9           -41.2          -42.5
+    11000             24.0           -40.2         -41.5          -42.8          -40.9*          -42.2*         -43.5*
+    11001             25.0           -41.2         -42.5          -43.8          -41.9*          -43.2*         -44.5*
+    11010             26.0           -42.2         -43.5          -44.8          -42.9*          -44.2*         -45.5*
+    11011             27.0           -43.2         -44.5          -45.8          -43.9*          -45.2*         -46.5*
+    11100        These states should never be used. If sensitivities of this order are required, (e.g. the Swedish Rural
+    11101        SPM specification, it is recommended that the Controlled sensitivity setting is set to 20dB (10100)
+    11110        and external components selected to set the Input Amp gain to a higher figure.
+    11111
+       Table 2 Controlled Sensitivity Setting Information in Fixed Bandwidth Operating State
+The figures in Table 2 assume:
+     1. The recommended amplifier components (see figure 2) are employed.
+     2. The applied VDD is 5.0V. 0dB(ref.) = 775Vrms.
+     3. Signal sensitivity is proportional to VDD. However, the 16kHz settings marked * (11000 to 11011)
+         are allowed for 5V operation only.
+     4. Bandwidth setting 00 (±1.5%), 01 (±3/0%) or 10 (±5.0%) is selected. Add 0.5dB to upper figure if
+         bandwidth setting 11 (±7.5%) is selected.
+Table 2 shows the serial data input to produce the required sensitivity. Minimum, nominal and maximum
+sensitivity figures are provided to make complete allowance for internal circuit offsets and component
+tolerances. The gain of each bandpass filter, and hence the device sensitivity, is adjusted by the applied
+serial bits D1 to D5. The system frequency is selected by bit D0 (‘1’ = 12kHz; ‘0’ = 16kHz). Data is loaded
+bit 5 (D5) first (See Figure 7).
+ 2002 Consumer Microcircuits Limited                        12                                                 D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                    CMX641A
+In controlled sensitivity mode, the ‘will detect’ bandwidth is internally set at ±1.5% i.e. in 12kHz mode, the
+CMX641A will detect frequencies between 11.82kHz to 12.18kHz inclusive. In 16kHz mode, it will detect
+frequencies between 15.76kHz to 16.24kHz inclusive. The ‘will not detect’ bandedges are ±4% so that, in
+12kHz mode, the CMX641A will not respond to frequencies of 11.52kHz or lower or to 12.48kHz or
+higher. In 16kHz, the equivalent frequencies are 15.36kHz and 16.64kHz.
+Fixed Sensitivity Mode (PRESET LEVEL pin = logic ‘1’ or open circuit)
+In this mode, the sensitivity of each channel is set by correct selection of external components around
+each Channel input amplifier. See section 1.6.5 and Figure 6 for a method of selecting amplifier gain
+and components to meet a particular sensitivity requirement.
+ 1.5.2.2 Enhanced Features Operating State (ENHANCED FEATURES pin = logic ‘1’)
+ This state is selected by tying pin 23 to logic 1. It has individually programmable tone detect
+ bandwidths, signal sensitivities and a 12kHz or 16kHz ASK keyed transmission tone. Control of the
+ CMX641A in this state is via a 16-bit serial data word, as shown in Table 3. Data is loaded bit 15 (D15)
+ first (See Figure 8).
+                    Channel 2                               Channel 1                     System Select
+          D15-D11                D10-D9             D8-D4                D3-D2                 D1-D0
+            Level                                   Level
+       Sensitivity set          Bandwidth      Sensitivity set        Bandwidth          12kHz or 16kHz
+        as in Table 2            Control        as in Table 2           Control                 Select
+           Above                                    Above
+                 Table 3 16-Bit Serial Input Word in Enhanced Features Operating State
+Channel Level Sensitivities
+These are independently programmable via bits D15-D11 for channel 2 and bits D8-D4 for channel 1.
+The 5-bit coding and sensitivities are as given in Table 2 above for the Fixed Bandwidth Operating State.
+For example, if D15-D11 = ‘01001’ and D8-D4 = ‘00101’, both in 12kHz mode, then channel 2 would have
+a nominal sensitivity of –26.5dB(ref) and channel 1 would have a nominal sensitivity of –22.5dB(ref).
+Will Detect and Will Not Detect Bandwidths
+There are four individually programmable bandwidths per channel. The ‘will detect’ bandwidth can be
+programmed to ±1.5%, ±3%, ±5% or ±7.5%. The corresponding ‘will not detect’ band edges are ±4%,
+±5.5%, ±7.5% and ±10%. Bits D10 and D9 control channel 2 and bits D3 and D2 control channel 1.
+D10-D9 (Channel 2)                  Lower              Lower                 Upper                  Upper
+ D3-D2 (Channel 1)            Will Not Detect       Will Detect           Will Detect          Will Not Detect
+           00                 11.52kHz (-4%)     11.82kHz (-1.5%)     12.18kHz (+1.5%)         12.48kHz (+4%)
+           01                11.34kHz (-5.5%)    11.64kHz (-3.0%)     12.36kHz (+3.0%)        12.66kHz (+5.5%)
+           10                11.10kHz (-7.5%)    11.40kHz (-5.0%)     12.60kHz (+5.0%)        12.90kHz (+7.5%)
+           11               10.80kHz (-10.0%)    11.10kHz (-7.5%)     12.90kHz (+7.5%)       13.20kHz (+10.0%)
+                      Table 4 Setting 12kHz Will Detect/Will Not Detect Bandwidths in
+                                       Enhanced Features Operating State
+ 2002 Consumer Microcircuits Limited                  13                                               D/641A/5
+
+
+ Dual SPM/Security Detector/Generator                                                                CMX641A
+D10-D9 (Channel 2)                  Lower            Lower                  Upper                 Upper
+D3-D2 (Channel 1)             Will Not Detect      Will Detect            Will Detect     Will Not Detect
+          00                 15.36kHz (-4.0%)   15.76kHz (-1.5%)      16.24kHz (+1.5%)     16.64kHz (+4.0%)
+          01                 15.12kHz (-5.5%)   15.52kHz (-3.0%)      16.48kHz (+3.0%)     16.88kHz (+5.5%)
+          10                 14.80kHz (-7.5%)   15.20kHz (-5.0%)      16.80kHz (+5.0%)     17.20kHz (+7.5%)
+          11                14.40kHz (-10.0%)   14.80kHz (-7.5%)      17.20kHz (+7.5%)    17.60kHz (+10.0%)
+                       Table 5 Setting 16kHz Will Detect/Will Not Detect Bandwidths in
+                                        Enhanced Features Operating State
+ The CMX641A will always respond to valid inputs between the Lower ‘Will Detect’ and Upper ‘Will Detect’
+ frequencies inclusive. It will not respond to frequencies at or below the Lower ‘Will Not Detect’ or at or
+ above the Upper ‘Will Not Detect’. The response and deresponse times will depend upon the output
+ format chosen, i.e. Tone Follower or Packet output.
+ System Select
+ Bits D1 and D0 select the operating frequencies of the CMX641A in Enhanced Features Operating State.
+        D1-D0               Channel 1 Output    Channel 2 Output            Amp 1               Amp 2
+          00                  Detects 16kHz      Detects 16kHz         Input to channel    Input to channel
+                                                                               1                   2
+          01                  Detects 16kHz      Detects 12kHz         Input to channel    Input to channel
+                                                                               1                   2
+          10                  Detects 16kHz      Detects 12kHz         Input to channel      Available as
+                                                                             1&2             independent
+                                                                                               amplifier
+          11                  Detects 12kHz      Detects 12kHz         Input to channel    Input to channel
+                                                                               1                   2
+              Table 6 Setting System Frequencies in Enhanced Features Operating State
+ The operating frequencies can be set in four ways as shown in Table 6. In three of the four cases,
+ Amplifier 1 is the input to channel 1 and Amplifier 2 is the input to channel 2. However, when bits
+ D1-D0 = ‘10’, both channels take their input from Amplifier 1. This makes Amplifier 2 available for
+ independent use, perhaps as a gain or filter block. However, it should be noted that each channel will
+ detect its system frequency only in the absence of the other. The device is not designed to be immune to
+ the presence of the other tone. Each channel will function correctly when either 12kHz or 16kHz, but not
+ both, is present.
+ ASK Tone Output
+ This is output from the TONE OP pin under the control of the TONE ASK input and the TX TONE
+ SELECT pins. The TONE ASK pin keys the transmit tone on-off. A logic high corresponds to no tone
+ and logic low to tone. The output frequency is selected by the TX TONE SELECT pin. A logic high
+ selects 12kHz and logic low selects 16kHz. (See Table 7). The tone output is ramped up to its maximum
+ level and down to nil output with time constants of TBD and TBD respectively.
+                             TONE                  TX TONE                        TONE
+                              ASK                   SELECT                         OP
+                               0                        0                         16kHz
+                               0                        1                         12kHz
+                               1                        X                         BIAS
+                     Table 7 Selecting Transmission Tone in Enhanced Features Mode
+  2002 Consumer Microcircuits Limited                 14                                            D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                CMX641A
+1.6      Application Notes
+1.6.1 Signal Input Configurations
+Figure 3 shows how the input amplifiers can be connected as differential mode or common mode
+amplifiers, according to the application.
+                                      Figure 3 Example Input Configurations
+1.6.2 Crystal/Clock Distribution
+The CMX641A requires a 3.579545MHz crystal or an external clock pulse input. With the exception of
+the crystal, all oscillator components are incorporated on chip. If a crystal is employed, the Clock Out pin
+should be connected directly to the Clock In pin.
+To reduce component and layout complexity the clock requirements of up to 3 additional CMX641A
+microcircuits may be supplied from a crystal driven CMX641A acting as the master system clock. With
+reference to Figure 4, the clock should be distributed as illustrated and the XTAL pins of the driven
+devices should be connected directly to VDD.
+Note that the maximum load on the master Clock Out pin should not be exceeded.
+              Figure 4 Example of Clock Distribution and 8-Channel Output Multiplexing
+1.6.3 Channel 1 and Channel 2 Output Format
+Figure 5 illustrates the two output formats: Tone Follower mode and Packet mode.
+ 2002 Consumer Microcircuits Limited                  15                                           D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                               CMX641A
+                               Figure 5 Tone Follower and Packet Mode Outputs
+1.6.4 Setting Level Sensitivity via the Input Serial Data Word
+The serial data word input is used to set the device sensitivity in the Controlled Sensitivity mode of the
+Fixed Bandwidth Operating state and in the Enhanced Features Operating state.
+In Controlled Sensitivity mode of the Fixed Bandwidth Operating state, the CMX641A operates identically
+to the FX641 and MX641. The input word is 6 bits and Table 2 lists the device sensitivities vs input
+codes.
+In the Enhanced Features Operating State, channel 1’s sensitivity is controlled by applying the codes in
+Table 2 to bits D15-D11. Channel 2’s sensitivity is controlled by applying these codes to bits D8-D4.
+Example:      Suppose the CMX641A is required to work in a system in which 16kHz signals, at or above
+–22dB(ref) must be detected and signals at or below –27dB(ref) must not be detected. Reference to
+Table 2 shows that bandpass filter gain settings of 6dB or 7dB will meet this level specification.
+Thus in Fixed Bandwidth Operating State and Controlled Sensitivity Mode:
+Inputting D5-D0 = ’001100’ or ‘001110’ (See Table 2) will set both channels to meet this specification.
+Selecting ‘001100’ makes both channels’ minimum ‘Will Detect’ level –22.9dB(ref) and its maximum ‘Will
+Not Detect’ level –25.5dB(ref). This means that the detection threshold of any device will lie between
+these two levels.
+In Enhanced Features Operating State Channel 2:
+Inputting D15-D11 = ‘00110’ or ‘00111’ (See Tables 2 & 3) and D1-D0 = ‘00’ (See Table 6) will
+programme channel 2 to meet this level specification. Selecting ‘00111’ makes the channel 2 minimum
+‘Will Detect’ level –23.9dB(ref) and its maximum ‘Will Not Detect’ level –26.5dB(ref). This means that
+Channel 2’s detection threshold will lie between these two levels.
+In Enhanced Features Operating State Channel 1:
+Inputting D8-D4 = ‘00110’ or ‘00111’ (See Tables 2 & 3) and D1-D0 = ‘00’, ‘01’ or ‘10’ (See Table 6) will
+programme channel 1 to meet this level specification. Selecting ‘00110’ makes the CMX641A minimum
+‘Will Detect’ level –22.9dB(ref) and its maximum ‘Will Not Detect’ level –25.5dB(ref). This means that
+channel 1’s detection threshold will lie between these two levels. The two channels may be set to
+identical detection thresholds, if desired.
+ 2002 Consumer Microcircuits Limited                 16                                           D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                    CMX641A
+1.6.5 Setting Level Sensitivity via External Components
+In Fixed Bandwidth Operating state, Fixed Sensitivity mode, the sensitivities of the two channels are set
+by the correct selection of the components around the Channel Input Amplifiers.
+Input Gain Calculation:            The input amplifiers, with their external circuitry, are available to set the
+sensitivity of the CMX641A to conform to the user’s national level specification with regard to ‘Must’ and
+‘Must-Not’ detect signal levels. With reference to the graph in Figure 6, the following steps will assist in
+the determination of the required gain/attenuation.
+Step 1
+Draw two horizontal lines from the Y-axis {Signal Level dB(ref)}
+The upper line will represent the required ‘Must’ decode level
+The lower line will represent the required ‘Must-Not’ decode level.
+Step 2
+Mark the intersection of the upper horizontal line and the upper sloping line; drop a vertical line from this
+point to the X-axis {Amplifier Gain (dB)}.
+The point where the vertical line meets the X-axis will indicate the MINIMUM Input gain required for
+reliable decoding of valid signals.
+Step 3
+Mark the intersection of the lower horizontal line and the lower sloping line; drop a vertical line from this
+point to the X-axis.
+The point where the vertical line meets the X-axis will indicate the MAXIMUM allowable Input amp gain.
+Input signals at or below the ‘Must-Not’ decode level will not be detected as long as the amplifier gain is
+no higher than this level.
+Step 4
+Refer to the gain components shown in Figure 2. The user should calculate and select external
+components (R1/R3/C3, R2/R4/C4 and R5/R7/C5, R6/R8/C6) to provide amplifier gains within the limits
+obtained in Steps 2 and 3.
+Component tolerances should not move the gain figure outside these limits. Resistors R3, R4, R7 and
+R8 should always be greater than or equal to 100kΩ. It is recommended that the designed gain is near
+the centre of the calculated range.
+Note that the device sensitivity is directly proportional to the applied power supply (VDD). The graph in
+Figure 6 is for the calculation of input gain components for the CMX641A using a VDD of 5.0 (±0.1) volts.
+Subtract 4.44dB from the amplifier gain for operation at 3.0V volts.
+1.6.6 Aliasing
+Due to the switched capacitor filters employed in the CMX641A, care should be taken to avoid any
+aliasing effects by removing all frequencies above 579.390kHz (16kHz mode) or 434.543kHz (12kHz
+mode). This can be achieved by adding bypass capacitors across R3, R4, R7 and R8, setting the –3dB
+breakpoint of each resistor-capacitor combination such that there is sufficient attenuation at the alias
+frequency and negligible effect at the desired SPM frequency.
+ 2002 Consumer Microcircuits Limited                    17                                             D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                        CMX641A
+         Figure 6 Input Gain Calculation Graph for use in the Fixed Sensitivity Mode of the
+                                      Fixed Bandwidth Operating State
+ 2002 Consumer Microcircuits Limited               18                                      D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                     CMX641A
+1.7     Performance Specification
+1.7.1    Electrical Performance
+1.7.1.1 Absolute Maximum Ratings
+Exceeding these maximum ratings can result in damage to the device.
+                                                                  Min.     Max.      Units
+ Supply (VDD - VSS)                                               -0.3     7.0       V
+ Voltage on any pin to VSS                                        -0.3     VDD + 0.3 V
+ Current into or out of VDD and VSS pins                          -30      +30       mA
+ Current into or out of any other pin                             -20      +20       mA
+D2/P4 Package                                                     Min.     Max.      Units
+ Total Allowable Power Dissipation at Tamb = 25°C                          800       mW
+         ... Derating                                                       13       mW/°C
+ Storage Temperature                                              -55      +125      °C
+ Operating Temperature                                            -40      +85       °C
+1.7.1.2 Operating Limits
+Correct operation of the device outside these limits is not implied.
+                                                    Notes         Min.     Max.      Units
+ Supply (VDD - VSS)                                               2.7      5.5       V
+ Operating Temperature                                            -40      +85       °C
+ Xtal Frequency                                                   3.558918 3.589368  MHz
+ 2002 Consumer Microcircuits Limited                19                                  D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                       CMX641A
+1.7.1.3 Operating Characteristics
+For the following conditions unless otherwise specified:
+         Xtal Frequency = 3.579545MHz, Audio Level 0dB(ref) = 775Vrms. Noise Bandwidth = 50kHz,
+         VDD = 3.0V to 5.5V, Tamb = - 40°C to +85°C. System Setting = 12kHz or 16kHz.
+                                                        Notes  Min.    Typ.       Max.      Units
+ DC Parameters
+   IDD                                                    1             2.0         5.0       mA
+                                                          2             1.2         3.0       mA
+ Input/Output Parameters
+   Clock Out Load                                                                   15        pF
+ Logic Inputs
+   Input logic “1” level                                       80%                           VDD
+   Input logic “0” level                                                           20%       VDD
+   Input leakage current (Vin = 0 to VDD)                 3     -5.0               +5.0       µA
+   Input capacitance                                                    7.5                   pF
+   Input current (Vin =0)                                 4    -15.0                          µA
+ Channel Outputs
+   Output logic “1” level (1OH = 120µA) (Enabled)         5    90%                           VDD
+   Output logic “0” level (1OL = 360µA) (Enabled)         5                        10%       VDD
+   Off state leakage current (High Z output)              6     -5.0                5.0       µA
+   Mode Change Time                                       7                        500        ns
+   Tone Follower Mode
+   Response and De-Response time                    8,9,10,11,                     15.0       ms
+                                                   12,13,14,15
+   Packet Mode
+   Response and De-Response time                    8,9,10,11,    40.0             48.0       ms
+                                                         12
+ Input Amplifiers
+   Input impedance (at 100Hz)                                     10.0                       MΩ
+   Open Loop voltage gain (I/P = 1mVrms at
+    100Hz)                                                              500                  V/V
+    Common Mode range                                             10%              90%       VDD
+    Input Signal Level                                                            100%       VDD
+    Output Impedance (open loop)                                         6.0                  kΩ
+ Overall Performance
+   12kHz Detect Bandwidth                                8,12    11.82            12.18      kHz
+   12kHz Detect Bandwidth                                8,13    11.64            12.36      kHz
+   12kHz Detect Bandwidth                                8,14    11.40            12.60      kHz
+   12kHz Detect Bandwidth                                8,15    11.10            12.90      kHz
+   12kHz Not Detect Frequencies (below 12kHz)            8,12                     11.52      kHz
+   12kHz Not Detect Frequencies (below 12kHz)            8,13                     11.34      kHz
+   12kHz Not Detect Frequencies (below 12kHz)            8,14                     11.10      kHz
+   12kHz Not Detect Frequencies (below 12kHz)            8,15                     10.80      kHz
+   12kHz Not Detect Frequencies (above 12kHz)            8,12    12.48                       kHz
+   12kHz Not Detect Frequencies (above 12kHz)            8,13    12.66                       kHz
+   12kHz Not Detect Frequencies (above12kHz)             8,14    12.90                       kHz
+   12kHz Not Detect Frequencies (above12kHz)             8,15    13.20                       kHz
+ 2002 Consumer Microcircuits Limited                20                                    D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                            CMX641A
+1.7.1.3     Operating Characteristics (continued)
+                                                     Notes   Min.   Typ.  Max.   Units
+   16kHz Detect Bandwidth                             8,12   15.76        16.24   kHz
+   16kHz Detect Bandwidth                             8,13   15.52        16.48   kHz
+   16kHz Detect Bandwidth                             8,14   15.20        16.80   kHz
+   16kHz Detect Bandwidth                             8,15   14.80        17.20   kHz
+   16kHz Not-Detect Frequencies (below 16kHz)         8,12                15.36   kHz
+   16kHz Not-Detect Frequencies (below 16kHz)         8,13                15.12   kHz
+   16kHz Not-Detect Frequencies (below 16kHz)         8,14                14.80   kHz
+   16kHz Not Detect Frequencies (below 16kHz)         8,15                14.40   kHz
+   16kHz Not-Detect Frequencies (above 16kHz)         8,12   16.64                kHz
+   16kHz Not-Detect Frequencies (above 16kHz)         8,13   16.88                kHz
+   16kHz Not-Detect Frequencies (above 16kHz)         8,14   17.20                kHz
+   16kHz Not-Detect Frequencies (above 16kHz)         8,15   17.60                kHz
+ Level Sensitivity                                                                kHz
+   Level Sensitivity set by input serial data      1,8,9,10     2.6   1.6   0.6    dB
+           (Bandwidth settings 00,01 or 10)        12,13,14
+                                                   16,17,20
+           (Bandwidth setting 11)                  1,8,9,10,    3.2   1.9   0.6    dB
+                                                 15,16,17,20
+   Level Sensitivity set by external components      1,8,9,  -25.4  -26.4 -27.4    dB
+           (5V, 12kHz operation)                   18,19,20
+           (5V, 16kHz operation)                    1,8,10,  -25.4  -26.4 -27.4    dB
+                                                     18,19
+           (3V, 16kHz operation                     2,8,10   -30.4  -31.4 -32.4    dB
+                                                     18,19
+ Signal Quality Requirements for Correct
+ Operation
+   Signal to Noise Ratio (Amp input)                  9,21,   22.0   20.0          dB
+                                                     22,23
+   Signal to Voice Ratio (Amp input)                  9,21,  -36.0  -40.0          dB
+                                                     22,24
+   Signal to Voice Ratio (Amp output)                 9,21    -1.0        -27.0    dB
+                                                     23,24
+ Tx Output
+   Output Impedance                                    29             1.0   2.5    kΩ
+   Output Frequency                                    25    11.94         12.6   kHz
+   Output Frequency                                    26    15.92        16.80   kHz
+   Signal Level                                         1      3.0    3.4   3.7   Vp-p
+   Output Distortion                                                         2     %
+   Response/De-response Times                        25,27                 100     µs
+                                                     26,27                  80     µs
+   Rise/Fall Times                                   25,28           500   600     µs
+                                                     26,28           400   500     µs
+ 2002 Consumer Microcircuits Limited             21                            D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                   CMX641A
+1.7.1.3     Operating Characteristics (continued)
+Notes:
+        1.   At 5.0V. Not including any current drawn from the pins by external circuitry.
+        2.   At 3.0V. Not including any current drawn from the pins by external circuitry.
+        3.   Logic pins with no internal pullup or pulldown resistors; CHIP SELECTN, SERIAL DATA,
+             SERIAL CLOCK, OP ENABLEN, OP SELECT and CLOCK IN pins.
+        4.   Logic pins with an internal pullup or pulldown resistor; PRESET LEVEL/TONE ASK,
+             SYSTEM SELECT/TX TONE SELECT, ENHANCED FEATURES.
+        5.   Tone Follower or Packet Mode enabled.
+        6.   Tristate selected.
+        7.   Time taken to change between any two of the operational modes: Tone follower, Packet or
+             Tristrate, and with a maximum capacitive load of 30pF on an output.
+        8.   With adherence to Signal to Voice and Signal to Noise specifications.
+        9.   12kHz system.
+        10.  16kHz system
+        11.  The time delay after a valid serial data load (or after device powerup, change of bandwidth
+             setting or change in input signal conditions), before the condition of the outputs can be
+             guaranteed correct.
+        12.  With ‘Will Detect’ bandwidth set to ±1.5%, Fixed Bandwidth Operating State or Enhanced
+             Features Operating State.
+        13.  With ‘Will Detect’ bandwidth set to ±3.0%, Enhanced Features Operating State only.
+        14.  With ‘Will Detect’ bandwidth set to ±5.0%, Enhanced Features Operating State only.
+        15.  With ‘Will Detect’ bandwidth set to ±7.5%, Enhanced Features Operating State only.
+        16.   With the input amplifier gain at 0dB and the Bandpass filter gain set to 0dB (Table 2);
+              subtract 1dB from this specification for each single dB of Bandpass filter gain programmed.
+              Alternatively, with the input components as recommended in Figure 2, the sensitivity is as
+              defined in Table 2.
+         17. In Fixed Bandwidth Operating State, Controlled Sensitivity mode; or in Enhanced Features
+             Operating State.
+         18. In Fixed Bandwidth Operating State, Preset Sensitivity mode.
+         19. With input amplifier gain setting 0dB via external components and measured at amplifier
+             output.
+         20. Signal sensitivity is proportional to VDD.
+         21. For immunity to false responses and/or deresponses.
+         22. Common mode SPM and balanced voice signal.
+         23. With SPM and voice signal balanced; to avoid false deresponses due to saturation, the peak
+             to peak voice + noise level at the output of the input amplifier should be no greater than the
+             dynamic range of the device. For this reason, the signal to voice figure at the Amp output
+             will vary with the sensitivity setting. The lowest signal to voice figure occurs at the highest
+             sensitivity setting (Table 2, 27dB).
+         24. Maximum voice frequencies = 3.4kHz.
+         25. Output tone = 12kHz selected.
+         26. Output tone = 16kHz selected.
+         27. The time between a logic ‘1-0’ transition at TONE ASK input and the tone at TONE OP
+             reaching 10% of its full value or between a ‘0-1’ transition at TONE ASK input and the tone
+             falling to 90% of its full value.
+         28. The time for the tone at TONE OP to rise from 10% to 90% or to fall from 90% to 10% of its
+             full value.
+         29. Tx circuit enabled in Enhanced Features Operating State.
+ 2002 Consumer Microcircuits Limited                   22                                             D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                     CMX641A
+Figure 7 Data Load Timing for the Fixed Bandwidth Operating State, Controlled Sensitivity Mode
+                    Figure 8 Data Load Timing for Enhanced Features Operating State
+           Parameter                                                 Min.    Typ.   Max.   Units
+ tPWH       Serial Clock ‘High’ Pulse Width                          250       -     -       ns
+ tPWL       Serial Clock ‘Low’ Pulse Width                           250       -     -       ns
+ tCYC       Serial Clock Period                                      600       -     -       ns
+ tCSE       Chip Select ‘Low’ to Clock ‘High’ Edge                   450       -     -       ns
+ tDH        Data Hold Time                                           50.0      -     -       ns
+ tDS        Data Setup Time                                          250       -     -       ns
+ tCSH       Chip Select ‘High’ from:
+            Clock ‘High’ Edge                                        50.0      -     -       ns
+            Clock ‘High’ Edge                                         -        -     1    Serial clock
+                                                                                          period
+ 2002 Consumer Microcircuits Limited              23                                    D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                              CMX641A
+1.7.2        Packaging
+                      Figure 9 D2 Mechanical Outline: Order as part no. CMX641AD2
+                     Figure 10 P4 Mechanical Outline: Order as part no. CMX641AP4
+ 2002 Consumer Microcircuits Limited              24                             D/641A/5
+
+
+Dual SPM/Security Detector/Generator                                                                                           CMX641A
+Handling precautions: This product includes input protection, however, precautions should be taken to prevent device damage from
+electro-static discharge. CML does not assume any responsibility for the use of any circuitry described. No IPR or circuit patent licences
+are implied. CML reserves the right at any time without notice to change the said circuitry and this product specification. CML has a
+policy of testing every product shipped using calibrated test equipment to ensure compliance with this product specification. Specific
+testing of all circuit parameters is not necessarily performed.
+                                                 Oval Park - LANGFORD             Telephone: +44 (0)1621 875500
+                                                                                  Telefax:           +44 (0)1621 875600
+                                                 MALDON - ESSEX
+                                                                                  e-mail:            sales@cmlmicro.co.uk
+                                                 CM9 6WG - ENGLAND                                   http://www.cmlmicro.co.uk
+
+
+                 CML Microcircuits
+ COMMUNICATION SEMICONDUCTORS
+                                         CML Product Data
+In the process of creating a more global image, the three standard product semiconductor
+companies of CML Microsystems Plc (Consumer Microcircuits Limited (UK), MX-COM, Inc
+(USA) and CML Microcircuits (Singapore) Pte Ltd) have undergone name changes and, whilst
+maintaining their separate new names (CML Microcircuits (UK) Ltd, CML Microcircuits (USA)
+Inc and CML Microcircuits (Singapore) Pte Ltd), now operate under the single title CML Micro-
+circuits.
+These companies are all 100% owned operating companies of the CML Microsystems Plc
+Group and these changes are purely changes of name and do not change any underlying legal
+entities and hence will have no effect on any agreements or contacts currently in force.
+CML Microcircuits Product Prefix Codes
+Until the latter part of 1996, the differentiator between products manufactured and sold from
+MXCOM, Inc. and Consumer Microcircuits Limited were denoted by the prefixes MX and FX
+respectively. These products use the same silicon etc. and today still carry the same prefixes.
+In the latter part of 1996, both companies adopted the common prefix: CMX.
+This notification is relevant product information to which it is attached.
+Company contact information is as below:
+            CML Microcircuits                   CML Microcircuits                 CML Microcircuits
+            (UK)Ltd                             (USA) Inc.                        (Singapore)PteLtd
+ COMMUNICATION SEMICONDUCTORS       COMMUNICATION SEMICONDUCTORS       COMMUNICATION SEMICONDUCTORS
+Oval Park, Langford, Maldon,        4800 Bethania Station Road,       No 2 Kallang Pudding Road, 09-05/
+Essex, CM9 6WG, England             Winston-Salem, NC 27105, USA      06 Mactech Industrial Building,
+Tel: +44 (0)1621 875500             Tel: +1 336 744 5050,             Singapore 349307
+Fax: +44 (0)1621 875600                   0800 638 5577               Tel: +65 7450426
+uk.sales@cmlmicro.com               Fax: +1 336 744 5054              Fax: +65 7452917
+www.cmlmicro.com                    us.sales@cmlmicro.com             sg.sales@cmlmicro.com
+                                    www.cmlmicro.com                  www.cmlmicro.com
+D/CML (D)/1 February 2002
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+CML Microcircuits:
+ CMX641AD2 CMX641AD2-REEL

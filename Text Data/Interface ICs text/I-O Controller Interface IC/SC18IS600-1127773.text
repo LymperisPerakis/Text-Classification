@@ -1,0 +1,1167 @@
+                 SC18IS600
+                 SPI to I2C-bus interface
+                 Rev. 8 — 9 October 2019                                            Product data sheet
+1. General description
+              The SC18IS600 is designed to serve as an interface between the standard SPI of a host
+              (microcontroller, microprocessor, chip set, etc.) and the serial I2C-bus. This allows the
+              host to communicate directly with other I2C-bus devices. The SC18IS600 can operate as
+              an I2C-bus master-transmitter or master-receiver. The SC18IS600 controls all the I2C-bus
+              specific sequences, protocol, arbitration and timing.
+2. Features and benefits
+                SPI slave interface
+                SPI Mode 3
+                Single master I2C-bus controller
+                Four General Purpose Input/Output (GPIO) pins
+                Two quasi-bidirectional I/O pins
+                5 V tolerant I/O pins
+                High-speed SPI: Up to 1.2 Mbit/s
+                High-speed I2C-bus: 400 kbit/s
+                96-byte transmit buffer
+                96-byte receive buffer
+                2.4 V to 3.6 V operation
+                Power-down mode with WAKEUP pin
+                Internal oscillator
+                Active LOW interrupt output
+                Available in TSSOP16 package
+
+
+NXP Semiconductors                                                                                                                      SC18IS600
+                                                                                                                                       SPI to I2C-bus interface
+3. Ordering information
+Table 1.       Ordering information
+ Type number                   Topside        Package
+                               marking        Name               Description                                                                              Version
+ SC18IS600IPW/S8               18IS600        TSSOP16 plastic thin shrink small outline package; 16 leads;                                                SOT403-1
+                                                                 body width 4.4 mm
+                       3.1 Ordering options
+Table 2.       Ordering options
+ Type number                Orderable part number                   Package               Packing method                      Minimum Temperature
+                                                                                                                              order
+                                                                                                                              quantity
+ SC18IS600IPW/S8            SC18IS600IPW/S8HP[1]                    TSSOP16 REEL 13" Q4/T2                                    2500      Tamb = 40 C to +85 C
+                                                                                          *STANDARD MARK
+                                                                                          SMD
+[1]   NXP plans to supply the /S8 device with an expected discontinuation in the 2024-2025 timeframe, but in the meantime, Failure Analysis
+      for /S8 devices will consist of Automated Test Equipment (ATE) and electrical overstress verification along with package and wire bond
+      validation only. Detailed device failure analysis will not be available; refer to CIN 201708035I.
+SC18IS600                                          All information provided in this document is subject to legal disclaimers.                © NXP B.V. 2019. All rights reserved.
+Product data sheet                                                Rev. 8 — 9 October 2019                                                                              2 of 28
+
+
+NXP Semiconductors                                                                                                                      SC18IS600
+                                                                                                                                   SPI to I2C-bus interface
+4. Block diagram
+                      SC18IS600
+                           CONTROL
+            RESET           LOGIC
+             MISO
+             MOSI                                                                                                 I2C-BUS                SDA
+                                                         INTERCONNECT BUS LINES
+                             SPI                                                    BUFFER
+             SCLK                                                                                               CONTROLLER               SCL
+               CS
+                                                                  AND
+                                                                                                                                         GPIO0
+              INT         INTERRUPT                                                                                                      GPIO1
+                                                                                                                      GENERAL            GPIO2
+                           CONTROL
+                                                             CONTROL SIGNALS
+                                                                                                                      PURPOSE
+                            LOGIC                                                                                                        GPIO3
+                                                                                                                        I/Os
+                                                                                                                                         IO5
+                                                                                                                                         IO4/WAKEUP
+                          OSCILLATOR
+                            ON-CHIP
+                              RC
+                          OSCILLATOR
+                                                                                                                            002aab712
+  Fig 1.    Block diagram of SC18IS600
+SC18IS600                                All information provided in this document is subject to legal disclaimers.                      © NXP B.V. 2019. All rights reserved.
+Product data sheet                                      Rev. 8 — 9 October 2019                                                                                   3 of 28
+
+
+NXP Semiconductors                                                                                                               SC18IS600
+                                                                                                                              SPI to I2C-bus interface
+5. Pinning information
+                   5.1 Pinning
+                                                          GPIO0         1                                          16 IO5
+                                                               CS       2                                          15 WAKEUP/IO4
+                                                         RESET          3                                          14 INT
+                                                              VSS       4                                          13 GPIO3
+                                                                               SC18IS600IPW/S8
+                                                            MISO        5                                          12 VDD
+                                                            MOSI        6                                          11 SCLK
+                                                              SDA       7                                          10 GPIO2
+                                                              SCL       8                                           9 GPIO1
+                                                                                                       002aab713
+                          Fig 2.  SC18IS600 pin configuration for TSSOP16
+                   5.2 Pin description
+Table 3.    Pin description
+ Symbol         Pin          Type  Description
+ GPIO0          1            I/O   programmable I/O pin
+ CS             2            I     Chip select. When CS is LOW, the SC18IS600 is selected.
+ RESET          3            I     Master Reset. When active (LOW), RESET sets internal registers to the
+                                   default values, and resets the I2C-bus and SPI hardware. See Table 4.
+ VSS            4            I     ground supply voltage
+ MISO           5            O     SPI slave data output
+ MOSI           6            I     SPI slave data input
+ SDA            7            I/O   I2C-bus serial data input/output
+ SCL            8            O     I2C-bus serial clock output
+ GPIO1          9            I/O   programmable I/O pin
+ GPIO2          10           I/O   programmable I/O pin
+ SCLK           11           I     SPI clock input
+ VDD            12           I     2.4 V to 3.6 V supply voltage
+ GPIO3          13           I/O   programmable I/O pin
+ CLKIN          -            I     external clock input
+ INT            14           O     Interrupt. When active (LOW), INT informs the CPU that the SC18IS600
+                                   has an interrupt to be serviced.
+                                   INT is reset (deactivated) either when the I2CStat register is read or as a
+                                   result of a master reset (RESET). This pin is an open-drain pin.
+ WAKEUP/IO4 15               I/O   Wake up the SC18IS600 from the Power-down mode. Pulled LOW by
+                                   the host to wake-up from low power state. This pin can also be used as
+                                   a quasi-bidirectional I/O when not in a power-down state.
+ IO5            16           I/O   quasi-bidirectional I/O pin
+ n.c.           -            -     not connected
+SC18IS600                               All information provided in this document is subject to legal disclaimers.                  © NXP B.V. 2019. All rights reserved.
+Product data sheet                                     Rev. 8 — 9 October 2019                                                                                4 of 28
+
+
+NXP Semiconductors                                                                                                           SC18IS600
+                                                                                                                           SPI to I2C-bus interface
+6. Functional description
+                         The SC18IS600 acts as a bridge between a SPI interface and an I2C-bus. It allows a SPI
+                         master device to communicate with I2C-bus slave devices. The SPI interface supports
+                         Mode 3 of the SPI specification and can operate up to 1.2 Mbit/s.
+                   6.1 Internal registers
+                         The SC18IS600 provides internal registers for monitoring and control. These registers are
+                         shown in Table 4. Register functions are more fully described in the following paragraphs.
+Table 4.    Internal registers summary
+ Register Register     Bit 7    Bit 6     Bit 5            Bit 4             Bit 3                 Bit 2             Bit 1 Bit 0       R/W            Default
+ address                                                                                                                                              value
+ 0x00      IOConfig    IO3.1    IO3.0     IO2.1            IO2.0             IO1.1                 IO1.0             IO0.1 IO0.0        R/W           0x00
+ 0x01      IOState     0        0         GPIO5            GPIO4             GPIO3                 GPIO2             GPIO1 GPIO0       R/W            0x3F
+ 0x02      I2CClock    CR7      CR6       CR5              CR4               CR3                   CR2               CR1   CR0         R/W            0x19
+ 0x03      I2CTO       TO6      TO5       TO4              TO3               TO2                   TO1               TO0   TE          R/W            0xFE
+ 0x04      I2CStat     1        1         1                1                 I2CSTAT3 I2CSTAT2 I2CSTAT1 I2CSTAT0 R                                    0xF0
+ 0x05      I2CAdr      ADR7     ADR6      ADR5             ADR4              ADR3                  ADR2              ADR1  X           R/W            0x00
+                   6.2 Register descriptions
+                6.2.1 Programmable IO port configuration register (IOConfig)
+                         Pins GPIO0 to GPIO3 may be configured by software to one of four types. These are:
+                         quasi-bidirectional, push-pull, open-drain, and input-only. Two configuration bits per pin,
+                         located in the IOConfig register, select the IO type for each pin. Each pin has
+                         Schmitt-triggered input that also has a glitch suppression circuit. IO4 and IO5 are
+                         quasi-bidirectional pins and are not user-configurable.
+                         Table 5 shows the configurations for the programmable I/O pins. IOx.1 and IOx.0
+                         correspond to GPIOx.
+                         Table 5.    Pin configurations
+                          IOx.1       IOx.0               Pin configuration
+                          0           0                   quasi-bidirectional output configuration
+                          0           1                   input-only configuration
+                          1           0                   push-pull output configuration
+                          1           1                   open-drain output configuration
+               6.2.1.1   Quasi-bidirectional output configuration
+                         Quasi-bidirectional outputs can be used both as an input and output without the need to
+                         reconfigure the pin. This is possible because when the pin outputs a logic HIGH, it is
+                         weakly driven, allowing an external device to pull the pin LOW. When the pin is driven
+                         LOW, it is driven strongly and able to sink a large current. There are three pull-up
+                         transistors in the quasi-bidirectional output that serve different purposes.
+SC18IS600                                 All information provided in this document is subject to legal disclaimers.             © NXP B.V. 2019. All rights reserved.
+Product data sheet                                       Rev. 8 — 9 October 2019                                                                           5 of 28
+
+
+NXP Semiconductors                                                                                                                   SC18IS600
+                                                                                                                                   SPI to I2C-bus interface
+                       One of these pull-ups, called the ‘very weak’ pull-up, is turned on whenever the pin latch
+                       for the pin contains a logic 1. This very weak pull-up sources a very small current that will
+                       pull the pin HIGH if it is left floating.
+                       A second pull-up, called the ‘weak’ pull-up, is turned on when the pin latch for the pin
+                       contains a logic 1 and the pin itself is also at a logic 1 level. This pull-up provides the
+                       primary source current for a quasi-bidirectional pin that is outputting a 1. If this pin is
+                       pulled LOW by an external device, the weak pull-up turns off, and only the very weak
+                       pull-up remains on. In order to pull the pin LOW under these conditions, the external
+                       device has to sink enough current to overpower the weak pull-up and pull the pin below its
+                       input threshold voltage.
+                       The third pull-up is referred to as the ‘strong’ pull-up. This pull-up is used to speed up
+                       LOW-to-HIGH transitions on a quasi-bidirectional pin when the pin latch changes from a
+                       logic 0 to a logic 1. When this occurs, the strong pull-up turns on for two system clock
+                       cycles quickly pulling the pin HIGH.
+                       The quasi-bidirectional pin configuration is shown in Figure 3.
+                       Although the SC18IS600 is a 3 V device, most of the pins are 5 V tolerant. If 5 V is applied
+                       to a pin configured in quasi-bidirectional mode, there will be a current flowing from the pin
+                       to VDD causing extra power consumption. Therefore, applying 5 V to pins configured in
+                       quasi-bidirectional mode is discouraged.
+                       A quasi-bidirectional pin has a Schmitt-triggered input that also has a glitch suppression
+                       circuit.
+                                                                                                                                               VDD
+                                                                       2 SYSTEM                              P              P       P
+                                                                                                                              very
+                                                                          CLOCK                                      strong                weak
+                                                                                                                              weak
+                                                                        CYCLES
+                                                                                                                                                          GPIOn,
+                                                                                                                                                          IOn pin
+                                pin latch data
+                                                                                                                  VSS
+                                                                                                             input data
+                                                                                                                                    glitch rejection
+                                                                                                                                                      002aab882
+                         Fig 3.      Quasi-bidirectional output configuration
+               6.2.1.2 Open-drain output configuration
+                       The open-drain output configuration turns off all pull-ups and only drives the pull-down
+                       transistor of the pin when the pin latch contains a logic 0. To be used as a logic output, a
+                       pin configured in this manner must have an external pull-up, typically a resistor tied to
+                       VDD. The pull-down for this mode is the same as for the quasi-bidirectional mode.
+                       The open-drain pin configuration is shown in Figure 4.
+                       An open-drain pin has a Schmitt-triggered input that also has a glitch suppression circuit.
+SC18IS600                                    All information provided in this document is subject to legal disclaimers.                      © NXP B.V. 2019. All rights reserved.
+Product data sheet                                          Rev. 8 — 9 October 2019                                                                                    6 of 28
+
+
+NXP Semiconductors                                                                                                                     SC18IS600
+                                                                                                                                     SPI to I2C-bus interface
+                                                                                                                                        GPIO pin
+                                        pin latch data
+                                                                                        VSS
+                                                                                   input data
+                                                                                                                      glitch rejection
+                                                                                                                                        002aab883
+                         Fig 4.  Open-drain output configuration
+               6.2.1.3 Input-only configuration
+                       The input-only pin configuration is shown in Figure 5. It is a Schmitt-triggered input that
+                       also has a glitch suppression circuit.
+                                                             input data                                                  GPIO pin
+                                                                                                  glitch rejection
+                                                                                                                        002aab884
+                         Fig 5.  Input-only configuration
+               6.2.1.4 Push-pull output configuration
+                       The push-pull output configuration has the same pull-down structure as both the
+                       open-drain and the quasi-bidirectional output modes, but provides a continuous strong
+                       pull-up when the pin latch contains a logic 1. The push-pull mode may be used when
+                       more source current is needed from a pin output.
+                       The push-pull pin configuration is shown in Figure 6.
+                       A push-pull pin has a Schmitt-triggered input that also has a glitch suppression circuit.
+                                                                                                                  VDD
+                                                                                                  P
+                                                                                                            strong
+                                                                                                                               GPIO pin
+                                                                                                  N
+                                                      pin latch data
+                                                                                                        VSS
+                                                                 input data
+                                                                                                           glitch rejection
+                                                                                                                              002aab885
+                         Fig 6.  Push-pull output configuration
+                6.2.2 I/O pins state register (IOState)
+                       When read, this register returns the actual state of all programmable and
+                       quasi-bidirectional I/O pins. When written, each register bit will be transferred to the
+                       corresponding I/O pin programmed as output.
+SC18IS600                              All information provided in this document is subject to legal disclaimers.                            © NXP B.V. 2019. All rights reserved.
+Product data sheet                                    Rev. 8 — 9 October 2019                                                                                          7 of 28
+
+
+NXP Semiconductors                                                                                                      SC18IS600
+                                                                                                                     SPI to I2C-bus interface
+                      Table 6.    IOState - I/O pins state register (address 0x01) bit description
+                       Bit        Symbol                                           Description
+                       7:6        -                                                reserved
+                       5          IO5                                              Set the logic level on the output pins.
+                       4          IO4                                              Write to this register:
+                       3          GPIO3 (SC18IS600 only)                               logic 0 = set output pin to zero
+                       2          GPIO2                                                logic 1 = set output pin to one
+                       1          GPIO1                                            A read from this register returns states of all pins.
+                       0          GPIO0
+                6.2.3 I2C-bus address register (I2CAdr)
+                      The contents of the register represents the device’s own I2C-bus address. The most
+                      significant bit corresponds to the first bit received from the I2C-bus after a START
+                      condition. The least significant bit is not used, but should be programmed with a ‘0’.
+                      I2CAdr is not needed for device operation, but should be configured so that its address
+                      does not conflict with an I2C-bus device address used by the bus master.
+                6.2.4 I2C-bus clock rates register (I2CClk)
+                      This register determines the I2C-bus clock frequency. Various clock rates are shown in
+                      Table 7 for the SC18IS600. The frequency can be determined using Equation 1:
+                                                                                          6
+                        2                                           7.3728  10
+                       I C-bus clock frequency = -------------------------------  Hz                                                                     (1)
+                                                                     4  I2CClk
+                      Table 7.    I2C-bus clock frequency example at 7.3728 MHz
+                       I2CClk (decimal)            I2C-bus clock frequency
+                       5 (minimum)                 369 kHz
+                       7                           263 kHz
+                       9                           204 kHz
+                       19                          97 kHz
+                       255 (maximum)               7.2 kHz
+                6.2.5 I2C-bus time-out register (I2CTO)
+                      The time-out register is used to determine the maximum time that the I2C-bus master is
+                      allowed to complete a transfer before setting an I2C-bus time-out interrupt.
+                      Table 8.    I2CTO - I2C-bus time-out register (address 0x04) bit description
+                       Bit        Symbol                    Description
+                       7:1        TO[7:1]                   Time-out value
+                       0          TE                        Enable/disable time-out function
+                                                                logic 0 = disable
+                                                                logic 1 = enable
+                      The least significant bit of I2CTO (TE bit) is used as a time-out enable/disable. A logic 1
+                      will enable the time-out function.
+SC18IS600                               All information provided in this document is subject to legal disclaimers.         © NXP B.V. 2019. All rights reserved.
+Product data sheet                                     Rev. 8 — 9 October 2019                                                                       8 of 28
+
+
+NXP Semiconductors                                                                                                                    SC18IS600
+                                                                                                                                    SPI to I2C-bus interface
+                         On the SC18IS600 the time-out oscillator operates at 57.6 kHz.
+                         This oscillator is fed into a 16-bit down counter. The down counter’s lower nine bits are
+                         loaded with ‘1’, while the upper seven bits are loaded with the contents of I2CTO.
+                                                               57.6 kHz                   16-BIT DOWN COUNTER
+                                                                                                                                time-out
+                                                           OSCILLATOR                         [I2CTO][111111111]
+                                                                                                                      002aab715
+                           Fig 7.  Time-out value
+                         The time-out value is an approximate value.
+                         In the case of arbitration loss, the SC18IS600 will transmit a START condition when the
+                         bus becomes free unless the time-out condition is reached. If the time-out condition is
+                         reached, an interrupt will be generated on the INT pin. The ‘I2C-bus time-out’ status can
+                         be read in I2CStat.
+                 6.2.6 I2C-bus status register (I2CStat)
+                         This register reports the results of I2C-bus transmit and receive transaction between
+                         SC18IS600 and an I2C-bus slave device.
+Table 9.    I2C-bus status
+ Register    Bit 7  Bit 6   Bit 5  Bit 4    Bit 3          Bit 2         Bit 1        Bit 0          I2C-bus status description
+ value
+ 0xF0        1      1       1      1        0              0             0            0              Transmission successful. The SC18IS600 has
+                                                                                                     successfully completed an I2C-bus read or write
+                                                                                                     transaction. An interrupt is generated on INT. This
+                                                                                                     is also the default status after reset. No interrupt is
+                                                                                                     generated after reset.
+ 0xF1        1      1       1      1        0              0             0            1              I2C-bus device address not acknowledged. No
+                                                                                                     I2C-bus slave device has acknowledged the slave
+                                                                                                     address that has been sent out in an I2C-bus read
+                                                                                                     or write transaction. An interrupt is generated on
+                                                                                                     INT.
+ 0xF2        1      1       1      1        0              0             1            0              I2C-bus device address not acknowledged. An
+                                                                                                     I2C-bus slave has not acknowledged the byte that
+                                                                                                     has just been transmitted by the SC18IS600. An
+                                                                                                     interrupt is generated on INT.
+ 0xF3        1      1       1      1        0              0             1            1              I2C-bus busy. The SC18IS600 is busy performing
+                                                                                                     an I2C-bus transaction, no new transaction should
+                                                                                                     be initiated by the host. No interrupt is generated.
+ 0xF8        1      1       1      1        1              0             0            0              I2C-bus time-out (see Section 6.2.5 “I2C-bus
+                                                                                                     time-out register (I2CTO)”). The SC18IS600 has
+                                                                                                     started an I2C-bus transaction that has taken
+                                                                                                     longer than the time programmed in I2CTO
+                                                                                                     register. This could happen after a period of
+                                                                                                     unsuccessful arbitration or when an I2C-bus slave
+                                                                                                     is (continuously) pulling the SCL clock LOW. An
+                                                                                                     interrupt is generated on INT.)
+ 0xF9        1      1       1      1        1              0             0            1              I2C-bus invalid data count. The number of bytes
+                                                                                                     specified in a read or write command to the
+                                                                                                     SC18IS600. An interrupt is generated on INT.
+SC18IS600                                  All information provided in this document is subject to legal disclaimers.                     © NXP B.V. 2019. All rights reserved.
+Product data sheet                                        Rev. 8 — 9 October 2019                                                                                   9 of 28
+
+
+NXP Semiconductors                                                                                                          SC18IS600
+                                                                                                                          SPI to I2C-bus interface
+                   6.3 I2C-bus serial interface
+                       I2C-bus uses two wires (SDA and SCL) to transfer information between devices
+                       connected to the bus, and it has the following features:
+                         • Bidirectional data transfer between masters and slaves
+                         • Multi-master bus (no central master)
+                         • Arbitration between simultaneously transmitting masters without corruption of serial
+                            data on the bus
+                         • Serial clock synchronization allows devices with different bit rates to communicate via
+                            one serial bus
+                         • Serial clock synchronization can be used as a handshake mechanism to suspend and
+                            resume serial transfer
+                         • The I2C-bus may be used for test and diagnostic purposes.
+                       A typical I2C-bus configuration is shown in Figure 8. The SC18IS600 device provides a
+                       byte-oriented I2C-bus interface that supports data transfers up to 400 kHz. (Refer to
+                       UM10204, “I2C-bus specification and user manual”.)
+                                                                    VDD
+                                                                                   RPU                        RPU
+                                                                                                                                 SDA
+                                         I2C-bus
+                                                                                                                                 SCL
+                                                                                                     I2C-BUS        I2C-BUS
+                                                               SC18IS600
+                                                                                                      DEVICE        DEVICE
+                                                                                                                            002aab716
+                         Fig 8.    I2C-bus configuration
+                   6.4 Serial Peripheral Interface (SPI)
+                       The host communicates with the SC18IS600 via the SPI interface. The SC18IS600
+                       operates in Slave mode up to 3 Mbit/s.
+                       The SPI interface has four pins: SCLK, MOSI, MISO, and CS.
+                         • SCLK, MOSI and MISO are typically tied together between two or more SPI devices.
+                            Data flows from the master to the SC18IS600 on the MOSI (Master Out Slave In) pin
+                            and flows from SC18IS600 to the master on the MISO (Master In Slave Out) pin. The
+                            SCLK signal is an input to the SC18IS600.
+                         • CS is the slave select pin. In a typical configuration, an SPI master selects one SPI
+                            device as the current slave. An SPI slave device uses its CS pin to determine whether
+                            it is selected.
+                       Typical connections are shown in Figure 9.
+SC18IS600                                All information provided in this document is subject to legal disclaimers.               © NXP B.V. 2019. All rights reserved.
+Product data sheet                                      Rev. 8 — 9 October 2019                                                                           10 of 28
+
+
+NXP Semiconductors                                                                                                                            SC18IS600
+                                                                                                                                            SPI to I2C-bus interface
+                                                         master                                                                  slave
+                                                                                             MISO                                     SC18IS600
+                                                                                             MOSI
+                                                                         SPICLK                                                   SCLK
+                                                                             PORT                                                 CS
+                                                                                                                                 slave
+                                                                                                                                      OTHER SPI
+                                                                                                                                       DEVICE
+                                                                                                                                  SCLK
+                                                                             PORT                                                 CS
+                                                                                                                                           002aab717
+                                 Fig 9.   SPI single master multiple slaves configuration
+                         6.5 SPI message format
+                      6.5.1 Write N bytes to I2C-bus slave device
+          SPI host sends
+              0x00       NUMBER      SLAVE ADDRESS            DATA                       DATA
+           COMMAND       OF BYTES         +W                BYTE 1                      BYTE N
+              CS
+           SCLK
+            MOSI          command 0x00     number of bytes D[7:0]          slave address A[7:1] 0                         data byte 1             data byte N
+                                                                                                                                                              002aab718
+  Fig 10. Write N bytes to I2C-bus slave device
+                               The SPI host issues the write command by sending a 0x00 command followed by the total
+                               number of bytes (maximum 96 bytes excluding the address) to send and an I2C-bus slave
+                               device address followed by I2C-bus data bytes, beginning with the first byte (data byte 1)
+                               and ending with the last byte (data byte N). Once the SPI host issues this command, the
+                               SC18IS600 will access the I2C-bus slave device and start sending the I2C-bus data bytes.
+                               When the I2C-bus write transaction has successfully finished, and interrupt is generated
+                               on the INT pin, and the ‘transaction completed’ status can be read in I2CStat.
+                               Note that the third byte sent by the host is the device I2C-bus slave address. The
+                               SC18IS600 will ignore the least significant bit so a write will always be performed even if
+                               the least significant bit is a ‘1’.
+SC18IS600                                        All information provided in this document is subject to legal disclaimers.                          © NXP B.V. 2019. All rights reserved.
+Product data sheet                                              Rev. 8 — 9 October 2019                                                                                      11 of 28
+
+
+NXP Semiconductors                                                                                                                       SC18IS600
+                                                                                                                                      SPI to I2C-bus interface
+                6.5.2 Read N bytes from I2C-bus slave device
+                                     SPI host sends
+                                         0x01            NUMBER               SLAVE ADDRESS
+                                      COMMAND           OF BYTES                        +R
+                                         CS
+                                       SCLK
+                                       MOSI              command 0x01                    number of bytes D[7:0]            slave address A[7:1] 1
+                                                                                                                                               002aab719
+                        Fig 11. Read N bytes from I2C-bus slave device
+                      Once the host issues this command, the SC18IS600 will start an I2C-bus read transaction
+                      on the I2C-bus to the specified slave address. Once the data is received, the SC18IS600
+                      will place this data in the receiver buffer, and will generate an interrupt on the INT pin. The
+                      ‘transaction completed’ status can be read in the I2CStat. Note that the data is not
+                      returned until a Read Buffer command is performed (see Section 6.5.4 “Read buffer”).
+                      Note that the third byte sent by the host is the device slave address. The SC18IS600 will
+                      ignore the least significant bit so a read will always be performed even if the least
+                      significant bit is a ‘0’. The maximum number of bytes to be read is 96.
+                6.5.3 I2C-bus read after write
+                          SPI host sends
+                              0x02      NUMBER OF NUMBER OF                              SLAVE                       DATA              DATA              SLAVE
+                           COMMAND        WRITE                 READ                   ADDRESS                    WRITE               WRITE           ADDRESS
+                                          BYTES                 BYTES                       +W                    BYTE 0              BYTE N                +R
+                                                                                                                                                               002aab720
+                        Fig 12. I2C-bus read after write
+                      Once the host issues this command, the SC18IS600 will start a write transaction on the
+                      I2C-bus to the specified slave address. Once the data is written, the SC18IS600 will read
+                      data from the specified slave, place the data in the Receiver Buffer and generate an
+                      interrupt on the INT pin. The ‘transaction completed’ status can be read in I2CStat. Note
+                      that the data is not returned until a ‘Read Buffer’ command is performed.
+                6.5.4 Read buffer
+                                                                    SPI host sends
+                                                                           0x06             DATA                        DATA
+                                                                      COMMAND              BYTE 1                      BYTE N
+                                                                                                                        002aab868
+                        Fig 13. Read buffer
+SC18IS600                                 All information provided in this document is subject to legal disclaimers.                           © NXP B.V. 2019. All rights reserved.
+Product data sheet                                       Rev. 8 — 9 October 2019                                                                                       12 of 28
+
+
+NXP Semiconductors                                                                                                                        SC18IS600
+                                                                                                                                        SPI to I2C-bus interface
+                          When the host issues a Read Buffer command, the SC18IS600 will return the data in the
+                          Read Buffer on the MISO pin. Note that the Read Buffer will be overwritten if an additional
+                          ‘Read N bytes’ or a ‘Read after write’ command is executed before the Read Buffer
+                          command.
+                   6.5.5 I2C-bus write after write
+   SPI host sends
+         0x03   NUMBER OF NUMBER OF        SLAVE 1                    DATA                         DATA                SLAVE 2            DATA                  DATA
+     COMMAND      BYTES 1    BYTES 2     ADDRESS + W                 BYTE 1                      BYTE N              ADDRESS + W         BYTE 1               BYTE M
+                                                                                                                                                                002aab721
+  Fig 14. Write after write
+                          When the host issues this command, the SC18IS600 will first write N data bytes to the
+                          I2C-bus slave 1 device followed by a write of M data bytes to the I2C-bus slave 2 device.
+                   6.5.6 SPI configuration
+                                                         SPI host sends
+                                                               0x18                       SPI
+                                                          COMMAND              CONFIGURATION
+                                                               CS
+                                                           SCLK
+                                                           MOSI                  character 0x18                   SPI configuration data
+                                                                                                                                   002aab722
+                            Fig 15. SPI configuration
+                          Table 10.   SPI configuration
+                           SPI configuration                  Data order
+                           0x81                               LSB first
+                           0x42                               MSB first (default)
+                          The SPI configuration command can be used to change the order in which the bits of SPI
+                          data byte are sent on the SPI bus. In the LSB first configuration (SPI configuration data is
+                          0x81), bit 0 is the first bit sent of any SPI byte. In MSB first (SPI configuration data is
+                          0x42), bit 7 is the first bit sent. Table 10 shows the two possible configurations that can be
+                          programmed.
+SC18IS600                                   All information provided in this document is subject to legal disclaimers.                         © NXP B.V. 2019. All rights reserved.
+Product data sheet                                         Rev. 8 — 9 October 2019                                                                                     13 of 28
+
+
+NXP Semiconductors                                                                                                       SC18IS600
+                                                                                                                      SPI to I2C-bus interface
+                6.5.7 Write to SC18IS600 internal registers
+                                   SPI host sends
+                                       0x20             REGISTER               DATA
+                                    COMMAND                    X               BYTE
+                                       CS
+                                     SCLK
+                                     MOSI                 character 0x20                           register X       data byte
+                                                                                                                              002aab723
+                       Fig 16. Write to SC18IS600 internal registers
+                      A Write Register function is initiated by sending a 0x20 command followed by an internal
+                      register address to be written (see Section 6.1). The register data byte follows the register
+                      address. Only one register can be accessed in a single transaction. There is no
+                      auto-incrementing of the register address.
+                6.5.8 Read from SC18IS600 internal register
+                                   SPI host sends
+                                       0x21                  REGISTER                  REGISTER
+                                    COMMAND                         X                      DATA
+                                       CS
+                                     SCLK
+                                     MOSI                 character 0x21                           register X     dummy byte
+                                     MISO                                                                          data byte
+                                                                                                                              002aab724
+                       Fig 17. Read from SC18IS600 internal register
+                      A Read Register function is initiated by sending a 0x21 command followed by an internal
+                      register address to be read (see Section 6.1) and a dummy byte. The data byte of the
+                      read register is returned by the SC18IS600 on the MISO pin. Only one register can be
+                      accessed in a single transaction. There is no auto-incrementing of the register address.
+                      Note that write and read from internal registers are processed immediately as soon as the
+                      SC18IS600 determines the intended register.
+SC18IS600                              All information provided in this document is subject to legal disclaimers.               © NXP B.V. 2019. All rights reserved.
+Product data sheet                                    Rev. 8 — 9 October 2019                                                                           14 of 28
+
+
+NXP Semiconductors                                                                                                                           SC18IS600
+                                                                                                                                          SPI to I2C-bus interface
+                     6.5.9 Power-down mode
+                                                SPI host sends
+                                                     0x30
+                                                                       0x5A           0xA5
+                                                  COMMAND
+                                                     CS
+                                                  SCLK
+                                                   MOSI                 character 0x30                       character 0x5A           character 0xA5
+                                                                                                                                                  002aab725
+                                 Fig 18. Power-down mode
+                               The SC18IS600 can be placed in a low-power mode where the internal oscillator is
+                               stopped and it will no longer respond to SPI messages. Enter the Power-down mode by
+                               sending the power-down command (0x30) followed by the two defined bytes, which are
+                               0x5A followed by 0xA5. If the exact message is not received, the device will not enter the
+                               power-down state.
+                               Before entering the power-down state, WAKEUP/IO4 should be placed in a HIGH state.
+                               To exit the power-down state, the WAKEUP/IO4 should be brought LOW. After leaving the
+                               power-down state, the WAKEUP/IO4 can once again be used as a general-purpose IO
+                               pin.
+7. Limiting values
+Table 11. Limiting values
+In accordance with the Absolute Maximum Rating System (IEC 60134).[1][2]
+ Symbol           Parameter                                                                     Conditions                          Min           Max                 Unit
+ Tamb(bias)       bias ambient temperature                                                      operating                           55           +125                C
+ Tstg             storage temperature                                                                                               65           +150                C
+ Vn               voltage on any other pin                                                      referenced to VSS                   0.5          +5.5                V
+ IOH(I/O)         HIGH-level output current per input/output pin                                                                    -             8                   mA
+ IOL(I/O)         LOW-level output current per input/output pin                                                                     -             20                  mA
+ II/O(tot)(max)   maximum total I/O current                                                                                         -             120                 mA
+ Ptot/pack        total power dissipation per package                                                                           [3] -             1.5                 W
+[1]    This product includes circuitry specifically designed for the protection of its internal devices from the damaging effects of excessive static
+       charge. Nonetheless, it is suggested that conventional precautions be taken to avoid applying greater than the rated maximum.
+[2]    Parameters are valid over the operating temperature range unless otherwise specified. All voltages are with respect to VSS unless
+       otherwise noted.
+[3]    Based on package heat transfer, not device power consumption.
+SC18IS600                                            All information provided in this document is subject to legal disclaimers.                     © NXP B.V. 2019. All rights reserved.
+Product data sheet                                                  Rev. 8 — 9 October 2019                                                                                 15 of 28
+
+
+NXP Semiconductors                                                                                                                        SC18IS600
+                                                                                                                                        SPI to I2C-bus interface
+8. Static characteristics
+Table 12. Static characteristics
+VDD = 2.4 V to 3.6 V; Tamb = 40 C to +85 C (industrial); unless otherwise specified.
+ Symbol            Parameter                                    Conditions                                                  Min       Typ[1]      Max                 Unit
+ IDD(oper)         operating supply current                     VDD = 3.6 V; f = 12 MHz                                     -         7           13                  mA
+                                                                VDD = 3.6 V; f = 18 MHz                                     -         11          16                  mA
+ IDD(idle)         Idle mode supply current                     VDD = 3.6 V; f = 12 MHz                                     -         3.6         4.8                 mA
+                                                                VDD = 3.6 V; f = 18 MHz                                     -         4           6                   mA
+ IDD(tpd)          total Power-down mode supply                 VDD = 3.6 V; industrial                                     -         < 0.1       5                   A
+                   current                                      VDD = 3.6 V; extended                                       -         -           50                  A
+ Vth(HL)           HIGH-LOW threshold voltage                   Schmitt trigger input                                       0.22VDD   0.4VDD      -                   V
+ Vth(LH)           LOW-HIGH threshold voltage                   Schmitt trigger input                                       -         0.6VDD      0.7VDD              V
+ Vhys              hysteresis voltage                                                                                       -         0.2VDD      -                   V
+ VOL               LOW-level output voltage                     all pins; IOL = 20 mA                                       -         0.6         1.0                 V
+                                                                all pins; IOL = 10 mA                                       -         0.3         0.5                 V
+                                                                all pins; IOL = 3.2 mA                                      -         0.2         0.3                 V
+ VOH               HIGH-level output voltage                    all pins; IOH = 8 mA;                                      VDD  1   -           -                   V
+                                                                push-pull mode
+                                                                all pins; IOH = 3.2 mA;                                    VDD  0.7 VDD  0.4 -                     V
+                                                                push-pull mode
+                                                                all pins; IOH = 20 A;                                     VDD  0.3 VDD  0.2 -                     V
+                                                                quasi-bidirectional mode
+ Cig               input capacitance at gate                                                                           [2]  -         -           15                  pF
+ IIL               LOW-level input current                      logical 0; VI = 0.4 V                                  [3]  -         -           80                 A
+ ILI               input leakage current                        all ports; VI = VIL or VIH                             [4]  -         -           10                 A
+ ITHL              HIGH-LOW transition current                  all ports; logical 1-to-0;                         [5][6]   30       -           450                A
+                                                                VI = 2.0 V at VDD = 3.6 V
+ RRESET_N(int)     internal pull-up resistance on pin                                                                       10        -           30                  k
+                   RESET
+[1]   Typical ratings are not guaranteed. The values listed are at room temperature, 3 V.
+[2]   Pin capacitance is characterized but not tested.
+[3]   Measured with pins in quasi-bidirectional mode.
+[4]   Measured with pins in high-impedance mode.
+[5]   Pins in quasi-bidirectional mode with weak pull-up (applies to all pins with pull-ups).
+[6]   Pins source a transition current when used in quasi-bidirectional mode and externally driven from logic 1 to logic 0. This current is
+      highest when VI is approximately 2 V.
+SC18IS600                                        All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2019. All rights reserved.
+Product data sheet                                              Rev. 8 — 9 October 2019                                                                                16 of 28
+
+
+NXP Semiconductors                                                                                                                          SC18IS600
+                                                                                                                                           SPI to I2C-bus interface
+9. Dynamic characteristics
+Table 13. Dynamic characteristics
+VDD = 2.4 V to 3.6 V; Tamb = 40 C to +85 C (industrial); unless otherwise specified.[1]
+ Symbol      Parameter                      Conditions                                                                      Variable clock      fosc = 12 MHz Unit
+                                                                                                                            Min      Max         Min          Max
+ fosc(RC)    internal RC oscillator         SC18IS600; nominal f = 7.3728 MHz;                                             7.189    7.557      7.189        7.557           MHz
+             frequency                      trimmed to 1 % at Tamb = 25 C
+ Glitch filter
+ tgr         glitch rejection time          RESET pin                                                               [2]       -        50          -            50          ns
+                                            any pin except RESET                                                    [2]       -        15          -            15          ns
+ tsa         signal acceptance time         RESET pin                                                                       125         -        125             -          ns
+                                            any pin except RESET                                                             50         -         50             -          ns
+ SPI slave interface
+ fSPI        SPI operating frequency        2.0 MHz                                                                           0      fosc⁄        0            2.0          MHz
+                                                                                                                                          6
+ TSPICYC     SPI cycle time                 2.0 MHz                                                                        6⁄           -        500             -          ns
+                                                                                                                             fosc
+ tSPILEAD    SPI enable lead time           2.0 MHz                                                                           4         -         4              -          s
+ tSPILAG     SPI enable lag time                                                                                              4         -         4              -          s
+ tSCLKH      SCLK HIGH time                                                                                                3⁄           -        190             -          ns
+                                                                                                                             fosc
+ tSCLKL      SCLK LOW time                                                                                                 3⁄           -        190             -          ns
+                                                                                                                             fosc
+ tSPIDSU     SPI data set-up time                                                                                           100         -        100             -          ns
+ tSPIDH      SPI data hold time                                                                                             100         -        100             -          ns
+ tSPIA       SPI access time                                                                                                  0       120         0            120          ns
+ tSPIDIS     SPI disable time               2.0 MHz                                                                           0       240          -           240          ns
+ tSPIDV      SPI enable to output           2.0 MHz                                                                           0       240          -           240          ns
+             data valid time                3.0 MHz                                                                           0       167          -           167          ns
+ tSPIOH      SPI output data hold time                                                                                        0         -         0              -          ns
+ tSPIR       SPI rise time                  SPI outputs (SCLK, MOSI, MISO)                                                    -       100          -           100          ns
+                                            SPI inputs (SCLK, MOSI, MISO, CS)                                                 -      2000          -         2000           ns
+ tSPIF       SPI fall time                  SPI outputs (SCLK, MOSI, MISO)                                                    -       100          -           100          ns
+                                            SPI inputs (SCLK, MOSI, MISO, CS)                                                 -      2000          -         2000           ns
+[1]   Parameters are valid over operating temperature range unless otherwise specified. Parts are tested to 2 MHz, but are guaranteed to
+      operate down to 0 Hz.
+[2]   SCL and SDA do not have glitch suppression circuits.
+SC18IS600                                       All information provided in this document is subject to legal disclaimers.                         © NXP B.V. 2019. All rights reserved.
+Product data sheet                                             Rev. 8 — 9 October 2019                                                                                     17 of 28
+
+
+NXP Semiconductors                                                                                                                   SC18IS600
+                                                                                                                                    SPI to I2C-bus interface
+Table 14. Dynamic characteristics
+VDD = 3.0 V to 3.6 V; Tamb = 40 C to +85 C (industrial); unless otherwise specified.[1]
+ Symbol       Parameter                       Conditions                                                           Variable clock     fosc = 18 MHz                Unit
+                                                                                                                Min          Max       Min         Max
+ fosc(RC)     internal RC oscillator          SC18IS600;                                                      7.189         7.557     7.189       7.557            MHz
+              frequency                       nominal f = 7.3728 MHz;
+                                              trimmed to 1 % at
+                                              Tamb = 25 C
+ Glitch filter
+ tgr          glitch rejection time           RESET pin                                              [2]           -           50        -           50            ns
+                                              any pin except RESET                                   [2]           -           15        -           15            ns
+ tsa          signal acceptance time          RESET pin                                                         125             -      125             -           ns
+                                              any pin except RESET                                               50             -       50             -           ns
+ SPI slave interface
+ fSPI         SPI operating frequency         3.0 MHz                                                              0         fosc⁄       0            3            MHz
+                                                                                                                                  6
+ TSPICYC      SPI cycle time                  3.0 MHz                                                          6⁄               -      333             -           ns
+                                                                                                                  fosc
+ tSPILEAD     SPI enable lead time            3.0 MHz                                                              4            -        4             -           s
+ tSPILAG      SPI enable lag time             3.0 MHz                                                              4            -        4             -           s
+ tSCLKH       SCLK HIGH time                                                                                   3⁄               -      167             -           ns
+                                                                                                                  fosc
+ tSCLKL       SCLK LOW time                                                                                    3⁄               -      167             -           ns
+                                                                                                                  fosc
+ tSPIDSU      SPI data set-up time                                                                              100             -      100             -           ns
+ tSPIDH       SPI data hold time                                                                                100             -      100             -           ns
+ tSPIA        SPI access time                                                                                      0           80       0            80            ns
+ tSPIDIS      SPI disable time                3.0 MHz                                                              0          160        -          160            ns
+ tSPIDV       SPI enable to output data       3.0 MHz                                                              0          160        -          160            ns
+              valid time
+ tSPIOH       SPI output data hold time                                                                            0            -        0             -           ns
+ tSPIR        SPI rise time                   SPI outputs                                                          -          100        -          100            ns
+                                              (SCLK, MOSI, MISO)
+                                              SPI inputs                                                           -        2000         -        2000             ns
+                                              (SCLK, MOSI, MISO, CS)
+ tSPIF        SPI fall time                   SPI outputs                                                          -          100        -          100            ns
+                                              (SCLK, MOSI, MISO)
+                                              SPI inputs                                                           -        2000         -        2000             ns
+                                              (SCLK, MOSI, MISO, CS)
+[1]   Parameters are valid over operating temperature range unless otherwise specified. Parts are tested to 2 MHz, but are guaranteed to
+      operate down to 0 Hz.
+[2]   SCL and SDA do not have glitch suppression circuits.
+SC18IS600                                       All information provided in this document is subject to legal disclaimers.                 © NXP B.V. 2019. All rights reserved.
+Product data sheet                                             Rev. 8 — 9 October 2019                                                                             18 of 28
+
+
+NXP Semiconductors                                                                                                                             SC18IS600
+                                                                                                                                            SPI to I2C-bus interface
+                            CS
+                                      tSPIF
+                                                              TCLCL
+                                     tSPILEAD                                                                                               tSPIR
+                                        tSPIF                          tSPIR                                                    tSPILAG
+                                                     tSCLKL          tSCLKH
+                      SCLK
+                     (input)
+                                      tSPIOH                       tSPIOH                         tSPIOH
+                                        tSPIDV                        tSPIDV                         tSPIDV
+                                                                                                                                              tSPIDIS
+                                          tSPIA
+                       MISO                            slave MSB/LSB out                                               slave LSB/MSB out
+                    (output)
+                               not defined            tSPIDSU       tSPIDH                       tSPIDSU              tSPIDSU    tSPIDH
+                       MOSI
+                      (input)                             MSB/LSB in                                                      LSB/MSB in
+                                                                                                                                   002aab797
+  Fig 19. SPI slave timing (Mode 3)
+SC18IS600                                       All information provided in this document is subject to legal disclaimers.                            © NXP B.V. 2019. All rights reserved.
+Product data sheet                                             Rev. 8 — 9 October 2019                                                                                        19 of 28
+
+
+NXP Semiconductors                                                                                                                           SC18IS600
+                                                                                                                                          SPI to I2C-bus interface
+Table 15.       Additional SPI AC characteristics
+ Symbol         Parameter                Conditions                                                                                     Min       Typ         Max             Unit
+ tSPICLKW       SPICLK HIGH time         between two SPI bytes                                                                          8         -           -               s
+ tCSW           CS HIGH time             between two SPI transactions                                                                   refer to Figure 21                    s
+ tSPILAG1       SPI enable lag time 1    in a SPI to        I2C-bus       transaction                                                   refer to Figure 22                    s
+ td             delay time               from last SCLK pulse to SDA LOW in a SPI to                                       I2C-bus      refer to Figure 23                    s
+                                         transaction
+                                                tSPICLKW
+              SCLK
+                                                                                                                                          tSPILAG1
+                             tSPILEAD
+                CS
+                                                                                                    tCSW
+                                                                                                                                                 td
+               SDA
+                                                                                                                                                        002aab927
+  Fig 20. SPI to I2C-bus timing diagram
+                                                     002aab929                                                                                         002aab930
+             8                                                                                           5
+       tCSW                                                                                  tSPILAG1
+        (μs)                                                                                     (μs)
+                                                                                                         4
+             6
+                                                                                                         3
+             4
+                                                                                                         2
+             2
+                                                                                                         1
+             0                                                                                           0
+                 1.843   3.687     7.373   12.00         18.00                                                  1.843         3.687 7.373     12.00      18.00
+                                             CLKIN frequency (MHz)                                                                             CLKIN frequency (MHz)
+  Fig 21. tCSW as a function of CLKIN frequency                                           Fig 22. tSPILAG1 as a function of CLKIN frequency
+                                                                                                               002aab931
+                                             160
+                                           td
+                                          (μs)
+                                             120
+                                               80
+                                               40
+                                                0
+                                                      1.843          3.687           7.373        12.00           18.00
+                                                                                                    CLKIN frequency (MHz)
+  Fig 23. td as a function of CLKIN frequency
+SC18IS600                                          All information provided in this document is subject to legal disclaimers.                       © NXP B.V. 2019. All rights reserved.
+Product data sheet                                                Rev. 8 — 9 October 2019                                                                                   20 of 28
+
+
+NXP Semiconductors                                                                                                                                       SC18IS600
+                                                                                                                                                      SPI to I2C-bus interface
+10. Package outline
+   TSSOP16: plastic thin shrink small outline package; 16 leads; body width 4.4 mm                                                                                          SOT403-1
+                                                     D                                                                             E                 A
+                                                                                                                                                           X
+                                                                                                 c
+                                      y                                                                                          HE                          v M A
+                                          Z
+                                  16                                  9
+                                                                                                                                                   Q
+                                                                                                        A2                                           (A 3)
+                                                                                                                                                              A
+                                                                                                             A1
+                                             pin 1 index
+                                                                                                                                                           θ
+                                                                                                                                              Lp
+                                                                                                                                            L
+                                   1                                   8
+                                                                                                                                     detail X
+                                                                               w M
+                                                e                  bp
+                                                                         0                   2.5                   5 mm
+                                                                                            scale
+       DIMENSIONS (mm are the original dimensions)
+                     A
+         UNIT               A1      A2      A3        bp      c        D (1)     E (2)         e        HE           L          Lp       Q        v     w      y       Z (1)         θ
+                   max.
+                                                                                                                                                                                      o
+                           0.15    0.95              0.30  0.2          5.1       4.5                   6.6                    0.75     0.4                           0.40          8
+          mm        1.1                     0.25                                             0.65                    1                           0.2  0.13    0.1                     o
+                           0.05    0.80              0.19  0.1          4.9       4.3                   6.2                    0.50     0.3                           0.06          0
+       Notes
+       1. Plastic or metal protrusions of 0.15 mm maximum per side are not included.
+       2. Plastic interlead protrusions of 0.25 mm maximum per side are not included.
+             OUTLINE                                                 REFERENCES                                                                EUROPEAN
+                                                                                                                                                                  ISSUE DATE
+             VERSION                    IEC                JEDEC                            JEITA                                             PROJECTION
+                                                                                                                                                                     99-12-27
+             SOT403-1                                      MO-153
+                                                                                                                                                                     03-02-18
+Fig 24. Package outline SOT403-1 (TSSOP16)
+SC18IS600                                                 All information provided in this document is subject to legal disclaimers.                           © NXP B.V. 2019. All rights reserved.
+Product data sheet                                                       Rev. 8 — 9 October 2019                                                                                       21 of 28
+
+
+NXP Semiconductors                                                                                                  SC18IS600
+                                                                                                                   SPI to I2C-bus interface
+11. Soldering of SMD packages
+                      This text provides a very brief insight into a complex technology. A more in-depth account
+                      of soldering ICs can be found in Application Note AN10365 “Surface mount reflow
+                      soldering description”.
+                 11.1 Introduction to soldering
+                      Soldering is one of the most common methods through which packages are attached to
+                      Printed Circuit Boards (PCBs), to form electrical circuits. The soldered joint provides both
+                      the mechanical and the electrical connection. There is no single soldering method that is
+                      ideal for all IC packages. Wave soldering is often preferred when through-hole and
+                      Surface Mount Devices (SMDs) are mixed on one printed wiring board; however, it is not
+                      suitable for fine pitch SMDs. Reflow soldering is ideal for the small pitches and high
+                      densities that come with increased miniaturization.
+                 11.2 Wave and reflow soldering
+                      Wave soldering is a joining technology in which the joints are made by solder coming from
+                      a standing wave of liquid solder. The wave soldering process is suitable for the following:
+                        • Through-hole components
+                        • Leaded or leadless SMDs, which are glued to the surface of the printed circuit board
+                      Not all SMDs can be wave soldered. Packages with solder balls, and some leadless
+                      packages which have solder lands underneath the body, cannot be wave soldered. Also,
+                      leaded SMDs with leads having a pitch smaller than ~0.6 mm cannot be wave soldered,
+                      due to an increased probability of bridging.
+                      The reflow soldering process involves applying solder paste to a board, followed by
+                      component placement and exposure to a temperature profile. Leaded packages,
+                      packages with solder balls, and leadless packages are all reflow solderable.
+                      Key characteristics in both wave and reflow soldering are:
+                        • Board specifications, including the board finish, solder masks and vias
+                        • Package footprints, including solder thieves and orientation
+                        • The moisture sensitivity level of the packages
+                        • Package placement
+                        • Inspection and repair
+                        • Lead-free soldering versus SnPb soldering
+                 11.3 Wave soldering
+                      Key characteristics in wave soldering are:
+                        • Process issues, such as application of adhesive and flux, clinching of leads, board
+                          transport, the solder wave parameters, and the time during which components are
+                          exposed to the wave
+                        • Solder bath specifications, including temperature and impurities
+SC18IS600                               All information provided in this document is subject to legal disclaimers.       © NXP B.V. 2019. All rights reserved.
+Product data sheet                                     Rev. 8 — 9 October 2019                                                                   22 of 28
+
+
+NXP Semiconductors                                                                                                          SC18IS600
+                                                                                                                           SPI to I2C-bus interface
+                 11.4 Reflow soldering
+                      Key characteristics in reflow soldering are:
+                        • Lead-free versus SnPb soldering; note that a lead-free reflow process usually leads to
+                           higher minimum peak temperatures (see Figure 25) than a SnPb process, thus
+                           reducing the process window
+                        • Solder paste printing issues including smearing, release, and adjusting the process
+                           window for a mix of large and small components on one board
+                        • Reflow temperature profile; this profile includes preheat, reflow (in which the board is
+                           heated to the peak temperature) and cooling down. It is imperative that the peak
+                           temperature is high enough for the solder to make reliable solder joints (a solder paste
+                           characteristic). In addition, the peak temperature must be low enough that the
+                           packages and/or boards are not damaged. The peak temperature of the package
+                           depends on package thickness and volume and is classified in accordance with
+                           Table 16 and 17
+                      Table 16.   SnPb eutectic process (from J-STD-020C)
+                       Package thickness (mm)                  Package reflow temperature (C)
+                                                               Volume (mm3)
+                                                               < 350                                                  350
+                       < 2.5                                   235                                                   220
+                        2.5                                   220                                                   220
+                      Table 17.   Lead-free process (from J-STD-020C)
+                       Package thickness (mm)                  Package reflow temperature (C)
+                                                               Volume (mm3)
+                                                               < 350                                       350 to 2000         > 2000
+                       < 1.6                                   260                                         260                 260
+                       1.6 to 2.5                              260                                         250                 245
+                       > 2.5                                   250                                         245                 245
+                      Moisture sensitivity precautions, as indicated on the packing, must be respected at all
+                      times.
+                      Studies have shown that small packages reach higher temperatures during reflow
+                      soldering, see Figure 25.
+SC18IS600                              All information provided in this document is subject to legal disclaimers.                © NXP B.V. 2019. All rights reserved.
+Product data sheet                                    Rev. 8 — 9 October 2019                                                                            23 of 28
+
+
+NXP Semiconductors                                                                                                   SC18IS600
+                                                                                                                   SPI to I2C-bus interface
+                                                                  maximum peak temperature
+                             temperature                              = MSL limit, damage level
+                                                                   minimum peak temperature
+                                                         = minimum soldering temperature
+                                                                                                                    peak
+                                                                                                                 temperature
+                                                                                                                                       time
+                                                                                                                               001aac844
+                               MSL: Moisture Sensitivity Level
+                      Fig 25. Temperature profiles for large and small components
+                   For further information on temperature profiles, refer to Application Note AN10365
+                   “Surface mount reflow soldering description”.
+12. Abbreviations
+                   Table 18.    Abbreviations
+                    Acronym                Description
+                    ASCII                  American Standard Code for Information Interchange
+                    CPU                    Central Processing Unit
+                    GPIO                   General Purpose Input/Output
+                    I/O                    Input/Output
+                    I2C-bus                Inter-Integrated Circuit bus
+                    LSB                    Least Significant Bit
+                    MSB                    Most Significant Bit
+                    PCB                    Printed-Circuit Board
+                    SPI                    Serial Peripheral Interface
+                    UART                   Universal Asynchronous Receiver/Transmitter
+SC18IS600                             All information provided in this document is subject to legal disclaimers.           © NXP B.V. 2019. All rights reserved.
+Product data sheet                                   Rev. 8 — 9 October 2019                                                                       24 of 28
+
+
+NXP Semiconductors                                                                                                     SC18IS600
+                                                                                                                      SPI to I2C-bus interface
+13. Revision history
+Table 19.    Revision history
+ Document ID           Release date        Data sheet status                                          Change notice  Supersedes
+ SC18IS600 v.8         20191009            Product data sheet                                         201910004I     SC18IS600_601 v.7
+ Modifications:          • Removed discontinued versions, and aligned pin 1 location in datasheet to ‘as-shipped’
+                           configuration. Product and product orientation have not changed.
+ SC18IS600 v.7.1       20171120            Product data sheet                                         201710021I     SC18IS600_601 v.7
+ Modifications:          • Section 6.4 “Serial Peripheral Interface (SPI)”, second bullet: removed sentence “The CS pin
+                           may be tied LOW if it is the only device on the bus.”
+ SC18IS600 v.7         20171013            Product data sheet                                         201708035I     SC18IS600_601 v.6
+ Modifications:          • Added SC18IS600IPW/S8
+                         • Updated Section 3.1 “Ordering options”
+ SC18IS600 v.6         20120504            Product data sheet                                         -              SC18IS600_601 v.5
+ Modifications:          • Deleted SC18IS601 from this data sheet
+                         • Section 2 “Features and benefits”, third bullet: changed from “Master I2C-bus controller” to
+                           “Single master I2C-bus controller”
+ SC18IS600_601 v.5     20080728            Product data sheet                                         -              SC18IS600_601 v.4
+ SC18IS600_601 v.4     20080320            Product data sheet                                         -              SC18IS600_601 v.3
+ SC18IS600_601 v.3     20061213            Product data sheet                                         -              SC18IS600_601 v.2
+ SC18IS600_601 v.2     20060811            Product data sheet                                         -              SC18IS600_601 v.1
+ SC18IS600_601 v.1     20060224            Product data sheet                                         -              -
+SC18IS600                                 All information provided in this document is subject to legal disclaimers.        © NXP B.V. 2019. All rights reserved.
+Product data sheet                                       Rev. 8 — 9 October 2019                                                                    25 of 28
+
+
+NXP Semiconductors                                                                                                                                          SC18IS600
+                                                                                                                                                         SPI to I2C-bus interface
+14. Legal information
+14.1 Data sheet status
+ Document status[1][2]                   Product status[3]                     Definition
+ Objective [short] data sheet            Development                           This document contains data from the objective specification for product development.
+ Preliminary [short] data sheet          Qualification                         This document contains data from the preliminary specification.
+ Product [short] data sheet              Production                            This document contains the product specification.
+[1]    Please consult the most recently issued document before initiating or completing a design.
+[2]    The term ‘short data sheet’ is explained in section “Definitions”.
+[3]    The product status of device(s) described in this document may have changed since this document was published and may differ in case of multiple devices. The latest product status
+       information is available on the Internet at URL http://www.nxp.com.
+14.2 Definitions                                                                                            Suitability for use — NXP Semiconductors products are not designed,
+                                                                                                            authorized or warranted to be suitable for use in life support, life-critical or
+                                                                                                            safety-critical systems or equipment, nor in applications where failure or
+Draft — The document is a draft version only. The content is still under
+                                                                                                            malfunction of an NXP Semiconductors product can reasonably be expected
+internal review and subject to formal approval, which may result in
+                                                                                                            to result in personal injury, death or severe property or environmental
+modifications or additions. NXP Semiconductors does not give any
+                                                                                                            damage. NXP Semiconductors and its suppliers accept no liability for
+representations or warranties as to the accuracy or completeness of
+                                                                                                            inclusion and/or use of NXP Semiconductors products in such equipment or
+information included herein and shall have no liability for the consequences of
+                                                                                                            applications and therefore such inclusion and/or use is at the customer’s own
+use of such information.
+                                                                                                            risk.
+Short data sheet — A short data sheet is an extract from a full data sheet
+                                                                                                            Applications — Applications that are described herein for any of these
+with the same product type number(s) and title. A short data sheet is intended
+                                                                                                            products are for illustrative purposes only. NXP Semiconductors makes no
+for quick reference only and should not be relied upon to contain detailed and
+                                                                                                            representation or warranty that such applications will be suitable for the
+full information. For detailed and full information see the relevant full data
+                                                                                                            specified use without further testing or modification.
+sheet, which is available on request via the local NXP Semiconductors sales
+office. In case of any inconsistency or conflict with the short data sheet, the                             Customers are responsible for the design and operation of their applications
+full data sheet shall prevail.                                                                              and products using NXP Semiconductors products, and NXP Semiconductors
+                                                                                                            accepts no liability for any assistance with applications or customer product
+Product specification — The information and data provided in a Product                                      design. It is customer’s sole responsibility to determine whether the NXP
+data sheet shall define the specification of the product as agreed between                                  Semiconductors product is suitable and fit for the customer’s applications and
+NXP Semiconductors and its customer, unless NXP Semiconductors and                                          products planned, as well as for the planned application and use of
+customer have explicitly agreed otherwise in writing. In no event however,                                  customer’s third party customer(s). Customers should provide appropriate
+shall an agreement be valid in which the NXP Semiconductors product is                                      design and operating safeguards to minimize the risks associated with their
+deemed to offer functions and qualities beyond those described in the                                       applications and products.
+Product data sheet.
+                                                                                                            NXP Semiconductors does not accept any liability related to any default,
+                                                                                                            damage, costs or problem which is based on any weakness or default in the
+14.3 Disclaimers                                                                                            customer’s applications or products, or the application or use by customer’s
+                                                                                                            third party customer(s). Customer is responsible for doing all necessary
+                                                                                                            testing for the customer’s applications and products using NXP
+Limited warranty and liability — Information in this document is believed to
+                                                                                                            Semiconductors products in order to avoid a default of the applications and
+be accurate and reliable. However, NXP Semiconductors does not give any
+                                                                                                            the products or of the application or use by customer’s third party
+representations or warranties, expressed or implied, as to the accuracy or
+                                                                                                            customer(s). NXP does not accept any liability in this respect.
+completeness of such information and shall have no liability for the
+consequences of use of such information. NXP Semiconductors takes no                                        Limiting values — Stress above one or more limiting values (as defined in
+responsibility for the content in this document if provided by an information                               the Absolute Maximum Ratings System of IEC 60134) will cause permanent
+source outside of NXP Semiconductors.                                                                       damage to the device. Limiting values are stress ratings only and (proper)
+                                                                                                            operation of the device at these or any other conditions above those given in
+In no event shall NXP Semiconductors be liable for any indirect, incidental,
+                                                                                                            the Recommended operating conditions section (if present) or the
+punitive, special or consequential damages (including - without limitation - lost
+                                                                                                            Characteristics sections of this document is not warranted. Constant or
+profits, lost savings, business interruption, costs related to the removal or
+                                                                                                            repeated exposure to limiting values will permanently and irreversibly affect
+replacement of any products or rework charges) whether or not such
+                                                                                                            the quality and reliability of the device.
+damages are based on tort (including negligence), warranty, breach of
+contract or any other legal theory.                                                                         Terms and conditions of commercial sale — NXP Semiconductors
+Notwithstanding any damages that customer might incur for any reason                                        products are sold subject to the general terms and conditions of commercial
+whatsoever, NXP Semiconductors’ aggregate and cumulative liability towards                                  sale, as published at http://www.nxp.com/profile/terms, unless otherwise
+customer for the products described herein shall be limited in accordance                                   agreed in a valid written individual agreement. In case an individual
+with the Terms and conditions of commercial sale of NXP Semiconductors.                                     agreement is concluded only the terms and conditions of the respective
+                                                                                                            agreement shall apply. NXP Semiconductors hereby expressly objects to
+Right to make changes — NXP Semiconductors reserves the right to make                                       applying the customer’s general terms and conditions with regard to the
+changes to information published in this document, including without                                        purchase of NXP Semiconductors products by customer.
+limitation specifications and product descriptions, at any time and without
+notice. This document supersedes and replaces all information supplied prior                                No offer to sell or license — Nothing in this document may be interpreted or
+to the publication hereof.                                                                                  construed as an offer to sell products that is open for acceptance or the grant,
+                                                                                                            conveyance or implication of any license under any copyrights, patents or
+                                                                                                            other industrial or intellectual property rights.
+SC18IS600                                                           All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2019. All rights reserved.
+Product data sheet                                                                 Rev. 8 — 9 October 2019                                                                                26 of 28
+
+
+NXP Semiconductors                                                                                                                                SC18IS600
+                                                                                                                                               SPI to I2C-bus interface
+Export control — This document as well as the item(s) described herein                             own risk, and (c) customer fully indemnifies NXP Semiconductors for any
+may be subject to export control regulations. Export might require a prior                         liability, damages or failed product claims resulting from customer design and
+authorization from competent authorities.                                                          use of the product for automotive applications beyond NXP Semiconductors’
+                                                                                                   standard warranty and NXP Semiconductors’ product specifications.
+Non-automotive qualified products — Unless this data sheet expressly
+states that this specific NXP Semiconductors product is automotive qualified,                      Translations — A non-English (translated) version of a document is for
+the product is not suitable for automotive use. It is neither qualified nor tested                 reference only. The English version shall prevail in case of any discrepancy
+in accordance with automotive testing or application requirements. NXP                             between the translated and English versions.
+Semiconductors accepts no liability for inclusion and/or use of
+non-automotive qualified products in automotive equipment or applications.
+In the event that customer uses the product for design-in and use in                               14.4 Trademarks
+automotive applications to automotive specifications and standards, customer
+                                                                                                   Notice: All referenced brands, product names, service names and trademarks
+(a) shall use the product without NXP Semiconductors’ warranty of the
+                                                                                                   are the property of their respective owners.
+product for such automotive applications, use and specifications, and (b)
+whenever customer uses the product for automotive applications beyond                              I2C-bus — logo is a trademark of NXP B.V.
+NXP Semiconductors’ specifications such use shall be solely at customer’s
+15. Contact information
+For more information, please visit: http://www.nxp.com
+For sales office addresses, please send an email to: salesaddresses@nxp.com
+SC18IS600                                                  All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2019. All rights reserved.
+Product data sheet                                                        Rev. 8 — 9 October 2019                                                                                27 of 28
+
+
+NXP Semiconductors                                                                                                                    SC18IS600
+                                                                                                                                   SPI to I2C-bus interface
+16. Contents
+1       General description . . . . . . . . . . . . . . . . . . . . . . 1         14            Legal information . . . . . . . . . . . . . . . . . . . . . .          26
+2       Features and benefits . . . . . . . . . . . . . . . . . . . . 1           14.1             Data sheet status . . . . . . . . . . . . . . . . . . . . . .       26
+3       Ordering information . . . . . . . . . . . . . . . . . . . . . 2          14.2             Definitions . . . . . . . . . . . . . . . . . . . . . . . . . . .   26
+3.1       Ordering options . . . . . . . . . . . . . . . . . . . . . . . . 2      14.3             Disclaimers . . . . . . . . . . . . . . . . . . . . . . . . . .     26
+                                                                                  14.4             Trademarks . . . . . . . . . . . . . . . . . . . . . . . . . .      27
+4       Block diagram . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+                                                                                  15            Contact information . . . . . . . . . . . . . . . . . . . .            27
+5       Pinning information . . . . . . . . . . . . . . . . . . . . . . 4
+                                                                                  16            Contents. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    28
+5.1       Pinning . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+5.2       Pin description . . . . . . . . . . . . . . . . . . . . . . . . . 4
+6       Functional description . . . . . . . . . . . . . . . . . . . 5
+6.1       Internal registers . . . . . . . . . . . . . . . . . . . . . . . . 5
+6.2       Register descriptions . . . . . . . . . . . . . . . . . . . . 5
+6.2.1     Programmable IO port configuration register
+          (IOConfig) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+6.2.1.1   Quasi-bidirectional output configuration . . . . . . 5
+6.2.1.2   Open-drain output configuration . . . . . . . . . . . . 6
+6.2.1.3   Input-only configuration . . . . . . . . . . . . . . . . . . 7
+6.2.1.4   Push-pull output configuration . . . . . . . . . . . . . 7
+6.2.2     I/O pins state register (IOState) . . . . . . . . . . . . 7
+6.2.3     I2C-bus address register (I2CAdr) . . . . . . . . . . 8
+6.2.4     I2C-bus clock rates register (I2CClk) . . . . . . . . 8
+6.2.5     I2C-bus time-out register (I2CTO). . . . . . . . . . . 8
+6.2.6     I2C-bus status register (I2CStat). . . . . . . . . . . . 9
+6.3       I2C-bus serial interface . . . . . . . . . . . . . . . . . . 10
+6.4       Serial Peripheral Interface (SPI) . . . . . . . . . . . 10
+6.5       SPI message format . . . . . . . . . . . . . . . . . . . . 11
+6.5.1     Write N bytes to I2C-bus slave device . . . . . . 11
+6.5.2     Read N bytes from I2C-bus slave device . . . . 12
+6.5.3     I2C-bus read after write. . . . . . . . . . . . . . . . . . 12
+6.5.4     Read buffer . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+6.5.5     I2C-bus write after write . . . . . . . . . . . . . . . . . 13
+6.5.6     SPI configuration . . . . . . . . . . . . . . . . . . . . . . 13
+6.5.7     Write to SC18IS600 internal registers . . . . . . 14
+6.5.8     Read from SC18IS600 internal register . . . . . 14
+6.5.9     Power-down mode . . . . . . . . . . . . . . . . . . . . . 15
+7       Limiting values. . . . . . . . . . . . . . . . . . . . . . . . . 15
+8       Static characteristics. . . . . . . . . . . . . . . . . . . . 16
+9       Dynamic characteristics . . . . . . . . . . . . . . . . . 17
+10      Package outline . . . . . . . . . . . . . . . . . . . . . . . . 21
+11      Soldering of SMD packages . . . . . . . . . . . . . . 22
+11.1      Introduction to soldering . . . . . . . . . . . . . . . . . 22
+11.2      Wave and reflow soldering . . . . . . . . . . . . . . . 22
+11.3      Wave soldering . . . . . . . . . . . . . . . . . . . . . . . . 22
+11.4      Reflow soldering . . . . . . . . . . . . . . . . . . . . . . . 23
+12      Abbreviations . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+13      Revision history . . . . . . . . . . . . . . . . . . . . . . . . 25
+                                                                                  Please be aware that important notices concerning this document and the product(s)
+                                                                                  described herein, have been included in section ‘Legal information’.
+                                                                                  © NXP B.V. 2019.                                                All rights reserved.
+                                                                                  For more information, please visit: http://www.nxp.com
+                                                                                  For sales office addresses, please send an email to: salesaddresses@nxp.com
+                                                                                                                                           Date of release: 9 October 2019
+                                                                                                                                          Document identifier: SC18IS600
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+NXP:
+ SC18IS600IPW,112 SC18IS600IPW,128 SC18IS600IBS,157 SC18IS600IBS,128 SC18IS600IBS,151
+SC18IS600IPW-F SC18IS600IPW/S8HP

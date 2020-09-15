@@ -1,0 +1,1104 @@
+                                                                                                                                                      Datasheet
+CXPI Transceiver for Automotive
+ BD41000AFJ-C
+General Description                                                                       Key Specifications
+    BD41000AFJ-C is a transceiver for the CXPI (Clock                                            Power Supply Voltage：                                     +7V to +18V
+    Extension      Peripheral         Interface)       communication.                            Absolute Maximum Rating of BAT： -0.3V to +40V
+    Switching between Master/Slave Mode can be done                                              Absolute Maximum Rating of BUS： -27V to +40V
+    using external pin (MS pin).
+                                                                                                 Power OFF Mode Current：                                     3 μA (Typ)
+    Low       power         consumption             during          standby
+    (non-communication) using Power Saving function.                                             Operating Temperature Range： -40°C to +125°C
+    Arbitration function stops the data output upon detection
+    of BUS data collision. Also Fail-safe function stops
+    outputs upon detection of under voltage or temperature                                Package                                          W(Typ) x D(Typ) x H(Max)
+    abnormality.                                                                                 SOP-J8                                     4.90mm x 6.00mm x 1.65mm
+Features
+     AEC-Q100 Qualified (Note1)
+     CXPI standards Qualified
+     Transmission speed range from 5kbps to 20kbps
+     Master/Slave switching function
+     Microcontroller interface corresponds to 3.3V/5.0V
+     Built-in terminator (30kΩ)
+     Power saving function
+     Data arbitration function
+     Built-in Under Voltage Lockout (UVLO) function
+     Built-in Thermal Shutdown (TSD) function
+     Low EME(Electromagnetic Emission)                                                                                             SOP-J8
+     High EMI(Electromagnetic Immunity)
+     High ESD(Electrostatic Discharge) robustness
+     (Note1: Grade 1)
+Applications
+     Automotive networks
+Typical Application Circuit
+                                                                                                                                            CXPI BUS VECU
+                      Master node
+                                                                  Regulator
+                                                2.7kΩ                                           10kΩ
+                                 VDD       INT                                          MS(8)
+                                                                                                 BAT(7)
+                                          RXD                  RXD(1)
+                                                                                                              100nF
+                                 Micro    TXD                  TXD(4)
+                              Controller                                  BD41000AFJ-C
+                               (Note 1) CLK                    CLK(3)                                                            1kΩ
+                                                                                                 BUS(6)
+                                            I/O                NSLP(2)
+                                 GND                                             GND(5)                         1nF
+                      Slave node
+                                                                  Regulator
+                                                2.7kΩ      2.7kΩ(Note 2)                        10kΩ
+                                 VDD       INT                                          MS(8)
+                                          RXD                                                    BAT(7)
+                                                               RXD(1)
+                                                                                                              100nF
+                                 Micro    TXD                  TXD(4)
+                              Controller                                  BD41000AFJ-C
+                               (Note 1) CLK                    CLK(3)
+                                                                                                 BUS(6)
+                                            I/O                NSLP(2)
+                                 GND                                            GND(5)                        220pF
+                                                      Note 1 INT: Interrupt, RXD: UART RXD, TXD: UART TXD, CLK: Clock, I/O: General Purpose I/O
+                                                      Note 2 While using slave, It is no problem that CLK is opened in the case of non-using CLK output.
+                                                        Figure 1. Typical Application Circuit
+    Consider the actual application design confirming the following linked document before applying this product.
+     Application Note
+〇Product structure : Silicon monolithic integrated circuit       〇This product has no designed protection against radioactive rays
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                         TSZ02201-0E2E0H600190-1-2
+                                                                                 1/20
+TSZ22111・14・001                                                                                                                                      2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Pin Configuration
+                                                                    (TOP VIEW)
+                                                 RXD 1                                      8  MS
+                                               NSLP 2                                       7  BAT
+                                                 CLK       3                                6  BUS
+                                                 TXD       4                                5  GND
+                                                        Figure 2. Pin Configuration
+Pin Description
+                                                                          Table 1. Pin Description
+                   Pin No.            Pin Name                                                 Function
+                      1                    RXD          Received data output pin
+                                                        Power saving control input pin
+                      2                  NSLP           (“H”：Change to “Codec mode”,
+                                                          “L”：Change to “Power OFF mode”)
+                                                        Clock signal input/output pin
+                      3                    CLK
+                                                        (Master setting: Input, Slave setting: Output)
+                      4                    TXD          Transmission data input pin
+                      5                   GND           Ground
+                      6                    BUS          CXPI BUS pin
+                      7                    BAT          Power supply pin
+                                                        Master/Slave switching pin
+                      8                    MS
+                                                        (“H”: Master, “L”: Slave)
+Block Diagram
+                                                                                                                                       7  BAT
+                           BAT
+                                                Thermal      Under Voltage         Power on
+                                               Shutdown         Lockout             Reset                     Regulator
+                                                 (TSD)          (UVLO)              (POR)     To each block
+             MS   8
+                                                                                                                               30kΩ
+                                                                LOGIC
+           RXD    1                                                                                                     Low Pass
+                                                                                                                                       6  BUS
+                                                                                                                          Filter
+                                                                         Decoder
+                                                                                               Wakeup
+                                                                                                Timer
+                                                                                                          Slope Control
+            TXD   4                                Arbiter               Encoder
+                                                   Dominant
+                                               Timeout Counter
+                                                    (DTC)
+                                                                         Controller
+                                     Slope
+           NSLP   2                  Timer
+            CLK   3                                            Timing
+                                                             Generator
+                                                                                                  Oscillator
+                                                                                                                                       5  GND
+                                                           Figure 3. Block Diagram
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                           TSZ02201-0E2E0H600190-1-2
+                                                                           2/20
+TSZ22111 • 15 • 001                                                                                                                 2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Description of Blocks
+  State Transition Diagram
+        BD41000AFJ-C is built-in “Power OFF Mode”, “Through Mode”, “RX Through Mode” other than “CODEC Mode” for power
+        saving control. Each mode is controlled by NSLP, BUS, and TXD pins.
+                                                                                       Non-power Supply
+                                                 When VBAT<VPOR is established
+                                                  in all modes, It shifts to                                    VBAT≥VPOR
+                                                  non-power supply state
+                                                                                       Power OFF Mode
+                                                                             RXD output         Hi-Z(H) fixed
+                                                                             CLK output (slave) Hi-Z(H) fixed
+                                                                             BUS output         Hi-Z(H) fixed
+                                                                             BUS terminator     Weak pull-up
+                                            BUS                                                                             TXD
+                                            Wakeup pulse detect                                                             Wakeup input detect
+                                            (Note 1)                                                                        (Note 2)
+                                                                          NSLP=L                             NSLP=H
+                 RX Through Mode                                                         CODEC Mode                                                   Through Mode
+                         Output is reversed at every                                             Decode BUS signal,                                           Output BUS signal
+ RXD output              BUS signal rising edge                        RXD output                and output it
+                                                                                                                                     RXD output               by through
+                                                         NSLP=H                                                           NSLP=H
+ CLK output (slave)        BUS clock output                            CLK output (slave)        BUS clock output                    CLK output (slave)       Hi-Z(H) fixed
+                                                                                                 Code TXD signal,                                             Output TXD signal
+ BUS output                Hi-Z(H) fixed                               BUS output                                                    BUS output
+                                                                                                 and output it.                                               by through
+ BUS terminator            30kΩ pull-up                                BUS terminator            30kΩ pull-up                        BUS terminator           30kΩ pull-up
+                                                                        Figure 4. State Transition Diagram
+        Please refer to the following parameter of the electrical characteristic about (Note 1) and (Note 2).
+        (Note 1): Wakeup pulse detection LO time, (Note 2): Wakeup input detection time (TXD)
+        While using master, CLK becomes input pin, and uses to input BUS clock in CODEC mode
+  Power OFF Mode
+        “Power OFF Mode” reduces power consumption by not supplying powers to any circuits other than necessary ones for
+        “Wakeup pulse detection (BUS)” and “Wakeup input detection (TXD)”.
+        When TXD is “H”, Wakeup input is detected, and then changes to “Through mode”. In the case of shifts to “Power OFF
+        Mode”, TXD is “L”, and then NSLP is “L”.
+        “Through Mode” and “RX Through mode” cannot change to “Power OFF Mode” directly. Please change via “CODEC Mode”
+        with NSLP as “H”.
+  Through Mode
+        “Through mode” does not process Coding/Decoding. It only drives signals from TXD to BUS and from BUS to RXD
+        directly.
+        Please change to “Through mode” with TXD as “H” to send Wakeup pulse.
+  RX Through Mode
+        “RX Through Mode” reverses RXD output at each rising edge of BUS.
+        Please monitor the change of RXD to detect Wakeup pulse in “Power OFF Mode”,.
+  CODEC Mode
+        “CODEC Mode” is the mode of CXPI communication. NSLP should be “H” for the chip to enter “CODEC Mode”.
+        Outputs in the case of Master setting are changed by the falling edge of CLK, and in the case of Slave setting are changed
+        by the falling edge of BUS. BUS signal is delayed 2.0±0.5Tbit from TXD input, and RXD is delayed 1.0±0.5Tbit from BUS
+        input.
+        The jitter of CLK input should satisfy the CXPI standard (±1.0%) including the effect of BD41000AFJ-C (±0.05%) in the
+        case of Master setting.
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                           TSZ02201-0E2E0H600190-1-2
+                                                                                             3/20
+TSZ22111 • 15 • 001                                                                                                                                  2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+  Sequence Diagram
+       It shows the example of BD41000AFJ-C control sequence (“Sleep Mode”, “Standby Mode” and “Normal Mode”)
+       corresponding to the CXPI standard. (Please refer to the CXPI standard for specifications about the detail of mode
+       management.)
+    1.    The Sequence from “Normal Mode” to “Sleep Mode”
+          When changing to “Sleep Mode”, NSLP should be switched from “H” to “L”, and then the IC turns to “Power OFF Mode”.
+          TXD has built-in pull-down resistor in case of a fail-safe. In “Sleep Mode”, set TXD to “L” before BD41000AFJ-C enters
+          “Power OFF Mode” to prevent extra currents from MCU side.
+          Set CLK to “L” just like TXD, because the pull-down resister of CLK is active in the case of Master setting.
+                                         Master Node                                                                                       Slave Node
+                 Micro Controller                                                                                                                                 Micro Controller
+                                                                 BD41000AFJ-C                                      BD41000AFJ-C
+                       (MCU)                                                                                                                                             (MCU)
+                         Sleep condition
+                             establish
+                                               TXD (Sleep flame)
+                       Sleep flame transmit
+                                                          Sleep flame transmit                                          Sleep flame transmit
+                                                              (with coding)                                                (with coding)
+                                                                                       Sleep flame(Note 1)
+                                              RXD (Sleep flame)                                                                      RXD (Sleep flame)
+                        Sleep flame detect                                                                                                                    Sleep flame detect
+            Normal Mode                                                                                                                                                          Normal Mode
+                                                                              CODEC Mode                    CODEC Mode
+                                                 CLK (“L” fixed)
+                         CLK output stop
+                                                                                      BUS clock supply stop
+                                                TXD (“L” output)
+                        TXD output control
+                                                                                                                                       TXD (“L” output)
+                                                                                                                                                              TXD output control
+                                                NSLP (“L” fixed)
+                        Power off indicate                                                                                            NSLP (“L” output)
+                                                                                                                                                              Power off indicate
+            Sleep Mode                                                      Power OFF Mode
+                                                                                                          Power off Mode                                                            Sleep Mode
+                                                                                                                                   Note 1    Please refer to the CXPI standard about Sleep flame.
+                                                 Figure 5. The Sequence from “Normal Mode” to “Sleep Mode”
+                 Master Node
+                    Operating
+                                                                          CODEC Mode                                                                       Power OFF Mode
+                     mode
+                     NSLP
+                      TXD           Sleep flame transmit
+                      CLK
+                      RXD                           Sleep flame receive
+                                                                                                Tclock_stop_m (Note1)
+                      BUS                         Sleep flame
+                                                                                                                  Note 1    Please refer to the CXPI standard about Tclock_stop_m.
+                                       Figure 6. The Timing Chart from “Normal Mode” to “Sleep Mode” (Master)
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                                       TSZ02201-0E2E0H600190-1-2
+                                                                                              4/20
+TSZ22111 • 15 • 001                                                                                                                                                     2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+               Slave Node
+                 Operating
+                                                                         CODEC Mode                                                                               Power OFF Mode
+                    mode
+                   NSLP
+                    TXD
+                    RXD                           Sleep flame receive
+                                                                                                        Tsleep_s (Note 2)
+                    BUS                         Sleep flame
+                                                                                                                      Note 2        Please refer to the CXPI standard about Tsleep_s.
+                                       Figure 7. The Timing Chart from “Normal Mode” to “Sleep Mode” (Slave)
+    2.  The Sequence from “Sleep Mode” to “Normal Mode” (Master Node Trigger)
+        To wake up the node by an internal factor, set NSLP to “H” for the chip to enter “CODEC Mode”. TXD should be “H” for
+        about 30µs before changing from “Power OFF Mode” to “CODEC Mode” in order to prevent abnormal outputs of BUS or
+        RXD.
+        In the case of slave mode, BD41000AFJ-C reverses RXD output at every rising edge of BUS signal after receiving BUS
+        clock. When detecting first RXD falling edge, please start micro controller initializing operation. To establish wakeup
+        pulse, please check if RXD output is “H” or detect RXD rising edge after initializing operation.
+        To change from “Standby Mode” to “Sleep Mode” because the slave node cannot receive the second rising pulse within
+        the specified time, please return to “Power OFF Mode” with NSLP as “L” again after the change to “CODEC Mode” with
+        NSLP as “H”.
+                                            Master Node                                                                                       Slave Node
+                    Micro Controller                                                                                                                               Micro Controller
+                                                               BD41000AFJ-C                                   BD41000AFJ-C
+                          (MCU)                                                                                                                                            (MCU)
+              Sleep Mode
+                             Wakeup factor
+                                               CLK (Output start)
+                            CLK output start
+                                                                           Power OFF Mode             Power OFF Mode                                                                Sleep Mode
+             Standby Mode
+                                                TXD (“H” output)
+                           TXD output control
+                                               NSLP (“H” output)
+                            Power off reset
+                                                            CLK transmit                                          Wakeup pulse receive
+                                                             (with coding)                                           (First rising edge)
+                                                                                     BUS clock supply start
+                                                                                                                                     RXD (“L” output)
+             Normal Mode                                                    CODEC Mode                                                                            Wakeup detect
+                                                                                                                  Wakeup pulse receive
+                                                                                                                                                                                            Initializing
+                                                                                                                   (Second rising edge)
+                                                                                                                                                                                            operation
+                                                                                                                                     RXD (“H” output)
+                                                                                                                                                                 Wakeup decision
+                                                                                                     RX Through Mode              After that, Output reverse by
+                                                                                                                                 every BUS signal pull up edge
+                                                                                                                                                                                   Standby Mode
+                                                                                                                                     TXD (“H” output)
+                                                                                                                                                                TXD output control
+                                                                                                                                   NSLP (“H” output)
+                                                                                                                                                                 Power off control
+                                                                                                       CODEC Mode                                                                   Normal Mode
+                            Figure 8. The Sequence from “Sleep Mode” to “Normal Mode” (Master Node Trigger)
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                                                  TSZ02201-0E2E0H600190-1-2
+                                                                                             5/20
+TSZ22111 • 15 • 001                                                                                                                                                             2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+                   Master Node
+                     Operating
+                                 Power OFF Mode                                CODEC Mode
+                      mode
+                                                      Within 30μs
+                      NSLP
+                       TXD
+                       CLK
+                       RXD
+                       BUS
+                 Figure 9. The Timing Chart from “Sleep Mode” to “Normal Mode” (Master Node Trigger, Master)
+                   Slave Node
+                    Operating                          RX Through
+                               Power OFF Mode                                           CODEC Mode
+                      mode                                 Mode
+                      NSLP                                        Within 30μs
+                       TXD
+                       CLK
+                      RXD
+                       BUS
+                                           Wakeup pulse
+                                            (Clock signal)
+                 Figure 10. The Timing Chart from “Sleep Mode” to “Normal Mode” (Master Node Trigger, Slave)
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                       TSZ02201-0E2E0H600190-1-2
+                                                                          6/20
+TSZ22111 • 15 • 001                                                                                       2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+    3.  The Sequence from “Sleep Mode” to “Normal Mode” (Slave Node Trigger)
+        To wake up the slave node by an internal factor, set TXD to “H” for the chip to enter “Through Mode”.
+        After receiving the wakeup pulse in the Master Node, RXD output reverses at every rising edge of the BUS signal. It is
+        better to establish Wakeup at clock’s first falling edge.
+        To change from “Standby Mode” to “Sleep Mode”, in case the master node cannot receive BUS clock within the
+        specified time, set NSLP to “L” to return to “Power OFF Mode” then enter to “CODEC Mode” by setting NSLP to “H”.
+                                                    Master Node                                                                                       Slave Node
+                            Micro Controller                                                                                                                                MicroController
+                                                                               BD41000AFJ-C                                   BD41000AFJ-C
+                                  (MCU)                                                                                                                                              (MCU)
+                                                                                                                                                                                                Sleep Mode
+                                                                                                                                                                          Wakeup factor
+                                                                                                                     Power OFF Mode
+                                                                                                                                                TXD (“H” output)
+                                                                                                                                                                        TXD output control
+                                                                                                                                             Wakeup BD41000AFJ-C
+                      Sleep Mode                                                          Power OFF Mode
+                                                                                                                                             when it exceeds TTXD_wakeup
+                                                                                                                                              TXD (Wakeup pulse)
+                                                                                                                                                                      Wakeup pulse transmit
+                                                                                                                                   Wakeup pulse transmit
+                                                                     Wakeup pulse receive                                            (without coding)
+                                                                                                         Wakeup pulse
+                                                         RXD (“L” output)
+                                    Wakeup decision
+                                                      After that, Output reverse at
+                                                      every BUS signal rising edge
+                                                                                                                                                                                              Standby Mode
+                                                       CLK (Output start)
+                                    CLK output start
+                                                                                          RX Through Mode                                                        In the case of it cannot receive
+                     Standby Mode                                                                                     Through Mode                                  clock within the role time,
+                                                        TXD (“H” output)                                                                                            Wakeup pulse retransmit
+                                   TXD output control
+                                                       NSLP (“H” output)
+                                    Power off control
+                                                                           Clock transmit
+                                                                                                                                     Clock receive
+                                                                            (with coding)
+                     Normal Mode                                                                    BUS clock supply start
+                                                                                           CODEC Mode                                          RXD(Clock signal)
+                                                                                                                                                                       Clock signal detect
+                                                                                                                                                 Through output
+                                                                                                                                               NSLP (“H” output)
+                                                                                                                                                                        Power off control
+                                                                                                                      CODEC Mode                                                                Normal Mode
+                         Figure 11. The Sequence from “Sleep Mode” to “Normal Mode” (Slave Node Trigger)
+                Master Node
+                  Operation
+                                               Power OFF Mode                                 Rx Through Mode                                      CODEC Mode
+                   mode
+                   NSLP                                                                                        Within 30μs
+                    TXD
+                    CLK
+                    RXD
+                    BUS                                           Ttx_wakeup(Note 2)                               Tclock_start_m (Note1)
+                                                                                                               Note 1,2    Please refer to the CXPI standard about Tclock_start_m, Ttx_wakeup.
+                 Figure 12. The Timing Chart from “Sleep Mode” to “Normal Mode” (Slave Node Trigger, Master)
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                                               TSZ02201-0E2E0H600190-1-2
+                                                                                                       7/20
+TSZ22111 • 15 • 001                                                                                                                                                                 2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+                  Slave Node
+                    Operation       Power OFF Mode                                             Through Mode                                                                 CODEC Mode
+                     mode
+                     NSLP
+                                                       TTXD_wakeup                      Ttx_wakeup_space(Note 3)
+                      TXD                              Ttx_wakeup(Note 2)               Ttx_wakeup(Note 2)
+                                                                              Wakeup pulse
+                      CLK
+                     RXD
+                     BUS
+                                                                                                Note2,3        Please refer to the CXPI standard about Ttx_wakeup, Ttx_wakeup_space
+                   Figure 13. The Timing Chart from “Sleep Mode” to “Normal Mode” (Slave Node Trigger, Slave)
+  Transmission and Reception Started Effective Time after Shift to CODEC Mode
+      To detect clock sequence is to learn the LO width of logic value1 during “CODEC Mode” with NSLP as “H”. To keep
+      learning it, please start to transmit and receive data after the time equal to 16 Tbit clocks at least. (6 Tbit clocks are
+      necessary until BUS clock is outputted by BUS or CLK after NSLP as “H”.)
+           Master                                         Prohibit Transmit and Receive                                                                Transmit and Receive possible
+            state
+           Master
+            CLK
+           Master
+           NSLP              Max 6Tbit                                                  16Tbit
+            BUS
+           Slave
+            RXD
+           Slave
+           NSLP                                              Max 6Tbit                                     16Tbit
+           Slave
+            CLK
+           Slave             Power OFF
+                                                 RX
+                                                                                                 Prohibit Transmit and Receive
+                                                                                                                                                                                    Transmit and Receive
+                                               Through
+            state                                                                                                                                                                         possible
+                     Figure 14. The Actual Time of Transmission and Reception after “CODEC Mode” Changing
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                                   TSZ02201-0E2E0H600190-1-2
+                                                                                        8/20
+TSZ22111 • 15 • 001                                                                                                                                               2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+  Arbitration Function
+      To carry out collision resolution functions that defined by CXPI specification, both micro controller and BD41000AFJ-C
+      share functions. Basically, BD41000AFJ-C arbitrates between UART bit data and micro controller arbitrates between
+      UART byte data.
+  1.  In case of collision is happened by transmitting from other node at the same time
+      In the case of collision (arbitration defeat) after data transmission by other node on BUS, it stops the transmission of
+      remaining UART flame data at the collision. It is necessary to have the interval 1Tbit or more (BUS baud rate period) to
+      transmit again after arbitration defeat. Set the wait time in consideration of the frequency deviation of the baud rate clock in
+      micro controller side and BUS side and the delay at UART circuit in micro controller side.
+                                                                                                                                          When arbitration defeat is detected,
+                                                                                                                                1 Tbit or more interval is needed at next transmition
+                                  Start                                                                                                     Stop                         Start
+                        TXD        Bit
+                                               1       0          1           0               1         0          1            0
+                                                                                                                                             Bit                          Bit
+                                                                                                                                                                                        0             1            0           1
+                                  2.0±0.5Tbit delay                                 Arbitration defeat
+                                                       0          1           0                         0           1            1              1            1             1            1             0             0           1
+                        BUS          1          1                                             0
+                                                      1.0±0.5Tbit delay
+                                                               Start                                                                                                                 Stop                        Start
+                       RXD                                                    1               0         0          0            1              1            1             1                                                    0
+                                                                 Bit                                                                                                                   Bit                        Bit
+                    Transmit
+                                                                                                                           While transmit prohibit signal is set “H”,
+              prohibit signal                                                                                                        BUS output is stopped
+            (Internal signal)
+                                                                                        Arbitration                                  BUS output is stopped
+                                                                                           defeat                                                                                                 BUS output can generate
+                                                                                          (TXD≠RXD)
+                                                                                                                             When arbitration defeat is detected,
+                                                                                                                           remainig UART output data is stopped
+                            Figure 15. Arbitration Function (When the Collision is detected after Data Transmission)
+  2.  In case of collision is detected by receiving from other node before transmission is started.
+      BD41000AFJ-C has built-in function to stop transmission upon detection of BUS data collision.
+      When the signal is detected on BUS before the start of transmit data, BD41000AFJ-C stops to transmit data for 10 Tbit
+      period, and then while stopping to transmit data, if TXD signal is inputted to BD41000AFJ-C, BD41000AFJ-C stops to
+      transmit data for further 10 Tbit period of the transmit data.
+                                                                                                                                                                            When arbitration defeat is detected,
+                                                                                                                                                                  more than 1 Tbit interval is needed at next transmition
+                                                                       Start                                                                                                   Stop                     Start
+                         TXD                                            Bit
+                                                                                    1               0     1         0           1           0            1            0
+                                                                                                                                                                                Bit                      Bit
+                                                                                                                                                                                                                      0          1
+                                                                                                                                                                                                           2.0±0.5Tbit delay
+                         BUS       1         1      1        1           0          1               0     0         0            1           1            1            1          1            1           1           1          0
+                                                                       1.0±0.5Tbit delay
+                                                                                  Start                                                                                                     Stop
+                         RXD                                                       Bit
+                                                                                                    1     0         0           0           1            1            1           1
+                                                                                                                                                                                              Bit
+                      Transmit
+                                                                                                                              While transmit prohibit signal is set “H”,
+                 prohibit signal                                                                                                        BUS output is stopped
+               (Internal signal)
+                                                                     Receive                                                             BUS output is stopped
+                                                                      detect                                                                                                                                       BUS output can generate
+                                                                                                            When the receive data is detected、BUS output is stopped for 10 Tbit period.
+                                                                                                                  and then, while stopping BUS output, if TXD signal is inputted,
+                                                                                                                         BUS output is stopped for further 10 Tbit period
+                           Figure 16. Arbitration Function (When receive data is detected before transmission data)
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                                                               TSZ02201-0E2E0H600190-1-2
+                                                                                                       9/20
+TSZ22111 • 15 • 001                                                                                                                                                                                 2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+  3.  In case of collision function failure is happed when micro controller outputs transmission data to BD41000AFJ-C
+      between the outside range of BD41000AFJ-C arbitration function.
+      BUS output is delayed 2.5 Tbit(Max.) from TXD input and RXD output is delayed 1.5 Tbit(Max.) from BUS input.
+      When micro controller outputs transmission data to BD41000AFJ-C at the timing that shown in Figure 17,
+      CXPI frame of other node is destroyed because BD41000AFJ-C outputs PID just after receive PID.
+      Micro controller should stop transmission data to BD41000AFJ-C while receiving UART data.
+      Figure 17 shows the example in case of 2.0 Tbit delay from TXD input to BUS output and 1.0 Tbit delay from BUS input to
+      RXD output.
+                                                Range of stopping transmission by detecting receive data from other node            If micro controller detect receive data with stopbit, there are some timings
+                                                                 (explained operation in previous page)                                    that micro controller can transmit data before stopbit detection.
+                                                                                                                                                                          Start
+                               TXD                                                                                                                                         Bit
+                                                                                                                                                                                        0            1           0          1           0
+                                                                                                                                                                                                    CXPI frame of other node is destroyed
+                                                                                      PID transmission from other node                                                    2.0±0.5Tbit delay      because irregular own node PID is outputted
+                               BUS       1       0          1           0           0           0           1            1             1           1            1           1           1            0           0          1           0
+                                               1.0±0.5Tbit delay
+                                                          Start                                                                                                           Stop                                 Start
+                               RXD                                      1           0           0           0           1             1            1            1                                                           0           1
+                                                           Bit                                                                                                             Bit                                  Bit
+                           Transmit
+                                                                                                While transmit prohibit signal is set “H”,
+                      prohibit signal                                                                     BUS output is stopped
+                    (Internal signal)
+                                             Receive                                                      BUS output is stopped
+                                                                                                                                                                                     BUS output can generate
+                                              detect
+                                                                               When the receive data is detected、BUS output is stopped for 10 Tbit period.
+                           Figure 17. Arbitration Function (When micro controller detect receive data with stopbit)
+  Fail-safe Mode
+      BD41000AFJ-C has built in fail-safe mode such as DTC (TXD Dominant Abnormal Detection Circuit), TSD (Abnormal
+      Thermal Detection Circuit) and UVLO/POR (Abnormal Under Voltage Detection Circuit).
+      The operations of each abnormality situation are as follows;
+                       Table 2. Fail-safe Functions
+                                                                                                                                                                                                                            CLK Output
+        Fail-safe Function              State Transition                                                 BUS Output                                                             RXD Output
+                                                                                                                                                                                                                     (While using slave)
+                                                                          CODEC Mode：Logical value1 output(Note 1)
+         DTC abnormality                   No change                                                                                                                      BUS signal output                                Hi-Z (H) fixed
+                                                                                        Through Mode：Hi-Z(H) fixed
+         TSD abnormality                   No change                                                    Hi-Z (H) fixed                                                         Hi-Z (H) fixed                              Hi-Z (H) fixed
+        UVLO abnormality                   No change                                                    Hi-Z (H) fixed                                                         Hi-Z (H) fixed                              Hi-Z (H) fixed
+         POR abnormality               Power OFF Mode                                                   Hi-Z (H) fixed                                                         Hi-Z (H) fixed                              Hi-Z (H) fixed
+     (Note 1) In the case of TXD fixed L, Logical value0 is outputted only in first 10bit. Logical value1 is outputted before DTC abnormality is detected.
+      When “L” time of TXD is more than TDTC, DTC (Dominant Timeout Counter) detects abnormality, and then it stops output. It
+      can retune to normal status with TXD as “H”
+      When the junction temperature exceeds TTSD, TSD (Thermal Shutdown) circuit detects abnormality, and then it stops
+      output. It can return to normal status when the temperature drops below TTSD_HYS.
+      Operations of UVLO (Under Voltage Lockout) and POR (Power ON Reset) are as follows;
+      When supply voltage drops below VUVLO, UVLO abnormality is detected, and then BUS, RXD and CLK outputs are fixed
+      Hi-Z (H). (Only slave)
+      When power supply exceeds VUVLO, transceiver restarts output. When supply voltage drops below VPOR, POR abnormality
+      is detected, and then it changes to “Power OFF Mode”, and reset status.
+                                                                                                                                                                                                                                             Absolute maxim rating
+                    0V                         5.0V                       6.7V 7V                                                                               18V                                                                                   40V
+          BAT                      POR                     UVLO
+                                                     Activation range                           Operating guarantee range
+        voltage            Activation range
+                                                   UVLO
+         Mode             Power OFF          detection state                                                                                         Normal operation
+                                                   Figure 18. Internal Status and Mode by Supply Voltage
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                                                                         TSZ02201-0E2E0H600190-1-2
+                                                                                                         10/20
+TSZ22111 • 15 • 001                                                                                                                                                                                           2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Absolute Maximum Ratings (Ta = 25°C)
+                     Table 3. Absolute Maximum Ratings (Ta = 25°C)
+                       Parameter                             Symbol                      Rating                    Unit
+      Supply Voltage on Pin       BAT (Note 1)                  VBAT                -0.3 to +40.0                    V
+      MS Voltage                                                VMS                 -0.3 to +40.0                    V
+      BUS Voltage                                              VBUS                -27.0 to +40.0                    V
+      CLK, TXD, RXD, NSLP voltage                              VMCU                  -0.3 to +7.0                    V
+      Power    Dissipation (Note 2)                              Pd                        0.67                     W
+      Storage Temperature Range                                 Tstg                 -55 to +150                    °C
+      Junction Max Temperature                                 Tjmax                       150                      °C
+      Electro Static Discharge (HBM) (Note 3)                  VESD                       4000                       V
+      (Note 1) Pd, ASO should not be exceeded.
+      (Note 2) Regarding above Ta=25°C, Pd decreased at 5.40mW/°C for temperatures when mounted on 70x70x1.6mm Glass-epoxy PCB.
+      (Note 3) JEDEC qualified.
+    Caution: Operating the IC over the absolute maximum ratings may damage the IC. The damage can either be a short circuit between pins or an open circuit
+    between pins and the internal circuitry. Therefore, it is important to consider circuit protection measures, such as adding a fuse, in case the IC is operated over
+    the absolute maximum ratings.
+Recommended Operating Conditions
+                     Table 4. Recommended Operating Conditions
+                       Parameter                             Symbol                      Rating                    Unit
+      BAT Supply Voltage Range                                  VBAT                   +7 to +18                     V
+      Operating Temperature Range                               Topr                  -40 to +125                   °C
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                              TSZ02201-0E2E0H600190-1-2
+                                                                                11/20
+TSZ22111 • 15 • 001                                                                                                                      2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Electrical Characteristics (Unless Otherwise Specified Ta=-40°C to +125°C, VBAT=7V to 18V)
+                    Table 5. Electrical Characteristics (1)
+                   Parameter                            Symbol           Min             Typ    Max    Unit           Conditions
+     BAT
+     Supply Current 1                                   IBAT_SLP           -              3      10    µA   After NSLP Shifts from H to L
+                                                                                                            NSLP=H, MS=H,
+     Supply Current 2                                   IBAT_NOR           -              3      10    mA   CLK=20kHz (Duty=50%)
+                                                                                                            TXD=10kHz (Duty=50%)
+     TXD, NLSP, CLK (When Input)
+     VIH                                               VIHMCU_IN          2.0             -       -     V
+     VIL                                               VILMCU_IN           -              -      0.8    V
+     Input H Current                                   IIHMCU_IN          6.0           14.0    40.0   µA   Input Voltage=5V
+     Input L Current                                   IILMCU_IN         -5.0            0.0     5.0   µA
+     Wakeup Input Detection Time
+                                                      TTXD_wakeup         30             100    150    µs   H Width
+     (TXD)
+     Input Clock Duty
+                                                        DutyCLK           48             50      95     %   Duty Rule of H Width
+     (CLK)
+     MS
+     VIH                                               VIHMS_IN        VBAT-1.0           -       -     V
+     VIL                                                VILMS_IN           -              -   VBAT-3.0  V
+     Input H Current                                    IIHMS_IN         -5.0             -      5.0   µA   Input Voltage= VBAT =18V
+     Input L Current                                    IILMS_IN         -5.0             -      5.0   µA   In Power OFF Mode
+     RXD, CLK (When Output)
+     Output ON Current                                OILMCU_OUT          1.3            3.5      -    mA   Output Pin=0.4V
+     Output OFF Current                               OIHMCU_OUT         -5.0            0.0     5.0   µA   Output Pin =5V
+     BUS (DC Characteristics)
+                                                                         VBAT
+     Recessive Output Voltage(Note 1)                  VBUS_RES                           -       -     V   RL=500Ω
+                                                                        x 0.9
+     Dominant Output Voltage           1(Note 1)      VBUS_DOM_1           -              -      1.2    V   VBAT=7V, RL=500Ω
+     Dominant Output Voltage           2(Note 1)      VBUS_DOM_2          0.6             -       -     V   VBAT=7V, RL=1kΩ
+     Dominant Output Voltage 3(Note 1)                VBUS_DOM_3           -              -      2.0    V   VBAT=18V, RL=500Ω
+     Dominant Output Voltage           4(Note 1)      VBUS_DOM_4          0.8             -       -     V   VBAT=18V, RL=1kΩ
+                                                                                                            When Recessive Output
+     H Level Leakage Current                              IIHBUS         -5.0            0.0     5.0   µA
+                                                                                                            VBAT= VBUS=18V
+     Pull-up Resister                                      RBUS           20             30      50    kΩ   VBAT=12V
+     Short-circuit Output      Current(Note 1)         IOCPBUS            40              -     200    mA   VBAT= VBUS=18V、RL=0Ω
+     L Current at Receiver Operating                     IOLBUS           -1              -       -    mA   VBAT=12V, VBUS=0V
+     Input Leakage Current at
+                                                           ILBUS           -              -      20    µA   VBAT=8V, VBUS=18V
+     Receiver Operating
+                                                                                                            GND=VBAT=12V,
+     Leakage Current when NO_GND                     ILBUS_NO_GND         -1              -       1    mA
+                                                                                                            VBUS=0V to 18V
+     Leakage Current when NO_BAT                     ILBUS_NO_BAT          -              -     100    µA   VBAT=0V, VBUS=0V to18V
+                                                                         VBAT
+     Input H Threshold Voltage                        VIHBUS_REC                          -       -     V
+                                                                       x 0.556
+                                                                                                VBAT
+     Input L Threshold Voltage                        VILBUS_DOM           -              -             V
+                                                                                              x 0.423
+                                                                         VBAT           VBAT    VBAT
+     Input Threshold Voltage (Typical)                 VTHCBUS                                          V
+                                                                       x 0.475          x 0.5 x 0.525
+                                                                                                VBAT
+     Input Hysteresis Voltage                          VHYSBUS             -              -             V
+                                                                                              x 0.133
+     (Note 1) RL is pullup resistor that is connected between BAT and BUS terminal outside.
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                             TSZ02201-0E2E0H600190-1-2
+                                                                         12/20
+TSZ22111 • 15 • 001                                                                                                2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+                     Table 6. Electrical Characteristics (2)
+                    Parameter                        Symbol                  Min                Typ            Max               Unit                  Conditions
+     BUS (AC Characteristics)
+     LO Level Time 1 of Logical Value                                                                        0.39Tbit
+                                                    Ttx_1_lo_rec               -                   -                                -      TH_rec=70%
+     “1” (Note 2)                                                                                             +0.6τ
+     LO Level Time 2 of Logical Value
+                                                    Ttx_1_lo_dom             0.11                  -              -               Tbit     TH_dom=30%
+     “1”
+     HI Detection Time of Receiving                   Ttx_0_hi               0.06                  -              -               Tbit     TH_rec=55.6%
+     Difference of LO Level Time
+     Between Logical Value “1” and                     Ttx_dif               0.06                  -              -               Tbit     Ttx_dif= Ttx_0_lo - Ttx_1_lo
+     Logical Value “0”
+     Delay Time from the LO Level
+     Detection to Logical Value “0”                   Ttx_0_pd                 -                   -           0.11               Tbit     TH_dom=30%
+     Output
+                                                                         Ttx_1_lo_rec
+     LO time 1 of Logical Value “0”                 Ttx_0_lo_rec                                   -              -               Tbit     TH_rec=70%
+                                                                            + 0.06
+                                                                         Ttx_1_lo_dom
+     LO time 2 of Logical Value “0”                 Ttx_0_lo_dom                                   -              -               Tbit     TH_dom=30%
+                                                                            + 0.06
+     BUS Pull-down Time                             Ttx_1_dom_m                -                   -           0.16               Tbit     TH_dom=30%
+                                                                                                                                           Ratio for the Recessive
+     Recessive Voltage of Logical
+                                                       V_rec_0                93                   -              -                %       voltage (V_rec_1)
+     Value “0”
+                                                                                                                                           when logical value is 1
+     Wakeup Pulse Detection LO
+                                                 Trx_wakeup_master            30                100            150                 µs      TH_dom=42.3%
+     Time for Master Setting
+     Wakeup Pulse Detection LO
+                                                  Trx_wakeup_slave            0.5                  3              5                µs      TH_dom=42.3%
+     Time for Slave Setting
+     TSD
+     TSD Detection Temperature
+     (Note 3)                                           TTSD                 150                   -           200                 °C
+     TSD Hysteresis Temperature
+     (Note 3)                                        TTSD_HYS                  -                 14               -                °C
+     UVLO
+     UVLO Detection Voltage                            VUVLO                  5.0                  -            6.7                 V
+     POR
+     POR Detection Voltage                              VPOR                   -                   -            5.0                 V
+     DTC
+     Dominant Time-out Time                             TDTC                   9                 13              22               ms
+     (Note 2) τis a fixed number when BUS (1μs ≤τ≤ 5μs)
+     (Note 3) It is a design guarantee parameter, and is not production tested.
+                                                                                                     Tbit
+                                                                             Ttx_1_lo_rec
+                                                                             Ttx_1_lo_dom
+                                                            V_rec_1
+                                           BUS Wave
+                                                            TH_rec
+                                        Logical Value “1” (Note1)
+                                                           TH_dom
+                                                           (Note1)
+                                                                                                     Ttx_dif
+                                                                                      Ttx_0_lo_rec                  Ttx_0_hi
+                                                                                     Ttx_0_lo_dom
+                                                            V_rec_0
+                                           BUS Wave         TH_rec
+                                        Logical Value “0” (Note1)
+                                                           TH_dom
+                                                           (Note1)
+                                                                    Ttx_1_dom_m
+                                                                                        Note1    These parameters show the ratio for VBAT.
+                                                   Figure 19. BUS Waves of Logical Value 1, 0
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                          TSZ02201-0E2E0H600190-1-2
+                                                                              13/20
+TSZ22111 • 15 • 001                                                                                                                                2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Application Example
+                 Slave node (Applicable secondary clock master option)
+                                                                                                                                                                   CXPI BUS VECU
+                                                                                         Regulator
+                                                                     2.7kΩ         2.7kΩ(Note 2)                     10kΩ
+                                                        VDD    INT                                           MS(8)
+                                                              RXD                                                      BAT(7)
+                                                                                       RXD(1)
+                                                                                                                                   100nF
+                                                      Micro    TXD                     TXD(4)
+                                                    Controller                                   BD41000AFJ-C
+                                                     (Note 1) CLK                      CLK(3)
+                                                                                                                       BUS(6)
+                                              I/O              I/O                     NSLP(2)
+                                                        GND                                            GND(5)                      220pF
+                                                                             Note 1 INT: Interrupt, RXD: UART RXD, TXD: UART TXD, CLK: Clock, I/O: General Purpose I/O
+                                                                             Note 2 While using slave, Pullup registor is no need for CLK in the case of non-using CLK output.
+                                                        Figure 20. Application Example of Secondary Clock Master Option
+Power Dissipation
+                                             0.8
+                                             0.7          0.67W
+                                             0.6
+                   Power dissipation Pd[W]
+                                             0.5                                                    θja = 185.2℃/W
+                                             0.4
+                                             0.3
+                                             0.2
+                                             0.1
+                                               0
+                                                    0                25                50                  75                   100                125                 150
+                                                                                                   Temp Ta [℃]
+                                                                                  Figure 21. Power Dissipation
+                (Note 1)                        Measured Board (70mm x 70mm x 1.6mm, glass epoxy 1-layer)
+                (Note 2)                        These values are changed by number of layer and copper foil area.
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                                                                           TSZ02201-0E2E0H600190-1-2
+                                                                                                    14/20
+TSZ22111 • 15 • 001                                                                                                                                           2019.03.26 Rev.003
+
+
+ BD41000AFJ-C
+I/O Equivalent Circuits
+   Type                      Equivalence Circuit     Type                  Equivalence Circuit
+    A                                                 B
+         Output pin: RXD                                  Input pin: NSLP, TXD
+                                                                           BAT
+                                                             BUS
+    C                                                 D
+                                                                                            1/2 x BAT
+         Input/output pin: CLK                            CXPI BUS Input/output pin: BUS
+    E
+         Input pin: MS
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                   TSZ02201-0E2E0H600190-1-2
+                                                 15/20
+TSZ22111 • 15 • 001                                                                       2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Operational Notes
+     1.    Reverse Connection of Power Supply
+           Connecting the power supply in reverse polarity can damage the IC. Take precautions against reverse polarity when
+           connecting the power supply, such as mounting an external diode between the power supply and the IC’s power
+           supply pins.
+     2.    Power Supply Lines
+           Design the PCB layout pattern to provide low impedance supply lines. Furthermore, connect a capacitor to ground at
+           all power supply pins. Consider the effect of temperature and aging on the capacitance value when using electrolytic
+           capacitors.
+     3.    Ground Voltage
+           Ensure that no pins are at a voltage below that of the ground pin at any time, even during transient condition.
+     4.    Ground Wiring Pattern
+           When using both small-signal and large-current ground traces, the two ground traces should be routed separately but
+           connected to a single ground at the reference point of the application board to avoid fluctuations in the small-signal
+           ground caused by large currents. Also ensure that the ground traces of external components do not cause variations
+           on the ground voltage. The ground lines must be as short and thick as possible to reduce line impedance.
+     5.    Thermal Consideration
+           Should by any chance the maximum junction temperature rating be exceeded the rise in temperature of the chip may
+           result in deterioration of the properties of the chip. In case of exceeding this absolute maximum rating, increase the
+           board size and copper area to prevent exceeding the maximum junction temperature rating.
+     6.    Recommended Operating Conditions
+           These conditions represent a range within which the expected characteristics of the IC can be approximately obtained.
+           The electrical characteristics are guaranteed under the conditions of each parameter.
+     7.    Inrush Current
+           When power is first supplied to the IC, it is possible that the internal logic may be unstable and inrush current may flow
+           instantaneously due to the internal powering sequence and delays, especially if the IC has more than one power
+           supply. Therefore, give special consideration to power coupling capacitance, power wiring, width of ground wiring, and
+           routing of connections.
+     8.    Operation Under Strong Electromagnetic Field
+           Operating the IC in the presence of a strong electromagnetic field may cause the IC to malfunction.
+     9.    Testing on Application Boards
+           When testing the IC on an application board, connecting a capacitor directly to a low-impedance output pin may
+           subject the IC to stress. Always discharge capacitors completely after each process or step. The IC’s power supply
+           should always be turned off completely before connecting or removing it from the test setup during the inspection
+           process. To prevent damage from static discharge, ground the IC during assembly and use similar precautions during
+           transport and storage.
+     10. Inter-pin Short and Mounting Errors
+           Ensure that the direction and position are correct when mounting the IC on the PCB. Incorrect mounting may result in
+           damaging the IC. Avoid nearby pins being shorted to each other especially to ground, power supply and output pin.
+           Inter-pin shorts could be due to many reasons such as metal particles, water droplets (in very humid environment) and
+           unintentional solder bridge deposited in between pins during assembly to name a few.
+     11. Unused Input Pins
+           Input pins of an IC are often connected to the gate of a MOS transistor. The gate has extremely high impedance and
+           extremely low capacitance. If left unconnected, the electric field from the outside can easily charge it. The small
+           charge acquired in this way is enough to produce a significant effect on the conduction through the transistor and
+           cause unexpected operation of the IC. So unless otherwise specified, unused input pins should be connected to the
+           power supply or ground line.
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                        TSZ02201-0E2E0H600190-1-2
+                                                                 16/20
+TSZ22111 • 15 • 001                                                                                          2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Operational Notes – continued
+     12. Regarding the Input Pin of the IC
+           This monolithic IC contains P+ isolation and P substrate layers between adjacent elements in order to keep them
+           isolated. P-N junctions are formed at the intersection of the P layers with the N layers of other elements, creating a
+           parasitic diode or transistor. For example (refer to figure below):
+           When GND > Pin A and GND > Pin B, the P-N junction operates as a parasitic diode.
+           When GND > Pin B, the P-N junction operates as a parasitic transistor.
+           Parasitic diodes inevitably occur in the structure of the IC. The operation of parasitic diodes can result in mutual
+           interference among circuits, operational faults, or physical damage. Therefore, conditions that cause these diodes to
+           operate, such as applying a voltage lower than the GND voltage to an input pin (and thus to the P substrate) should be
+           avoided.
+                                       Resistor                                                Transistor (NPN)
+               Pin A                                                    Pin B         B                         Pin B
+                                                                                C
+                                                Pin A                                 E
+                               P                                                                                     B  C
+                   P+                   P+                                   P+      N P     P+
+                N       N            N      N             Parasitic       N               N      N
+                                                                                                                        E
+                                                         Elements
+                                                                                                                             Parasitic
+                                  P Substrate                                            P Substrate
+                                                                                                                             Elements
+                                GND                                                     GND      GND                     GND
+                 Parasitic                                                 Parasitic                        N Region
+                Elements                                                   Elements                          close-by
+                                                  Figure 22. Example of Monolithic IC Structure
+     13. Ceramic Capacitor
+           When using a ceramic capacitor, determine the dielectric constant considering the change of capacitance with
+           temperature and the decrease in nominal capacitance due to DC bias and others.
+     14. Area of Safe Operation (ASO)
+           Operate the IC such that the output voltage, output current, and the maximum junction temperature rating are all within
+           the Area of Safe Operation (ASO).
+     15. Thermal Shutdown Circuit(TSD)
+           This IC has a built-in thermal shutdown circuit that prevents heat damage to the IC. Normal operation should always
+           be within the IC’s maximum junction temperature rating. If however the rating is exceeded for a continued period, the
+           junction temperature (Tj) will rise which will activate the TSD circuit that will turn OFF all output pins. When the Tj falls
+           below the TSD threshold, the circuits are automatically restored to normal operation.
+           Note that the TSD circuit operates in a situation that exceeds the absolute maximum ratings and therefore, under no
+           circumstances, should the TSD circuit be used in a set design or for any purpose other than protecting the IC from
+           heat damage.
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                         TSZ02201-0E2E0H600190-1-2
+                                                                    17/20
+TSZ22111 • 15 • 001                                                                                               2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Ordering Information
+     B       D        4         1        0 0      0      A       F      J    －      C       E      2
+  Part Number                                                 Package            Product Rank
+                                                              FJ: SOP-J8         C: for Automotive
+                                                                                 Packaging and forming specification
+                                                                                 E2: Embossed tape and reel
+Marking Diagrams
+                      SOP-J8 (TOP VIEW)
+                                                   Part Number Marking
+                              4 1 0 0 A
+                                                   LOT Number
+                                                   1PIN MARK
+                    Part Number Marking      Package       Orderable Part Number
+                    4100A                  SOP-J8          BD41000AFJ-CE2
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                       TSZ02201-0E2E0H600190-1-2
+                                                        18/20
+TSZ22111 • 15 • 001                                                                          2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Physical Dimension, Tape and Reel Information
+ Package Name                                      SOP-J8
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                TSZ02201-0E2E0H600190-1-2
+                                              19/20
+TSZ22111 • 15 • 001                                                2019.03.26 Rev.003
+
+
+BD41000AFJ-C
+Revision History
+          Date         Revision                                                 Changes
+                                       New Release
+                                       (For additional information, the changed contents is shown from BD41000FJ-C Rev0.02)
+     08.Aug.2017            001
+                                       All     Modified from BD41000FJ-C to BD41000AFJ-C
+                                       P5      Added detail information about wakeup decision method of slave node
+                                       P7      Added detail information about wakeup decision method of master node
+                                       P9,P10 Modified arbitration function explanation
+                                       P18     Modified ordering information and marking diagrams
+     21.Seq.2017            002        P12     Added explanation of RL
+                                       P1      Added the ApplicationNote information
+                                       P9      1. In case of collision is happened by transmitting from other node at the same
+     26.Mar.2019            003                 time
+                                                   Added a caution about the time to validate the transmit after an arbitration
+                                                   defeat occurred.
+www.rohm.com
+© 2017 ROHM Co., Ltd. All rights reserved.                                                       TSZ02201-0E2E0H600190-1-2
+                                                                 20/20
+TSZ22111 • 15 • 001                                                                                          2019.03.26 Rev.003
+
+
+                                                            Notice
+Precaution on using ROHM Products
+    1.  If you intend to use our Products in devices requiring extremely high reliability (such as medical equipment (Note 1),
+        aircraft/spacecraft, nuclear power controllers, etc.) and whose malfunction or failure may cause loss of human life,
+        bodily injury or serious damage to property (“Specific Applications”), please consult with the ROHM sales
+        representative in advance. Unless otherwise agreed in writing by ROHM in advance, ROHM shall not be in any way
+        responsible or liable for any damages, expenses or losses incurred by you or third parties arising from the use of any
+        ROHM’s Products for Specific Applications.
+                               (Note1) Medical Equipment Classification of the Specific Applications
+                                     JAPAN                USA                EU              CHINA
+                                    CLASSⅢ                               CLASSⅡb
+                                                       CLASSⅢ                              CLASSⅢ
+                                    CLASSⅣ                                CLASSⅢ
+    2.  ROHM designs and manufactures its Products subject to strict quality control system. However, semiconductor
+        products can fail or malfunction at a certain rate. Please be sure to implement, at your own responsibilities, adequate
+        safety measures including but not limited to fail-safe design against the physical injury, damage to any property, which
+        a failure or malfunction of our Products may cause. The following are examples of safety measures:
+              [a] Installation of protection circuits or other protective devices to improve system safety
+              [b] Installation of redundant circuits to reduce the impact of single or multiple circuit failure
+    3.  Our Products are not designed under any special or extraordinary environments or conditions, as exemplified below.
+        Accordingly, ROHM shall not be in any way responsible or liable for any damages, expenses or losses arising from the
+        use of any ROHM’s Products under any special or extraordinary environments or conditions. If you intend to use our
+        Products under any special or extraordinary environments or conditions (as exemplified below), your independent
+        verification and confirmation of product performance, reliability, etc, prior to use, must be necessary:
+              [a] Use of our Products in any types of liquid, including water, oils, chemicals, and organic solvents
+              [b] Use of our Products outdoors or in places where the Products are exposed to direct sunlight or dust
+              [c] Use of our Products in places where the Products are exposed to sea wind or corrosive gases, including Cl2,
+                  H2S, NH3, SO2, and NO2
+              [d] Use of our Products in places where the Products are exposed to static electricity or electromagnetic waves
+              [e] Use of our Products in proximity to heat-producing components, plastic cords, or other flammable items
+              [f] Sealing or coating our Products with resin or other coating materials
+              [g] Use of our Products without cleaning residue of flux (Exclude cases where no-clean type fluxes is used.
+                 However, recommend sufficiently about the residue.); or Washing our Products by using water or water-soluble
+                 cleaning agents for cleaning residue after soldering
+              [h] Use of the Products in places subject to dew condensation
+    4.  The Products are not subject to radiation-proof design.
+    5.  Please verify and confirm characteristics of the final or mounted products in using the Products.
+    6.  In particular, if a transient load (a large amount of load applied in a short period of time, such as pulse, is applied,
+        confirmation of performance characteristics after on-board mounting is strongly recommended. Avoid applying power
+        exceeding normal rated power; exceeding the power rating under steady-state loading condition may negatively affect
+        product performance and reliability.
+    7.  De-rate Power Dissipation depending on ambient temperature. When used in sealed area, confirm that it is the use in
+        the range that does not exceed the maximum junction temperature.
+    8.  Confirm that operation temperature is within the specified range described in the product specification.
+    9.  ROHM shall not be in any way responsible or liable for failure induced under deviant condition from what is defined in
+        this document.
+Precaution for Mounting / Circuit board design
+    1.  When a highly active halogenous (chlorine, bromine, etc.) flux is used, the residue of flux may negatively affect product
+        performance and reliability.
+    2.  In principle, the reflow soldering method must be used on a surface-mount products, the flow soldering method must
+        be used on a through hole mount products. If the flow soldering method is preferred on a surface-mount products,
+        please consult with the ROHM representative in advance.
+    For details, please refer to ROHM Mounting specification
+Notice-PAA-E                                                                                                            Rev.004
+© 2015 ROHM Co., Ltd. All rights reserved.
+
+
+Precautions Regarding Application Examples and External Circuits
+    1.   If change is made to the constant of an external circuit, please allow a sufficient margin considering variations of the
+         characteristics of the Products and external components, including transient characteristics, as well as static
+         characteristics.
+    2.   You agree that application notes, reference designs, and associated data and information contained in this document
+         are presented only as guidance for Products use. Therefore, in case you use such information, you are solely
+         responsible for it and you must exercise your own independent verification and judgment in the use of such information
+         contained in this document. ROHM shall not be in any way responsible or liable for any damages, expenses or losses
+         incurred by you or third parties arising from the use of such information.
+Precaution for Electrostatic
+    This Product is electrostatic sensitive product, which may be damaged due to electrostatic discharge. Please take proper
+    caution in your manufacturing process and storage so that voltage exceeding the Products maximum rating will not be
+    applied to Products. Please take special care under dry condition (e.g. Grounding of human body / equipment / solder iron,
+    isolation from charged objects, setting of Ionizer, friction prevention and temperature / humidity control).
+Precaution for Storage / Transportation
+    1.   Product performance and soldered connections may deteriorate if the Products are stored in the places where:
+              [a] the Products are exposed to sea winds or corrosive gases, including Cl 2, H2S, NH3, SO2, and NO2
+              [b] the temperature or humidity exceeds those recommended by ROHM
+              [c] the Products are exposed to direct sunshine or condensation
+              [d] the Products are exposed to high Electrostatic
+    2.   Even under ROHM recommended storage condition, solderability of products out of recommended storage time period
+         may be degraded. It is strongly recommended to confirm solderability before using Products of which storage time is
+         exceeding the recommended storage time period.
+    3.   Store / transport cartons in the correct direction, which is indicated on a carton with a symbol. Otherwise bent leads
+         may occur due to excessive stress applied when dropping of a carton.
+    4.   Use Products within the specified time after opening a humidity barrier bag. Baking is required before using Products of
+         which storage time is exceeding the recommended storage time period.
+Precaution for Product Label
+    A two-dimensional barcode printed on ROHM Products label is for ROHM’s internal use only.
+Precaution for Disposition
+    When disposing Products please dispose them properly using an authorized industry waste company.
+Precaution for Foreign Exchange and Foreign Trade act
+    Since concerned goods might be fallen under listed items of export control prescribed by Foreign exchange and Foreign
+    trade act, please consult with ROHM in case of export.
+Precaution Regarding Intellectual Property Rights
+    1.   All information and data including but not limited to application example contained in this document is for reference
+         only. ROHM does not warrant that foregoing information or data will not infringe any intellectual property rights or any
+         other rights of any third party regarding such information or data.
+    2.   ROHM shall not have any obligations where the claims, actions or demands arising from the combination of the
+         Products with other articles such as components, circuits, systems or external equipment (including software).
+    3.   No license, expressly or implied, is granted hereby under any intellectual property rights or other rights of ROHM or any
+         third parties with respect to the Products or the information contained in this document. Provided, however, that ROHM
+         will not assert its intellectual property rights or other rights against you or your customers to the extent necessary to
+         manufacture or sell products containing the Products, subject to the terms and conditions herein.
+Other Precaution
+    1.   This document may not be reprinted or reproduced, in whole or in part, without prior written consent of ROHM.
+    2.   The Products may not be disassembled, converted, modified, reproduced or otherwise changed without prior written
+         consent of ROHM.
+    3.   In no event shall you use in any way whatsoever the Products and the related technical information contained in the
+         Products or this document for any military purposes, including but not limited to, the development of mass-destruction
+         weapons.
+    4.   The proper names of companies or products described in this document are trademarks or registered trademarks of
+         ROHM, its affiliated companies or third parties.
+Notice-PAA-E                                                                                                              Rev.004
+© 2015 ROHM Co., Ltd. All rights reserved.
+
+
+                                                                                                                Datasheet
+General Precaution
+    1. Before you use our Products, you are requested to carefully read this document and fully understand its contents.
+        ROHM shall not be in any way responsible or liable for failure, malfunction or accident arising from the use of any
+        ROHM’s Products against warning, caution or note contained in this document.
+    2. All information contained in this document is current as of the issuing date and subject to change without any prior
+        notice. Before purchasing or using ROHM’s Products, please confirm the latest information with a ROHM sales
+        representative.
+    3.  The information contained in this document is provided on an “as is” basis and ROHM does not warrant that all
+        information contained in this document is accurate and/or error-free. ROHM shall not be in any way responsible or
+        liable for an y damages, expenses or losses incurred b y you or third parties resulting from inaccuracy or errors of or
+        concerning such information.
+Notice – WE                                                                                                           Rev.001
+© 2015 ROHM Co., Ltd. All rights reserved.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+ROHM Semiconductor:
+ BD41000AFJ-CE2

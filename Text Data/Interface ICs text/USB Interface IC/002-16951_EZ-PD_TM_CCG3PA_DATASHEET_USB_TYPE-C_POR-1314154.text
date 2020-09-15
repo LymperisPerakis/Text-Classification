@@ -1,0 +1,1756 @@
+                                                                                      EZ-PD™ CCG3PA Datasheet
+                                                                              USB Type-C Port Controller
+General Description
+EZ-PD™ CCG3PA is Cypress’ highly integrated USB Type-C port controller that complies with the latest USB Type-C and PD
+standards and is targeted for PC power adapters, mobile chargers, car chargers, and power bank applications. In such applications,
+CCG3PA provides additional functionalities and BOM integration advantages. CCG3PA uses Cypress’ proprietary M0S8 technology
+with a 32-bit Arm® Cortex™-M0 processor, 64-KB flash, a complete Type-C USB-PD transceiver, all termination resistors required for
+a Type-C port, an integrated feedback control circuitry for voltage (VBUS) regulation and system-level ESD protection. It is available
+in 24-pin QFN and 16-pin SOIC packages.
+Features                                                              32-bit MCU Subsystem
+                                                                      ■ Arm Cortex-M0 CPU
+Type-C Support and USB-PD Support
+                                                                      ■ 64-KB Flash
+■ Supports USB PD3.0 Version 1.1 Spec including Program-
+                                                                      ■ 8-KB SRAM
+  mable Power Supply Mode
+■ Configurable resistors RP and RD                                    Clocks and Oscillators
+■ Supports one USB Type-C port and one Type-A port                    ■ Integrated oscillator eliminating the need for external clock
+2x Legacy/Proprietary Charging Blocks                                 Power
+■ Supports QC 4.0, Apple charging 2.4A, AFC, BC 1.2                   ■ 3.0-V to 24.5-V operation (30-V tolerant)
+■ Integrates all required terminations on DP/DM lines                 System-Level ESD Protection
+                                                                      ■ On CC, VBUS_C_MON_DISCHARGE, DP0, DM0, P2.2, and
+Integrated Voltage (VBUS) Regulation and Current                        P2.3 pins
+Sense Amplifier
+                                                                      ■ ± 8-kV Contact Discharge and ±15-kV Air Gap Discharge based
+■ Analog regulation of secondary side feedback node (direct             on IEC61000-4-2 level 4C
+  feedback or opto coupler)
+                                                                      Packages
+■ Integrated shunt regulator function for VBUS control                ■ 24-pin QFN and 16-pin SOIC
+■ Constant current or constant voltage mode                           ■ Supports extended industrial temperature range
+                                                                        (–40 °C to +105 °C)
+■ Supports low-side current sensing for constant current control
+System-Level Fault Protection
+■ VBUS to CC Short Protection
+■ On-chip OVP, OCP, UVP, and SCP
+■ Supports OTP through integrated ADC circuit
+Cypress Semiconductor Corporation           •   198 Champion Court           •    San Jose, CA 95134-1709           •     408-943-2600
+Document Number: 002-16951 Rev. *F                                                                              Revised March 2, 2018
+
+
+                                                                                                                                     EZ-PD™ CCG3PA Datasheet
+Logic Block Diagram
+                          CCG3PA: Single- Chip Type- C Controller
+                              MCU Subsystem                                                       Integrated Digital Blocks               I/O Subsystem
+                                                       Advanced High- Performance Bus (AHB)
+                                                                                                                                           Programmable
+                                   ARM                                                                       4x TCPWM
+                                                                                                                                                                  CC
+                                  CORTEX-M0
+                                                                                                                                             I/O Matrix
+                                                                                                                2x SCB
+                                                                                                          (I2 C, SPI, UART)
+                                                                                                                                                             GPIOs
+                                     Flash
+                                    (64 KB)                                                      USB PD Subsystem
+                                                                                                                                                 OCP and OVP
+                                                                                                          Baseband PHY
+                                                                                                                                                  Protection
+                                    SRAM                                                                                                  Low- side Current
+                                                                                                              RP , R D
+                                    (8 KB)                                                                                                 Sense Amplifier
+                                                                                                         Voltage (VBUS)                          2x PFET Gate
+                                                                                                           Regulation                               Drivers
+                                     System
+                                    Resources                                                                                                    High Voltage
+                                                                                                        2x VBUS Discharge
+                                                                                                                                                   Regulator
+                                                                                                        2x 8- bit SAR ADCs                  2x Charger Detect
+Internal Block Diagram
+                                    VBUS_IN_DISCHARGE                                                    VBUS_P_CTRL      VBUS_C_CTRL                      VBUS_C_MON_DISCHARGE
+                                    OV/UV,
+                                     R-Div                                                                                                                R-Div
+        VDDD                          HV
+                                      Reg
+                                                                                                                                                                       DISCH
+                                   3.3 V
+        VCCD                                         Prog
+                1.8 V                               DISCH
+                        LDO
+                                                                                                                                                                   BMC         CC1
+                                                                                                                                                                   PHY
+                                                                                                                                                                               CC2
+                                                                                                          MCU Subsystem
+                                                                                                                                                                               DP0 / GPIO
+                                                                                                Advanced High- Performance Bus                                    Charger
+                                                                                                            (AHB)                                                 Detect0      DM0 / GPIO
+          FB
+                                                                                                              Flash       SRAM
+                                                                                               Cortex-M0                                                                       DP1 / GPIO
+        CATH/                                                                                                (64KB)       (8KB)                                   Charger
+        COMP                                                                                                                                                      Detect1
+                                                                                                                                                                               DM1 / GPIO
+                                                                                                                                2x SCB                             POR         AXRES / GPIO
+                                            LSCSA                                             2x ADCs       4x TCPWM
+                                                                                                                              (I2C, SPI, UART)
+                                                                                                                                                                   GPIO        GPIO
+                                   GND               CSP
+                                                                                                         Type-C
+                                                                                                         Connector
+                                                                                                         Ground
+                                              Rs
+Document Number: 002-16951 Rev. *F                                                                                                                                                   Page 2 of 37
+
+
+                                                                                                         EZ-PD™ CCG3PA Datasheet
+Contents
+Functional Overview ........................................................ 4           Ordering Information......................................................        29
+    MCU Subsystem ......................................................... 4                Ordering Code Definitions .........................................           29
+    USB-PD Subsystem (SS)............................................ 4                  Package Diagrams..........................................................        30
+    Integrated Digital Blocks.............................................. 5            Acronyms ........................................................................ 33
+    I/O Subsystem............................................................. 5         Document Conventions .................................................            34
+Power Systems Overview ................................................ 6                    Units of Measure .......................................................      34
+Pinouts .............................................................................. 7 Document History Page .................................................           35
+CCG3PA Programming and Bootloading..................... 10                               Sales, Solutions, and Legal Information ......................                    37
+    Programming the Device Flash over SWD Interface. 10                                      Worldwide Sales and Design Support.......................                     37
+Application Diagrams..................................................... 12                 Products .................................................................... 37
+Electrical Specifications ................................................ 17                PSoC® Solutions ......................................................        37
+    Absolute Maximum Ratings ....................................... 17                      Cypress Developer Community.................................                  37
+    Device-Level Specifications ...................................... 17                    Technical Support .....................................................       37
+    Digital Peripherals ..................................................... 21
+    System Resources .................................................... 23
+Document Number: 002-16951 Rev. *F                                                                                                                              Page 3 of 37
+
+
+                                                                                    EZ-PD™ CCG3PA Datasheet
+Functional Overview                                                sensing the GPIO pin voltage with an ADC, the pin voltage
+                                                                   cannot exceed the VDDIO supply value.
+MCU Subsystem
+                                                                   Charger Detection
+CPU                                                                The two charger detection blocks connected to the two pairs of
+The Cortex-M0 CPU in EZ-PD CCG3PA is part of the 32-bit MCU        DP/DM pins allow CCG3PA to detect conventional battery
+subsystem, which is optimized for low-power operation with         chargers conforming to BC 1.2, and the following proprietary
+extensive clock gating.                                            charger specifications: Apple, Qualcomm’s QuickCharge 4.0,
+The CPU also includes a serial wire debug (SWD) interface,         and Samsung AFC.
+which is a 2-wire form of JTAG. The debug configuration used for   VBUS Overcurrent and Overvoltage Protection
+EZ-PD CCG3PA has four break-point (address) comparators
+and two watchpoint (data) comparators.                             The CCG3PA chip has an integrated hardware block for VBUS
+                                                                   overvoltage protection (OVP)/overcurrent protection (OCP) with
+Flash                                                              configurable thresholds and response times on the Type C port.
+The EZ-PD CCG3PA device has a flash module with one bank
+of 64-KB flash, a flash accelerator, tightly coupled to the CPU to VBUS Short Protection
+improve average access times from the flash block.                 CCG3PA provides four VBUS short protection pins: CC1, CC2,
+                                                                   P2.2, and P2.3. These pins are protected from accidental shorts
+SROM                                                               to high-voltage VBUS. Accidental shorts may occur because the
+A supervisory ROM that contains boot and configuration routines    CC1 and CC2 pins are placed next to the VBUS pins in the USB
+is provided.                                                       Type-C connector. A Power Delivery controller without the
+                                                                   high-voltage VBUS short protection will be damaged in the event
+USB-PD Subsystem (SS)                                              of accidental shorts. When the protection circuit is triggered,
+The USB-PD subsystem provides the interface to the Type-C          CCG3PA can handle up to 17 V forever and between 17 V to
+USB port. This subsystem comprises a current sense amplifier,      22 VDC for 1000 hours on the OVT pins. When a VBUS short
+a high-voltage regulator, OVP, OCP, and supply switch blocks.      event occurs on the CC pins, a temporary high-ringing voltage is
+This subsystem also includes all ESD required and supported on     observed due to the RLC elements in the USB Type-C cable.
+the Type-C port.                                                   Without CCG3PA connected, this ringing voltage can be twice
+                                                                   (44 V) the maximum VBUS voltage (21.5 V). However, when
+USB-PD Physical Layer                                              CCG3PA is connected, it is capable of clamping temporary
+                                                                   high-ringing voltage and protecting the CC pin using IEC ESD
+The USB-PD Physical Layer consists of a transmitter and
+                                                                   protection diodes.
+receiver that communicate BMC-encoded data over the CC
+channel based on the PD 3.0 standard. All communication is         Low-side Current Sense Amplifier (CSA)
+half-duplex. The Physical Layer or PHY practices collision
+avoidance to minimize communication errors on the channel.         The CCG3PA chip also has an integrated low-side current sense
+                                                                   amplifier that is capable of detecting current in the order of
+The USB-PD block includes all termination resistors (RP and RD)    100 mA across a 5 mΩ external resistor. It also supports
+and their switches as required by the USB-PD spec. RP and RD       constant current mode of operation in power adapter application
+resistors are required to implement connection detection, plug     as a provider.
+orientation detection, and for establishing USB DFP/UFP roles.
+The RP resistor is implemented as a current source.                PFET Gate Drivers on VBUS Path
+According to the USB Type-C spec, a Type-C controller such as      CCG3PA has two integrated PFET gate drivers to drive external
+CCG3PA must present certain termination resistors depending        PFETs on the VBUS provider and consumer path. The
+on its role in its unpowered state. The Sink role in a power bank  VBUS_P_CTRL gate driver has an active pull-up, and thus can
+application requires RD resistors to be present on the CC pins     drive high, low or High-Z.
+whereas the DFP role, as in a power adapter, requires both CC
+                                                                   The VBUS_C_CTRL gate driver can drive only low or high-Z,
+lines to be open. To be flexible for such applications, CCG3PA
+                                                                   thus requiring an external pull-up. These pins are VBUS
+includes the resistors required in the unpowered state on
+                                                                   voltage-tolerant.
+separate pads or pins. The dead battery RD resistors are
+available on separate pads. The dead battery RD is implemented     VBUS Discharge FETs
+as a bond option on parts for Power Bank applications. In these
+parts, each CC pin is bonded out together with its corresponding   CCG3PA also has two integrated VBUS discharge FETs used to
+dead battery RD resistor. On part numbers for the DFP appli-       discharge VBUS to meet the USB-PD specification timing on a
+cation, the CC pins are not bonded with the dead battery RD.       detach condition. VBUS Discharge FET on the provider side can
+                                                                   be used to accelerate the ramp down of VBUS to default 5V on
+ADC                                                                the secondary side.
+The ADC is a low-footprint 8-bit SAR ADC that is available for     Voltage (VBUS) Regulation
+general-purpose A-D conversion applications in the chip. This
+ADC can be accessed from all GPIOs and the DP/DM pins              CCG3PA contains an integrated feedback control circuitry (for
+through an on-chip analog mux. CCG3PA contains two instances       AC/DC applications) for secondary side control with analog
+of the ADC. The voltage reference for the ADCs is generated        regulation of the feedback/cathode pins to achieve the appro-
+either from the VDDD supply or from internal bandgap. When
+Document Number: 002-16951 Rev. *F                                                                                   Page 4 of 37
+
+
+                                                                                      EZ-PD™ CCG3PA Datasheet
+priate voltage on VBUS pin as per the negotiated contract with     find the number of times a particular event occurs (counter),
+the peer device over Type-C.                                       generate PWM signals, or decode quadrature signals.
+Integrated Digital Blocks                                          I/O Subsystem
+Serial Communication Blocks (SCB)                                  EZ-PD CCG3PA has up to 12 GPIOs of which, some of them can
+                                                                   be re-purposed to support functions of SCB (I2C, UART, SPI).
+EZ-PD CCG3PA has two SCBs, which can be configured to              GPIO pins P0.0 and P0.1 are overvoltage-tolerant (OVT) (upto
+implement an I2C, SPI, or UART interface. The hardware I2C         7V).
+blocks implement full multi-master and slave interfaces capable
+                                                                   The GPIO block implements the following:
+of multimaster arbitration. In the SPI mode, the SCB blocks can
+be configured to act as master or slave.                           ■  Seven drive strength modes:
+        2                                                             ❐ Input only
+In the I C mode, the SCB blocks are capable of operating at
+speeds of up to 1 Mbps (Fast Mode Plus) and have flexible             ❐ Weak pull-up with strong pull-down
+buffering options to reduce interrupt overhead and latency for the    ❐ Strong pull-up with weak pull-down
+CPU. These blocks also support I2C that creates a mailbox             ❐ Open drain with strong pull-down
+address range in the memory of EZ-PD CCG3PA and effectively           ❐ Open drain with strong pull-up
+reduce I2C communication to reading from and writing to an            ❐ Strong pull-up with strong pull-down
+array in memory. In addition, the blocks support 8-deep FIFOs         ❐ Weak pull-up with weak pull-down
+for receive and transmit which, by increasing the time given for
+the CPU to read data, greatly reduce the need for clock            ■  Input threshold select (CMOS or LVTTL)
+stretching caused by the CPU not having read data on time.         ■  Individual control of input and output buffer enabling/disabling
+The I2C peripherals are compatible with the I2C Standard-mode,        in addition to the drive strength modes
+Fast-mode, and Fast-mode Plus devices as defined in the NXP        ■  Hold mode for latching previous state (used for retaining I/O
+I2C-bus specification and user manual (UM10204). The I2C bus          state in Deep Sleep mode)
+I/Os are implemented with GPIO in open-drain modes.
+                                                                   ■  Selectable slew rates for dV/dt related noise control to improve
+The I2C port on the SCB blocks of EZ-PD CCG3PA are not
+                                                                      EMI
+completely compliant with the I2C spec in the following aspects:
+                                                                   During power-on and reset, the I/O pins are forced to the disable
+■ The GPIO cells for SCB 1’s I2C port are not overvoltage-tolerant state so as not to crowbar any inputs and/or cause excess
+  and, therefore, cannot be hot-swapped or powered up              turn-on current. A multiplexing network known as a high-speed
+  independently of the rest of the I2C system.                     I/O matrix is used to multiplex between various signals that may
+                                                                   connect to an I/O pin.
+■ Fast-mode Plus has an IOL specification of 20 mA at a VOL of     Port pins P1.0 and P1.1 can be configured to indicate Fault for
+  0.4 V. The GPIO cells can sink a maximum of 8-mA IOL with a      OCP/SCP/OVP/UVP conditions. Any two fault conditions can be
+  VOL maximum of 0.6 V.                                            mapped to two GPIOs or all the four faults can be OR’ed to
+                                                                   indicate over one GPIO.
+■ Fast-mode and Fast-mode Plus specify minimum Fall times,
+  which are not met with the GPIO cell; Slow strong mode can
+  help meet this spec depending on the bus load.
+Timer/Counter/PWM Block (TCPWM)
+EZ-PD CCG3PA has four TCPWM blocks. Each implements a
+16-bit timer, counter, pulse-width modulator (PWM), and
+quadrature decoder functionality. The block can be used to
+measure the period and pulse width of an input signal (timer),
+Document Number: 002-16951 Rev. *F                                                                                       Page 5 of 37
+
+
+                                                                                       EZ-PD™ CCG3PA Datasheet
+Power Systems Overview
+CCG3PA can operate from two possible external supply sources:         Transitions between these power modes are managed by the
+VBUS_IN_DISCHARGE (3.0 V–24.5 V) or VDDD (2.7 V–5.5 V).               power       system.      When        powered       through      the
+When powered through VBUS_IN_DISCHARGE, the internal                  VBUS_IN_DISCHARGE pin, VDDD cannot be used to power
+regulator generates VDDD of 3.3 V for chip operation. The             external devices and should be connected to a 1-µF capacitor for
+regulated supply, VDDD, is either used directly inside some           the regulator stability only. These pins are not supported as
+analog blocks or further regulated down to VCCD (1.8 V), which        power supplies. Refer to the application diagrams for capacitor
+powers majority of the core using the regulators. CCG3PA has          connections.
+three different power modes: Active, Sleep, and Deep Sleep.
+Table 1. CCG3PA Power Modes
+             Mode                                                             Description
+                                 Power is valid and an internal reset source is asserted or SleepController is sequencing the system
+ Power-On Reset (POR)
+                                 out of reset.
+ ACTIVE                          Power is valid and CPU is executing instructions.
+                                 Power is valid and CPU is not executing instructions. All logic that is not operating is clock gated to
+ SLEEP
+                                 save power.
+                                 Main regulator and most blocks are shut off. DeepSleep regulator powers logic, but only
+ DEEP SLEEP
+                                 low-frequency clock is available.
+                                      Figure 1. Power System Requirement Block Diagram
+                                                                       SHV                      VBUS_IN_DISCHARGE
+                                                                   Regulator
+              VBUS_C_MON                            UV/
+               _DISCHARGE                          OVP
+                                                                               Gate Driver      VBUS_P_CTRL
+             VBUS_C_CTRL               Gate Driver
+                                                                                                VDDD
+                                                                                                                1uF
+                                                            1.8-V
+                                                         Regulator
+                       VCCD
+            1uF
+                                                                                 CC
+                                                            Core                                CC1, CC2
+                                          GPIO                                 Tx/Rx
+                          VSS                                                                   VSS
+                                                          CCG3PA
+Document Number: 002-16951 Rev. *F                                                                                          Page 6 of 37
+
+
+                                                                                                EZ-PD™ CCG3PA Datasheet
+Pinouts
+Table 2. CCG3PA Pin Descriptions
+ 24-Pin     16-Pin         Pin Name                                                          Description
+  QFN        SOIC
+    1          –                P1.0           Port 1 pin 0: GPIO/UART_1_CTS/I2C_SDA_1[1] / TCPWM_line_0[2], Programmable
+                                               SCP/OCP/OVP/UVP Fault indication
+    2          –                P1.1           Port 1 pin 1: GPIO/UART_1_RTS/I2C_SCL_1[1] / TCPWM_line_1[3], Programmable
+                                               SCP/OCP/OVP/UVP Fault indication
+                                               Provider (PMOS) FET control (30-V Tolerant)
+    3          5        VBUS_P_CTRL            0: Path ON
+                                               1: Path OFF
+                                               VBUS Consumer (PMOS) FET Control (30-V Tolerant)
+    4          –        VBUS_C_CTRL            0: Path ON
+                                               Z: Path OFF
+    5          –            DP1/P1.2           USB D+/Port 1 pin 2: GPIO/UART_1_TX1/AFC/QC/BC 1.2/Apple Charging/No IEC
+    6          –            DM1/P1.3           USB D-/Port 1 pin 3: GPIO/UART_1_RX1/AFC/QC/BC 1.2/Apple Charging/No IEC
+    7          6       SWD_DAT_0/P0.0          Port 0 pin 0: GPIO/OVT/I2C_SDA_0/TCPWM_line_0/UART_0_CTS
+    8          7       SWD_CLK_0/P0.1          Port 0 pin 1: GPIO/OVT/I2C_SCL_0/TCPWM_line_1/UART_0_RTS
+    9          8          AXRES/P2.0           Port 2 pin 0: GPIO/Alternate XRES[4]/TCPWM_line_0//UART_0_TX0
+   10          –                P2.1           Port 2 pin 1: GPIO/TCPWM_line_1//UART_0_RX0
+   11          9     VBUS_C_MON_DIS-           Type C VBUS Monitor with Internal Discharge FET
+                            CHARGE
+   12          –                P2.2           Port 2 pin 2: GPIO with Open drain with pull-up assist. Configurable as GPIO_20VT/I2C_SDA_1/IEC.
+                                               Tolerant to temporary short to VBUS pin..
+   13          –                P2.3           Port 2 pin 3: GPIO with Open drain with pull-up assist. Configurable as GPIO_20VT/I2C_SCL_1/IEC.
+                                               Tolerant to temporary short to VBUS pin.
+   14         10                CC2            Communication Channel 2 with Dead-battery Rd Bonding Option/IEC. Tolerant to temporary short to
+                                               VBUS pin.
+   15         11                CC1            Communication Channel 1 with Dead-battery Rd Bonding Option/IEC. Tolerant to temporary short to
+                                               VBUS pin.
+   16         12            DM0/P3.1           USB D-/Port 3 pin 1: GPIO/UART_1_RX0/AFC/QC/BC 1.2/Apple Charging/IEC
+   17         13            DP0/P3.0           USB D+/Port 3 pin 0: GPIO/UART_1_TX0/AFC/QC/BC 1.2/Apple Charging/IEC
+                         VBUS_IN_DIS
+   18         14            CHARGE             VBUS Power IN (3.0 V–24.5 V) with Internal Discharge FET
+   19         16                CSP            CS +: Current sense input
+   20          1                 FB            Voltage regulation feedback pin
+   21          2          CATH/COMP            Cathode of voltage regulation and compensation for other applications
+   22         15                GND            Ground
+   23          3               VDDD            Power Input: 2.7 V–5.5 V
+   24          4               VCCD            1.8-V Core Voltage pin (not intended for use as a power source)
+    –          –               EPAD            Ground
+Note
+ 1. Out of the two SCB blocks (SCB0 and SCB1), while the SCB0’s I2C functionality is mapped out to the P0.0/P0.1 GPIO pins, the I2C functionality
+    of SCB1 provides flexibility to have it mapped either on P1.0/P1.1 OR P2.2/P2.3 GPIO pins.
+ 2. TCPWM_line_0 can be mapped to port pins P1.0, P0.0, P2.0 or P2.2.
+ 3. TCPWM_line_1 can be mapped to port pins P1.1, P0.1, P2.1 or P2.3.
+ 4. AXRES pin will be internally pulled up during the Power On I/O initialization time (see Table 6 for more details).
+ 5. See Table 9 and Table 10 for specifications related to these pins.
+Document Number: 002-16951 Rev. *F                                                                                                 Page 7 of 37
+
+
+                                                                            EZ-PD™ CCG3PA Datasheet
+Table 3. GPIO Ports, Pins and Their Functionality
+                                                                            Protection
+ Port 24-QFN 16-SOIC           SCB Function                                               USB Charging Signal   IEC4
+                                                                  Fault     Capability
+                                                       TCPWM
+                                                                Indicator VBUS
+ Pin    Pin#   Pin#      UART         SPI       I2C                       Short   OVT  AFC    QC   BC1.2 Apple
+ P0.0     7      6    UART_0_CTS SPI_1_MO     I2C_0_ TCPWM_line     –       –      Yes   –     –      –     –     –
+                                       SI       SDA     _0:0
+                                   SPI_1_MIS  I2C_0_ TCPWM_line
+ P0.1     8      7    UART_0_RTS                                    –       –      Yes   –     –      –     –     –
+                                       O        SCL     _1:0
+                                              I2C_1_ TCPWM_line
+ P1.0     1           UART_1_CTS SPI_0_SEL     SDA:1    _2:1       Yes      –           –     –      –     –     –
+ P1.1     2           UART_1_RTS SPI_0_MIS    I2C_1_ TCPWM_line    Yes      –           –     –      –     –     –
+                                       O       SCL:1    _3:1
+                                   SPI_0_MO
+ P1.2     5           UART_1_TX1                  –      –          –       –       –   D+    D+     D+    D+     –
+                                       SI
+ P1.3     6           UART_1_RX1 SPI_0_CLK        –      –          –       –       –   D-     D-    D-     D-    –
+                                                     TCPWM_line
+ P2.0     9      8    UART_0_TX0 SPI_1_SEL        –                 –       –       –    –     –      –     –     –
+                                                        _2:0
+                                                     TCPWM_line
+ P2.1    10           UART_0_RX0 SPI_1_CLK        –     _3:0        –       –       –    –     –      –     –     –
+ P2.2    12           UART_0_TX1       –      I2C_1_ TCPWM_line     –      Yes      –    –     –      –     –    Yes
+                                               SDA:0    _0:1
+                                              I2C_1_ TCPWM_line
+ P2.3    13           UART_0_RX1       –                            –      Yes      –    –     –      –     –    Yes
+                                               SCL:0    _1:1
+ P3.0    17     13    UART_1_TX0       –          –      –          –       –       –   D+    D+     D+    D+    Yes
+ P3.1    16     12    UART_1_RX0       –          –      –          –       –       –   D-     D-    D-     D-   Yes
+Document Number: 002-16951 Rev. *F                                                                        Page 8 of 37
+
+
+                                                                                                                                                     EZ-PD™ CCG3PA Datasheet
+                                     Figure 2. Pinout of 24-QFN Package (Top View)
+                                                                                                     CATH/COMP
+                                                      VCCD             VDDD             GND                      FB                     CSP
+                                                      24
+                                                      23
+                                                      22
+                                                      21
+                                                      20
+                                                  1                                                                                             18
+                                                      19
+                                  GPIO                                                                                                                   VBUS_IN_DISCHARGE
+                                  GPIO            2                                                                                             17       DP0/GPIO
+                         VBUS_P_CTRL              3                                                                                             16       DM0/GPIO
+                                                                                        EPAD
+                         VBUS_C_CTRL              4                                                                                             15       CC1
+                             DP1/GPIO             5                                                                                             14       CC2
+                             DM1/GPIO             6   7
+                                                      8                                                                                         13       GPIO_20VT
+                                                      9
+                                                      10
+                                                      11
+                                                      12
+                                                                                        AXRES/GPIO
+                                                                                                     GPIO
+                                                      SWD_DAT_0/GPIO
+                                                                                                                 VBUS_C_MON_DISCHARGE
+                                                                       SWD_CLK_0/GPIO
+                                                                                                                                        GPIO_20VT
+                                     Figure 3. Pinout of 16-SOIC Package (Top View)
+                                         FB   1                                                                      16                      CSP
+                               CATH/COMP      2                                                                      15                      GND
+                                              3                                                                      14
+                                      VDDD
+                                                                       SOIC                                                                  VBUS_IN_DISCHARGE
+                                      VCCD    4                                                                      13                      DP0/ GPIO
+                                                            (Top View)
+                              VBUS_P_CTRL     5                                                                      12                     DM0/ GPIO
+                          SWD_DAT_0/GPIO      6                                                                      11                      CC1
+                           SWD_ CLK_0/GPIO    7                                                                      10                      CC2
+                               AXRES/ GPIO    8                                                                               9              VBUS_C_ MON_ DISCHARGE
+Document Number: 002-16951 Rev. *F                                                                                                                                           Page 9 of 37
+
+
+                                                                                                EZ-PD™ CCG3PA Datasheet
+CCG3PA Programming and Bootloading                                            MiniProg3 programmer. There are many third party
+                                                                              programmers that support mass programming in a manufac-
+There are two ways to program application firmware into a                     turing environment.
+CCG3PA device:                                                                As shown in the block diagram in Figure 4, the SWD_0_DAT and
+1. Programming the device flash over SWD Interface                            SWD_0_CLK pins are connected to the host programmer’s
+                                                                              SWDIO (data) and SWDCLK (clock) pins respectively. During
+2. Application firmware update over CC interface
+                                                                              SWD programming, the CCG3PA device has to be powered by
+Generally, the CCG3PA devices are programmed over SWD                         the host programmer by connecting its VTARG (power supply to
+interface only during development or during the manufacturing                 the target device) to VDDD pin of CCG3PA device. While
+process of the end product. Once the end product is                           programming over SWD interface, the CCG3PA device cannot
+manufactured, the CCG3PA device’s application firmware can                    receive power through VBUS_IN_DISCHARGE.
+be updated via the CC bootloader interface.
+                                                                              The CCG3PA device family does not have the XRES pin. Due to
+Programming the Device Flash over SWD Interface                               that, the XRES line from the host programmer remains uncon-
+                                                                              nected, and hence programming using Reset Mode is not
+CCG3PA family of devices can be programmed using the SWD                      supported. In other words, CCG3PA devices are supported by
+interface. Cypress provides a programming kit (CY8CKIT-002                    Power Cycle programming mode only since XRES line is not
+MiniProg3 Kit) called MiniProg3 and PSoC Programmer                           used. Contact Cypress for further details on CYPD3XXX
+Software which can be used to program the flash as well as                    Programming Specifications.
+debug firmware. The flash is programmed by downloading the
+information from a hex file. This hex file is a binary file generated
+as an output of building the firmware project in PSoC Creator
+Software. Click here for more information on how to use the
+                                    Figure 4. Connecting the Programmer to CYPD317x Device
+        Programming                                       Target Device from CCG3PA Family
+          Hardware                                     (Only Power Cycle Programming Mode Supported)
+                   VTARG                                                                      VDDD
+                                                                                                                    1F      100nF
+                SWDCLK                                SWD_0_CLK                               VCCD                 10V        10V
+                                                                                                          1F
+                  SWDIO                               SWD_0_DAT                                                    X7R        X7R
+                                                                                                         10V
+                                                                                                         X7R
+                   XRES                     X          AXRES
+                                                                                                                 While programming over
+                    GND                                VSS                                                       SWD interface, device cannot
+                                                                                                                 receive power through
+                                             GND                                                                 VBUS_IN_DISHCARGE.
+Document Number: 002-16951 Rev. *F                                                                                                Page 10 of 37
+
+
+                                                                                EZ-PD™ CCG3PA Datasheet
+Application Firmware Update over CC Interface
+For bootloading CCG3PA applications, the CY4532 CCG3PA EVK can be used to send programming and configuration data as
+Cypress specific Vendor Defined Messages (VDMs) over the CC line. The CY4532 CCG3PA EVK’s Power Board is connected to the
+system containing CCG3PA device on one end and a Windows PC running the EZ-PD Configuration Utility as shown in Figure 5
+on the other end to bootload the CCG3PA device.
+                                     Figure 5. Application Firmware Update over CC Interface
+                                                         USB Serial Device of
+                                                         CY4532 EVK Power
+                                                               Board
+         PC Running                                                  I2C
+                             USB Mini-B cable                                              CC Line
+                                                                                                        CYPD317x Device to
+     EZ-PD Configuration
+                                                                                                          be Bootloaded
+            Utility                                        CCG4 Device on
+                                                         CY4532 EVK Power
+                                                               Board
+                                                     CY4532 CCG3PA EVK’s              Type-C Receptacle
+                        Mini-B Receptacle
+                                                           Power Board
+Document Number: 002-16951 Rev. *F                                                                             Page 11 of 37
+
+
+                                                                                               EZ-PD™ CCG3PA Datasheet
+Application Diagrams
+Figure 6 and Figure 7 show the application diagrams of CCG3PA-based Power Adapter with Opto-Coupler Feedback control using
+16-pin SOIC and 24-pin QFN parts respectively. In an opto-feedback power adapter, CCG3PA implements a shunt regulator and the
+feedback to the primary controller is through an opto-coupler. The current drawn through the CATH path is proportional to the potential
+difference between FB pin and the internal bandgap reference voltage. At default 5-V VBUS, the FB pin will be held at the voltage set
+by the bandgap reference voltage using internal VBUS resistor dividers.
+If VBUS needs to be changed from default 5 V, using internal IDACs and an error amplifier, CCG3PA draws a proportional current
+through the CATH pin. This in turn gets coupled to the primary controller through the opto-coupler.
+  Figure 6. CCG3PA Based Power Adapter Application Diagram with Opto Coupler Feedback Control (16-pin SOIC Device)
+                                                                                PFET Load Switch
+                                                                                                                        VBUS
+                                                                                       50 k
+                                                                    14               5
+                                                               VBUS_IN_DIS    VBUS_P_CTRL
+                                                               CHARGE
+                                                                                           VBUS_C_MON_ 9                     VBUS
+                                                            3                                  DISCHARGE
+                                                               VDDD
+                                    100 nF     1 µF         4
+                                                               VCCD                                       11
+                                                                                                      CC1                    CC1
+                                                      1 µF                                                10
+                                                                                                      CC2                    CC2
+                                                                                                            390 pF  390 pF
+                                                                         CYPD3174-16SXQ                       5%      5%
+                                                                                                             X7R     X7R
+                                                                                                                                Type-C
+                                         R1    C1           1                                                                 Receptacle
+                                                              FB                                          13
+                                                                                                      DP0                    DP0
+                                                                                                          12
+                                            C2                                                        DM0                    DM0
+                                                            2 CATH/                                       8
+                                                                                               AXRES/GPIO
+                                                              COMP
+                                                                                     SWD_      SWD_                100 nF
+                                                                  GND        CSP     DAT_0     CLK_0
+                                                                      15       16        6        7
+         Note:
+                                                                        5 m
+         R1, C1, and C2 values are selected                                                                                  GND
+         based on primary side controller's design.
+                                                         To Programming Header (Not needed for final production)
+Document Number: 002-16951 Rev. *F                                                                                                   Page 12 of 37
+
+
+                                                                                                  EZ-PD™ CCG3PA Datasheet
+ Figure 7. CCG3PA Based Power Adapter Application Diagram with Opto Coupler Feedback Control (24-pin QFN Device)
+                                                                                PFET Load Switch
+                                                                                                                             VBUS
+                                                                                       50 k
+                                                                    18               3               4
+                                                              VBUS_IN_DIS     VBUS_P_CTRL VBUS_C_CTRL
+                                                              CHARGE                                                              VBUS
+                                                           23                                        GPIO     1, 2, 5,
+                                                              VDDD                                            6, 10
+                                                                                           VBUS_C_MON_ 11
+                                   100 nF     1 F         24
+                                                              VCCD                             DISCHARGE
+                                                                                                           15
+                                                                                                       CC1                        CC1
+                                                   1 F                                                    14
+                                                                                                       CC2                        CC2
+                                                                                                             390 pF     390 pF
+                                                                       CYPD3174-24LQXQ                         5%         5%
+                                                                                                              X7R         X7R
+                                                    12, 13    GPIO_20VT                                                              Type-C
+                                                                                                                                   Receptacle
+                                        R1                 20                                              17
+                                              C1              FB                                       DP0                        DP0
+                                                                                                           16
+                                                                                                       DM0                        DM0
+                                           C2              21 CATH/                                        9
+                                                                                               AXRES/GPIO
+                                                              COMP
+                                                                                     SWD_      SWD_                   100 nF
+                                                                  GND        CSP     DAT_0     CLK_0
+                                                                      22       19        7        8
+      Note:
+      R1, C1 and, C2 values are selected based on                       5 m
+      primary side controller's design.                                                                                           GND
+                                                           To Programming Header (Not needed for final production)
+Document Number: 002-16951 Rev. *F                                                                                                          Page 13 of 37
+
+
+                                                                                                               EZ-PD™ CCG3PA Datasheet
+Figure 8 shows the application diagram of CCG3PA based power adapter with Direct Feedback control. In this application, VBUS is
+maintained at a constant voltage. The default value of VBUS upon power up (which is usually at 5 V) is set up by choosing the
+appropriate resistor divider that will set the FB node at a voltage expected by the secondary controller.
+Feedback node is regulated using internal IDACs. Whenever a change in VBUS voltage is needed, CCG3PA will either source or sink
+a proportional current at feedback node, based on the amount of voltage change needed.
+                 Figure 8. CCG3PA Based Power Adapter Application Diagram with Direct Feedback Control
+                                                                                                PFET Load Switch
+                                                                                                                                      VBUS
+                                                                                                       50 k
+                                                                                   18                3
+                                                                             VBUS_IN_DIS      VBUS_P_CTRL
+                                                                             CHARGE
+                                                                                                           VBUS_C_MON_ 11                  VBUS
+                                                                          23                                   DISCHARGE
+                                                                             VDDD
+                                                                                                                          4
+                                                       1 F                                                 VBUS_C_CTRL
+                                                                          24
+                                         100 nF                              VCCD                                         15
+                                                                                                                      CC1                  CC1
+                                                               1 F       21 CATH/                                        14
+                                                                                                                      CC2                  CC2
+                                                                             COMP
+                                                                                                                           390 pF 390 pF
+                                         R1                           100 nF                                                 5%     5%
+                                                                                      CYPD3175-24LQXQ                       X7R    X7R
+                           SR
+                     Secondary FB                                         20                                   AXRES/GPIO
+                                                                                                                          9                   Type-C
+                                                                             FB
+                         Or                                                                                                                 Receptacle
+                     Integrated
+                     Controller                                                                                           17
+                                                              1, 2, 5, 6,    GPIO                                     DP0                  DP0
+                                                             10, 12, 13,                                                  16
+                                                                                                                      DM0                  DM0
+                                         R2                                                          SWD_      SWD_
+                                                                                 GND         CSP     DAT_0     CLK_0
+                                              Select R1, R2 to get                   22        19        7        8
+                                              the expected FB
+                                              voltage at 5V VBUS                        5 m
+                                                                                                                                           GND
+                                                                       To Programming Header (Not needed for final production)
+Document Number: 002-16951 Rev. *F                                                                                                                   Page 14 of 37
+
+
+                                                                                                                       EZ-PD™ CCG3PA Datasheet
+Figure 9 shows the application diagram of a CCG3PA based power adapter application with direct feedback control for two port car
+charger. The car charger application can charge portable devices connected to the Type-C and Type-A port simultaneously. The
+Type-C port supports USBPD 3.0 QC 4.0, Apple Charging 2.4A, and AFC. The Type-A port supports QC 3.0, Apple Charging and AFC.
+       Figure 9. CCG3PA Based Power Adapter Application with Direct Feedback Control for Two Port Car Charger
+                          DC/DC Regulator 1
+                         VBAT
+                               CE          PWMI     PWM    FB
+                                                                                                                         Provider
+                                                                                                                           FET
+                                                                                                                  4
+                                                                                                 VBUS_C_CTRL
+                                                                   1                                              3
+                                                                        P1.0                     VBUS_P_CTRL
+                                                                    9
+                                                                      P2.0/AXRES          VBUS_IN_DISCHARGE 18                                              VBUS
+                                                                   20 FB                    VBUS_C_MON_DIS 11
+                                                                                                            15
+                                                                                                        CC1                                         CC1
+                                                                                                            14
+                                                                   2                                    CC2                                         CC2
+                                                                        P1.1
+                                                                                                                            390 pF
+          12 V                                                     21
+                                                                        COMP                                                  5%
+                                                                                                                                     390 pF
+         Supply                                                                CYPD3175-24LQXQ                    10
+                                                                                                                             X7R
+                                                                                                                                       5%
+                                                                                                                                                       Type-C
+                                                                                                           P2.1                       X7R
+                   3.3 V/5 V               2.7 V to 5.5 V          23                                                                                 Receptacle
+                                                                        VDDD
+                   Regulator                                                                                      17
+                                                                                                       DP0/P3.0                                     DPLUS
+                                           0.1 F                  13                                             16
+                                                                        P2.3                         DM0/P3.1                                       DMINUS
+                                                                   7
+                                                                        P0.0/SWD_DAT_0                 DP1/P1.2 5
+                                                                   8
+                                                                        P0.1/SWD_CLK_0               DM1/P1.3 6                                              GND
+                                                                   12
+                                                                        P2.2
+                                                                                   VCCD   GND      CSP
+                                                                                     24     22        19
+                                                                               1 F
+                                                                               10 V
+                                                                               X7R          10 m 1%
+                                              PWM   PWMI
+                                                           CE
+                                    VBAT            EN      VSEL
+                                    DC/DC Regulator 2                                                                                                        VBUS
+                                                                                                                                                     DPLUS
+                                                                                                                                                     DMINUS
+                  Pins 7 and 8 can also be
+                  connected to the programming                                                                                                         Type-A
+                  header (not needed for final                                                                                                GND
+                                                                                                                                                      Receptacle
+                  production)
+Document Number: 002-16951 Rev. *F                                                                                                                             Page 15 of 37
+
+
+                                                                                                                  EZ-PD™ CCG3PA Datasheet
+Figure 10 shows the application diagram of a CCG3PA based power bank application. It shows dual port power bank implementation
+using CCG3PA device. The power bank application can charge portable devices connected to the Type-C and Type-A port
+simultaneously. The Type-C port can be configured to support USBPD 3.0 QC 4.0, Apple Charging 2.4A, and AFC. The Type-A port
+can be configured to support QC3.0, Apple Charging, and AFC.
+The battery can be charged from Type-C and USBPD power adapters or BC1.2 power adapters.
+                                          Figure 10. CCG3PA Power Bank Application Diagram
+                            Battery                                                                         Consumer
+                            Charger                                                                            FET
+                           EN       ILIM
+                                                                                                                           Provider
+                                             Reg                                                                             FET
+                                          EN         FB
+                                                              R1
+                                                                    R2  Select R1, R2 to get 5 V VBUS
+                                                          20                                                 3
+                                                               FB                              VBUS_P_CTRL
+                                                           2   P1.1                                          4
+                                                                                               VBUS_C_CTRL
+                                                           9                                                18
+                                                               P2.0/AXRES              VBUS_IN_DISCHARGE
+                                                          1                                                 11                                        VBUS
+                                                               P1.0                       VBUS_C_MON_DIS
+                                                                                                            15
+                                                                                                       CC1                                      CC1
+                           5V              2.7 V to 5.5 V 23                                                14
+                                                              VDDD                                     CC2                                      CC2
+                        Regulator
+                                          0.1 F
+      Battery VBATT                                       10   P2.1                                    P2.3 13                    390 pF 390 pF
+                                                                                                                                    5%    5%
+      1S/2S          499 k    49.9 k                                                                                              X7R   X7R       Type-C
+                       1%         1%                                    CYPD3171-24LQXQ                                                           Receptacle
+                                                          21                                                17
+                                                               COMP                                DP0/P3.0                                     DPLUS
+                                                                                                            16
+                                                                                                   DM0/P3.1                                     DMINUS
+                                                           7                                                 5
+                                                               P0.0/SWD_DAT_0                      DP1/P1.2
+                                                           12
+                                                               P2.2                                         6
+                                                                                                   DM1/P1.3                                            GND
+                                                                  P0.1/
+                                                              SWD_CLK_0       VCCD      GND      CSP
+                                                                    8           24         22       19
+                                                                         1 F
+                                         PWM/                            10 V
+                                         GPIO                            X7R               5 m 1%
+                                              FB       EN
+                                                Reg
+                                                                                                                                                       VBUS
+                                                                                                                                                 DPLUS
+                                                                FET                                                                              DMINUS
+                                                                                                                                                      Type-A
+               Pins 7 and 8 can also be                                                                                                            Receptacle
+               connected to the programming                                                                        Type-A                               GND
+               header (not needed for final                                                                        Connect
+               production)                                                                                          Detect
+                                                                                                                    Rsense
+Document Number: 002-16951 Rev. *F                                                                                                                    Page 16 of 37
+
+
+                                                                                    EZ-PD™ CCG3PA Datasheet
+ Electrical Specifications
+ Absolute Maximum Ratings
+ Table 4. Absolute Maximum Ratings
+     Parameter                          Description                 Min      Typ       Max        Units      Details/Conditions
+                      Max supply voltage relative to VSS on
+  VBUS_MAX            VBUS_IN_DISCHARGE and                           –       –         30          V
+                      VBUS_C_MON_DISCHARGE pins
+  VDDD_MAX            Max supply voltage relative to VSS              –       –          6          V
+                      Max voltage on CC1, CC2 pins and port                                             Absolute max
+  VCC_PIN_ABS         pins P2.2 and P2.3 for applicable               –       –        22[6]        V
+                      devices
+  VGPIO_ABS           GPIO voltage                                  –0.5      –    VDDD +0.5        V
+  IGPIO_ABS           Maximum current per GPIO                       –25      –         25         mA
+                      GPIO injection current, Max for VIH >                                             Absolute max, current
+  IGPIO_injection                                                   –0.5      –         0.5        mA
+                      VDDD, and Min for VIL < VSS                                                       injected per pin
+                                                                                                        Applicable to port pins P0.0
+  VGPIO_OVT_ABS       OVT GPIO voltage                              –0.5      –          6          V
+                                                                                                        and P0.1
+                      Electrostatic discharge human body
+  ESD_HBM                                                           2200      –          –          V                 –
+                      model
+                      Electrostatic discharge charged device
+  ESD_CDM                                                            500      –          –          V                 –
+                      model
+  LU                  Pin current for latch-up                      –100      –        100         mA                 –
+                                                                                                        Contact discharge on CC1,
+  ESD_IEC_CON Electrostatic discharge IEC61000-4-2                  8000      –          –          V   CC2, VBUS, P2.2 and P2.3
+                                                                                                        pins
+                                                                                                        Air discharge for DPLUS,
+  ESD_IEC_AIR         Electrostatic discharge IEC61000-4-2         15000      –          –          V   DMINUS, CC1, CC2, VBUS,
+                                                                                                        P2.2 and P2.3 pins
+ Device-Level Specifications
+ All specifications are valid for –40 °C  TA  105 °C and TJ  120 °C, except where noted.
+ Table 5. DC Specifications
+       Spec ID          Parameter                   Description          Min  Typ  Max      Units         Details/Conditions
+ SID.PWR#2            VDDD               Power Supply Input Voltage      2.7    –   5.5      V    Sink mode, –40 °C  TA  105 °C.
+ SID.PWR#2_A          VDDD               Power Supply Input Voltage      3.0    –  5.5       V    Source mode, –40 °C  TA  105 °C.
+ SID.PWR#3            VBUS_IN            Power Supply Input Voltage      3.0    –  24.5      V    –40 °C  TA  105 °C.
+ SID.PWR#5            VCCD               Output Voltage for core Logic    –    1.8   –       V                     –
+                                         Power supply decoupling
+ SID.PWR#13           Cexc                                               0.8    1    –       µF   X5R ceramic or better
+                                         capacitor for VDDD
+                                         Power supply decoupling
+ SID.PWR#14           Cexv               capacitor for VBUS_IN_DISH-      –    0.1   –       µF   X5R ceramic or better
+                                         CARGE
+  Note
+   6. As per USB PD specification, maximum allowed VBUS = 21.5V.
+Document Number: 002-16951 Rev. *F                                                                                    Page 17 of 37
+
+
+                                                                            EZ-PD™ CCG3PA Datasheet
+Table 5. DC Specifications (continued)
+    Spec ID       Parameter              Description           Min  Typ  Max    Units           Details/Conditions
+Active Mode. Typical values measured at VDDD = 5.0V or VBUS = 5.0 V and TA = 25 °C.
+                                                                                      VDDD = 5 V OR VBUS = 5 V, TA =
+                                                                                      25 °C. CC1/CC2 in Tx or Rx, no I/O
+                                Supply current from VBUS or
+SID.PWR#8       IDD_A                                            –   10    –     mA   sourcing current, 2 SCBs at 1 Mbps,
+                                VDDD
+                                                                                      EA/ADC/CSA/UVOV ON, CPU at
+                                                                                      24 MHz.
+Sleep Mode. Typical values measured at VDD = 3.3 V and TA = 25 °C.
+                                                                                      VDDD = 3.3 V, TA = 25 °C,
+                                CC, I2C, WDT wakeup on.
+SID25A          IDD_S                                            –   3     –     mA   All blocks except CPU are on, CC IO
+                                IMO at 24 MHz.
+                                                                                      on, EA/ADC/CSA/UVOV On.
+Deep Sleep Mode. Typical values measured at TA = 25 °C.
+                                                                                      Power Adapter/Charger application
+                                                                                      Power Source = VBUS = 5 V,
+                                VBUS = 4.5 to 5.5 V. CC
+SID_PA_DS_UA IDD_PA_DS_UA                                        –  100    –     µA   TA = 25 °C,
+                                Attach, I2C, WDT Wakeup on
+                                                                                      Type-C Not Attached. CC Attach, I2C
+                                                                                      and WDT enabled for Wakeup.
+                                                                                      Power Adapter/Charger application
+                                VBUS = 3.0 to 24.5 V. CC, I2C,                        VBUS = 24.5 V, TA = 25 °C,
+SID_PA_DS_A     IDD_PA_DS_A                                      –  500    –     µA
+                                WDT Wakeup on                                         Part is in deep sleep. Attached, CC
+                                                                                      I/O on, ADC/CSA/UVOV On
+                                                                                      Power Bank application
+                                                                                      Power Source = VDDD = 5 V,
+                                VDDD = 3.0 to 5.5 V. CC
+SID_PB_DS_UA IDD_PB_DS_UA                                        –  100    –     µA   TA = 25 °C,
+                                Attach, I2C, WDT Wakeup on
+                                                                                      Type-C Not Attached. CC Attach, I2C
+                                                                                      and WDT enabled for Wakeup.
+                                                                                      Power Bank Source application
+SID_P-          IDD_P-          VDDD = 3.0 to 5.5 V.                                  VDDD = 5 V, TA= 25 °C,
+                                                                 –  500    –     µA
+B_DS_A_SRC      B_DS_A_SRC      CC, I2C, WDT Wakeup on                                Part is in deep sleep. Attached, CC
+                                                                                      I/O on, ADC/CSA/UVOV On.
+                                                                                      Power Bank Sink application
+SID_P-          IDD_P-          VBUS 4.0 to 24.5 V.                                   VBUS = 24.5 V, TA = 25 °C,
+                                                                 –  500    –     µA
+B_DS_A_SNK      B_DS_A_SNK      CC, I2C, WDT Wakeup on                                Part is in deep sleep. Attached, CC
+                                                                                      I/O on, ADC/CSA/UVOV On
+Table 6. AC Specifications (Guaranteed by Characterization)
+    Spec ID       Parameter             Description            Min Typ   Max   Units           Details/Conditions
+SID.CLK#4       FCPU           CPU input frequency             DC   –     48    MHz All VDDD
+SID.PWR#17      TSLEEP         Wakeup from sleep mode           –   0     –      µs                      –
+                               Wakeup from Deep Sleep
+SID.PWR#18      TDEEPSLEEP                                      –   –     35     µs                      –
+                               mode
+                               Power-up to “Ready to accept
+SYS.FES#1       T_PWR_RDY                                       –   5     25     ms                      –
+                               I2C/CC command”
+                               Power-on I/O Initialization
+SID.PWR#18A     TPOR_HIZ_T                                      –   3     –      ms                      –
+                               Time
+Document Number: 002-16951 Rev. *F                                                                            Page 18 of 37
+
+
+                                                                              EZ-PD™ CCG3PA Datasheet
+I/O
+Table 7. I/O DC Specifications
+    Spec ID       Parameter            Description             Min      Typ      Max     Units       Details/Conditions
+ SID.GIO#37    VIH_CMOS       Input voltage HIGH threshold 0.7 × VDDD     –        –        V    CMOS input
+ SID.GIO#38    VIL_CMOS       Input voltage LOW threshold        –        –  0.3 × VDDD     V    CMOS input
+ SID.GIO#39    VIH_VDDD2.7-   LVTTL input, VDDD < 2.7 V     0.7× VDDD     –        –        V                 –
+ SID.GIO#40    VIL_VDDD2.7-   LVTTL input, VDDD < 2.7 V          –        –  0.3 × VDDD     V                 –
+ SID.GIO#41    VIH_VDDD2.7+   LVTTL input, VDDD  2.7 V        2.0        –        –        V                 –
+ SID.GIO#42    VIL_VDDD2.7+   LVTTL input, VDDD  2.7 V          –        –      0.8        V                 –
+ SID.GIO#33    VOH_3V         Output voltage HIGH level     VDDD –0.6    –         –        V    IOH = 4 mA at 3-V VDDD
+ SID.GIO#36    VOL_3V         Output voltage LOW level          –        –       0.6        V    IOL = 10 mA at 3-V VDDD
+ SID.GIO#5     RPU            Pull-up resistor value           3.5      5.6      8.5       k    +25 °C TA, all VDDD
+ SID.GIO#6     RPD            Pull-down resistor value         3.5      5.6      8.5       k    +25 °C TA, all VDDD
+                              Input leakage current                                              +25 °C TA, 3-V VDDD
+ SID.GIO#16    IIL                                              –         –        2       nA
+                              (absolute value)
+                                                                                                 Capacitance on DP0, DM0,
+                                                                                                 DP1, DMI pins.
+ SID.GIO#17    CPIN_A         Max pin capacitance               –        –       22        pF
+                                                                                                 Guaranteed by characteri-
+                                                                                                 zation.
+                                                                                                 –40°C to +85°C TA, All
+                                                                                                 VDDD, all other I/OS.
+ SID.GIO#17A CPIN             Max pin capacitance               –        3        7        pF
+                                                                                                 Guaranteed by characteri-
+                                                                                                 zation.
+                              Input hysteresis, LVTTL VDDD                                       Guaranteed by characteri-
+ SID.GIO#43    VHYSTTL                                          15       40        –      mV
+                               2.7 V                                                            zation.
+                                                                                                 VDDD < 4.5 V.
+ SID.GIO#44    VHYSCMOS       Input hysteresis CMOS        0.05 × VDDD    –        –      mV     Guaranteed by characteri-
+                                                                                                 zation.
+                              Current through protection                                         Guaranteed by design.
+ SID69         IDIODE                                           –         –      100       µA
+                              diode to VDDD/VSS
+                              Maximum total sink chip                                            Guaranteed by design.
+ SID.GIO#45    ITOT_GPIO                                        –         –       85      mA
+                              current
+ OVT
+                              Input current when Pad >
+ SID.GIO#46    IIHS                                              –        –     10.00      µA    Per I2C specification
+                              VDDD for OVT inputs
+Table 8. I/O AC Specifications
+(Guaranteed by Characterization)
+   Spec ID       Parameter                    Description              Min  Typ Max Units          Details/Conditions
+ SID70        TRISEF         Rise time in Fast Strong mode              2    –     12   ns    3.3-V VDDD, Cload = 25 pF
+ SID71        TFALLF         Fall time in Fast Strong mode              2    –     12   ns    3.3-V VDDD, Cload = 25 pF
+Document Number: 002-16951 Rev. *F                                                                            Page 19 of 37
+
+
+                                                                            EZ-PD™ CCG3PA Datasheet
+Table 9. GPIO_20VT DC Specifications (Applicable to port pins P2.2 and P2.3 only)
+(Guaranteed by Characterization)
+      Spec ID#           Parameter                 Description       Min   Typ    Max Units       Details / Conditions
+ SID.GPIO_20VT#4  GPIO_20VT_I_LU       GPIO_20VT Latch up current    –140    –    140  mA   Max / min current in to any input
+                                       limits                                               or output, pin-to-pin,
+                                                                                            pin-to-supply
+ SID.GPIO_20VT#5  GPIO_20VT_RPU        GPIO_20VT Pull-up resistor      1    –      25  kΩ   +25 °C TA, 1.4 V to
+                                       value                                                GPIO_20VT_Voh(min)
+ SID.GPIO_20VT#6  GPIO_20VT_RPD        GPIO_20VT Pull-down resistor   2.5   –      20  kΩ   +25°C TA, 1.4-V to VDDD
+                                       value
+ SID.GPIO_20VT#16 GPIO_20VT_IIL        GPIO_20VT Input leakage         –    –       2  nA   +25°C TA, 3-V VDDD
+                                       current (absolute value)
+ SID.GPIO_20VT#17 GPIO_20VT_CPIN       GPIO_20VT pin capacitance      15    –      25  pF   –40 °C to +85 °C TA, All VDDD,
+                                                                                            F = 1 MHz
+ SID.GPIO_20VT#36 GPIO_20VT_Vol        GPIO_20VT Output Voltage low    –     –    0.4   V   IOL = 2 mA
+                                       level.
+ SID.GPIO_20VT#41 GPIO_20VT_Vih_LVTTL  GPIO_20VT LVTTL Input Voltage   2    –       –   V   VDDD  2.7 V
+                                       high level.
+ SID.GPIO_20VT#42 GPIO_20VT_Vil_LVTTL  GPIO_20VT LVTTL Input Voltage   –     –    0.8   V   VDDD  2.7 V
+                                       low level.
+ SID.GPIO_20VT#43 GPIO_20VT_Vhysttl    GPIO_20VT Input hysteresis     15    40      –  mV   VDDD  2.7 V
+                                       LVTTL
+ SID.GPIO_20VT#69 GPIO_20VT_IDIODE     GPIO_20VT Current through       –     –    100  µA
+                                       protection diode to VDDD/VSS
+Table 10. GPIO_20VT AC Specifications (Applicable to port pins P2.2 and P2.3 only)
+(Guaranteed by Characterization)
+       Spec ID#           Parameter               Description        Min   Typ    Max Units      Details / Conditions
+ SID.GPIO_20VT#70 GPIO_20VT_TriseF     GPIO_20VT Rise time in         1     –      45  ns   All VDDD, Cload = 25 pF
+                                       Fast Strong Mode
+ SID.GPIO_20VT#71 GPIO_20VT_TfallF     GPIO_20VT Fall time in Fast    2     –      15  ns   All VDDD, Cload = 25 pF
+                                       Strong Mode
+Document Number: 002-16951 Rev. *F                                                                            Page 20 of 37
+
+
+                                                                                    EZ-PD™ CCG3PA Datasheet
+Digital Peripherals
+The following specifications apply to the Timer/Counter/PWM peripherals in the Timer mode.
+Pulse Width Modulation (PWM) for GPIO Pins
+Table 11. PWM AC Specifications (Guaranteed by Characterization)
+     Spec ID       Parameter                 Description              Min     Typ    Max   Units       Details/Conditions
+                                                                                                  Fc max = CLK_SYS.
+ SID.TCPWM.3      TCPWMFREQ Operating frequency                        –       –      Fc   MHz
+                                                                                                  Maximum = 48 MHz.
+ SID.TCPWM.4      TPWMENEXT Input trigger pulse width                 2/Fc     –      –     ns    For all trigger events
+                                                                                                  Minimum possible width of
+                                                                                                  Overflow, Underflow, and CC
+ SID.TCPWM.5      TPWMEXT       Output trigger pulse width            2/Fc     –      –     ns
+                                                                                                  (Counter equals Compare
+                                                                                                  value) outputs
+                                                                                                  Minimum time between
+ SID.TCPWM.5A TCRES             Resolution of counter                 1/Fc     –      –     ns
+                                                                                                  successive counts
+                                                                                                  Minimum pulse width of PWM
+ SID.TCPWM.5B PWMRES            PWM resolution                        1/Fc     –      –     ns
+                                                                                                  output
+                                                                                                  Minimum pulse width between
+ SID.TCPWM.5C QRES              Quadrature inputs resolution          1/Fc     –      –     ns
+                                                                                                  quadrature-phase inputs
+I2C
+Table 12. Fixed I2C DC Specifications
+(Guaranteed by Characterization)
+    Spec ID        Parameter                  Description              Min    Typ    Max   Units       Details/Conditions
+ SID149          II2C1           Block current consumption at 100 kHz   –       –    100    µA                     –
+ SID150          II2C2           Block current consumption at 400 kHz   –       –    135    µA                     –
+ SID151          II2C3           Block current consumption at 1 Mbps    –       –    310    µA                     –
+ SID152          II2C4           I2C  enabled in Deep Sleep mode        –      1.4     –    µA                     –
+Table 13. Fixed I2C AC Specifications
+(Guaranteed by Characterization)
+    Spec ID        Parameter                  Description               Min     Typ   Max   Units      Details/Conditions
+ SID153          FI2C1           Bit rate                                –        –     1   Mbps                   –
+Table 14. Fixed UART DC Specifications
+(Guaranteed by Characterization)
+    Spec ID        Parameter                  Description              Min      Typ    Max  Units       Details/Conditions
+                                 Block current consumption at
+ SID160          IUART1                                                  –        –     20    µA                   –
+                                 100 kbps
+                                 Block current consumption at
+ SID161          IUART2                                                  –        –    312    µA                   –
+                                 1000 kbps
+Table 15. Fixed UART AC Specifications
+(Guaranteed by Characterization)
+    Spec ID        Parameter                  Description              Min      Typ   Max   Units       Details/Conditions
+ SID162          FUART                           Bit rate               –        –      1   Mbps                   –
+Document Number: 002-16951 Rev. *F                                                                                   Page 21 of 37
+
+
+                                                                               EZ-PD™ CCG3PA Datasheet
+Table 16. Fixed SPI DC Specifications
+(Guaranteed by Characterization)
+    Spec ID       Parameter                  Description                Min    Typ    Max    Units       Details/Conditions
+ SID163         ISPI1          Block current consumption at 1 Mb/s       –      –      360     µA                   –
+ SID164         ISPI2          Block current consumption at 4 Mb/s       –      –      560     µA                   –
+ SID165         ISPI3          Block current consumption at 8 Mb/s       –      –      600     µA                   –
+Table 17. Fixed SPI AC Specifications
+(Guaranteed by Characterization)
+    Spec ID       Parameter                Description              Min     Typ    Max     Units       Details/Conditions
+                               SPI Operating frequency (Master; 6X
+ SID166          FSPI                                                 –      –      8      MHz                   –
+                               oversampling)
+Table 18. Fixed SPI Master Mode AC Specifications (Guaranteed by Characterization)
+    Spec ID       Parameter                Description              Min     Typ    Max     Units       Details/Conditions
+ SID167          TDMO          MOSI Valid after SClock driving edge   –      –      15      ns                    –
+                               MISO Valid before SClock capturing                                 Full clock, late MISO
+ SID168          TDSI                                                20      –       –      ns
+                               edge                                                               sampling
+                                                                                                  Referred to slave capturing
+ SID169          THMO          Previous MOSI data hold time           0      –       –      ns
+                                                                                                  edge
+Table 19. Fixed SPI Slave Mode AC Specifications
+(Guaranteed by Characterization)
+    Spec ID       Parameter                Description              Min     Typ        Max       Units     Details/Conditions
+                               MOSI Valid before Sclock capturing
+ SID170         TDMI                                                 40      –           –         ns                 –
+                               edge
+ SID171         TDSO           MISO Valid after Sclock driving edge  –       –    42 + 3 × TCPU    ns     TCPU = 1/FCPU
+                               MISO Valid after Sclock driving edge
+ SID171A        TDSO_EXT                                              –      –          48         ns                 –
+                               in Ext Clk mode
+ SID172         THSO           Previous MISO data hold time          0       –           –         ns                 –
+ SID172A        TSSELSCK       SSEL Valid to first SCK Valid edge   100      –           –         ns                 –
+Document Number: 002-16951 Rev. *F                                                                                 Page 22 of 37
+
+
+                                                                                  EZ-PD™ CCG3PA Datasheet
+System Resources
+Power-on-Reset (POR) with Brown Out SWD Interface
+Table 20. Imprecise Power On Reset (PRES) (Guaranteed by Characterization)
+     Spec ID        Parameter                Description             Min     Typ   Max    Units       Details/Conditions
+                                Power-on Reset (POR) rising trip
+ SID185           VRISEIPOR                                          0.80     –    1.50     V                   –
+                                voltage
+ SID186           VFALLIPOR     POR falling trip voltage             0.70     –     1.4     V                   –
+Table 21. Precise Power On Reset (POR)
+(Guaranteed by Characterization)
+     Spec ID        Parameter                Description             Min     Typ   Max    Units        Details/Conditions
+                                Brown-out Detect (BOD) trip voltage
+ SID190           VFALLPPOR                                          1.48     –    1.62     V                   –
+                                in active/sleep modes
+ SID192           VFALLDPSLP    BOD trip voltage in Deep Sleep mode   1.1     –     1.5     V                   –
+Table 22. SWD Interface Specifications
+(Guaranteed by Characterization)
+     Spec ID          Parameter                Description            Min     Typ    Max     Units      Details/Conditions
+                                                                                                    SWDCLK 1/3 CPU clock
+ SID.SWD#1        F_SWDCLK1          3.3V  VDDD  5.5V                 –       –     14     MHz
+                                                                                                    frequency
+                                                                                                    SWDCLK 1/3 CPU clock
+ SID.SWD#2        F_SWDCLK2          2.7V  VDDD  3.3V                 –       –      7     MHz
+                                                                                                    frequency
+ SID.SWD#3        T_SWDI_SETUP T = 1/f SWDCLK                       0.25 × T    –      –      ns
+ SID.SWD#4        T_SWDI_HOLD        T = 1/f SWDCLK                 0.25 × T    –      –      ns
+ SID.SWD#5        T_SWDO_VALID T = 1/f SWDCLK                           –       –  0.50 × T   ns
+ SID.SWD#6        T_SWDO_HOLD T = 1/f SWDCLK                            1       –      –      ns
+Internal Main Oscillator
+Table 23. IMO DC Specifications
+(Guaranteed by Design)
+     Spec ID       Parameter                 Description             Min     Typ     Max    Units       Details/Conditions
+ SID218          IIMO1        IMO operating current at 48 MHz          –       –    1000     µA                   –
+Table 24. IMO AC Specifications
+     Spec ID       Parameter                 Description             Min     Typ    Max     Units       Details/Conditions
+                              Frequency variation at 24, 36, and
+ SID.CLK#13      FIMOTOL                                               –       –     ±2      %                   –
+                              48 MHz (trimmed)
+                                                                                                   Guaranteed by characteri-
+ SID226          TSTARTIMO    IMO start-up time                        –       –      7      µs
+                                                                                                   zation.
+                                                                                                   Guaranteed by characteri-
+ SID228          TJITRMSIMO2  RMS jitter at 24 MHz                     –     145      –      ps
+                                                                                                   zation.
+                                                                                                   Only 3 frequencies
+ SID.CLK#1       FIMO         IMO frequency                           24      36     48     MHz    supported: 24 MHz,
+                                                                                                   36 MHz, and 48 MHz.
+Document Number: 002-16951 Rev. *F                                                                                Page 23 of 37
+
+
+                                                                             EZ-PD™ CCG3PA Datasheet
+Internal Low-Speed Oscillator Power Down
+Table 25. ILO DC Specifications
+(Guaranteed by Design)
+     Spec ID        Parameter                    Description             Min  Typ  Max Units      Details/Conditions
+ SID231          IILO1            ILO operating current                    –  0.3  1.05  µA                 –
+ SID233          IILOLEAK         ILO leakage current                      –    2   15   nA                 –
+Table 26. ILO AC Specifications
+     Spec ID        Parameter                    Description             Min Typ   Max  Units     Details/Conditions
+                                                                                              Guaranteed by Character-
+ SID234          TSTARTILO1       ILO start-up time                       –    –     2    ms
+                                                                                              ization
+                                                                                              Guaranteed by Character-
+ SID238          TILODUTY         ILO duty cycle                         40   50    60    %
+                                                                                              ization
+ SID.CLK#5       FILO             ILO frequency                          20   40    80   kHz                –
+Table 27. PD DC Specifications
+     Spec ID        Parameter                    Description            Min  Typ   Max  Units     Details/Conditions
+                                 DFP CC termination for default USB
+ SID.PD.1       Rp_std                                                   64   80    96   µA                 –
+                                 Power
+ SID.PD.2       Rp_1.5A          DFP CC termination for 1.5A power      166  180  194.4  µA                 –
+ SID.PD.3       Rp_3.0A          DFP CC termination for 3.0A power      304  330  356.4  µA                 –
+ SID.PD.4       Rd               UFP CC termination                     4.59 5.1   5.61  kΩ                 –
+                                                                                              All supplies forced to 0V
+                                 UFP (Power Bank) Dead Battery CC
+ SID.PD.5       Rd_DB                                                   4.08 5.1   6.12  kΩ   and 1.32 V applied at CC1
+                                 Termination on CC1 and CC2
+                                                                                              or CC2
+                                 Ground offset tolerated by BMC                               Relative to the remote
+ SID.PD.6       Vgndoffset                                              –500   –   500   mV
+                                 receiver                                                     BMC transmitter.
+Table 28. LS-CSA Specifications
+    Spec ID        Parameter                    Description             Min  Typ  Max   Units     Details/Conditions
+ SID.LSCSA.1    Cin_inp          CSP Input capacitance                    7    –    10   pF   Guaranteed by
+                                                                                              characterization
+ SID.LSCSA.2    Csa_Acc1         CSA accuracy 5 mV < Vsense < 10 mV     –15    –    15    %
+ SID.LSCSA.3    Csa_Acc2         CSA accuracy 10 mV < Vsense < 15 mV    –10   –     10    %
+ SID.LSCSA.4    Csa_Acc3         CSA accuracy 15 mV < Vsense < 20 mV     –6    –     6    %
+ SID.LSCSA.5    Csa_Acc4         CSA accuracy 20 mV < Vsense < 30 mV     –5    –     5    %
+ SID.LSCSA.6    Csa_Acc5         CSA accuracy 30 mV < Vsense < 50 mV     –4    –     4    %
+                                                                                                     Active Mode
+ SID.LSCSA.7    Csa_Acc6         CSA accuracy 50 mV < Vsense             –4    –     4    %
+ SID.LSCSA.8    Csa_SCP_Acc1 CSA SCP 80 mV                             –16.5   –    30    %
+ SID.LSCSA.9    Csa_SCP_Acc2 CSA SCP 100 mV                            –13.4   –    24    %
+ SID.LSCSA.10 Csa_SCP_Acc3 CSA SCP 150 mV                               –9.4   –    16    %
+ SID.LSCSA.11 Csa_SCP_Acc4 CSA SCP 200 mV                               –7.5   –    12    %
+ SID.LSCSA.12 Av                 Nominal Gain values supported: 5, 10,    5    –   150   V/V
+                                 20, 35, 50, 75, 125, 150
+ SID.LSCSA.24 Av1_E_Trim         Gain Error                              –3    –     3    %   Guaranteed by
+                                                                                              characterization
+ SID.LSCSA.31 Av_E_SCP           Gain Error of SCP stage                –3.5   –   3.5    %   Guaranteed by
+                                                                                              characterization
+Document Number: 002-16951 Rev. *F                                                                          Page 24 of 37
+
+
+                                                                                EZ-PD™ CCG3PA Datasheet
+Table 29. LS-CSA AC Specifications
+(Guaranteed by Characterization)
+     Spec ID      Parameter                  Description               Min  Typ    Max  Units       Details/Conditions
+                               Delay from OCP threshold trip to
+ SID.LSCSA.AC.1 TOCP_GPIO                                               –     –     20   µs    Available on P1.0 or P1.1
+                               output GPIO toggle
+                               Delay from OCP threshold trip to
+ SID.LSCSA.AC.2 TOCP_Gate                                               –     –     50   µs                  –
+                               external PFET Power Gate Turn off
+                               Delay from SCP threshold trip to
+ SID.LSCSA.AC.3 TSCP_GPIO                                               –     –     15   µs    Available on P1.0 or P1.1
+                               output GPIO toggle
+                               Delay from SCP threshold trip to
+ SID.LSCSA.AC.4 TSCP_Gate                                               –     –     50   µs                  –
+                               external PFET Power Gate Turn off
+                               Delay from SR threshold trip to output
+ SID.LSCSA.AC.5 TSR_GPIO                                                –     –     20   µs    Available on P1.0 or P1.1
+                               GPIO toggle
+Table 30. UV/OV Specifications
+(Guaranteed by Characterization)
+     Spec ID      Parameter                  Description              Min  Typ    Max  Units       Details/Conditions
+                                Overvoltage Threshold Accuracy,
+ SID.UVOV.1      VTHOV1                                                –3   –      3    %
+                                4.0 V to 11.0 V
+                                Overvoltage Threshold Accuracy,
+ SID.UVOV.2      VTHOV2                                               –3.2  –     3.2   %
+                                11 V to 27.4 V
+                                Undervoltage Threshold Accuracy,
+ SID.UVOV.3      VTHUV1                                                -4   –      4    %
+                                2.7 V to 3.3 V
+                                                                                              Active Mode
+                                Undervoltage Threshold Accuracy,
+ SID.UVOV.4      VTHUV2                                               –3.5  –     3.5   %
+                                3.3 V to 4.0 V
+                                Undervoltage Threshold Accuracy,
+ SID.UVOV.5      VTHUV3                                                –3   –      3    %
+                                4.0 V to 11.0 V
+                                Undervoltage Threshold Accuracy,
+ SID.UVOV.6      VTHUV4                                               –2.9  –     2.9   %
+                                11.0 V to 22.0 V
+Table 31. UV/OV AC Specifications
+(Guaranteed by Characterization)
+     Spec ID      Parameter                 Description               Min  Typ   Max   Units       Details/Conditions
+                                Delay from UV threshold trip to
+ SID.UVOV.AC.1 TOV_GPIO                                                –    –     20    µs    Available on P1.0 or P1.1
+                                output GPIO toggle
+                                Delay from UV threshold trip to
+ SID.UVOV.AC.2 TOV_GATE                                                –    –     50    µs                  –
+                                external PFET power gate turn off
+                                Delay from UV threshold trip to
+ SID.UVOV.AC.3 TUV_GPIO                                                –    –     20    µs    Available on P1.0 or P1.1
+                                output GPIO toggle
+Document Number: 002-16951 Rev. *F                                                                            Page 25 of 37
+
+
+                                                                               EZ-PD™ CCG3PA Datasheet
+Gate Driver Specifications
+Table 32. Gate Driver DC Specifications
+   Spec ID    Parameter               Description           Min    Typ    Max   Units             Details/Conditions
+                                                                                        Applicable on VBUS_P_CTRL and
+ SID.GD.1     RPD          Pull-down resistance               –     –       3     kΩ    VBUS_C_CTRL to turn ON external
+                                                                                        PFET.
+                                                                                        Applicable on VBUS_P_CTRL to turn
+ SID.GD.2     RPU          Pull-up resistance                 –     –       4     kΩ
+                                                                                        OFF external PFET
+                           Pull-down current sink at drive
+ SID.GD.3     IPD0                                            25    –      75     µA
+                           strength of 1
+                           Pull-down current sink at drive
+ SID.GD.4     IPD1                                            50    –      150    µA
+                           strength of 2
+                           Pull-down current sink at drive                              I-mode (current mode) pull down at
+ SID.GD.5     IPD2                                           140    –      300    µA
+                           strength of 4                                                5 V. Applicable on VBUS_P_CTRL
+                           Pull-down current sink at drive                              and VBUS_C_CTRL to turn ON
+ SID.GD.6     IPD3                                           280    –      580    µA    external PFET
+                           strength of 8
+                           Pull-down current sink at drive
+ SID.GD.7     IPD4                                           560    –     1200    µA
+                           strength of 16
+                           Pull-down current sink at drive
+ SID.GD.8     IPD5                                          1120    –     2300    µA
+                           strength of 32
+ SID.GD.9     I_leak_p1    Pin leakage on VBUS_P_CTRL         –   0.003     –     µA    +25 °C TJ, 5-V VDDD, 20-V VBUS
+ SID.GD.10    I_leak_c1    Pin leakage on VBUS_C_CTRL         –   0.003     –     µA    +25 °C TJ, 5-V VDDD, 20-V VBU
+ SID.GD.11    I_leak_p2    Pin leakage on VBUS_P_CTRL         –     –       2     µA    +85 °C TJ, 5-V VDDD, 20-V VBU
+ SID.GD.12    I_leak_c2    Pin leakage on VBUS_C_CTRL         –     –       2     µA    +85 °C TJ, 5-V VDDD, 20-V VBU
+ SID.GD.13    I_leak_p3    Pin leakage on VBUS_P_CTRL         –     –       7     µA    +125 °C TJ, 5-V VDDD, 20-V VBU
+ SID.GD.14    I_leak_c3    Pin leakage on VBUS_C_CTRL         –     –       7     µA    +125 °C TJ, 5-V VDDD, 20-V VBU
+Table 33. Gate Driver AC Specifications
+(Guaranteed by Characterization)
+   Spec ID    Parameter              Description            Min  Typ    Max    Units             Details/Conditions
+                                                                                     Cload = 2 nF, Delay to VBUS –1.5 V
+                           Pull down delay on                                        from initiation of falling edge, VBUS =
+ SID.GD.15   TPD1                                            –    –      2      µs
+                           VBUS_C_CTRL                                               5 V to 20 V, 50 K tied between
+                                                                                     VBUS_C_CTRL and VBUS
+                                                                                     80% to 20%, 50 K tied between
+                           Discharge rate of output node on
+ SID.GD.16   Tr_discharge                                    –    –      5     V/µs  VBUS_C_CTRL and VBUS, Cload =
+                           VBUS_C_CTRL
+                                                                                     2 nF, Vinitial = 24 V
+                                                                                     Cload = 2 nF, Delay to VBUS –1.5 V from
+                           Pull down delay on                                        initiation of falling edge, VBUS = 5 V to
+ SID.GD.17   TPD2                                            –    –      2      µs
+                           VBUS_P_CTRL                                               20 V, 50 K tied between
+                                                                                     VBUS_C_CTRL and VBUS
+                                                                                     Cload = 2 nF, Delay to VBUS–1.5 V from
+                                                                                     initiation of falling edge, VBUS = 5 V to
+ SID.GD.18   TPU           Pull up delay on VBUS_P_CTRL      –    –      18     µs
+                                                                                     20 V, 50 K tied between
+                                                                                     VBUS_C_CTRL and VBUS
+                           Output slew rate on                                       Cload = 2 nF, 20% to 80% of
+ SID.GD.19   SRPU                                            –    –      5     V/µs
+                           VBUS_P_CTRL                                               VBUS_P_CTRL range
+                           Output slew rate on                                       Cload = 2 nF, 80% to 20% of
+ SID.GD.20   SRPD                                            –    –      5     V/µs
+                           VBUS_P_CTRL                                               VBUS_P_CTRL range
+Document Number: 002-16951 Rev. *F                                                                                 Page 26 of 37
+
+
+                                                                                EZ-PD™ CCG3PA Datasheet
+Table 34. VBUS Discharge Specifications
+     Spec ID#         Parameter               Description            Min Typ     Max    Units        Details / Conditions
+SID.VBUS.DISC.6      I1          20-V NMOS ON current for DS = 1     0.15   –      1     mA
+SID.VBUS.DISC.7      I2          20-V NMOS ON current for DS = 2      0.4   –      2     mA
+SID.VBUS.DISC.8      I4          20-V NMOS ON current for DS = 4      0.9   –      4     mA    Measured at 0.5 V
+SID.VBUS.DISC.9      I8          20-V NMOS ON current for DS = 8       2    –      8     mA
+SID.VBUS.DISC.10 I16             20-V NMOS ON current for DS = 16      4    –     10     mA
+                                                                                               When VBUS is discharged to
+                     VBUS_Stop Error percentage of final VBUS value
+SID.VBUS.DISC.11                                                       –    –     10     %     5 V. Guaranteed by Characteri-
+                     _Error      from setting
+                                                                                               zation.
+Table 35. Voltage (VBUS) Regulation DC Specifications
+     Spec ID#       Parameter                Description              Min   Typ    Max   Units       Details / Conditions
+                                                                                                Active mode shunt regulator at
+SID.DC.VR.1        V_IN_3       V(pad_in) at 3-V target              2.85     3    3.15    V
+                                                                                                3 V with bandgap
+                                                                                                Active mode shunt regulator at
+SID.DC.VR.2        V_IN_5       V(pad_in) at 5-V target              4.75     5    5.25    V
+                                                                                                5V
+                                                                                                Active mode shunt regulator at
+SID.DC.VR.3        V_IN_9       V(pad_in) at 9-V target              8.55     9    9.45    V
+                                                                                                9V
+                                                                                                Active mode shunt regulator at
+SID.DC.VR.4        V_IN_15      V(pad_in) at 15-V target             14.25   15   15.75    V
+                                                                                                15 V
+                                                                                                Active mode shunt regulator at
+SID.DC.VR.5        V_IN_20      V(pad_in) at 20-V target               19    20     21     V
+                                                                                                20 V
+                                                                                                Deep Sleep mode shunt
+SID.DC.VR.6        V_IN_3_DS    V(pad_in) at 3-V target               2.7     3     3.3    V
+                                                                                                regulator at 3 V with bandgap
+                                                                                                Deep Sleep mode shunt
+SID.DC.VR.7        V_IN_5_DS    V(pad_in) at 5-V target               4.5     5     5.5    V
+                                                                                                regulator at 5 V
+                                                                                                Deep Sleep mode shunt
+SID.DC.VR.8        V_IN_9_DS    V(pad_in) at 9-V target               8.1     9     9.1    V
+                                                                                                regulator at 9 V
+                                                                                                Deep Sleep mode shunt
+SID.DC.VR.9        V_IN_15_DS V(pad_in) at 15-V target                13.5   15    16.5    V
+                                                                                                regulator at 15 V
+                                                                                                Deep Sleep mode shunt
+SID.DC.VR.10       V_IN_20_DS V(pad_in) at 20-V target                 18    20     22     V
+                                                                                                regulator at 20 V
+SID.DC.VR.11       IKA_OFF      Off-state cathode current               –     –     10    µA    -
+SID.DC.VR.12       IKA_ON       Current through cathode pin             –     –     10    mA -
+Table 36. VBUS Short Protection Specifications
+    Spec ID       Parameter                  Description            Min    Typ   Max    Units        Details/Conditions
+                  V_SHORT_ Short-to-VBUS system-side clamping                                   Guaranteed by Characteri-
+ SID.VSP.1                                                            –     9      –      V
+                  TRIGGER      voltage on the CC/P2.2/P2.3 pins                                 zation.
+Table 37. VBUS DC Regulator Specifications
+    Spec ID       Parameter                  Description            Min    Typ   Max    Units        Details/Conditions
+                  VBUS_-
+ SID.VREG.2                    VBUS detect threshold voltage        1.08    –    2.62    V                     –
+                  DETECT
+Document Number: 002-16951 Rev. *F                                                                                Page 27 of 37
+
+
+                                                                                 EZ-PD™ CCG3PA Datasheet
+Table 38. VBUS AC Regulator Specifications
+   Spec ID       Parameter                Description              Min     Typ     Max    Units      Details/Conditions
+                            Total startup time for the regulator                                   Guaranteed by Charac-
+ SID.VREG.3     Tstart                                               –      –      200      µs
+                            supply outputs                                                         terization.
+Analog to Digital Converter
+Table 39. ADC DC Specifications (Guaranteed by Characterization)
+   Spec ID       Parameter                Description               Min     Typ     Max    Units     Details/Conditions
+SID.ADC.1      Resolution   ADC resolution                            –       8       –     Bits               –
+                                                                                                   Reference voltage
+SID.ADC.2      INL          Integral non-linearity                  –2.5      –      2.5    LSB
+                                                                                                   generated from VDDD
+                                                                                                   Reference voltage
+SID.ADC.2A INL              Integral non-linearity                  –1.5      –      1.5    LSB
+                                                                                                   generated from bandgap
+                                                                                                   Reference voltage
+SID.ADC.3      DNL          Differential non-linearity              –2.5      –      2.5    LSB
+                                                                                                   generated from VDDD
+                                                                                                   Reference voltage
+SID.ADC.3A DNL              Differential non-linearity              –1.5      –      1.5    LSB
+                                                                                                   generated from bandgap
+SID.ADC.4      Gain Error   Gain error                              –1.5      –      1.5    LSB                –
+                            ADC reference voltage when                                             Reference voltage
+SID.ADC.6      VREF_ADC2                                            1.96     2.0    2.04     V
+                            generated from band gap.                                               generated from bandgap
+Table 40. ADC AC Specifications (Guaranteed by Design)
+   Spec ID        Parameter               Description              Min      Typ    Max    Units      Details/Conditions
+                             Rate of change of sampled voltage
+SID.ADC.7       SLEW_Max                                             –       –       3    V/ms                 –
+                             signal
+Memory
+Table 41. Flash AC Specifications
+   Spec ID          Parameter                 Description         Min Typ Max      Units         Details/Conditions
+SID.MEM#3 FLASH_ERASE               Row erase time                 –     –   15.5   ms   –40 °C TA 85 °C, all VDDD
+                                    Row (Block) write time (erase
+SID.MEM#4 FLASH_WRITE                                              –     –    20    ms   –40 °C TA 85 °C, all VDDD
+                                    and program)
+SID.MEM#8 FLASH_ROW_PGM Row program time after erase               –     –     7    ms   25 °C TA 55 °C, all VDDD
+SID178         TBULKERASE           Bulk erase time (32 KB)        –     –    35    ms                    –
+SID180         TDEVPROG             Total device program time      –     –    7.5    s                    –
+                                    Flash retention, TA ≤ 55 °C,
+SID182         FRET1                                              20     –     –   years                  –
+                                    100K P/E cycles
+                                    Flash retention, TA ≤ 85 °C,
+SID182A        FRET2                                              10     –     –   years                  –
+                                    10K P/E cycles
+                                    Flash retention, TA ≤ 105 °C,
+SID182B        FRET3                                               3     –     –   years                  –
+                                    10K P/E cycles
+Document Number: 002-16951 Rev. *F                                                                             Page 28 of 37
+
+
+                                                                                                             EZ-PD™ CCG3PA Datasheet
+Ordering Information
+Table 42 lists the EZ-PD CCG3PA part numbers and features.
+Table 42. CCGPA Ordering Information
+                                                             Termination
+            MPN                    Application                                    Role                Bootloader[7]              Package Type    Si ID
+                                                               Resistor
+CYPD3171-24LQXQ Power Bank                                 RP, RD, RD-DB          DRP        UFP CC Bootloader                    24-Pin QFN     2003
+                            Power Adapter based
+                                                                                             DFP CC with Opto Coupler
+CYPD3174-16SXQ              on Opto Coupler                        RP             DFP                                             16-Pin SOIC    2001
+                                                                                             Feedback Bootloader
+                            Feedback
+                            Power Adapter based
+                                                                                             DFP CC with Opto Coupler
+CYPD3174-24LQXQ on Opto Coupler                                    RP             DFP                                             24-Pin QFN     2000
+                                                                                             Feedback Bootloader
+                            Feedback
+                            Power Adapter based                                              DFP CC with Direct
+CYPD3175-24LQXQ                                                    RP             DFP                                             24-Pin QFN     2002
+                            on Direct Feedback                                               Feedback Bootloader
+Ordering Code Definitions
+ CY PD        X     X XX -       XX XX        X    X X
+                                                              T = Tape and Reel
+                                                              Temperature Grade:
+                                                              Q = Extended industrial (–40 °C to +105 °C)
+                                                              Lead: X = Pb-free
+                                                              Package Type: LQ = QFN; S = SOIC
+                                                              Number of pins in the package
+                                                              Application and Feature Combination Designation
+                                                              Number of Type-C Ports: 1 = 1 Port, 2 = 2 Port
+                                                              Product Type: 3 = Third-generation product family
+                                                              Marketing Code: PD = Power Delivery product family
+                                                              Company ID: CY = Cypress
+Note
+ 7. It is assumed that VBUS is at 5V by default. Bootloader execution is not responsible for controlling the generation of 5V VBUS.
+Document Number: 002-16951 Rev. *F                                                                                                            Page 29 of 37
+
+
+                                                                             EZ-PD™ CCG3PA Datasheet
+Packaging
+Table 43. Package Characteristics
+  Parameter                 Description               Conditions         Min     Typ   Max  Units
+TA             Operating ambient temperature      Extended Industrial    -40      25   105   °C
+TJ             Operating junction temperature     Extended Industrial    -40      25   120   °C
+TJA            Package JA (24-QFN)               -                        -       -  19.98 °C/W
+TJC            Package JC (24-QFN)               -                        -       -   4.78 °C/W
+TJA            Package JA (16-SOIC)              -                        -       -    84  °C/W
+TJC            Package JC (16-SOIC)              -                        -       -   33.9 °C/W
+Table 44. Solder Reflow Peak Temperature
+                                                   Maximum Time within 5° C
+    Package         Maximum Peak Temperature           of Peak Temperature
+   24-pin QFN                   260 °C                      30 seconds
+   16-pin SOIC                  260 °C                      30 seconds
+Table 45. Package Moisture Sensitivity Level (MSL), IPC/JEDEC J-STD-2
+        Package                      MSL
+       24-pin QFN                    MSL3
+       16-pin SOIC                   MSL3
+Document Number: 002-16951 Rev. *F                                                              Page 30 of 37
+
+
+                                                                                                  EZ-PD™ CCG3PA Datasheet
+                                         Figure 11. 24-pin QFN Package Outline
+                          ġ
+                                                         NOTES
+                                        DIMENSIONS
+                             SYMBOL                      1. ALL DIMENSIONS ARE IN MILLIMETERS.
+                                    MIN.   NOM.    MAX.  2. DIE THICKNESS ALLOWABLE IS 0.305 mm MAXIMUM(.012 INCHES MAXIMUM)
+                                                         3. DIMENSIONING & TOLERANCES CONFORM TO ASME Y14.5M. -1994.
+                                A                  0.60
+                                                         4. THE PIN #1 IDENTIFIER MUST BE PLACED ON THE TOP SURFACE OF THE
+                                A1  0.00           0.05
+                                                            PACKAGE BY USING INDENTATION MARK OR OTHER FEATURE OF
+                                A2          0.40   0.425
+                                                            PACKAGE BODY.
+                                A3       0.152 REF       5. EXACT SHAPE AND SIZE OF THIS FEATURE IS OPTIONAL.
+                                b   0.18    0.25   0.30  6. PACKAGE WARPAGE MAX 0.08 mm.
+                                D        4.00 BSC        7. APPLIED FOR EXPOSED PAD AND TERMINALS. EXCLUDE EMBEDDING PART
+                                                            OF EXPOSED PAD FROM MEASURING.
+                                D2  2.65    2.75   2.85
+                                                         8. APPLIED ONLY TO TERMINALS.
+                                E        4.00 BSC
+                                                         9. JEDEC SPECIFICATION NO. REF: N.A.
+                                E2  2.65    2.75   2.85
+                                L   0.30    0.40   0.50
+                                e        0.50 BSC
+                                                                                                        002-16934 *A
+                                R   0.09
+Document Number: 002-16951 Rev. *F                                                                                           Page 31 of 37
+
+
+                                                                      EZ-PD™ CCG3PA Datasheet
+                                   Figure 12. 16-pin SOIC Package Outline
+                                                                                 51-85068 *E
+Document Number: 002-16951 Rev. *F                                                        Page 32 of 37
+
+
+                                                                                 EZ-PD™ CCG3PA Datasheet
+Acronyms                                                          Table 46. Acronyms Used in this Document (continued)
+Table 46. Acronyms Used in this Document                           Acronym                        Description
+                                                                  OCP         overcurrent protection
+  Acronym                       Description
+                                                                  OTP         over temperature protection
+ADC         analog-to-digital converter
+                                                                  OVP         overvoltage protection
+AES         advanced encryption standard
+                                                                  OVT         overvoltage tolerant
+API         application programming interface
+                                                                  PCB         printed circuit board
+ARM®        advanced RISC machine, a CPU architecture
+                                                                  PD          power delivery
+CC          configuration channel
+                                                                  PGA         programmable gain amplifier
+CCG3        Cable Controller Generation 3
+                                                                  PHY         physical layer
+CPU         central processing unit
+                                                                  POR         power-on reset
+            cyclic redundancy check, an error-checking
+CRC
+            protocol                                              PRES        precise power-on reset
+                                                                        ®     Programmable System-on-Chip™
+CS          current sense                                         PSoC
+DFP         downstream facing port                                PWM         pulse-width modulator
+            digital input/output, GPIO with only digital capabil- RAM         random-access memory
+DIO
+            ities, no analog. See GPIO.
+                                                                  RISC        reduced-instruction-set computing
+DRP         dual role port
+                                                                  RMS         root-mean-square
+            electrically erasable programmable read-only
+EEPROM                                                            RTC         real-time clock
+            memory
+                                                                  RX          receive
+            electronically marked cable assembly, a USB
+            cable that includes an IC that reports cable          SAR         successive approximation register
+EMCA
+            characteristics (e.g., current rating) to the Type-C
+                                                                  SCL         I2C serial clock
+            ports
+                                                                  SCP         short circuit protection
+EMI         electromagnetic interference
+                                                                  SDA         I2C serial data
+ESD         electrostatic discharge
+                                                                  S/H         sample and hold
+FS          full-speed
+                                                                  SHA         secure hash algorithm
+GPIO        general-purpose input/output
+                                                                              Serial Peripheral Interface, a communications
+IC          integrated circuit                                    SPI
+                                                                              protocol
+IDE         integrated development environment
+                                                                  SRAM        static random access memory
+ 2C,        Inter-Integrated Circuit, a communications
+I    or IIC                                                       SWD         serial wire debug, a test protocol
+            protocol
+                                                                  TX          transmit
+ILO         internal low-speed oscillator, see also IMO
+                                                                              a new standard with a slimmer USB connector and
+IMO         internal main oscillator, see also ILO
+                                                                  Type-C      a reversible cable, capable of sourcing up to
+I/O         input/output, see also GPIO                                       100 W of power
+LDO         low-dropout regulator                                             Universal Asynchronous Transmitter Receiver, a
+                                                                  UART
+                                                                              communications protocol
+LVD         low-voltage detect
+                                                                  USB         Universal Serial Bus
+LVTTL       low-voltage transistor-transistor logic
+                                                                              USB input/output, CCG2 pins used to connect to a
+MCU         microcontroller unit                                  USBIO
+                                                                              USB port
+NC          no connect
+                                                                  UVP         undervoltage protection
+NMI         nonmaskable interrupt
+                                                                  XRES        external reset I/O pin
+NVIC        nested vectored interrupt controller
+opamp       operational amplifier
+Document Number: 002-16951 Rev. *F                                                                                 Page 33 of 37
+
+
+                                              EZ-PD™ CCG3PA Datasheet
+Document Conventions
+Units of Measure
+Table 47. Units of Measure
+  Symbol                      Unit of Measure
+°C          degrees Celsius
+Hz          hertz
+KB          1024 bytes
+kHz         kilohertz
+k          kilo ohm
+Mbps        megabits per second
+MHz         megahertz
+M          mega-ohm
+Msps        mega samples per second
+µA          microampere
+µF          microfarad
+µs          microsecond
+µV          microvolt
+µW          microwatt
+mA          milliampere
+ms          millisecond
+mV          millivolt
+nA          nanoampere
+ns          nanosecond
+           ohm
+pF          picofarad
+ppm         parts per million
+ps          picosecond
+s           second
+sps         samples per second
+V           volt
+Document Number: 002-16951 Rev. *F                           Page 34 of 37
+
+
+                                                                                  EZ-PD™ CCG3PA Datasheet
+Document History Page
+ Document Title: EZ-PD™ CCG3PA Datasheet, USB Type-C Port Controller
+ Document Number: 002-16951
+                     Orig. of Submission
+ Revision    ECN                                                            Description of Change
+                     Change       Date
+    **     5473667    VGT      10/13/2016 New datasheet
+                                          Changed datasheet status to Preliminary.
+                                          Updated Features.
+                                          Updated Logic Block Diagram.
+                                          Updated Functional Overview
+    *A     5544333    VGT      12/13/2016
+                                          Updated Figure 2, Figure 3, Figure 6, Figure 8, Figure 9, and Figure 10.
+                                          Updated Pinouts.
+                                          Updated Table 4 with VCC_PIN_ABS and VSBU_PIN_ABS parameters.
+                                          Added Q-temp parts in Table 42.
+                                          Updated General Description, Features, I/O Subsystem, CPU, Charger Detection, and
+                                          Ordering Information.
+    *B     5583660    VGT      01/18/2017 Updated Table 2 and Table 4.
+                                          Updated Figure 6 through Figure 10.
+                                          Updated Sales page.
+                                          Updated Figure 2, Figure 6, Figure 8, Figure 10, Table 1,Table 2, Table 4, Table 42, Features,
+                                          Logic Block Diagram, Functional Overview, Power Systems Overview, Ordering Code
+                                          Definitions, Acronyms.
+   *C      5665676    VGT      03/22/2017 Added Internal Block Diagram.
+                                          Added Table 5 through Table 41 in Device-Level Specifications.
+                                          Updated compliance with USB spec in Sales, Solutions, and Legal Information.
+                                          Updated Cypress logo.
+                                          Added Application Diagram description before Figure 6, Figure 8, Figure 9, and Figure 10.
+                                          Added Figure 1.
+                                          Added CCG3PA Programming and Bootloading section.
+                                          Added Document History Page section.
+   *D      5738854    VGT      05/19/2017 Added Table 3.
+                                          Updated Figure 3, Figure 4, Figure 6, Figure 8, Figure 9, and Figure 10.
+                                          Updated Table 2, Table 4, Table 5, and Table 42.
+                                          Updated Figure 11 (spec 002-16934 Rev. ** to *A) in Packaging.
+                                          Updated Cypress logo, Sales page, and Copyright information.
+                                          Removed Preliminary document status.
+                                          Updated System-Level Fault Protection, Power, and System-Level ESD Protection.
+                                          Updated Internal Block Diagram
+                                          Updated Figure 2.
+                                          Table 2: Updated Pins 12 and 13. Added Note 5.
+                                          Updated Figure 6.
+                                          Added Figure 7.
+                                          Table 4: Updated max value for VCC_PIN_ABS
+                                          Table 5: Removed SID_DS and updated typ value for SID_PB_DS_UA.
+                                          Table 7: Added new SID.GIO#17 spec and changed SID.GIO#17 to SID.GIO#17A.
+                                          Added Table 9 and Table 10.
+                                          Table 12: Updated max value for SID149.
+                                          Table 22; Added “Guaranteed by Characterization”
+                                          Table 24: Updated Conditions for SID226 and SID228. Updated typ value and conditions for
+    *E     5984670    VGT      12/06/2017
+                                          SID.CLK#1.
+                                          Table 26: Updated Conditions for SID234 and SID238.
+                                          Table 28: Updated min, typ, and max values for SID.LSCSA.1,SID.LSCSA.7, and
+                                          SID.LSCSA.24
+                                          Updated Conditions for SID.GIO#17A, SID.GIO#43, SID.GIO#44, SID.GIO#45, and SID69.
+                                          Table 31: Added “Guaranteed by Characterization”
+                                          Table 32: Added SID.GD.9, SID.GD.10, SID.GD.11, SID.GD.12, SID.GD.13, SID.GD.14.
+                                          Changed description of spec IDs SID.GD.1 to SID.GD.8.
+                                          Table 33: Renumbered all spec IDs starting from SID.GD.15 to SID.GD.20. Modified max
+                                          values of SID.GD.15, SID.GD.17 and SID.GD.18. Modified Details/Conditions of all
+                                          parameters.
+                                          Table 34: Removed spec IDs SID.VBUS.DISC.1 to SID.VBUS.DISC5. Renumbered
+                                          SID.VBUS.DISC6 to SID.VBUS.DISC11. Added new spec IDs SID.VBUS.DISC6 to
+                                          SID.VBUS.DISC10.
+Document Number: 002-16951 Rev. *F                                                                                       Page 35 of 37
+
+
+                                                                                 EZ-PD™ CCG3PA Datasheet
+ Document Title: EZ-PD™ CCG3PA Datasheet, USB Type-C Port Controller
+ Document Number: 002-16951
+                                          Table 35: Added V_IN_3 and V_IN3_DS parameters and renumbered spec IDs from
+                                          SID.DC.VR.1 to SID.DC.VR.12.
+                                          Added Table 36.
+                                          Table 39: Updated min and max values for SID.ADC.4.
+ *E (contd) 5984670   VGT      12/06/2017
+                                          Table 42: Added new MPN CYPD3174-24LQXQ. Modified "Application" column of
+                                          CYPD3174-16SXQ and CYPD3175-24LQXQ MPNs.
+                                          Removed Errata.
+                                          Added Table 43, Table 44 and Table 45 to Packaging section.
+                                          Added “The voltage reference for the ADCs is generated either from the VDDD supply or from
+                                          internal bandgap. When sensing the GPIO pin voltage with an ADC, the pin voltage cannot
+                                          exceed the VDDIO supply value” to ADC section.
+                                          Table 2: Updated the Descripion “GPIO with Open drain with pull-up assist. Configurable as
+                                          GPIO_20VT/I2C_SDA_1/IEC. Tolerant to temporary short to VBUS pin” for Pins P2.2 and P2.3.
+                                          Table 7: Removed SBU1, SBU2 reference in Details/Conditions for Spec ID SID.GIO#17.
+                                          Table 32: Moved “0.003” to Typ column for the Spec ID SID.GD.9 and SID.GD.10.
+                                          Table 12: Updated typical and max values for II2C4 parameter.
+                                          Table 9: Removed GPIO_20VT_Voh parameter.
+     *F     6079226   VGT      03/02/2018
+                                          Table 28: Updated max values of Csa_SCP_Acc parameters.
+                                          Table 39: Updated the Description of Spec ID SID.ADC.6 as “ADC reference voltage when
+                                          generated from band gap.”. Removed SID.ADC.5 parameter and added SID.ADC.2A and
+                                          SID.ADC.3A parameters. Updated Details/Conditions of SID.ADC.2 and SID.ADC3
+                                          parameters.
+                                          Table 35: Added units (V) to SID.DC.VR.3, SID.DC.VR.4 and SID.DC.VR.5 parameters.
+                                          Updated VBUS Short Protection and I/O Subsystem sections.
+                                          Updated Table 3 with information on Fault Indicator and VBUS Short Protection Capability.
+                                          Updated Application Diagrams section.
+Document Number: 002-16951 Rev. *F                                                                                    Page 36 of 37
+
+
+                                                                                                                                    EZ-PD™ CCG3PA Datasheet
+Sales, Solutions, and Legal Information
+Worldwide Sales and Design Support
+Cypress maintains a worldwide network of offices, solution centers, manufacturer’s representatives, and distributors. To find the office
+closest to you, visit us at Cypress Locations.
+Products                                                                                                   PSoC® Solutions
+Arm® Cortex® Microcontrollers                                          cypress.com/arm                     PSoC 1 | PSoC 3 | PSoC 4 | PSoC 5LP | PSoC 6
+Automotive                                                 cypress.com/automotive
+                                                                                                           Cypress Developer Community
+Clocks & Buffers                                                   cypress.com/clocks
+                                                                                                           Forums | WICED IOT Forums | Projects | Video | Blogs |
+Interface                                                      cypress.com/interface                       Training | Components
+Internet of Things                                                       cypress.com/iot
+                                                                                                           Technical Support
+Memory                                                          cypress.com/memory
+                                                                                                           cypress.com/support
+Microcontrollers                                                      cypress.com/mcu
+PSoC                                                                 cypress.com/psoc
+Power Management ICs                                                 cypress.com/pmic
+Touch Sensing                                                       cypress.com/touch
+USB Controllers                                                        cypress.com/usb
+Wireless Connectivity                                           cypress.com/wireless
+Notice regarding compliance with Universal Serial Bus specification. Cypress offers firmware and hardware solutions that are certified to comply with the Universal Serial Bus specification, USB
+Type-C™ Cable and Connector Specification, and other specifications of USB Implementers Forum, Inc (USB-IF). You may use Cypress or third party software tools, including sample code, to modify
+the firmware for Cypress USB products. Modification of such firmware could cause the firmware/hardware combination to no longer comply with the relevant USB-IF specification. You are solely
+responsible ensuring the compliance of any modifications you make, and you must follow the compliance requirements of USB-IF before using any USB-IF trademarks or logos in connection with any
+modifications you make. In addition, if Cypress modifies firmware based on your specifications, then you are responsible for ensuring compliance with any desired standard or specifications as if you
+had made the modification. CYPRESS IS NOT RESPONSIBLE IN THE EVENT THAT YOU MODIFY OR HAVE MODIFIED A CERTIFIED CYPRESS PRODUCT AND SUCH MODIFIED PRODUCT
+NO LONGER COMPLIES WITH THE RELEVANT USB-IF SPECIFICATIONS.
+© Cypress Semiconductor Corporation, 2016-2018. This document is the property of Cypress Semiconductor Corporation and its subsidiaries, including Spansion LLC ("Cypress"). This document,
+including any software or firmware included or referenced in this document ("Software"), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries
+worldwide. Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or other
+intellectual property rights. If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress
+hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to
+modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users
+(either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress's patents that are infringed by the Software (as
+provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products. Any other use, reproduction, modification, translation, or compilation
+of the Software is prohibited.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE
+OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. No computing
+device can be absolutely secure. Therefore, despite security measures implemented in Cypress hardware or software products, Cypress does not assume any liability arising out of any security breach,
+such as unauthorized access to or use of a Cypress product. In addition, the products described in these materials may contain design defects or errors known as errata which may cause the product
+to deviate from published specifications. To the extent permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any
+liability arising out of the application or use of any product or circuit described in this document. Any information provided in this document, including any sample design information or programming
+code, is provided only for reference purposes. It is the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this
+information and any resulting product. Cypress products are not designed, intended, or authorized for use as critical components in systems designed or intended for the operation of weapons, weapons
+systems, nuclear installations, life-support devices or systems, other medical devices or systems (including resuscitation equipment and surgical implants), pollution control or hazardous substances
+management, or other uses where the failure of the device or system could cause personal injury, death, or property damage ("Unintended Uses"). A critical component is any component of a device
+or system whose failure to perform can be reasonably expected to cause the failure of the device or system, or to affect its safety or effectiveness. Cypress is not liable, in whole or in part, and you
+shall and hereby do release Cypress from any claim, damage, or other liability arising from or related to all Unintended Uses of Cypress products. You shall indemnify and hold Cypress harmless from
+and against all claims, costs, damages, and other liabilities, including claims for personal injury or death, arising from or related to any Unintended Uses of Cypress product.
+.Cypress, the Cypress logo, Spansion, the Spansion logo, and combinations thereof, WICED, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress in
+the United States and other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be claimed as property of their respective owners.
+Document Number: 002-16951 Rev. *F                                                                Revised March 2, 2018                                                                Page 37 of 37
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Cypress Semiconductor:
+ CYPD3171-24LQXQ CYPD3174-16SXQ CYPD3175-24LQXQ CYPD3174-24LQXQ CYPD3171-24LQXQT
+CYPD3174-16SXQT CYPD3174-24LQXQT CYPD3175-24LQXQT

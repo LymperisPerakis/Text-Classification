@@ -1,0 +1,797 @@
+                                                         ATA6663/ATA6664
+                                                                      LIN Transceiver
+                                                                             DATASHEET
+Features
+● Operating range from 5V to 27V
+● Baud rate up to 20Kbaud
+● Improved slew rate control according to LIN specification 2.0, 2.1 and SAEJ2602-2
+● Fully compatible with 3.3V and 5V devices
+● Atmel® ATA6663: TXD Time-out Timer, Atmel ATA6664: No TXD Time-out Timer
+● Normal and Sleep Mode
+● Wake-up capability via LIN bus (90µs dominant)
+● External wake-up via WAKE Pin (35µs low level)
+● INH output to control an external voltage regulator or to switch the master pull-up
+● Very low standby current during Sleep Mode (10µA)
+● Wake-up source recognition
+● Bus pin short-circuit protected versus GND and battery
+● LIN input current < 2µA if VBAT is disconnected
+● Overtemperature protection
+● High EMC level
+● Interference and damage protection according to ISO/CD 7637
+● Fulfills the OEM “Hardware Requirements for LIN in Automotive Applications
+    Rev.1.1”
+● Packages: SO8, DFN8
+Description
+The Atmel ATA6663 is a fully integrated LIN transceiver complying with the LIN
+specification 2.0, 2.1 and SAEJ2602-2. The Atmel ATA6664 is an identical version, the
+only difference is that the TXD-dominant Time-out function is disabled so the device is able
+to send a static low signal to the LIN bus. It interfaces the LIN protocol handler and the
+physical layer. The device is designed to handle the low-speed data communication in
+vehicles, for example, in convenience electronics. Improved slope control at the LIN driver
+ensures secure data communication up to 20Kbaud. Sleep Mode guarantees minimal cur-
+rent consumption even in the case of a floating bus line or a short circuit on the LIN bus to
+GND. The ATA6663/ATA6664 feature advanced EMI and ESD performance.
+                                                                            9146I-AUTO-10/14
+
+
+Figure 1.    Block Diagram
+                                                                                                                 7   VS
+                 RXD  1                                Receiver
+                                                               -
+                                                              +
+                                                                                                                 6   LIN
+                                                                                            Filter
+                                                         Wake up bus timer                Short circuit and
+                 TXD  4                                                                   overtemperature
+                                           TXD                                            protection
+                                        Time-Out          Slew rate control
+                                           timer
+                                      (only ATA6663)
+                          VS                                                                  VS
+                                                             Control unit                                        5   GND
+               WAKE   3                 Wake-up             Standby mode
+                                           timer
+                                                                 2                       8
+                                                                  EN                      INH
+1.      Pin Configuration
+        Figure 1-1. Pinning SO8, DFN8
+                                      RXD      1       8   INH                   RXD                     INH
+                                       EN      2       7   VS                     EN      DFN8           VS
+                                                   SO8
+                                    WAKE       3       6   LIN                WAKE         3x3           LIN
+                                      TXD      4       5   GND                   TXD                     GND
+        Table 1-1.    Pin Description
+              Pin        Symbol     Function
+               1           RXD      Receive data output (open drain)
+               2            EN      Enables normal mode; when the input is open or low, the device is in sleep mode
+               3          WAKE      High voltage input for local wake-up request. If not needed, connect directly to VS
+               4           TXD      Transmit data input; active low output (strong pull-down) after a local wake-up request
+               5           GND      Ground, heat sink
+               6           LIN      LIN bus line input/output
+               7            VS      Battery supply
+                                    Battery-related inhibit output for controlling an external voltage regulator or to switch-off the LIN
+               8           INH
+                                    master pull-up resistor; active high after a wake-up request
+2       ATA6663/ATA6664 [DATASHEET]
+        9146I–AUTO–10/14
+
+
+2.  Functional Description
+2.1 Physical Layer Compatibility
+    Since the LIN physical layer is independent from higher LIN layers (e.g., the LIN protocol layer), all nodes with a LIN physical
+    layer according to LIN2.x can be used along with LIN physical layer nodes, which are according to older versions (i.e.,
+    LIN1.0, LIN1.1, LIN1.2, LIN1.3), without any restrictions.
+2.2 Supply Pin (VS)
+    Undervoltage detection is implemented to disable transmission if VS falls to a value below 5V in order to avoid false bus
+    messages. After switching on VS, the IC switches to fail-safe mode and INHIBIT is switched on. The supply current in sleep
+    mode is typically 10µA.
+2.3 Ground Pin (GND)
+    The Atmel ATA6663/ATA6664 does not affect the LIN Bus in the case of a GND disconnection. It is able to handle a ground
+    shift up to 11.5% of VS.
+2.4 Bus Pin (LIN)
+    A low-side driver with internal current limitation and thermal shutdown, and an internal pull-up resistor are implemented as
+    specified by LIN2.x. The voltage range is from –27V to +40V. This pin exhibits no reverse current from the LIN bus to VS,
+    even in the case of a GND shift or VBatt disconnection. The LIN receiver thresholds are compatible to the LIN protocol
+    specification.The fall time (from recessive to dominant) and the rise time (from dominant to recessive) are slope controlled.
+    The output has a self-adapting short-circuit limitation: During current limitation, as the chip temperature increases, the
+    current is reduced.
+    Note:          The internal pull-up resistor is only active in normal and fail-safe mode.
+2.5 Input/Output Pin (TXD)
+    In Normal Mode the TXD pin is the microcontroller interface to control the state of the LIN output. TXD must be at Low- level
+    in order to have a low LIN Bus. If TXD is high, the LIN output transistor is turned off and the Bus is in recessive state. The
+    TXD pin is compatible to both a 3.3V or 5V supply. During fail-safe Mode, this pin is used as output and is signalling the
+    wake- up source (see Section 2.14 “Wake-up Source Recognition” on page 8). It is current limited to < 8mA.
+2.6 TXD Dominant Time-out Function (only Atmel ATA6663)
+    The TXD input has an internal pull-down resistor. An internal timer prevents the bus line from being driven permanently in
+    dominant state. If TXD is forced to low longer than tDOM > 40ms, the pin LIN will be switched off (recessive mode). To reset
+    this mode, TXD needs to be switched to high (> 10µs) before switching LIN to dominant again.
+    Note:          The ATA6664 does not provide this functionality.
+2.7 Output Pin (RXD)
+    This pin forwards information on the state of the LIN bus to the microcontroller. LIN high (recessive) is indicated by a high
+    level at RXD, LIN low (dominant) is reported by a low voltage at RXD. The output is an open drain, therefore, it is compatible
+    to a 3.3V or 5V power supply. The AC characteristics are defined by a pull-up resistor of 5kΩ to 5V and a load capacitor of
+    20pF. The output is short-current protected. In unpowered mode (VS = 0V), RXD is switched off. For ESD protection a Zener
+    diode with VZ = 6.1V is integrated.
+2.8 Enable Input Pin (EN)
+    This pin controls the operation mode of the device. If EN = 1, the device is in normal mode, with the transmission path from
+    TXD to LIN and from LIN to RXD both active. At a falling edge on EN, while TXD is already set to high, the device switches
+    to sleep mode and transmission is not possible. In sleep mode, the LIN bus pin is connected to VS with a weak pull-up
+    current source. The device can transmit only after being woken up (see Section 2.9, “Inhibit Output Pin (INH)” ).
+    During sleep mode the device is still supplied from the battery voltage. The supply current is typically 10µA. The pin EN
+    provides a pull-down resistor in order to force the transceiver into sleep mode in case the pin is disconnected.
+                                                                                     ATA6663/ATA6664 [DATASHEET]                   3
+                                                                                                            9146I–AUTO–10/14
+
+
+2.9  Inhibit Output Pin (INH)
+     This pin is used to control an external voltage regulator or to switch on/off the LIN Master pull-up resistor in case the device
+     is used in a Master node. The inhibit pin provides an internal switch towards pin VS which is protected by temperature
+     monitoring. If the device is in normal or fail-safe mode, the inhibit high-side switch is turned on. When the device is in sleep
+     mode, the inhibit switch is turned off, thus disabling the voltage regulator or other connected external devices.
+     A wake-up event on the LIN bus or at pin WAKE will switch the INH pin to the VS level. After a system power-up (VS rises
+     from zero), the pin INH switches automatically to the VS level.
+2.10 Wake-up Input Pin (WAKE)
+     This pin is a high-voltage input used to wake-up the device from sleep mode. It is usually connected to an external switch in
+     the application to generate a local wake-up. A pull-up current source with typically –10µA is implemented. The voltage
+     threshold for a wake-up signal is 3V below the VS voltage with an output current of typically –3µA.
+     If a local wake-up is not needed in the application, pin WAKE can directly be connected to pin VS.
+2.11 Operation Modes
+        1.   Normal Mode
+             This is the normal transmitting and receiving mode. All features are available.
+        2.   Sleep Mode
+             In this mode the transmission path is disabled and the device is in low-power mode. Supply current from VBatt is
+             typically 10µA. A wake-up signal from the LIN bus or via pin WAKE will be detected and will switch the device to
+             fail-safe mode. If EN then switches to high, normal mode is activated. Input debounce timers at pin WAKE (tWAKE),
+             LIN (tBUS) and EN (tsleep,tnom) prevent unwanted wake-up events due to automotive transients or EMI. In sleep
+             mode the INH pin remains floating.
+             The internal termination between pin LIN and pin VS is disabled. Only a weak pull-up current (typical 10 µA)
+             between pin LIN and pin VS is present. Sleep mode can be activated independently from the actual level on pin
+             LIN or WAKE.
+        3.   Fail-safe Mode
+             At system power-up or after a wake-up event, the device automatically switches to fail-safe mode. It switches the
+             INH pin to a high state, to the VS level when VS exceeds 5V. LIN communication is switched off. The microcon-
+             troller of the application will then confirm normal mode by setting the EN pin to high.
+     Figure 2-1. Modes of Operation
+                                                                     Power-up
+                                                                           a                            a: Power-up (VS > 3V)
+                                                                                                        b: VS < 5V
+                                                                                                        c: Bus wake-up event
+                                                                                                        d: Wake-up from wake switch
+                                                                  Fail-Safe Mode                           (only Transceiver 2)
+                                                               Communication: OFF
+                                                             RXD: see table of Modes
+                                                     INH: high (INH HS switch ON) if VS > 5V
+                                          b                                                           b
+                                         EN = 1                                              c or d
+                                        & NOT b
+                                                                Go to sleep command
+                                                    EN = 0
+                            Normal Mode                                                                       Sleep Mode
+                    INH: high (INH HS switch ON)                 Local wake-up event          INH: high impedance (INH HS switch OFF)
+                         Communication: ON          EN = 1                                               Communication: OFF
+4    ATA6663/ATA6664 [DATASHEET]
+     9146I–AUTO–10/14
+
+
+     Table 2-1.     Table of Operation Modes
+         Mode of Operation              Transceiver                    INH                   RXD                      LIN
+                                                                    On, except       High, except after
+               Fail-safe                      Off                                                                  Recessive
+                                                                     VS < 5V               wake-up
+                Normal                        On                        On             LIN depending            TXD depending
+                 Sleep                        Off                       Off              High ohmic                Recessive
+     Wake-up events from sleep mode:
+       ● LIN bus
+       ●     EN pin
+       ●     WAKE pin
+       ●     VS undervoltage
+     Figure 2-1 on page 4, Figure 2-2 on page 5 and Figure 2-5 on page 8 show the details of wake-up operations.
+2.12 Remote Wake-up via Dominant Bus State
+     A voltage lower than the LIN pre-wake detection VLINL at pin LIN activates the internal LIN receiver and starts the wake-up
+     detection timer.
+     A falling edge at pin LIN, followed by a dominant bus level VBUSdom maintained for a certain time period (> tBUS) and a rising
+     edge at pin LIN results in a remote wake-up request. The device switches to fail-safe mode. Pin INH is activated (switches to
+     VS) and the internal termination resistor is switched on. The remote wake-up request is indicated by a low level at pin RXD to
+     interrupt the microcontroller (see Figure 2-2).
+     Figure 2-2. LIN Wake-up Waveform Diagram
+                                         Bus wake-up filtering time
+                                                  (tBUS)
+                    LIN bus
+                                                                                         High
+                        INH
+                                              Low or floating
+                       RXD                    High or floating
+                                                                                          Low
+                   External
+                    voltage
+                  regulator                      Off state
+                                                                                                             Normal
+                                                                               Regulator wake-up time delay   Mode
+                                                                                                             EN High
+                         EN
+                                           Node in sleep state
+                                                                                  Microcontroller start-up
+                                                                                         delay time
+                                                                                    ATA6663/ATA6664 [DATASHEET]                    5
+                                                                                                            9146I–AUTO–10/14
+
+
+  In sleep mode the device has a very low current consumption, even during short-circuits or floating conditions on the bus. A
+  floating bus can arise if the Master pull-up resistor is missing, e.g., in case it is switched off when the LIN Master is in sleep
+  mode or if the power supply of the Master node is switched off.
+  To minimize the current consumption IVS during voltage levels at the LIN-pin below the LIN pre-wake threshold, the receiver
+  is activated only for a specific time tmon. If tmon elapses while the voltage at the bus is lower than pre-wake detection low
+  (VLINL) and higher than the LIN dominant level, the receiver is switched off again and the circuit reverts to sleep mode. The
+  current consumption is then the result of IVSsleep plus ILINwake. If a dominant state is reached on the bus no wake-up will occur.
+  Even if the voltage exceeds the pre-wake detection high (VLINH), the IC will remain in sleep mode (see Figure 2-3 on page 6).
+  This means the LIN bus must be above the Pre-wake detection threshold VLINH for a few microseconds before a new LIN
+  wake-up is possible.
+  Figure 2-3. Floating LIN Bus During Sleep Mode
+                                                                                                             LIN Pre-wake
+                                VLINL
+                LIN BUS
+                                                                                                       LIN dominant state
+                                VBUSdom
+                                                                   tmon
+                                                                                          IVSsleep
+                                                                  IVSfail                + ILINwake
+                      IVS
+                                IVSsleep                                                              IVSsleep
+                 Mode of
+                operation       Sleep Mode             Wake-up Detection Phase               Sleep Mode
+              Int. Pull-up
+                Resistor                                      off (disabled)
+                  RLIN
+6 ATA6663/ATA6664 [DATASHEET]
+  9146I–AUTO–10/14
+
+
+     If the Atmel® ATA6663/ATA6664 is in sleep mode and the voltage level at the LIN is in dominant state (VLIN < VBUSdom) for a
+     time period exceeding tmon (during a short circuit at LIN, for example), the IC switches back to sleep mode. The VS current
+     consumption then consists of IVSsleep plus ILINWAKE. After a positive edge at pin LIN the IC switches directly to fail-safe mode
+     (see Figure 2-4).
+     Figure 2-4. Short Circuit to GND on the LIN Bus During Sleep Mode
+                                                                                                             LIN Pre-wake
+                                  VLINL
+                    LIN BUS
+                                                                                                      LIN dominant state
+                                  VBUSdom
+                                                                          tmon
+                                                                   tmon
+                                                                  IVSfail           IVSsleep
+                         IVS                                                       + ILINwake
+                                   IVSsleep
+                    Mode of
+                                  Sleep Mode          Wake-up Detection Phase      Sleep Mode         Fail-safe Mode
+                   operation
+                 Int. Pull-up
+                   Resistor                             off (disabled)                               on (enabled)
+                     RLIN
+2.13 Local Wake-up via Pin WAKE
+     A falling edge at pin WAKE, followed by a low level maintained for a certain time period (> tWAKE), results in a local wake-up
+     request. According to ISO7637, the wake-up time ensures that no transient creates a wake-up. The device then switches to
+     fail-safe mode. Pin INH is activated (switches to VS) and the internal termination resistor is switched on. The local wake-up
+     request is indicated both by a low level at pin RXD to interrupt the microcontroller and by a strong pull-down at pin TXD (see
+     Figure 2-5). The voltage threshold for a wake-up signal is 3V below the VS voltage with an output current of typically –3µA.
+     Even in case of a continuous low at pin WAKE it is possible to switch the IC into sleep mode via a low level at pin EN. The IC
+     will remain in sleep mode for an unlimited time. To generate a new wake-up at pin WAKE, a high signal > 6µs is required. A
+     negative edge then starts the wake-up filtering time again.
+                                                                                   ATA6663/ATA6664 [DATASHEET]                       7
+                                                                                                             9146I–AUTO–10/14
+
+
+     Figure 2-5. Wake-up from Wake-up Switch
+                   Wake pin                              State change
+                         INH                                                               High
+                                           Low or floating
+                        RXD                High or floating
+                                                                                           Low                 High
+                                                                                                               Weak
+                        TXD          TXD weak pull-down resistor
+                                                                                   TXD strong pull-down      pull-down
+                                                       Wake filtering time
+                                                              tWAKE
+                     Voltage                                                             On state
+                    regulator                 Off state
+                                                                                                              Node in
+                                                                             Regulator wake-up time delay    operation
+                                                                                                             EN High
+                          EN
+                                         Node in sleep state
+                                                                                  Microcontroller start-up
+                                                                                        delay time
+2.14 Wake-up Source Recognition
+     The device can distinguish between a local wake-up request (pin WAKE) and a remote wake-up request (LIN bus). The
+     wake-up source can be read at pin TXD in fail-safe mode. If an external pull-up resistor (typically 5kΩ) has been added on
+     pin TXD to the power supply of the microcontroller, a high level indicates a remote wake-up request (weak pull-down at pin
+     TXD), a low level indicates a local wake-up request (strong pull-down at pin TXD). The wake-up request flag (indicated at pin
+     RXD) as well as the wake-up source flag (indicated at pin TXD) are reset immediately if the microcontroller sets pin EN to
+     high (see Figure 2-2 on page 5 and Figure 2-5 on page 8).
+2.15 Fail-safe Features
+       ●    During a short-circuit at LIN to VBAT, the output limits the output current to IBUS_LIM. Due to the power dissipation, the
+            chip temperature exceeds Toff, and the LIN output is switched off. The chip cools down, and after a hysteresis of Thys,
+            it switches the output on again.
+       ●    During a short-circuit from LIN to GND the IC can be switched to sleep mode, and even in this case the current
+            consumption is lower than 45µA. When the short-circuit has elapsed, the IC starts with a remote wake-up.
+       ●    If the Atmel® ATA6663/ATA6664 is in sleep mode and a floating condition occurs on the bus, the IC switches back to
+            sleep mode automatically. The current consumption is lower than 45µA in this case.
+       ●    The reverse current is < 2µA at pin LIN during loss of VBAT. This is the best behavior for bus systems where some
+            slave nodes are supplied from battery or ignition.
+       ●    Pin EN provides a pull-down resistor to force the transceiver into sleep mode if EN is disconnected
+       ●    Pin RXD is set floating if VBAT is disconnected
+       ●    Pin TXD provides a pull-down resistor to provide a static low if TXD is disconnected
+       ●    After switching the IC into Normal Mode the TXD pin must be pulled to high longer than 10µs in order to activate the
+            LIN driver. This feature prevents the bus from being driven into dominant state when the IC is switched into Normal
+            Mode and TXD is low.
+       ●    The INH output transistor is protected by temperature monitoring
+8    ATA6663/ATA6664 [DATASHEET]
+     9146I–AUTO–10/14
+
+
+3.        Absolute Maximum Ratings
+Stresses beyond those listed under “Absolute Maximum Ratings” may cause permanent damage to the device. This is a stress rating
+only and functional operation of the device at these or any other conditions beyond those indicated in the operational sections of this
+specification is not implied. Exposure to absolute maximum rating conditions for extended periods may affect device reliability.
+Parameters                                                     Symbol           Min.           Typ.           Max.            Unit
+VS
+                                                                                –0.3                           +40              V
+  - Continuous supply voltage
+Wake DC and transient voltage (with 2.7kΩ serial resistor)                        –3                           +40              V
+  - Transient voltage according to ISO7637 (coupling 1nF)                       –150                          +100              V
+Logic pins (RXD, TXD, EN)                                                       –0.3                          +5.5              V
+LIN
+  - DC voltage                                                                   –27                           +40              V
+  - Transient voltage according to ISO7637 (coupling 1nF)                       –150                          +100              V
+INH
+  - DC voltage                                                                  –0.3                        VS + 0.3            V
+ESD according to IBEE LIN EMC
+Test specification 1.0 according to IEC 61000-4-2
+  - Pin VS, LIN to GND                                                            ±8                                          KV
+  - Pin WAKE (2.7kΩ serial resistor)                                              ±6                                          KV
+ESD HBM according to STM5.1
+with 1.5kΩ / 100pF                                                                ±6                                          KV
+  - Pin VS, LIN, WAKE, INH to GND
+HBM ESD
+ANSI/ESD-STM5.1                                                                   ±3                                          KV
+JESD22-A114
+AEC-Q100 (002)
+CDM ESD STM 5.3.1                                                               ±750                                            V
+Machine Model ESD AEC-Q100-Rev.F (003)                                          ±200                                            V
+Junction temperature                                               Tj            –40                          +150             °C
+Storage temperature                                               Tstg           –55                          +150             °C
+4.        Thermal Characteristics SO8
+Parameters                                                     Symbol           Min.           Typ.           Max.            Unit
+Thermal resistance junction ambient                              RthJA                                         145            K/W
+Special heat sink at GND (pin 5) on PCB (fused lead
+                                                                 RthJA                          80                            K/W
+frame to pin 5)
+Thermal shutdown                                                   Toff          150           165             180             °C
+Thermal shutdown hysteresis                                       Thys             5            10              20             °C
+                                                                                     ATA6663/ATA6664 [DATASHEET]                      9
+                                                                                                             9146I–AUTO–10/14
+
+
+5.      Thermal Characteristics DFN8
+Parameters                                                     Symbol       Min.          Typ.         Max.        Unit
+Thermal resistance junction to heat slug                         RthJC                     10                      K/W
+Thermal resistance junction to ambient, where heat slug is
+                                                                 RthJA                     50                      K/W
+soldered to PCB according to JEDEC
+Thermal shutdown                                                  Toff      150           165           180          °C
+Thermal shutdown hysteresis                                      Thys        5             10            20          °C
+6.      Electrical Characteristics
+5V < VS < 27V, Tj = –40°C to +150°C
+   No.  Parameters                        Test Conditions              Pin     Symbol      Min.   Typ.    Max.  Unit   Type*
+    1   VS Pin
+   1.1  DC voltage range nominal                                        7           VS       5    13.5      27   V       A
+                                          Sleep mode
+                                          VLIN > VS – 0.5V              7       IVSsleep           10       20  µA       A
+                                          VS < 14V
+   1.2  Supply current in sleep mode      Sleep mode,
+                                          bus shorted to GND
+                                                                        7     IVSsleep_sc          23       45  µA       A
+                                          VLIN = 0V
+                                          VS < 14V
+                                          Bus recessive
+   1.3                                                                  7         IVSrec           0.9      1.3 mA       A
+                                          VS < 14V
+        Supply current in normal mode     Bus dominant
+   1.4                                    VS < 14V                      7        IVSdom            1.2       2  mA       A
+                                          Total bus load > 500Ω
+                                          Bus recessive
+   1.5  Supply current in fail-safe mode                                7         IVSfail   0.5             1.1 mA       A
+                                          VS < 14V
+   1.6  VS undervoltage threshold on                                    7          VSth      4             4.95  V       A
+   1.7  VS undervoltage threshold off                                   7          VSth    4.05              5   V       A
+        VS undervoltage threshold
+   1.8                                                                  7      VSth_hys     50             500  mV       A
+        hysteresis
+    2   RXD Output Pin (Open Drain)
+                                          Normal mode
+   2.1  Low-level output sink current                                   1         IRXDL     1.3    2.5       8  mA       A
+                                          VLIN = 0V, VRXD = 0.4V
+   2.2  RXD saturation voltage            5-kΩ pull-up resistor to 5V   1      VsatRXD                      0.4  V       A
+                                          Normal mode
+   2.3  High-level leakage current                                      1         IRXDH     –3              +3  µA       A
+                                          VLIN = VBAT, VRXD = 5V
+   2.4  ESD Zener diode                   IRXD = 100µA                  1       VZRXD       5.8             8.6  V       A
+    3   TXD Input Pin
+   3.1  Low-level voltage input                                         4        VTXDL     –0.3            +0.8  V       A
+   3.2  High-level voltage input                                        4        VTXDH       2              5.5  V       A
+   3.3  Pull-down resistor                VTXD = 5V                     4         RTXD     125     250     600  kΩ       A
+   3.4  Low-level leakage current         VTXD = 0V                     4      ITXD_leak    –3              +3  µA       A
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+10      ATA6663/ATA6664 [DATASHEET]
+        9146I–AUTO–10/14
+
+
+6.      Electrical Characteristics (Continued)
+5V < VS < 27V, Tj = –40°C to +150°C
+   No.  Parameters                        Test Conditions               Pin    Symbol     Min.    Typ.     Max.    Unit Type*
+                                          Fail-safe mode, local wake-up
+   3.5  Low-level output sink current     VTXD = 0.4V                    4       ITXD       1.3    2.5        8    mA     A
+                                          VLIN = VBAT
+    4   EN Input Pin
+   4.1  Low-level voltage input                                          2       VENL      –0.3             +0.8     V    A
+   4.2  High-level voltage input                                         2       VENH        2               5.5     V    A
+   4.3  Pull-down resistor                VEN = 5V                       2       REN       125     250      600     kΩ    A
+   4.4  Low-level input current           VEN = 0V                       2        IEN       –3               +3     µA    A
+    5   INH Output Pin
+                                          Normal or fail-safe mode                         VS –
+   5.1  High-level voltage                                               8      VINHH                        VS      V    A
+                                          IINH = –15mA                                     0.75
+        Switch-on resistance between
+   5.2                                    Normal or fail-safe mode       8       RINH              30        50      Ω    A
+        VS and INH
+                                          Sleep mode
+   5.3  Leakage current                                                  8       IINHL      –3               +3     µA    A
+                                          VINH = 0V/27V, VS = 27V
+    6   WAKE Pin
+                                                                                           VS –            VS +
+   6.1  High-level input voltage                                         3     VWAKEH                                V    A
+                                                                                            1V             0.3V
+                                                                                                            VS –
+   6.2  Low-level input voltage           IWAKE = typically –3µA         3     VWAKEL      –1V                       V    A
+                                                                                                           3.3V
+   6.3  Wake pull-up current              VS < 27V                       3      IWAKE      –30     –10              µA    A
+   6.4  High-level leakage current        VS = 27V, VWAKE = 27V          3      IWAKE       –5               +5     µA    A
+    7   LIN Bus Driver
+                                                                                          0.9 ×
+   7.1  Driver recessive output voltage RLOAD = 500Ω / 1kΩ               6     VBUSrec                       VS      V    A
+                                                                                            VS
+        Driver dominant voltage
+   7.2                                    VVS = 7V, Rload = 500Ω         6     V_LoSUP                       1.2     V    A
+        VBUSdom_DRV_LoSUP
+        Driver dominant voltage
+   7.3                                    VVS = 18V, Rload = 500Ω        6     V_HiSUP                        2      V    A
+        VBUSdom_DRV_HiSUP
+        Driver dominant voltage
+   7.4                                    VVS = 7V, Rload = 1000Ω        6    V_LoSUP_1k    0.6                      V    A
+        VBUSdom_DRV_LoSUP
+        Driver dominant voltage
+   7.5                                    VVS = 18V, Rload = 1000Ω       6   V_HiSUP_1k_    0.8                      V    A
+        VBUSdom_DRV_HiSUP
+   7.6  Pull-up resistor to VS            The serial diode is mandatory  6       RLIN       20     30        47     kΩ    A
+                                          In pull-up path with Rslave
+   7.7  Voltage drop at the serial diodes                                6     VSerDiode    0.4              1.0     V    D
+                                          ISerDiode = 10mA
+        LIN current limitation
+   7.8                                                                   6     IBUS_LIM     40     120      200    mA     A
+        VBUS = VBAT_max
+        Input leakage current at the      Input leakage current
+                                                                             IBUS_PAS_do
+   7.9  receiver, including pull-up       Driver off                     6                  –1                     mA     A
+                                                                                   m
+        resistor as specified             VBUS = 0V, VS = 12V
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                 ATA6663/ATA6664 [DATASHEET]               11
+                                                                                                       9146I–AUTO–10/14
+
+
+6.      Electrical Characteristics (Continued)
+5V < VS < 27V, Tj = –40°C to +150°C
+   No.  Parameters                       Test Conditions               Pin     Symbol      Min.   Typ.    Max.  Unit Type*
+                                         Driver off
+                                         8V < VBAT < 18V
+  7.10  Leakage current LIN recessive                                   6    IBUS_PAS_rec          10       20  µA     A
+                                         8V < VBUS < 18V
+                                         VBUS ≥ VBAT
+        Leakage current at ground loss;
+        control unit disconnected from GNDDevice = VS
+  7.11  ground; loss of local ground     VBAT =12V                      6    IBUS_NO_Gnd    –10   +0.5     +10  µA     A
+        must not affect communication 0V < VBUS < 18V
+        in the residual network
+        Leakage current at loss of
+        battery; node has to substain    VBAT disconnected
+  7.12  the current that can flow under VSUP_Device = GND               6    IBUS_NO_Bat           0.1       2  µA     A
+        this condition; bus must remain 0V < VBUS < 18V
+        operational under this condition
+  7.13  Capacitance on pin LIN to GND                                   6         CLIN                      20   pF    D
+    8   LIN Bus Receiver
+                                         VBUS_CNT =                                       0.475 × 0.5 ×   0.525
+   8.1  Center of receiver threshold                                    6     VBUS_CNT                           V     A
+                                         (Vth_dom + Vth_rec) / 2                            VS     VS      × VS
+                                                                                                          0.4 ×
+   8.2  Receiver dominant state          VEN = 5V                       6      VBUSdom      –27                  V     A
+                                                                                                            VS
+                                                                                           0.6 ×
+   8.3  Receiver recessive state         VEN = 5V                       6       VBUSrec                     40   V     A
+                                                                                            VS
+                                                                                          0.028 × 0.1 ×   0.175
+   8.4  Receiver input hysteresis        VHYS = Vth_rec – Vth_dom       6      VBUShys                           V     A
+                                                                                            VS     VS      × VS
+        Pre-wake detection LIN                                                             VS –           VS +
+   8.5                                                                  6        VLINH                           V     A
+        High-level input voltage                                                            2V            0.3V
+        Pre-wake detection LIN                                                                            VS –
+   8.6                                   Switches the LIN receiver on   6        VLINL     –27V                  V     A
+        Low-level input voltage                                                                           3.3V
+                                         VS < 27V
+   8.7  LIN Pre-wake pull-up current                                    6      ILINWAKE     –30    –10          µA     A
+                                         VLIN = 0V
+    9   Internal Timers
+        Dominant time for wake-up via
+   9.1                                   VLIN = 0V                      6         tBUS       30    90      150   µs    A
+        LIN bus
+        Time of low pulse for wake-up
+   9.2                                   VWAKE = 0V                     3        tWAKE       7     35       50   µs    A
+        via pin WAKE
+        Time delay for mode change
+   9.3  from fail-safe mode to normal    VEN = 5V                       2         tnorm      2      7       15   µs    A
+        mode via pin EN
+        Time delay for mode change
+   9.4  from normal mode into sleep      VEN = 0V                       2         tsleep     7     15       24   µs    A
+        mode via pin EN
+        Atmel ATA6663:
+   9.5                                   VTXD = 0V                      4          tdom      40    60       85  ms     A
+        TXD dominant time out time
+        Power-up delay between
+   9.6  VS = 5V until INH switches to    VVS = 5V                      7, 8         tVS                    200   µs    A
+        high
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+12      ATA6663/ATA6664 [DATASHEET]
+        9146I–AUTO–10/14
+
+
+6.      Electrical Characteristics (Continued)
+5V < VS < 27V, Tj = –40°C to +150°C
+   No.  Parameters                       Test Conditions                  Pin   Symbol    Min.     Typ.    Max.    Unit Type*
+        Monitoring time for wake-up via
+   9.7                                                                     6       tmon      6      10       15     ms    A
+        LIN bus
+        LIN Bus Driver AC Parameter with Different Bus Loads
+   10   Load 1 (small): 1nF, 1kΩ ; Load 2 (large): 10nF, 500Ω ; RRXD = 5kΩ ; CRXD = 20pF;
+        Load 3 (medium): 6.8nF, 660Ω characterized on samples; 10.1 and 10.2 specifies the timing parameters for proper
+        operation at 20Kbit/s, 10.3 and 10.4 at 10.4Kbit/s.
+                                         THRec(max) = 0.744 × VS
+                                         THDom(max) = 0.581 × VS
+  10.1  Duty cycle 1                     VS = 7.0V to 18V                  6        D1    0.396                           A
+                                         tBit = 50µs
+                                         D1 = tbus_rec(min) / (2 × tBit)
+                                         THRec(min) = 0.422 × VS
+                                         THDom(min) = 0.284 × VS
+  10.2  Duty cycle 2                     VS = 7.0V to 18V                  6        D2                     0.581          A
+                                         tBit = 50µs
+                                         D2 = tbus_rec(max) / (2 × tBit)
+                                         THRec(max) = 0.778 × VS
+                                         THDom(max) = 0.616 × VS
+  10.3  Duty cycle 3                     VS = 7.0V to 18V                  6        D3    0.417                           A
+                                         tBit = 96µs
+                                         D3 = tbus_rec(min) / (2 × tBit)
+                                         THRec(min) = 0.389 × VS
+                                         THDom(min) = 0.251 × VS
+  10.4  Duty cycle 4                     VS = 7.0V to 18V                  6        D4                     0.590          A
+                                         tBit = 96µs
+                                         D4 = tbus_rec(max) / (2 × tBit)
+        Receiver Electrical AC Parameters of the LIN Physical Layer
+   11
+        LIN receiver, RXD load conditions: CRXD = 20pF, Rpull-up = 5kΩ
+        Propagation delay of receiver    trec_pd = max(trx_pdr , trx_pdf)
+  11.1                                                                     1      trx_pd                     6      µs    A
+        (see Figure 6-1 on page 14)      VS = 7.0V to 18V
+        Symmetry of receiver
+                                         trx_sym = trx_pdr – trx_pdf
+  11.2  propagation delay rising edge                                      1     trx_sym    –2               +2     µs    A
+                                         VS = 7.0V to 18V
+        minus falling edge
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                   ATA6663/ATA6664 [DATASHEET]             13
+                                                                                                       9146I–AUTO–10/14
+
+
+   Figure 6-1. Definition of Bus Timing Parameter
+                                                       tBit                         tBit                 tBit
+                           TXD
+              (Input to transmitting node)
+                                                               tBus_dom(max)             tBus_rec(min)
+                                                                                                               Thresholds of
+                                     THRec(max)
+                                                                                                              receiving node 1
+                   VS                THDom(max)
+         (Transceiver supply
+         of transmitting node)                              LIN Bus Signal
+                                                                                                               Thresholds of
+                                      THRec(min)                                                              receiving node 2
+                                     THDom(min)
+                                                              tBus_dom(min)                tBus_rec(max)
+                         RXD
+          (Output of receiving node 1)
+                                            trx_pdf(1)                                    trx_pdr(1)
+                         RXD
+          (Output of receiving node 2)
+                                                                         trx_pdr(2)                              trx_pdf(2)
+14 ATA6663/ATA6664 [DATASHEET]
+   9146I–AUTO–10/14
+
+
+Figure 6-2. Application Circuit
+                                                                                                                             Master node
+                                                                                                                               pull-up
+   VBATTERY                                                                                              100nF
+              22μF          12V                                                                                                     1k
+                                5V
+                                                                                                                        7
+                                                                                                                                         LIN sub bus
+                                                         ATA6663/ATA6664
+                                               5kΩ
+                             VDD
+                                                                                                                            VS
+                                                                              Receiver
+                                                     1
+                                              RXD
+                                                                                                                        6
+                                                                                                       Filter
+                         Microcontroller                                                                                    LIN
+                                                                              Wake-up bus timer
+                                                                                                   Short-circuit and
+                                                                                                   overtemperature
+                                                     4                                                protection
+                                                                     TXD      Slew rate control
+                                              TXD                                                                                   220pF
+                                                                   Time-out
+                                                                     timer
+                         GND IO
+                                                                                                          VS
+                                                          VS
+                 10kΩ                                                           Control unit
+                                                                                                                        5
+                                     2.7kΩ           3             Wake-up      Sleep mode
+                                                                    timer                                                   GND
+              External                       WAKE
+               switch                                                              2               8
+                                                                                 EN               INH
+                                                                                       ATA6663/ATA6664 [DATASHEET]                                     15
+                                                                                                                 9146I–AUTO–10/14
+
+
+7.     Ordering Information
+Extended Type Number                                            Package     Remarks
+ATA6663-FAQW-1                                                      DFN8    LIN transceiver, Pb-free, 6k, taped and reeled
+ATA6663-GAQW                                                        SO8     LIN transceiver, Pb-free, 4k, taped and reeled
+ATA6664-GAQW                                                        SO8     LIN transceiver, Pb-free, 4k, taped and reeled
+8.     Package Information
+Figure 8-1. SO8
+                                       D                                               E1
+                                                                                                           C
+                                                                                                  L
+                          b                             A1     A2   A
+                                  e                                                    E
+                              8                 5
+                                                                                      technical drawings
+                                                                                      according to DIN
+                                                                                      specifications
+                                                                                    Dimensions in mm
+                              1                 4
+                                                                                    COMMON DIMENSIONS
+                                      Pin 1 identity                                  (Unit of Measure = mm)
+                                                                           Symbol     MIN      NOM           MAX      NOTE
+                                                                             A        1.5       1.65           1.8
+                                                                             A1       0.1       0.15         0.25
+                                                                             A2       1.4       1.47         1.55
+                                                                             D        4.8        4.9           5
+                                                                             E        5.8         6            6.2
+                                                                             E1       3.8        3.9           4
+                                                                             L        0.4       0.65           0.9
+                                                                             C        0.15       0.2         0.25
+                                                                             b        0.3       0.4            0.5
+                                                                             e               1.27 BSC
+                                                                                                                                  05/08/14
+                                                       TITLE                                           GPC         DRAWING NO.       REV.
+                   Package Drawing Contact:            Package: SO8
+                   packagedrawings@atmel.com                                                                    6.543-5185.01-4       1
+16     ATA6663/ATA6664 [DATASHEET]
+       9146I–AUTO–10/14
+
+
+Figure 8-2. DFN8
+                         Top View
+                              D
+                         8
+         PIN 1 ID                      E
+                                                                               technical drawings
+                                                                               according to DIN
+                         1                                                     specifications
+                                                                         Dimensions in mm
+                         Side View          A1   A3
+                                                      A
+                              Partially Plated Surface
+                        Bottom View
+                          1        4
+                                                                                   COMMON DIMENSIONS
+                                       E2
+                                                                                      (Unit of Measure = mm)
+                                                                        Symbol       MIN       NOM       MAX        NOTE
+                          8        5                                      A           0.8       0.85      0.9
+                    Z
+                              e                                           A1          0        0.035      0.05
+                                                                          A3         0.16       0.21      0.26
+                              D2                                          D           2.9           3     3.1
+                                                                          D2          2.3       2.4       2.5
+                                                                          E           2.9           3     3.1
+                          Z 10:1                                          E2          1.5       1.6       1.7
+                                                                          L          0.35       0.4       0.45
+                                        L
+                                                                          b          0.25        0.3      0.35
+                                                                          e                     0.65
+                                   b
+                                                                                                                                   10/11/13
+                                                 TITLE                                                  GPC       DRAWING NO.         REV.
+             Package Drawing Contact:            Package: VDFN_3x3_8L
+             packagedrawings@atmel.com           Exposed pad 2.4x1.6                                             6.543-5165.03-4       1
+                                                                                       ATA6663/ATA6664 [DATASHEET]                            17
+                                                                                                                   9146I–AUTO–10/14
+
+
+9. Revision History
+   Please note that the following page numbers referred to in this section refer to the specific revision mentioned, not to this
+   document.
+    Revision No.                     History
+                                     • Put datasheet in the latest template
+    9146I-AUTO-10/14                 • Section 7 “Ordering Information” on page 16 updated
+                                     • Section 8 “Package Information” on pages 16 to 17 updated
+                                     • Section 7 “Ordering Information” on page 16: Order quantity of ATA6663-FAQW
+    9146H-AUTO-03/14
+                                       updated
+    9146G-AUTO-06/12                 • Section 5“Electrical Characteristics” numbers 3.2 and 4.2 on page 10 to 11 updated
+    9146F-AUTO-10/11                 • Section 6 “Thermal Characteristics DFN8” on page 10 implemented
+                                     • Figure 1-1 “Block Diagram” on page 2 updated
+    9146E-AUTO-03/11
+                                     • Section 3.15 “Fail-safe Features” on page 9 updated
+                                     • Section 7 “Ordering Information” on page 17 updated
+    9146D-AUTO-09/10
+                                     • Section 8 “Package Information” on pages 17 to 18 updated
+    9146C-AUTO-07/10                 • Section 6 “Electrical Characteristics” numbers 9.4 and 9.5 on page 13 updated
+                                     • Features updated
+    9146B-AUTO-05/10                 • Headings 3.6 and 3.10: text updated
+                                     • Abs.Max.Ratings table: row “ESD HBM according to STM5.1” updated
+18 ATA6663/ATA6664 [DATASHEET]
+   9146I–AUTO–10/14
+
+
+                                                                                                                                             XXXXXX
+Atmel Corporation              1600 Technology Drive, San Jose, CA 95110 USA                   T: (+1)(408) 441.0311          F: (+1)(408) 436.4200           |      www.atmel.com
+© 2014 Atmel Corporation. / Rev.: 9146I–AUTO–10/14
+Atmel®, Atmel logo and combinations thereof, Enabling Unlimited Possibilities®, and others are registered trademarks or trademarks of Atmel Corporation or its
+subsidiaries. Other terms and product names may be trademarks of others.
+DISCLAIMER: The information in this document is provided in connection with Atmel products. No license, express or implied, by estoppel or otherwise, to any intellectual property right
+is granted by this document or in connection with the sale of Atmel products. EXCEPT AS SET FORTH IN THE ATMEL TERMS AND CONDITIONS OF SALES LOCATED ON THE
+ATMEL WEBSITE, ATMEL ASSUMES NO LIABILITY WHATSOEVER AND DISCLAIMS ANY EXPRESS, IMPLIED OR STATUTORY WARRANTY RELATING TO ITS PRODUCTS
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. IN NO EVENT
+SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT, CONSEQUENTIAL, PUNITIVE, SPECIAL OR INCIDENTAL DAMAGES (INCLUDING, WITHOUT LIMITATION, DAMAGES
+FOR LOSS AND PROFITS, BUSINESS INTERRUPTION, OR LOSS OF INFORMATION) ARISING OUT OF THE USE OR INABILITY TO USE THIS DOCUMENT, EVEN IF ATMEL HAS
+BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. Atmel makes no representations or warranties with respect to the accuracy or completeness of the contents of this
+document and reserves the right to make changes to specifications and products descriptions at any time without notice. Atmel does not make any commitment to update the information
+contained herein. Unless specifically provided otherwise, Atmel products are not suitable for, and shall not be used in, automotive applications. Atmel products are not intended,
+authorized, or warranted for use as components in applications intended to support or sustain life.
+SAFETY-CRITICAL, MILITARY, AND AUTOMOTIVE APPLICATIONS DISCLAIMER: Atmel products are not designed for and will not be used in connection with any applications where
+the failure of such products would reasonably be expected to result in significant personal injury or death (“Safety-Critical Applications”) without an Atmel officer's specific written
+consent. Safety-Critical Applications include, without limitation, life support devices and systems, equipment or systems for the operation of nuclear facilities and weapons systems.
+Atmel products are not designed nor intended for use in military or aerospace applications or environments unless specifically designated by Atmel as military-grade. Atmel products are
+not designed nor intended for use in automotive applications unless specifically designated by Atmel as automotive-grade.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ ATA6663-TAQY ATA6664-TAQY 19 ATA6664-GAQW ATA6663-FAQW-1

@@ -1,0 +1,1221 @@
+                                                      Traffic Manager Co-processor                                                                     89TTM553
+                                                      Data Sheet                                                                     Preliminary Information*
+Description                                                                                       89TTM55x Features           Features
+    The 89TTM553 is a flow-based traffic management co-processor
+                                                                                                     ◆
+                                                                                                         Deterministic performance at 10 Gbps wire-speed (35 Mcps)
+that can be used in conjunction with the 89TTM552.                                                       regardless of the number of flows, traffic size, and patterns.
+                                                                                                     ◆ Up to 256 megabytes of external memory buffer space
+    It has two major functional parts: the queue manager (QM) and the
+                                                                                                         (equivalent to a 210 ms buffer at 10 Gbps).
+FLQ scheduler. The QM is responsible for all the non-bandwidth func-
+tions, which include managing up to 1 Million queuing structures,
+                                                                                                     ◆
+                                                                                                         Support (Rx and Tx) for industry-standard SPI-4 phase 2,
+handling cell and packet arrivals and departures from these queues, and                                  NPF Streaming Interface, and CSIX over LVDS.
+maintaining a database of congestion management and statistics
+                                                                                                     ◆
+                                                                                                         Hierarchical queuing and precise scheduling:
+parameters for each flow queue (FLQ). The FLQ scheduler is respon-                                      – Traffic management flexibility.
+sible for managing the FLQ bandwidth functions.                                                         – Support for up to 4K aggregate flow queues (AFQs), 1K port
+                                                                                                             queues (PQs), 2K arrival reassembly queues (ARQs), and 1K
+    The 89TTM553 FLQ scheduler supports traffic scheduling on up to                                          output queues/channels (OQs) with no external memory
+1M discrete flows. In addition to the scheduling levels provided by the                                      required. Configurable AFQ-to-port assignments.
+89TTM552, the 89TTM553 provides one or two levels of additional                                         – Support for up to 1M discrete flows (FLQs), with queuing for
+scheduling hierarchy. It also provides guaranteed minimum rate,                                              each flow, using external memory. Configurable mapping of
+maximum rate capping, excess rate distribution using weighted fair                                           FLQs into aggregate flow queues.
+queuing (WFQ), byte rate shaping, and dynamic configuration adjust-                                     – Two-level FLQ scheduling mode that supports up to 128K or
+ments.                                                                                                       256K virtual pipe or subscriber queues with up to 8 or 4 CoS
+                                                                                                             priority queues each.
+    The 89TTM553 stores all the flow-based parameters (and state infor-                                 – Accurate byte-rate shaping at the FLQ, AFQ and port levels.
+mation) that are made available to the 89TTM552 for flow-based                                       ◆
+                                                                                                         Multiple levels of buffer congestion management.
+processing. When the 89TTM553 is used with the 89TTM552, conges-                                        – Hierarchical queue structure and thresholding.
+tion and bandwidth management features are enabled at the flow level                                    – Congestion indication.
+as well as at the aggregate-flow level.                                                                 – Dynamic adjustment of thresholds during periods of congestion.
+                                                                                                        – Packet discard (PD).
+                                                                                                        – Weighted random early discard (WRED).
+                                                                                                        – Local congestion indication (CI).
+                                           IDT and the IDT logo are trademarks of Integrated Device Technology, Inc.
+                                                                                        1 of 30                                                         March 3, 2005
+  2005 Integrated Device Technology, Inc.            *Notice: The information in this document is subject to change without notice                                DSC 6797
+
+
+IDT 89TTM553
+ ◆  Configurable forwarding based on classification index.
+ ◆
+    Two ports for obtaining event-based statistics.
+ ◆
+    Configurable on-chip diagnostic statistics.
+ ◆ Bandwidth management rate guarantee and shaping mechanisms for each flow, each aggregate flow and each port queue.
+   – Priority and weighted bandwidth distribution mechanisms across groups of flows and aggregate flows.
+   – Schedules rates as low as 2 kbps for each flow.
+   – One- and two-level byte-rate FLQ scheduling: maximum and minimum rates, and strict priority and weighted fair queuing (WFQ) for each FLQ.
+       Per-flow byte-rate shaping.
+   – AFQ scheduling with byte-rate shaping: minimum and maximum rates with VBR MBS and PCR enforcement. Excess distribution using
+       weighted fair queuing (WFQ) and PRR.
+   – Port queues: maximum rates with byte-rate scheduling.
+ ◆
+    Wire-speed logical multicasting.
+   – Four classes of service.
+   – Programmable service rate (minimum and excess bandwidth distribution).
+   – Programmable thresholds.
+   – Branch connections can be added and deleted during live traffic.
+   – Traffic management features on all multicast roots and branches.
+ ◆
+    Multicast label generation for spatial multicast support.
+ ◆
+    Integrated wire-speed AAL-5 segmentation and reassembly (AAL-5 CPCS SAR) in the datapath.
+ ◆ 32-bit processor interface running at up to 66 MHz with integrated AAL-5 SAR and DMA engine for data insertion and extraction.
+   – Four classes of service.
+   – Integrated AAL-5-compliant and packet-based SAR.
+   – Programmable service rate.
+   – Programmable queue thresholds.
+   – Use of descriptors and DMA support for maximum performance.
+   – 16-bit data bus transfer at up to 66 MHz.
+ ◆
+    Algorithms implemented in hardware; software intervention required for initialization and configuration only.
+ ◆
+    Error protection on all external RAM and BIST on all internal RAM.
+ ◆ Inter-operable with the IDT ZTM200 traffic manager.
+                                                                 2 of 30                                                     March 3, 2005
+
+
+ IDT 89TTM553
+89TTM55x Functional Block Diagram
+                              Data Buffer Memory (DDR SDRAM)
+                         89TTM552
+                               Multicast               Control Path SAR                 CPU and Peripheral      ZBus
+                             Engine (DFC)                    (SAR)                     Interface (CPIF, DMA)
+                 SPI-4.2   Rx                                                                                Tx SPI-4.2
+                      or
+                                                                                          Datapath              or
+              Streaming   DSR,          Memory Controller               OQ Manager                         DST,
+                                                                                           AAL-5                Streaming
+               Interface  BRX                (PBC)                     (VOQM, BPQ)                         BTX
+                                                                                         SAR (ILS)              Interface
+                      or
+                                                                                                                or
+         SIX-over-LVDS
+                                                                                                                CSIX-over-LVD
+                           Forwarding
+                              and              Queue Manager                  Packet
+                          Thresholding               (QM)                    Scheduler
+                          Engine (AC)                                          (SS)
+                                                                                                  Statistics    External
+                                              Extended Scheduler                                  Processor     Statistics
+                                                   Interface                                        (SP)        Port
+                         89TTM553
+                                            89TTM552-to-89TTM553                                  Statistics
+                                                   Interface                                      Processor
+                                                                                                    (SP)
+                           Forwarding                                      Packet
+                              and              Queue Manager             Scheduler
+                          Thresholding               (QM)                (ARS, GS,      CPU and Peripheral       ZBus
+                          Engine (AC)                                      WFQ)        Interface (CPIF, DMA)
+                                                                3 of 30                                                    March 3, 2005
+
+
+ IDT 89TTM553
+89TTM553 Pin Description
+          Note: Information in this section is subject to change. Contact your IDT FAE before making design decisions.
+  In this data sheet, direction is indicated as follows: I for In, O for Out, B for Bi-directional, and P for power.
+               Signal Name                   I/O Type              Dir.     Freq.                                   Remarks
+           BLL_CLK_CP,                   1.5V HSTL Class 1          I      175 MHz       BLL QDR SRAM input clock: This clock pair registers data
+           BLL_CLK_CN                                                                    inputs on the rising edge of C and C#. All synchronous inputs
+                                                                                         must meet setup and hold times around the clock rising
+                                                                                         edges.
+           BLL_CLK_KP,                   1.5V HSTL Class 1          O      175 MHz       BLL QDR SRAM output clock: This clock pair times the control
+           BLL_CLK_KN                                                                    outputs to the rising edge of K, and times the address and
+                                                                                         data outputs to the rising edge of K and K#.
+           BLL_ADDR[21:0]                1.5V HSTL Class 1          O      175 MHz       BLL QDR SRAM address outputs.
+           BLL_RD_N                      1.5V HSTL Class 1          O      175 MHz       BLL QDR SRAM synchronous read output (active low): When
+                                                                                         asserted, a read cycle is initiated to the external QDR SRAM
+                                                                                         devices.
+           BLL_DIN[17:0]                 1.5V HSTL Class 1          I      175 MHz       BLL QDR SRAM data inputs: Input data must meet setup and
+                                                                                         hold times around the rising edges of C and C# during read
+                                                                                         operations
+           BLL_WR_N                      1.5V HSTL Class 1          O      175 MHz       BLL QDR SRAM synchronous write output (active low): When
+                                                                                         asserted, a write cycle is initiated to the external QDR SRAM
+                                                                                         devices.
+           BLL_DOUT[17:0]                1.5V HSTL Class 1          O      175 MHz       BLL QDR SRAM write data outputs: Output data is synchro-
+                                                                                         nized to the K and K# during write operations
+           BLL_VREF                      0.75V                      —          —         HSTL reference. Nominally VDDQ / 2, so connect to 0.75 V
+                                                            Table 1 Buffer Linked List QDR SRAM
+               Signal Name                   I/O Type              Dir.     Freq.                                   Remarks
+           BXT_CLK_CP,                   1.5V HSTL Class 1          I      175 MHz       BXT QDR SRAM input clock: This clock pair registers data
+           BXT_CLK_CN                                                                    inputs on the rising edge of C and C#. All synchronous inputs
+                                                                                         must meet setup and hold times around the clock rising
+                                                                                         edges.
+           BXT_CLK_KP,                   1.5V HSTL Class 1          O      175 MHz       BXT QDR SRAM output clock: This clock pair times the con-
+           BXT_CLK_KN                                                                    trol outputs to the rising edge of K, and times the address and
+                                                                                         data outputs to the rising edge of K and K#.
+           BXT_ADDR[21:0]                1.5V HSTL Class 1          O      175 MHz       BXT QDR SRAM address outputs.
+           BXT_RD_N                      1.5V HSTL Class 1          O      175 MHz       BXT QDR SRAM synchronous read output (active low): When
+                                                                                         asserted, a read cycle is initiated to the external QDR SRAM
+                                                                                         devices.
+           BXT_DIN[3:0]                  1.5V HSTL Class 1          I      175 MHz       BXT QDR SRAM data inputs: Input data must meet setup and
+                                                                                         hold times around the rising edges of C and C# during read
+                                                                                         operations
+                                               Table 2 Buffer Linked List Extension QDR SRAM (Part 1 of 2)
+                                                                          4 of 30                                                                March 3, 2005
+
+
+IDT 89TTM553
+          Signal Name      I/O Type           Dir.       Freq.                                Remarks
+      BXT_WR_N        1.5V HSTL Class 1         O       175 MHz    BXT QDR SRAM synchronous write output (active low): When
+                                                                   asserted, a write cycle is initiated to the external QDR SRAM
+                                                                   devices.
+      BXT_DOUT[3:0]   1.5V HSTL Class 1         O       175 MHz    BXT QDR SRAM write data outputs: Output data is synchro-
+                                                                   nized to the K and K# during write operations
+      BXT_LLT_VREF    0.75V                    —           —       HSTL reference. Nominally VDDQ / 2, so connect to 0.75 V
+                             Table 2 Buffer Linked List Extension QDR SRAM (Part 2 of 2)
+          Signal Name      I/O Type           Dir.       Freq.                                Remarks
+      FCT_CLK_CP,     1.5V HSTL Class 1         I       175 MHz    FCT QDR SRAM input clock: This clock pair registers data
+      FCT_CLK_CN                                                   inputs on the rising edge of C and C#. All synchronous inputs
+                                                                   must meet setup and hold times around the clock rising
+                                                                   edges.
+      FCT_CLK_KP,     1.5V HSTL Class 1         O       175 MHz    FCT QDR SRAM output clock: This clock pair times the con-
+      FCT_CLK_KN                                                   trol outputs to the rising edge of K, and times the address and
+                                                                   data outputs to the rising edge of K and K#.
+      FCT_ADDR[19:0]  1.5V HSTL Class 1         O       175 MHz    FCT QDR SRAM address outputs.
+      FCT_RD_N        1.5V HSTL Class 1         O       175 MHz    FCT QDR SRAM synchronous read output (active low): When
+                                                                   asserted, a read cycle is initiated to the external QDR SRAM
+                                                                   devices.
+      FCT_DIN[27:0]   1.5V HSTL Class 1         I       175 MHz    FCT QDR SRAM data inputs: Input data must meet setup and
+                                                                   hold times around the rising edges of C and C# during read
+                                                                   operations
+      FCT_WR_N        1.5V HSTL Class 1         O       175 MHz    FCT QDR SRAM synchronous write output (active low): When
+                                                                   asserted, a write cycle is initiated to the external QDR SRAM
+                                                                   devices.
+      FCT_DOUT[27:0]  1.5V HSTL Class 1         O       175 MHz    FCT QDR SRAM write data outputs: Output data is synchro-
+                                                                   nized to the K and K# during write operations
+      FCT_VREF[1:0]   0.75                     —           —       HSTL reference. Nominally VDDQ / 2, so connect to 0.75 V
+                                       Table 3 Flow Control Table QDR SRAM
+          Signal Name      I/O Type           Dir.       Freq.                                Remarks
+      FPT_CLK_CP,     1.5V HSTL Class 1         I       175 MHz    FPT QDR SRAM input clock: This clock pair registers data
+      FPT_CLK_CN                                                   inputs on the rising edge of C and C#. All synchronous inputs
+                                                                   must meet setup and hold times around the clock rising
+                                                                   edges.
+      FPT_CLK_KP,     1.5V HSTL Class 1         O       175 MHz    FPT QDR SRAM output clock: This clock pair times the con-
+      FPT_CLK_KN                                                   trol outputs to the rising edge of K, and times the address and
+                                                                   data outputs to the rising edge of K and K#.
+      FPT_ADDR[20:0]  1.5V HSTL Class 1         O       175 MHz    FPT QDR SRAM address outputs.
+      FPT_RD_N        1.5V HSTL Class 1         O       175 MHz    FPT QDR SRAM synchronous read output (active low): When
+                                                                   asserted, a read cycle is initiated to the external QDR SRAM
+                                                                   devices.
+                               Table 4 Flow Parameters Table QDR SRAM (Part 1 of 2)
+                                                      5 of 30                                                              March 3, 2005
+
+
+IDT 89TTM553
+          Signal Name     I/O Type          Dir.     Freq.                                Remarks
+      FPT_DIN[35:0]   1.5V HSTL Class 1      I      175 MHz    FPT QDR SRAM data inputs: Input data must meet setup and
+                                                               hold times around the rising edges of C and C# during read
+                                                               operations
+      FPT_WR_N        1.5V HSTL Class 1      O      175 MHz    FPT QDR SRAM synchronous write output (active low): When
+                                                               asserted, a write cycle is initiated to the external QDR SRAM
+                                                               devices.
+      FPT_BW_N[3:0]   1.5V HSTL Class 1      O      175 MHz    FPT QDR SRAM synchronous write byte enables (active low)
+      FPT_DOUT[35:0]  1.5V HSTL Class 1      O      175 MHz    FPT QDR SRAM write data outputs: Output data is synchro-
+                                                               nized to the K and K# during write operations
+      FPT_VREF[1:0]   0.75V                  —         —       HSTL reference. Nominally VDDQ / 2, so connect to 0.75 V
+                              Table 4 Flow Parameters Table QDR SRAM (Part 2 of 2)
+          Signal Name     I/O Type          Dir.     Freq.                                Remarks
+      GPT_CLK_CP,     1.5V HSTL Class 1      I      175 MHz    GPT QDR SRAM input clock: This clock pair registers data
+      GPT_CLK_CN                                               inputs on the rising edge of C and C#. All synchronous inputs
+                                                               must meet setup and hold times around the clock rising
+                                                               edges.
+      GPT_CLK_KP,     1.5V HSTL Class 1      O      175 MHz    GPT QDR SRAM output clock: This clock pair times the con-
+      GPT_CLK_KN                                               trol outputs to the rising edge of K, and times the address and
+                                                               data outputs to the rising edge of K and K#.
+      GPT_ADDR[20:0]  1.5V HSTL Class 1      O      175 MHz    GPT QDR SRAM address outputs.
+      GPT_RD_N        1.5V HSTL Class 1      O      175 MHz    GPT QDR SRAM synchronous read output (active low): When
+                                                               asserted, a read cycle is initiated to the external QDR SRAM
+                                                               devices.
+      GPT_DIN[17:0]   1.5V HSTL Class 1      I      175 MHz    GPT QDR SRAM data inputs: Input data must meet setup and
+                                                               hold times around the rising edges of C and C# during read
+                                                               operations.
+      GPT_WR_N        1.5V HSTL Class 1      O      175 MHz    GPT QDR SRAM synchronous write output (active low): When
+                                                               asserted, a write cycle is initiated to the external QDR SRAM
+                                                               devices.
+      GPT_BW_N[1:0]   1.5V HSTL Class 1      O      175 MHz    GPT QDR SRAM synchronous byte enables (active low).
+      GPT_DOUT[17:0]  1.5V HSTL Class 1      O      175 MHz    GPT QDR SRAM write data outputs: Output data is synchro-
+                                                               nized to the K and K# during write operations.
+      GPT_VREF        0.75V                  —         —       HSTL reference. Nominally VDDQ / 2, so connect to 0.75 V
+                                   Table 5 Group Parameters Table QDR SRAM
+                                                   6 of 30                                                             March 3, 2005
+
+
+IDT 89TTM553
+          Signal Name          I/O Type          Dir.      Freq.                                Remarks
+      HT_CLK_CP, HT_CLK_CN 1.5V HSTL Class 1       I      175 MHz     HT QDR SRAM input clock: This clock pair registers data
+                                                                      inputs on the rising edge of C and C#. All synchronous inputs
+                                                                      must meet setup and hold times around the clock rising
+                                                                      edges.
+      HT_CLK_KP,           1.5V HSTL Class 1       O      175 MHz     HT QDR SRAM output clock: This clock pair times the control
+      HT_CLK_KN                                                       outputs to the rising edge of K, and times the address and
+                                                                      data outputs to the rising edge of K and K#.
+      HT_ADDR[19:0]        1.5V HSTL Class 1       O      175 MHz     HT QDR SRAM address outputs.
+      HT_RD_N              1.5V HSTL Class 1       O      175 MHz     HT QDR SRAM synchronous read output (active low): When
+                                                                      asserted, a read cycle is initiated to the external QDR SRAM
+                                                                      devices.
+      HT_DIN[35:0]         1.5V HSTL Class 1       I      175 MHz     HT QDR SRAM data inputs: Input data must meet setup and
+                                                                      hold times around the rising edges of C and C# during read
+                                                                      operations.
+      HT_WR_N              1.5V HSTL Class 1       O      175 MHz     HT QDR SRAM synchronous write output (active low): When
+                                                                      asserted, a write cycle is initiated to the external QDR SRAM
+                                                                      devices.
+      HT_DOUT[35:0]        1.5V HSTL Class 1       O      175 MHz     HT QDR SRAM write data outputs: Output data is synchro-
+                                                                      nized to the K and K# during write operations.
+      HT_VREF[1:0]         0.75V                  —          —        HSTL reference. Nominally VDDQ / 2, so connect to 0.75 V
+                                                Table 6 Head Tail QDR SRAM
+          Signal Name          I/O Type          Dir.      Freq.                                Remarks
+      LLT_CLK_CP,          1.5V HSTL Class 1       I      175 MHz     LLT QDR SRAM input clock: This clock pair registers data
+      LLT_CLK_CN                                                      inputs on the rising edge of C and C#. All synchronous inputs
+                                                                      must meet setup and hold times around the clock rising
+                                                                      edges.
+      LLT_CLK_KP,          1.5V HSTL Class 1       O      175 MHz     LLT QDR SRAM output clock: This clock pair times the control
+      LLT_CLK_KN                                                      outputs to the rising edge of K, and times the address and
+                                                                      data outputs to the rising edge of K and K#.
+      LLT_ADDR[19:0]       1.5V HSTL Class 1       O      175 MHz     LLT QDR SRAM address outputs.
+      LLT_RD_N             1.5V HSTL Class 1       O      175 MHz     LLT QDR SRAM synchronous read output (active low): When
+                                                                      asserted, a read cycle is initiated to the external QDR SRAM
+                                                                      devices.
+      LLT_DIN[10:0]        1.5V HSTL Class 1       I      175 MHz     LLT QDR SRAM data inputs: Input data must meet setup and
+                                                                      hold times around the rising edges of C and C# during read
+                                                                      operations.
+      LLT_WR_N             1.5V HSTL Class 1       O      175 MHz     LLT QDR SRAM synchronous write output (active low): When
+                                                                      asserted, a write cycle is initiated to the external QDR SRAM
+                                                                      devices.
+      LLT_DOUT[10:0]       1.5V HSTL Class 1       O      175 MHz     LLT QDR SRAM write data outputs: Output data is synchro-
+                                                                      nized to the K and K# during write operations.
+                                            Table 7 Linked List Table QDR SRAM
+                                                         7 of 30                                                              March 3, 2005
+
+
+IDT 89TTM553
+         Signal Name       I/O Type            Dir.     Freq.                                Remarks
+      FLQS_DIN[14:0]  1.5V HSTL Class 1          I     175 MHz     Control serial interface to 89TTM552
+      FLQS_DIN_PRTY                                                (15 signal lines + 1 parity line)
+      FLQS_DOUT[19:0] 1.5V HSTL Class 1         O      175 MHz     Control serial interface to 89TTM552
+      FLQS_DOUT_PRTY                                               (20 signal lines + 1 parity line)
+      FLQS_CLKIN      1.5V HSTL Class 1          I     175 MHz     Clock input from 89TTM552
+      FLQS_CLKOUT     1.5V HSTL Class 1         O      175 MHz     Clock output to 89TTM552
+      FLQS_TIC_IN     1.5V HSTL Class 1          I     175 MHz     Cell time tic input from 89TTM552
+      FLQS_TIC_OUT    1.5V HSTL Class 1         O      175 MHz     Cell time tic out to 89TTM552
+      FLQS_VREF       0.75V                     —         —        HSTL reference. Nominally VDDQ / 2, so connect to 0.75 V
+                                         Table 8 89TTM552/89TTM553 Interface
+         Signal Name       I/O Type            Dir.     Freq.                                Remarks
+      ZBUS_AVALID_N   3.3V LVTTL,               B        33 or     ZBus address valid flag (active low)
+                      12mA drive,                       66 MHz
+                      internal pullup
+      ZBUS_CLK        3.3V,                      I       33 or     ZBus clock input (up to 66 MHz)
+                      no internal pullup                66 MHz
+      ZBUS_AD[15:0]   3.3V LVTTL,               B        33 or     ZBus 16-bit multiplexed address/data bus
+                      12mA drive,                       66 MHz
+                      internal pullup
+      ZBUS_DEVID[4:0] 3.3V,                      I       33 or     Used for ZBus device identification
+                      internal pullup                   66 MHz
+      ZBUS_DVALID_N   3.3V LVTTL,               B        33 or     ZBus data valid flag (active low)
+                      12mA drive,                       66 MHz
+                      internal pullup
+      ZBUS_GNT_N      3.3V,                      I       33 or     ZBus grant (active low)
+                      internal pullup                   66 MHz
+      ZBUS_INT_N[2:0] 3.3V LVTTL,               O        33 or     ZBus device interrupt (active low)
+                      12mA drive                        66 MHz
+      ZBUS_PRTY       3.3V LVTTL,               B        33 or     ZBus parity over address/data; one parity bit for 16 bits
+                      12mA drive,                       66 MHz
+                      internal pullup
+      ZBUS_DIR        3.3V LVTTL,               O        33 or     ZBus write/read flag
+                      12mA drive                        66 MHz
+      ZBUS_REQ_N      3.3V LVTTL,               O        33 or     ZBus master cycle request (active low)
+                      12mA drive                        66 MHz
+                                          Table 9 Processor Interface (ZBus)
+                                                      8 of 30                                                              March 3, 2005
+
+
+IDT 89TTM553
+          Signal Name      I/O Type      Dir.      Freq.                                 Remarks
+      IDDQ            3.3V,                I         N/A       IDDQ input (active high).
+                      internal pulldown                        For IDT use only. Do not connect.
+      RESERVE_1       3.3V LVTTL,         O          N/A       For IDT use only. Do not connect.
+                      4 mA drive
+      SCAN_EN         3.3V                 I         N/A       Scan enable (active high)
+                                                               For IDT use only. Attach to a 4.7K resistor to 0V
+      RESERVE_0       3.3V,                I         N/A       Tristate enable (active low)
+                      internal pullup                          For IDT use only.
+                                                               Attach to a 4.7K resistor to 3.3V
+      TCK             3.3V                 I         —         JTAG (IEEE 1149.1) clock input.
+      TDI             3.3V,                I         —         JTAG (IEEE 1149.1) test data input.
+                      internal pullup
+      TDO             3.3V LVTTL,         O          —         JTAG (IEEE 1149.1) test data output.
+                      12 mA drive
+      TMS             3.3V,                I         —         JTAG (IEEE 1149.1) test mode select
+                      internal pullup
+      TRST_N          3.3V,                I         —         JTAG (IEEE 1149.1) test reset input.
+                      internal pullup
+                                              Table 10 Test I/O
+          Signal Name      I/O Type      Dir.      Freq.                                 Remarks
+      PLL_2X_BPCLK    3.3V,                I         N/A       Bypass Clock Input
+                      internal pulldown                        For IDT use only. Do not connect.
+      PLL_BP_MODE     3.3V,                I         N/A       Bypass Clock Input
+                      internal pulldown                        For IDT use only. Do not connect.
+      PLL_MON         3.3V LVTTL,         O          N/A       PLL Monitor
+                      12mA drive                               For IDT use only. Do not connect.
+      PLL_CFG_OVR     3.3V,                I         N/A       PLL Configuration Override
+                      internal pulldown
+      PLL_RST         3.3V                 I       Async       PLL reset. A special initialization sequence is required.
+      PLL_VDDA        1.8V                —          —         PLL Analog VDD
+      PLL_VSSA        —                   —          —         PLL Analog VSS
+      PLL_SYS_REFCLK  3.3V                 I      100 MHz      Chip core PLL reference clock.
+      RESET_N         3.3V,                I       Async       Chip reset input (active low).
+                      internal pullup
+      VDD18           —                   —          —         1.8V core power
+      VDD15           —                   —          —         1.5V I/O power for HSTL-2 I/Os: Isolated output buffer supply
+                                                               set nominally to 1.5V
+                                        Table 11 PLL I/O (Part 1 of 2)
+                                                 9 of 30                                                               March 3, 2005
+
+
+   IDT 89TTM553
+                Signal Name                    I/O Type           Dir.     Freq.                               Remarks
+           VDD33                          —                        —         —         3.3V I/O power for LVTTL I/Os
+           N/C                            —                        —        N/A        Do not connect.
+           GND                            —                        I        N/A        Ground
+                                                                Table 11 PLL I/O (Part 2 of 2)
+89TTM553 Electrical Specifications
+    Some data are TBD and will be published as they become available. The specifications are subject to change without notice.
+Absolute Maximum Ratings
+    The absolute maximum ratings are the maximum conditions that the device can withstand without sustaining permanent damage. Exceeding any
+of these conditions could result in permanent damage to the device. Normal operation should not be expected at these conditions. In addition, expo-
+sure to absolute maximum rated conditions (or near absolute maximum rated conditions) for extended periods may affect device reliability.
+    Operation of the device is not guaranteed at the absolute maximum ratings, but rather at the operating conditions outlined in “DC Characteristics”
+on page 11 and “AC Characteristics” on page 12.
+            Symbol                              Parameter                               Min         Max          Units       Conditions
+              TJMAX      Junction temperature under bias                                 —           105           °C
+            TSTORAGE     Storage temperature                                             —           150           °C
+                         Storage temperature range                                      –40            85          °C       Long term storage
+             TSOLDER     Soldering temperature                                           —           215           °C
+            TREWORK      Rework temperature                                              —           204           °C
+                                                            Table 12 Absolute Maximum Ratings
+Operating Ranges
+           Symbol                               Parameter                         Min       Typical        Max        Units       Conditions
+                TJ          Operating junction temperature range                    0            —            85       °C
+               IV15         Input current for 1.5V power supply                     —           800           —        mA
+               IV18         Input current for 1.8V power supply                     —          1.16           —         A
+               IV33         Input current for 3.3V power supply                     —            60           —        mA
+             VDD15          1.5V HSTL supply                                      1.425         1.5         1.575       V              ±5%
+             VDD18          1.8V Core supply                                       1.71         1.8          1.89       V              ±5%
+                                                           Table 13 Operating Ranges (Part 1 of 2)
+                                                                         10 of 30                                                        March 3, 2005
+
+
+ IDT 89TTM553
+          Symbol                                     Parameter                             Min      Typical      Max      Units         Conditions
+             VDD33             3.3V LVTTL supply                                           3.135       3.3        3.465       V                ±5%
+           VRFHSTL     1
+                               0.75V HSTL reference voltage                               0.7125       0.75      0.7875       V                ±5%
+      Power Dissipation                                                                      —         3.49        3.66       W     Max. values use the
+                                                                                                                                    maximum voltages and
+                                                                                                                                    current listed in this
+                                                                                                                                    table and typical values
+                                                                                                                                    use the typical voltages
+                                                                                                                                    and current.
+                                                                  Table 13 Operating Ranges (Part 2 of 2)
+      1.
+         This operating range applies to the following pins: BLL_VREF, BXT_LLT_VREF, FCT_VREF[1:0], FPT_VREF[1:0], GPT_VREF, HT_VREF[1:0], and FLQS_VREF.
+DC Characteristics
+  Unless otherwise stated, the following parameters are provided given the conditions outlined in Table 13.
+                       Symbol                                 Parameter                           Min       Typical      Max           Units
+                  VILHSTL (1.5v HSTL)        Input low voltage for 1.5V HSTL inputs (VREF           —       VREF – 0.1     V
+                                             = 0.75V)
+                 VIHHSTL (1.5v HSTL)         Input high voltage for 1.5V HSTL inputs            VREF+ 0.1   VDDQ+0.3       V
+                                             (VREF = 0.75V, VDDQ = 1.5V)
+                   VIL33 (3.3v LVTTL)        Input low voltage for 3.3V LVTTL inputs                —           0.8        V
+                   VIH33 (3.3v LVTTL)        Input high voltage for 3.3V LVTTL inputs              2.0           —         V
+                         VOLHSTL             Output low voltage for 1.5V HSTL outputs               —           0.4        V      1.5v HSTL classI
+                                                                                                                                    w/8mA Drive)
+                         VOHHSTL             Output high voltage for 1.5V HSTL outputs          VDDQ-0.4          -        V      1.5v HSTL classI
+                                             (VDDQ = 1.5V)                                                                         w/ 8mA Drive)
+                          VOL33              Output low voltage for 3.3V CMOS outputs               —           0.5        V       3.3v LVTTL w/
+                                             (12mA pads)                                                                             12mA Drive
+                          VOH33              Output high voltage for 3.3V CMOS outputs             2.4           —         V       3.3v LVTTL w/
+                                             (12mA pads)                                                                             12mA Drive
+                  IILHSTL (1.5v HSTL)        Input Leakage low current for 1.5V HSTL               -10           10       uA
+                                             Inputs
+                  IIHHSTL (1.5v HSTL)        Input Leakage high current for 1.5V HSTL              -10           10       uA
+                                             Inputs
+               IIL33 (3.3v pads w/o Pull     Input Leakage low current for 3.3V Inputs             -10           10       uA
+                        Up/Down)
+              IIH33 (3.3v pads w/o Pull      Input Leakage high current for 3.3V Inputs            -10           10       uA
+                        Up/Down)
+                 IIL33PU (3.3v pads w/       Input Leakage low current for 3.3V with Pull-        -200          -10       uA
+                         Pull Up)            Up Inputs
+                                                                   Table 14 DC Parameters (Part 1 of 2)
+                                                                               11 of 30                                                          March 3, 2005
+
+
+ IDT 89TTM553
+                      Symbol                               Parameter                           Min     Typical   Max      Units
+               IIH33PU (3.3v pads w/        Input Leakage high current for 3.3V with Pull-      -10        +10     uA
+                       Pull Up)             Up Inputs
+               IIL33PD (3.3v pads w/        Input Leakage low current for 3.3V with Pull-       -10        +10     uA
+                      Pull Down)            Down Inputs
+               IIH33PD (3.3v pads w/        Input Leakage high current for 3.3V with Pull-      10         200     uA
+                      Pull Down)            Down Inputs
+                                                                  Table 14 DC Parameters (Part 2 of 2)
+AC Characteristics
+  Unless otherwise stated, the following parameters are provided given the conditions outlined in Table 13.
+             Symbol                                            Parameter                               Min     Typical Max      Units
+                 fSYS           Frequency for system (core) clock reference                              —       100    —        MHz
+                TJSYS           Jitter requirements for system clock                                     —        —     80        ps
+                DSYS            Percentage duty for system clock                                         45      50     55        %
+                  fZB           Frequency for ZBus clock                                                 33      33     66       MHz
+                 DZB            Percentage duty for ZBus clock                                           45      50     55        %
+                                                                     Table 15 System Clock Timing
+             Symbol                                            Parameter                               Min     Typical Max      Units
+                TKQOV           K/K rising edge to address/data output valid                             —        —    1.61       ns
+                TKQOX           K/K rising edge to address/data output invalid                          0.81      —     —         ns
+                TCQIS           C/C rising edge to data input setup                                     –0.2      —     —         ns
+                TCQIH           C/C rising edge to data input hold                                       —        —     1.6       ns
+                                                                 Table 16 QDR SSRAM Interface Timing
+         1. The parameter is specified at 89TTM55x core clock frequency of 175 MHz.
+             Symbol                                            Parameter                               Min     Typical Max      Units
+                 TKQV           Zbus clock high to output valid                                          —        —     8.3       ns
+                 TKQX           Zbus clock high to output invalid                                        2.5      —     —         ns
+                TKQLZ           Zbus clock high to output low-Z                                          1.0      —     6.0       ns
+                TKQHZ           Zbus clock high to output high-Z                                         1.0      —     6.0       ns
+                  TS            Input setup time from system clock                                       3.0      —     —         ns
+                  TH            Input hold time from system clock                                         0       —     —         ns
+                                                                     Table 17 Zbus Interface Timing
+                                                                                12 of 30                                        March 3, 2005
+
+
+ IDT 89TTM553
+AC Test Conditions
+         Input Rise/Fall Time                                                                            1 V / ns (20% / 80%)
+         Output timing measurement reference level (VREF) for 3.3V interfaces                            (VDDQ/2) V
+         Output load                                                                                     As shown in Figure 1
+                                                                 Table 18 AC Test Conditions
+                                                                                                                     VDD
+                                  Z0 = 50Ω                                              For enable/disable spec
+                                                                                                                         75Ω
+                                                                  50Ω
+                                                  20 pF                                                                  75Ω
+                                                                   VREF                                 5 pF
+                          For output timing
+                                                                    Figure 1 AC Test Load
+89TTM553 Thermal ConsiderationsConsiderations
+  This section describes the temperature and heat sink calculations for flip-chip BGA devices.
+            Symbol                                     Parameter                                 Value       Units             Conditions
+               ØJA          Thermal resistance, junction to ambient (no heat sink)                  9.8       °C / W            Max: still air.
+                                                                                                    7.8       °C / W          Typical: 200 FPM.
+               ØJB          Estimated thermal resistance, junction to board                         3.1       °C / W
+               ØJC          Thermal resistance, junction to case                                    0.7       °C / W
+                                                        Table 19 89TTM553 Thermal Characteristics
+  The thermal circuit is as shown below.
+                                                                     ØJB
+                                                                                                 TA
+                                               Device
+                                                                              W2 (dissipated through board)
+                                                             TJ
+                                            Total Power
+                                            =W                                                   TA
+                                                                             W1
+                                                                    ØJC            ØCA
+                                                             Figure 2 89TTM553 Thermal Circuit
+                                                                          13 of 30                                                              March 3, 2005
+
+
+  IDT 89TTM553
+    For flip-chip BGA devices, there are two paths for heat dissipation: one through the package balls to the board and other through the package case
+to air. The device specifications provide ØJB and ØJC numbers. The ØCA number comes from the heat sink manufacturer and depends on type of heat
+sink (area, height, fin type, etc.) and the airflow across the heat sink. The device specifications also provide the maximum operating junction tempera-
+ture (TJ) that will not degrade the device reliability. The system designer should ensure that the device maximum junction temperature is not exceeded
+under any operating condition. One method of accomplishing this is to calculate the maximum ambient temperature (TA) that can be tolerated based
+on the above device parameters. The formula is shown below.
+                            ØJB x (ØJC + ØCA)
+       TA = TJ - W x         -----------------------
+                            ØJB + ØJC + ØCA
+   The following graph depicts the ambient temperature (TA) versus ØCA.
+                                                                    Ambient Temp. vs ØCA
+                                             90.0
+                                             80.0      81.0     79.7     78.8     78.2         77.7     77.2     76.9   76.6
+                                             70.0
+                                        C
+                                       o
+                                             60.0
+                                        TA
+                                             50.0
+                                             40.0
+                                             30.0
+                                                    1.0       2.0      3.0      4.0          5.0      6.0      7.0      8.0
+                                                                                         o
+                                                                                ØCA          C/W
+                                                          Figure 3 89TTM553 Ambient Temperature Curve
+   For system designers, specification of the maximum device junction temperature (operating) is critical, since it allows them to select a heat sink
+that meets the maximum ambient temperature requirements of their system.
+   The other parameter that is device package-specific is ØJA, without a heat sink, and is specified for various air-flow conditions. This is the intrinsic
+thermal resistance of the package (junction to case + case to ambient) and is mainly specified as a reference parameter. (This is when a heat sink is
+not present and the top surface of the package is essentially acting as the heat sink). However, in devices that have high power dissipation, heat sink
+usage is highly desirable. Consequently, system designers may have limited use for this parameter.
+                                                                             14 of 30                                                   March 3, 2005
+
+
+   IDT 89TTM553
+89TTM553 Reset Sequence
+    A PLL reset sequence must be followed when resetting the 89TTM553 to ensure that clocks are stable when the chip comes out of reset. This
+section describes the reset sequence for the 89TTM553 device.
+    The 89TTM553 uses data presented on the ZBus data and parity pins to determine the clock frequencies when the chip is in reset. The
+PLL_CFG_OVR pin controls this feature. When left high, the PLL will determine its clock frequency by sampling these values on the ZBus pins. The
+feature is not necessary if the default clock frequencies are desired. (The default frequency for the core clock is 133 MHz when a 100 MHz clock refer-
+ence is used.) When default frequencies are desired, the PLL_CFG_OVR should be held low and it is not necessary to drive the ZBus data and parity
+lines during the reset.
+Core PLL PLL Frequency Setting
+    Following is the summary of the reset sequence:
+    1. Assert chip reset.
+    2. Drive LOR (latch on reset) values on ZBus (described below) and enable configuration override on all PLLs. (Configuration override remains
+        ON forever).
+    3. Reset PLLs.
+    4. Release reset on PLLs.
+    5. Release chip reset.
+    6. Release LOR value on ZBus.
+    The following values must be driven on ZBUS_AD[ ] and ZBUS_PRTY before the reset sequences in order to set the chip operation frequency
+properly. Note that the setting is based on a 100MHz reference input clock (PLL_SYS_REFCLK pin).
+           ZB_PRTY[1:0] = 0x3, must be driven “LOW” for the entire reset sequence cycles
+           ZB_AD[31:16], and ZB_AD[15:0] = bits are set as:
+                                                  Core/system clock frequency
+                                     0x154F =     187.50MHz
+                                     0x1527 =     175.00MHz
+                                     0x153a =     166.67MHz
+                                     0x1526 =     150.00MHz
+                                     0x1538 =     133.33MHz
+                                     0x1525 =     125.00MHz
+                                                                        15 of 30                                                     March 3, 2005
+
+
+ IDT 89TTM553
+Reset Sequence Timing Diagram
+                                                                 T0     T1    T2      T3      T4        T5
+                           Power                                    10ms 10ms    10ms    10ms    10ms
+                           RESET_N
+                           ZBUS_AD[ ], ZBUS_PRTY[ ]
+                           PLL_CFG_OVR
+                           PLL_RST
+                            NOTE:
+                            - ZBUS_AD[ ] and ZBUS_PRTY[ ] are used to configure the chip operating frequency, and is
+                              listed on next page
+                                                  Figure 4 89TTM553 Reset Sequence Timing Diagram
+Pin List I/O Description
+  The 89TTM553 Pin List on page 17 uses the following I/O notations:
+                   I                       Input
+                   O                       Output
+                   B                       Bidirectional
+                   P                       Power
+                                                                     16 of 30                                        March 3, 2005
+
+
+ IDT 89TTM553
+89TTM553 Pin List                                                      Pin          Signal            Type
+  Pin   Signal      Type                                               B11          HT_DIN_32         I
+  A2    GND         P                                                  B12          HT_DOUT_13        O
+  A3    VDD15       P                                                  B13          HT_DOUT_12        O
+  A4    HT_CLK_CN   I                                                  B14          VDD15             P
+  A5    HT_CLK_CP   I                                                  B15          GND               P
+  A6    HT_DIN_19   I                                                  B16          HT_DOUT_17        O
+  A7    HT_DIN_20   I                                                  B17          HT_CLK_KP         O
+  A8    VDD15       P                                                  B18          HT_DOUT_34        O
+  A9    GND         P                                                  B19          HT_ADDR_15        O
+  A10   HT_DIN_34   I                                                  B20          GND               P
+  A11   HT_DIN_35   I                                                  B21          VDD15             P
+  A12   HT_DOUT_14  O                                                  B22          HT_ADDR_18        O
+  A13   HT_DOUT_15  O                                                  B23          HT_ADDR_19        O
+  A14   VDD15       P                                                  B24          FCT_ADDR_17       O
+  A15   GND         P                                                  B25          FCT_ADDR_16       O
+  A16   HT_DOUT_16  O                                                  B26          GND               P
+  A17   HT_DOUT_31  O                                                  B27          VDD15             P
+  A18   HT_DOUT_35  O                                                  B28          FCT_DOUT_09       O
+  A19   HT_ADDR_14  O                                                  B29          FCT_DOUT_08       O
+  A20   GND         P                                                  B30          FCT_DOUT_10       O
+  A21   VDD15       P                                                  B31          FCT_DOUT_11       O
+  A22   HT_ADDR_16  O                                                  B32          VDD15             P
+  A23   HT_ADDR_17  O                                                  B33          GND               P
+  A24   FCT_ADDR_12 O                                                  B34          GND               P
+  A25   FCT_ADDR_13 O                                                  C1           VDD15             P
+  A26   GND         P                                                  C2           VDD15             P
+  A27   VDD15       P                                                  C3           HT_DIN_03         I
+  A28   FCT_DOUT_02 O                                                  C4           HT_DIN_08         I
+  A29   FCT_DOUT_03 O                                                  C5           HT_DIN_09         I
+  A30   FCT_DOUT_04 O                                                  C6           HT_DIN_12         I
+  A31   FCT_DOUT_05 O                                                  C7           HT_DIN_11         I
+  A32   VDD15       P                                                  C8           VDD15             P
+  A33   GND         P                                                  C9           GND               P
+  B1    GND         P                                                  C10          HT_DIN_28         I
+  B2    GND         P                                                  C11          HT_DIN_29         I
+  B3    VDD15       P                                                  C12          HT_DOUT_08        O
+  B4    HT_DIN_13   I                                                  C13          HT_DOUT_09        O
+  B5    HT_DIN_14   I                                                  C14          VDD15             P
+  B6    HT_DIN_15   I                                                  C15          GND               P
+  B7    HT_DIN_16   I                                                  C16          HT_DOUT_21        O
+  B8    VDD15       P                                                  C17          HT_CLK_KN         O
+  B9    GND         P                                                  C18          HT_ADDR_00        O
+  B10   HT_DIN_33   I                                                  C19          HT_ADDR_11        O
+                                                         17 of 30                                          March 3, 2005
+                        *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal      Type                                               Pin          Signal            Type
+ C20   GND         P                                                  D29          FCT_DOUT_19       O
+ C21   VDD15       P                                                  D30          FCT_DOUT_20       O
+ C22   FCT_ADDR_01 O                                                  D31          FCT_DOUT_23       O
+ C23   FCT_ADDR_00 O                                                  D32          FCT_DIN_05        I
+ C24   FCT_ADDR_18 O                                                  D33          FCT_DIN_10        I
+ C25   FCT_ADDR_19 O                                                  D34          FCT_CLK_CP        I
+ C26   GND         P                                                  E1           BLL_DIN_04        I
+ C27   VDD15       P                                                  E2           BLL_CLK_CN        I
+ C28   FCT_DOUT_12 O                                                  E3           BLL_DIN_10        I
+ C29   FCT_DOUT_13 O                                                  E4           BLL_DIN_15        I
+ C30   FCT_DOUT_17 O                                                  E5           BLL_DIN_14        I
+ C31   FCT_DOUT_16 O                                                  E6           HT_DIN_05         I
+ C32   FCT_DOUT_22 O                                                  E7           HT_DIN_10         I
+ C33   VDD15       P                                                  E8           VDD15             P
+ C34   VDD15       P                                                  E9           GND               P
+ D1    BLL_DIN_03  I                                                  E10          HT_VREF_01        P
+ D2    BLL_CLK_CP  I                                                  E11          HT_DIN_25         I
+ D3    BLL_DIN_11  I                                                  E12          HT_DOUT_05        O
+ D4    HT_DIN_02   I                                                  E13          HT_DOUT_04        O
+ D5    HT_DIN_04   I                                                  E14          VDD15             P
+ D6    HT_DIN_06   I                                                  E15          GND               P
+ D7    HT_DIN_07   I                                                  E16          HT_DOUT_22        O
+ D8    VDD15       P                                                  E17          HT_DOUT_28        O
+ D9    GND         P                                                  E18          HT_ADDR_02        O
+ D10   HT_DIN_26   I                                                  E19          HT_ADDR_09        O
+ D11   HT_DIN_27   I                                                  E20          GND               P
+ D12   HT_DOUT_06  O                                                  E21          VDD15             P
+ D13   HT_DOUT_07  O                                                  E22          FCT_ADDR_04       O
+ D14   VDD15       P                                                  E23          FCT_ADDR_05       O
+ D15   GND         P                                                  E24          FCT_DOUT_01       O
+ D16   HT_DOUT_20  O                                                  E25          FCT_DOUT_00       O
+ D17   HT_DOUT_30  O                                                  E26          GND               P
+ D18   HT_ADDR_01  O                                                  E27          VDD15             P
+ D19   HT_ADDR_10  O                                                  E28          FCT_DIN_08        I
+ D20   GND         P                                                  E29          FCT_DOUT_21       O
+ D21   VDD15       P                                                  E30          FCT_DIN_01        I
+ D22   FCT_ADDR_02 O                                                  E31          FCT_DIN_00        I
+ D23   FCT_ADDR_03 O                                                  E32          FCT_DIN_04        I
+ D24   FCT_CLK_KN  O                                                  E33          FCT_DIN_09        I
+ D25   FCT_CLK_KP  O                                                  E34          FCT_CLK_CN        I
+ D26   GND         P                                                  F1           BLL_DIN_00        I
+ D27   VDD15       P                                                  F2           BLL_DIN_06        I
+ D28   FCT_DOUT_18 O                                                  F3           BLL_DIN_08        I
+                                                        18 of 30                                          March 3, 2005
+                       *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal      Type                                               Pin          Signal            Type
+ F4    BLL_DIN_12  I                                                  G13          HT_DOUT_18        O
+ F5    BLL_DIN_16  I                                                  G14          VDD15             P
+ F6    HT_DIN_00   I                                                  G15          GND               P
+ F7    HT_VREF_00  P                                                  G16          HT_DOUT_24        O
+ F8    VDD15       P                                                  G17          HT_DOUT_25        O
+ F9    GND         P                                                  G18          HT_ADDR_07        O
+ F10   HT_DIN_21   I                                                  G19          HT_ADDR_06        O
+ F11   HT_DIN_22   I                                                  G20          GND               P
+ F12   HT_DOUT_00  O                                                  G21          VDD15             P
+ F13   HT_DOUT_01  O                                                  G22          FCT_ADDR_10       O
+ F14   VDD15       P                                                  G23          FCT_ADDR_11       O
+ F15   GND         P                                                  G24          FCT_WR_N          O
+ F16   HT_DOUT_23  O                                                  G25          FCT_RD_N          O
+ F17   HT_DOUT_29  O                                                  G26          GND               P
+ F18   HT_ADDR_03  O                                                  G27          VDD15             P
+ F19   HT_ADDR_08  O                                                  G28          VDD15             P
+ F20   GND         P                                                  G29          FCT_DOUT_24       O
+ F21   VDD15       P                                                  G30          FCT_DOUT_26       O
+ F22   FCT_ADDR_09 O                                                  G31          FCT_DIN_03        I
+ F23   FCT_ADDR_08 O                                                  G32          FCT_DIN_07        I
+ F24   FCT_ADDR_15 O                                                  G33          FCT_DIN_12        I
+ F25   FCT_ADDR_14 O                                                  G34          FCT_DIN_15        I
+ F26   GND         P                                                  H1           VDD15             P
+ F27   VDD15       P                                                  H2           VDD15             P
+ F28   FCT_VREF_00 P                                                  H3           VDD15             P
+ F29   FCT_DOUT_25 O                                                  H4           VDD15             P
+ F30   FCT_DOUT_27 O                                                  H5           VDD15             P
+ F31   FCT_DIN_02  I                                                  H6           VDD15             P
+ F32   FCT_DIN_06  I                                                  H7           VDD15             P
+ F33   FCT_DIN_11  I                                                  H8           GND               P
+ F34   FCT_DIN_16  I                                                  H9           BLL_DIN_07        I
+ G1    BLL_DOUT_17 O                                                  H10          HT_DIN_24         I
+ G2    BLL_DIN_05  I                                                  H11          HT_DIN_23         I
+ G3    BLL_DIN_09  I                                                  H12          HT_DOUT_11        O
+ G4    BLL_DIN_13  I                                                  H13          HT_DOUT_10        O
+ G5    BLL_DIN_17  I                                                  H14          VDD15             P
+ G6    HT_DIN_01   I                                                  H15          GND               P
+ G7    VDD15       P                                                  H16          HT_DOUT_33        O
+ G8    VDD15       P                                                  H17          HT_DOUT_32        O
+ G9    GND         P                                                  H18          HT_ADDR_04        O
+ G10   HT_DIN_31   I                                                  H19          HT_ADDR_13        O
+ G11   HT_DIN_30   I                                                  H20          GND               P
+ G12   HT_DOUT_19  O                                                  H21          VDD15             P
+                                                        19 of 30                                          March 3, 2005
+                       *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal      Type                                               Pin          Signal            Type
+ H22   HT_WR_N     O                                                  J31          GND               P
+ H23   HT_RD_N     O                                                  J32          GND               P
+ H24   FCT_DOUT_07 O                                                  J33          GND               P
+ H25   FCT_DOUT_06 O                                                  J34          GND               P
+ H26   GND         P                                                  K1           BLL_DOUT_02       O
+ H27   GND         P                                                  K2           BLL_DOUT_05       O
+ H28   VDD15       P                                                  K3           BLL_DOUT_08       O
+ H29   VDD15       P                                                  K4           BLL_DOUT_10       O
+ H30   VDD15       P                                                  K5           BLL_DOUT_13       O
+ H31   VDD15       P                                                  K6           BLL_DOUT_16       O
+ H32   VDD15       P                                                  K7           BLL_DOUT_03       O
+ H33   VDD15       P                                                  K8           BLL_DOUT_11       O
+ H34   VDD15       P                                                  K9           BLL_DIN_01        I
+ J1    GND         P                                                  K26          FCT_DIN_21        I
+ J2    GND         P                                                  K27          FLQS_DOUT_PRTY    O
+ J3    GND         P                                                  K28          FCT_DIN_17        I
+ J4    GND         P                                                  K29          FCT_DIN_19        I
+ J5    GND         P                                                  K30          FCT_VREF_01       P
+ J6    GND         P                                                  K31          FCT_DIN_24        I
+ J7    GND         P                                                  K32          FCT_DIN_26        I
+ J8    GND         P                                                  K33          FLQS_DOUT_01      O
+ J9    BLL_VREF    P                                                  K34          FLQS_DOUT_02      O
+ J10   HT_DIN_18   I                                                  L1           BLL_DOUT_01       O
+ J11   HT_DIN_17   I                                                  L2           BLL_DOUT_06       O
+ J12   HT_DOUT_03  O                                                  L3           BLL_DOUT_07       O
+ J13   HT_DOUT_02  O                                                  L4           BLL_DOUT_09       O
+ J14   VDD15       P                                                  L5           BLL_DOUT_14       O
+ J15   GND         P                                                  L6           BLL_DOUT_15       O
+ J16   HT_DOUT_27  O                                                  L7           BLL_DOUT_04       O
+ J17   HT_DOUT_26  O                                                  L8           BLL_DOUT_12       O
+ J18   HT_ADDR_05  O                                                  L9           BLL_DIN_02        I
+ J19   HT_ADDR_12  O                                                  L26          FCT_DIN_22        I
+ J20   GND         P                                                  L27          FLQS_TIC_OUT      O
+ J21   VDD15       P                                                  L28          FCT_DIN_18        I
+ J22   FCT_ADDR_07 O                                                  L29          FCT_DIN_20        I
+ J23   FCT_ADDR_06 O                                                  L30          FCT_DIN_23        I
+ J24   FCT_DOUT_15 O                                                  L31          FCT_DIN_25        I
+ J25   FCT_DOUT_14 O                                                  L32          FCT_DIN_27        I
+ J26   FCT_DIN_14  I                                                  L33          FLQS_DOUT_00      O
+ J27   FCT_DIN_13  I                                                  L34          FLQS_DOUT_03      O
+ J28   GND         P                                                  M1           BLL_ADDR_13       O
+ J29   GND         P                                                  M2           BLL_ADDR_15       O
+ J30   GND         P                                                  M3           BLL_ADDR_18       O
+                                                        20 of 30                                          March 3, 2005
+                       *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal       Type                                               Pin          Signal            Type
+ M4    BLL_CLK_KP   O                                                  P15          VDD18             P
+ M5    BLL_ADDR_21  O                                                  P16          GND               P
+ M6    BLL_ADDR_02  O                                                  P17          VDD18             P
+ M7    BLL_DOUT_00  O                                                  P18          GND               P
+ M8    BLL_ADDR_01  O                                                  P19          VDD18             P
+ M9    BLL_ADDR_00  O                                                  P20          GND               P
+ M26   FLQS_DOUT_06 O                                                  P21          VDD18             P
+ M27   FLQS_DOUT_13 O                                                  P26          VDD15             P
+ M28   FLQS_TIC_IN  I                                                  P27          VDD15             P
+ M29   FLQS_DOUT_04 O                                                  P28          VDD15             P
+ M30   FLQS_DOUT_09 O                                                  P29          VDD15             P
+ M31   FLQS_CLKOUT  O                                                  P30          VDD15             P
+ M32   FLQS_DOUT_11 O                                                  P31          VDD15             P
+ M33   FLQS_DOUT_16 O                                                  P32          VDD15             P
+ M34   FLQS_DOUT_17 O                                                  P33          VDD15             P
+ N1    BLL_ADDR_12  O                                                  P34          VDD15             P
+ N2    BLL_ADDR_14  O                                                  R1           GND               P
+ N3    BLL_ADDR_19  O                                                  R2           GND               P
+ N4    BLL_CLK_KN   O                                                  R3           GND               P
+ N5    BLL_ADDR_20  O                                                  R4           GND               P
+ N6    BLL_RD_N     O                                                  R5           GND               P
+ N7    BLL_WR_N     O                                                  R6           GND               P
+ N8    BLL_ADDR_17  O                                                  R7           GND               P
+ N9    BLL_ADDR_16  O                                                  R8           GND               P
+ N26   FLQS_DOUT_07 O                                                  R9           GND               P
+ N27   FLQS_DOUT_14 O                                                  R14          VDD18             P
+ N28   FLQS_DIN_14  I                                                  R15          GND               P
+ N29   FLQS_DOUT_05 O                                                  R16          VDD18             P
+ N30   FLQS_DOUT_08 O                                                  R17          GND               P
+ N31   FLQS_DOUT_10 O                                                  R18          VDD18             P
+ N32   FLQS_DOUT_12 O                                                  R19          GND               P
+ N33   FLQS_DOUT_15 O                                                  R20          VDD18             P
+ N34   FLQS_DOUT_18 O                                                  R21          GND               P
+ P1    VDD15        P                                                  R26          GND               P
+ P2    VDD15        P                                                  R27          GND               P
+ P3    VDD15        P                                                  R28          GND               P
+ P4    VDD15        P                                                  R29          GND               P
+ P5    VDD15        P                                                  R30          GND               P
+ P6    VDD15        P                                                  R31          GND               P
+ P7    VDD15        P                                                  R32          GND               P
+ P8    VDD15        P                                                  R33          GND               P
+ P9    VDD15        P                                                  R34          GND               P
+ P14   GND          P                                                  T1           BLL_ADDR_10       O
+                                                         21 of 30                                          March 3, 2005
+                        *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal        Type                                               Pin          Signal            Type
+ T2    BLL_ADDR_11   O                                                  U27          FLQS_DIN_00       I
+ T3    BLL_ADDR_07   O                                                  U28          FLQS_DIN_08       I
+ T4    BLL_ADDR_06   O                                                  U29          FLQS_DIN_06       I
+ T5    BLL_ADDR_05   O                                                  U30          FLQS_CLKIN        I
+ T6    BLL_ADDR_04   O                                                  U31          FLQS_DIN_05       I
+ T7    BXT_WR_N      O                                                  U32          FLQS_DIN_04       I
+ T8    BLL_ADDR_09   O                                                  U33          FLQS_DIN_03       I
+ T9    BLL_ADDR_08   O                                                  U34          FLQS_DIN_02       I
+ T14   GND           P                                                  V1           BXT_ADDR_15       O
+ T15   VDD18         P                                                  V2           BXT_CLK_KP        O
+ T16   GND           P                                                  V3           BXT_CLK_KN        O
+ T17   VDD18         P                                                  V4           BXT_ADDR_14       O
+ T18   GND           P                                                  V5           BXT_ADDR_12       O
+ T19   VDD18         P                                                  V6           BXT_ADDR_13       O
+ T20   GND           P                                                  V7           BXT_ADDR_09       O
+ T21   VDD18         P                                                  V8           BXT_ADDR_17       O
+ T26   FLQS_VREF     P                                                  V9           BXT_ADDR_11       O
+ T27   FLQS_DIN_01   I                                                  V14          GND               P
+ T28   FLQS_DIN_09   I                                                  V15          VDD18             P
+ T29   FLQS_DIN_10   I                                                  V16          GND               P
+ T30   FLQS_DIN_11   I                                                  V17          VDD18             P
+ T31   FLQS_DIN_13   I                                                  V18          GND               P
+ T32   FLQS_DIN_12   I                                                  V19          VDD18             P
+ T33   FLQS_DIN_PRTY I                                                  V20          GND               P
+ T34   FLQS_DOUT_19  O                                                  V21          VDD18             P
+ U1    BXT_ADDR_19   O                                                  V26          TDO               O
+ U2    BXT_ADDR_18   O                                                  V27          TMS               I
+ U3    BXT_ADDR_20   O                                                  V28          PLL_2X_BPCLK      I
+ U4    BXT_ADDR_21   O                                                  V29          TDI               I
+ U5    BXT_ADDR_00   O                                                  V30          TCK               I
+ U6    BXT_ADDR_01   O                                                  V31          RESERVE_0         I
+ U7    BLL_ADDR_03   O                                                  V32          SCAN_EN           I
+ U8    BXT_RD_N      O                                                  V33          IDDQ              I
+ U9    BXT_ADDR_02   O                                                  V34          RESERVE_1         I
+ U14   VDD18         P                                                  W1           BXT_DOUT_01       O
+ U15   GND           P                                                  W2           BXT_DOUT_02       O
+ U16   VDD18         P                                                  W3           BXT_ADDR_05       O
+ U17   GND           P                                                  W4           BXT_ADDR_04       O
+ U18   VDD18         P                                                  W5           BXT_ADDR_06       O
+ U19   GND           P                                                  W6           BXT_ADDR_07       O
+ U20   VDD18         P                                                  W7           BXT_ADDR_08       O
+ U21   GND           P                                                  W8           BXT_ADDR_16       O
+ U26   FLQS_DIN_07   I                                                  W9           BXT_ADDR_10       O
+                                                          22 of 30                                          March 3, 2005
+                         *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal         Type                                               Pin          Signal            Type
+ W14   VDD18          P                                                  AA1          VDD15             P
+ W15   GND            P                                                  AA2          VDD15             P
+ W16   VDD18          P                                                  AA3          VDD15             P
+ W17   GND            P                                                  AA4          VDD15             P
+ W18   VDD18          P                                                  AA5          VDD15             P
+ W19   GND            P                                                  AA6          VDD15             P
+ W20   VDD18          P                                                  AA7          VDD15             P
+ W21   GND            P                                                  AA8          VDD15             P
+ W26   RESET_N        I                                                  AA9          VDD15             P
+ W27   PLL_SYS_REFCLK I                                                  AA14         VDD18             P
+ W28   TRST_N         I                                                  AA15         GND               P
+ W29   PLL_BP_MODE    I                                                  AA16         VDD18             P
+ W30   PLL_MON        O                                                  AA17         GND               P
+ W31   PLL_CFG_OVR    I                                                  AA18         VDD18             P
+ W32   PLL_RST        I                                                  AA19         GND               P
+ W33   NC                                                                AA20         VDD18             P
+ W34   PLL_VSSA       I                                                  AA21         GND               P
+ Y1    GND            P                                                  AA26         VDD33             P
+ Y2    GND            P                                                  AA27         VDD33             P
+ Y3    GND            P                                                  AA28         VDD33             P
+ Y4    GND            P                                                  AA29         VDD33             P
+ Y5    GND            P                                                  AA30         VDD33             P
+ Y6    GND            P                                                  AA31         VDD33             P
+ Y7    GND            P                                                  AA32         VDD33             P
+ Y8    GND            P                                                  AA33         VDD33             P
+ Y9    GND            P                                                  AA34         VDD33             P
+ Y14   GND            P                                                  AB1          BXT_DOUT_00       O
+ Y15   VDD18          P                                                  AB2          BXT_CLK_CP        I
+ Y16   GND            P                                                  AB3          BXT_DIN_00        I
+ Y17   VDD18          P                                                  AB4          LLT_DIN_09        I
+ Y18   GND            P                                                  AB5          LLT_DIN_06        I
+ Y19   VDD18          P                                                  AB6          LLT_DIN_04        I
+ Y20   GND            P                                                  AB7          BXT_ADDR_03       O
+ Y21   VDD18          P                                                  AB8          BXT_DIN_02        I
+ Y26   GND            P                                                  AB9          BXT_LLT_VREF      P
+ Y27   GND            P                                                  AB26         ZBUS_AD_00        B
+ Y28   GND            P                                                  AB27         ZBUS_AD_01        B
+ Y29   GND            P                                                  AB28         ZBUS_AD_12        B
+ Y30   GND            P                                                  AB29         ZBUS_AD_11        B
+ Y31   GND            P                                                  AB30         ZBUS_AD_06        B
+ Y32   GND            P                                                  AB31         ZBUS_AD_04        B
+ Y33   GND            P                                                  AB32         ZBUS_AD_03        B
+ Y34   GND            P                                                  AB33         ZBUS_AVALID_N     B
+                                                           23 of 30                                          March 3, 2005
+                          *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal        Type                                               Pin          Signal            Type
+ AB34  PLL_VDDA      I                                                  AE7          LLT_RD_N          O
+ AC1   BXT_DIN_03    I                                                  AE8          LLT_DOUT_10       O
+ AC2   BXT_CLK_CN    I                                                  AE9          LLT_DOUT_02       O
+ AC3   LLT_DIN_10    I                                                  AE26         GPT_DIN_01        I
+ AC4   LLT_DIN_08    I                                                  AE27         ZBUS_INT_N_00     O
+ AC5   LLT_DIN_07    I                                                  AE28         ZBUS_DEVID_00     I
+ AC6   LLT_DIN_03    I                                                  AE29         ZBUS_DIR          O
+ AC7   BXT_DOUT_03   O                                                  AE30         ZBUS_INT_N_02     O
+ AC8   BXT_DIN_01    I                                                  AE31         ZBUS_GNT_N        I
+ AC9   LLT_DIN_05    I                                                  AE32         ZBUS_DEVID_04     I
+ AC26  ZBUS_AD_08    B                                                  AE33         ZBUS_DEVID_02     I
+ AC27  ZBUS_AD_09    B                                                  AE34         ZBUS_AD_15        B
+ AC28  ZBUS_AD_13    B                                                  AF1          GND               P
+ AC29  ZBUS_AD_10    B                                                  AF2          GND               P
+ AC30  ZBUS_AD_07    B                                                  AF3          GND               P
+ AC31  ZBUS_AD_05    B                                                  AF4          GND               P
+ AC32  ZBUS_AD_02    B                                                  AF5          GND               P
+ AC33  ZBUS_CLK      I                                                  AF6          GND               P
+ AC34  NC                                                               AF7          GND               P
+ AD1   LLT_CLK_CP    I                                                  AF8          LLT_ADDR_16       O
+ AD2   LLT_DIN_01    I                                                  AF9          LLT_ADDR_17       O
+ AD3   LLT_DOUT_09   O                                                  AF10         FPT_DIN_25        I
+ AD4   LLT_DOUT_07   O                                                  AF11         FPT_DIN_26        I
+ AD5   LLT_DOUT_04   O                                                  AF12         FPT_BW_N_01       O
+ AD6   LLT_DOUT_01   O                                                  AF13         FPT_BW_N_02       O
+ AD7   LLT_WR_N      O                                                  AF14         VDD15             P
+ AD8   LLT_DIN_00    I                                                  AF15         GND               P
+ AD9   LLT_DOUT_03   O                                                  AF16         FPT_ADDR_07       O
+ AD26  GPT_DIN_02    I                                                  AF17         FPT_ADDR_00       O
+ AD27  ZBUS_INT_N_01 O                                                  AF18         FPT_DOUT_21       O
+ AD28  ZBUS_DEVID_01 I                                                  AF19         FPT_DOUT_22       O
+ AD29  ZBUS_PRTY     B                                                  AF20         GND               P
+ AD30  VDD33         P                                                  AF21         VDD15             P
+ AD31  ZBUS_DVALID_N B                                                  AF22         GPT_BW_N_00       O
+ AD32  VDD33         P                                                  AF23         GPT_BW_N_01       O
+ AD33  ZBUS_DEVID_03 I                                                  AF24         GPT_ADDR_00       O
+ AD34  ZBUS_AD_14    B                                                  AF25         GPT_ADDR_01       O
+ AE1   LLT_CLK_CN    I                                                  AF26         GPT_VREF          P
+ AE2   LLT_DIN_02    I                                                  AF27         GND               P
+ AE3   LLT_DOUT_08   O                                                  AF28         GND               P
+ AE4   LLT_DOUT_06   O                                                  AF29         GND               P
+ AE5   LLT_DOUT_05   O                                                  AF30         GND               P
+ AE6   LLT_DOUT_00   O                                                  AF31         GND               P
+                                                          24 of 30                                          March 3, 2005
+                         *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal      Type                                               Pin          Signal            Type
+ AF32  GND         P                                                  AH7          VDD15             P
+ AF33  GND         P                                                  AH8          VDD15             P
+ AF34  GND         P                                                  AH9          GND               P
+ AG1   VDD15       P                                                  AH10         FPT_DIN_11        I
+ AG2   VDD15       P                                                  AH11         FPT_DIN_12        I
+ AG3   VDD15       P                                                  AH12         FPT_DIN_01        I
+ AG4   VDD15       P                                                  AH13         FPT_DIN_00        I
+ AG5   VDD15       P                                                  AH14         VDD15             P
+ AG6   VDD15       P                                                  AH15         GND               P
+ AG7   VDD15       P                                                  AH16         FPT_ADDR_01       O
+ AG8   GND         P                                                  AH17         FPT_ADDR_02       O
+ AG9   GND         P                                                  AH18         FPT_DOUT_20       O
+ AG10  FPT_DIN_17  I                                                  AH19         FPT_DOUT_19       O
+ AG11  FPT_DIN_18  I                                                  AH20         GND               P
+ AG12  FPT_ADDR_15 O                                                  AH21         VDD15             P
+ AG13  FPT_ADDR_16 O                                                  AH22         FPT_DOUT_13       O
+ AG14  VDD15       P                                                  AH23         FPT_DOUT_14       O
+ AG15  GND         P                                                  AH24         GPT_ADDR_14       O
+ AG16  FPT_ADDR_08 O                                                  AH25         GPT_ADDR_15       O
+ AG17  FPT_DOUT_35 O                                                  AH26         GND               P
+ AG18  FPT_DOUT_29 O                                                  AH27         VDD15             P
+ AG19  FPT_DOUT_30 O                                                  AH28         VDD15             P
+ AG20  GND         P                                                  AH29         GPT_DOUT_01       O
+ AG21  VDD15       P                                                  AH30         GPT_DIN_17        I
+ AG22  FPT_DOUT_05 O                                                  AH31         GPT_DIN_13        I
+ AG23  FPT_DOUT_06 O                                                  AH32         GPT_DIN_09        I
+ AG24  GPT_ADDR_08 O                                                  AH33         GPT_DIN_05        I
+ AG25  GPT_ADDR_09 O                                                  AH34         ZBUS_REQ_N        O
+ AG26  GPT_DIN_07  I                                                  AJ1          LLT_ADDR_19       O
+ AG27  GND         P                                                  AJ2          LLT_ADDR_12       O
+ AG28  VDD15       P                                                  AJ3          LLT_ADDR_06       O
+ AG29  VDD15       P                                                  AJ4          LLT_CLK_KN        O
+ AG30  VDD15       P                                                  AJ5          LLT_ADDR_01       O
+ AG31  VDD15       P                                                  AJ6          FPT_DIN_35        I
+ AG32  VDD15       P                                                  AJ7          LLT_ADDR_09       O
+ AG33  VDD15       P                                                  AJ8          VDD15             P
+ AG34  VDD15       P                                                  AJ9          GND               P
+ AH1   LLT_ADDR_18 O                                                  AJ10         FPT_DIN_04        I
+ AH2   LLT_ADDR_13 O                                                  AJ11         FPT_DIN_05        I
+ AH3   LLT_ADDR_07 O                                                  AJ12         FPT_BW_N_03       O
+ AH4   LLT_CLK_KP  O                                                  AJ13         FPT_WR_N          O
+ AH5   LLT_ADDR_00 O                                                  AJ14         VDD15             P
+ AH6   FPT_DIN_34  I                                                  AJ15         GND               P
+                                                        25 of 30                                          March 3, 2005
+                       *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal      Type                                               Pin          Signal            Type
+ AJ16  FPT_ADDR_03 O                                                  AK25         GPT_ADDR_11       O
+ AJ17  FPT_DOUT_34 O                                                  AK26         GND               P
+ AJ18  FPT_DOUT_24 O                                                  AK27         VDD15             P
+ AJ19  FPT_DOUT_18 O                                                  AK28         GPT_DOUT_11       O
+ AJ20  GND         P                                                  AK29         GPT_DOUT_05       O
+ AJ21  VDD15       P                                                  AK30         GPT_DIN_14        I
+ AJ22  GPT_RD_N    O                                                  AK31         GPT_DIN_15        I
+ AJ23  GPT_ADDR_20 O                                                  AK32         GPT_DIN_10        I
+ AJ24  GPT_ADDR_07 O                                                  AK33         GPT_CLK_CN        I
+ AJ25  GPT_ADDR_06 O                                                  AK34         GPT_DIN_04        I
+ AJ26  GND         P                                                  AL1          LLT_ADDR_14       O
+ AJ27  VDD15       P                                                  AL2          LLT_ADDR_11       O
+ AJ28  GPT_DOUT_10 O                                                  AL3          LLT_ADDR_05       O
+ AJ29  GPT_DOUT_00 O                                                  AL4          FPT_DIN_33        I
+ AJ30  GPT_DIN_16  I                                                  AL5          FPT_DIN_30        I
+ AJ31  GPT_DIN_12  I                                                  AL6          FPT_DIN_29        I
+ AJ32  GPT_DIN_08  I                                                  AL7          FPT_VREF_01       P
+ AJ33  GPT_DIN_06  I                                                  AL8          VDD15             P
+ AJ34  GPT_DIN_00  I                                                  AL9          GND               P
+ AK1   LLT_ADDR_15 O                                                  AL10         FPT_VREF_00       P
+ AK2   LLT_ADDR_10 O                                                  AL11         FPT_DIN_10        I
+ AK3   LLT_ADDR_04 O                                                  AL12         FPT_ADDR_20       O
+ AK4   LLT_ADDR_02 O                                                  AL13         FPT_ADDR_19       O
+ AK5   LLT_ADDR_03 O                                                  AL14         VDD15             P
+ AK6   FPT_DIN_31  I                                                  AL15         GND               P
+ AK7   LLT_ADDR_08 O                                                  AL16         FPT_ADDR_05       O
+ AK8   VDD15       P                                                  AL17         FPT_DOUT_32       O
+ AK9   GND         P                                                  AL18         FPT_DOUT_25       O
+ AK10  FPT_DIN_13  I                                                  AL19         FPT_DOUT_15       O
+ AK11  FPT_DIN_14  I                                                  AL20         GND               P
+ AK12  FPT_BW_N_00 O                                                  AL21         VDD15             P
+ AK13  FPT_RD_N    O                                                  AL22         FPT_DOUT_02       O
+ AK14  VDD15       P                                                  AL23         FPT_DOUT_01       O
+ AK15  GND         P                                                  AL24         GPT_CLK_KP        O
+ AK16  FPT_ADDR_04 O                                                  AL25         GPT_CLK_KN        O
+ AK17  FPT_DOUT_33 O                                                  AL26         GND               P
+ AK18  FPT_DOUT_23 O                                                  AL27         VDD15             P
+ AK19  FPT_DOUT_17 O                                                  AL28         GPT_DOUT_07       O
+ AK20  GND         P                                                  AL29         GPT_DOUT_06       O
+ AK21  VDD15       P                                                  AL30         GPT_DOUT_04       O
+ AK22  GPT_WR_N    O                                                  AL31         GPT_DOUT_02       O
+ AK23  FPT_DOUT_00 O                                                  AL32         GPT_DIN_11        I
+ AK24  GPT_ADDR_10 O                                                  AL33         GPT_CLK_CP        I
+                                                        26 of 30                                          March 3, 2005
+                       *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal      Type                                               Pin          Signal            Type
+ AL34  GPT_DIN_03  I                                                  AN9          GND               P
+ AM1   VDD15       P                                                  AN10         FPT_DIN_06        I
+ AM2   VDD15       P                                                  AN11         FPT_DIN_07        I
+ AM3   FPT_DIN_32  I                                                  AN12         FPT_ADDR_14       O
+ AM4   FPT_DIN_27  I                                                  AN13         FPT_ADDR_13       O
+ AM5   FPT_DIN_28  I                                                  AN14         VDD15             P
+ AM6   FPT_DIN_24  I                                                  AN15         GND               P
+ AM7   FPT_DIN_23  I                                                  AN16         FPT_ADDR_10       O
+ AM8   VDD15       P                                                  AN17         FPT_CLK_KP        O
+ AM9   GND         P                                                  AN18         FPT_DOUT_27       O
+ AM10  FPT_DIN_09  I                                                  AN19         FPT_DOUT_12       O
+ AM11  FPT_DIN_08  I                                                  AN20         GND               P
+ AM12  FPT_ADDR_17 O                                                  AN21         VDD15             P
+ AM13  FPT_ADDR_18 O                                                  AN22         FPT_DOUT_07       O
+ AM14  VDD15       P                                                  AN23         FPT_DOUT_08       O
+ AM15  GND         P                                                  AN24         GPT_ADDR_16       O
+ AM16  FPT_ADDR_06 O                                                  AN25         GPT_ADDR_17       O
+ AM17  FPT_DOUT_31 O                                                  AN26         GND               P
+ AM18  FPT_DOUT_26 O                                                  AN27         VDD15             P
+ AM19  FPT_DOUT_16 O                                                  AN28         GPT_DOUT_17       O
+ AM20  GND         P                                                  AN29         GPT_DOUT_16       O
+ AM21  VDD15       P                                                  AN30         GPT_DOUT_15       O
+ AM22  FPT_DOUT_04 O                                                  AN31         GPT_DOUT_14       O
+ AM23  FPT_DOUT_03 O                                                  AN32         VDD15             P
+ AM24  GPT_ADDR_13 O                                                  AN33         GND               P
+ AM25  GPT_ADDR_12 O                                                  AN34         GND               P
+ AM26  GND         P                                                  AP2          GND               P
+ AM27  VDD15       P                                                  AP3          VDD15             P
+ AM28  GPT_DOUT_12 O                                                  AP4          FPT_CLK_CN        I
+ AM29  GPT_DOUT_13 O                                                  AP5          FPT_CLK_CP        I
+ AM30  GPT_DOUT_09 O                                                  AP6          FPT_DIN_16        I
+ AM31  GPT_DOUT_08 O                                                  AP7          FPT_DIN_15        I
+ AM32  GPT_DOUT_03 O                                                  AP8          VDD15             P
+ AM33  VDD15       P                                                  AP9          GND               P
+ AM34  VDD15       P                                                  AP10         FPT_DIN_03        I
+ AN1   GND         P                                                  AP11         FPT_DIN_02        I
+ AN2   GND         P                                                  AP12         FPT_ADDR_12       O
+ AN3   VDD15       P                                                  AP13         FPT_ADDR_11       O
+ AN4   FPT_DIN_22  I                                                  AP14         VDD15             P
+ AN5   FPT_DIN_21  I                                                  AP15         GND               P
+ AN6   FPT_DIN_19  I                                                  AP16         FPT_ADDR_09       O
+ AN7   FPT_DIN_20  I                                                  AP17         FPT_CLK_KN        O
+ AN8   VDD15       P                                                  AP18         FPT_DOUT_28       O
+                                                        27 of 30                                          March 3, 2005
+                       *Notice: The information in this document is subject to change without notice
+
+
+IDT 89TTM553
+ Pin   Signal      Type
+ AP19  FPT_DOUT_11 O
+ AP20  GND         P
+ AP21  VDD15       P
+ AP22  FPT_DOUT_10 O
+ AP23  FPT_DOUT_09 O
+ AP24  GPT_ADDR_19 O
+ AP25  GPT_ADDR_18 O
+ AP26  GND         P
+ AP27  VDD15       P
+ AP28  GPT_ADDR_05 O
+ AP29  GPT_ADDR_04 O
+ AP30  GPT_ADDR_02 O
+ AP31  GPT_ADDR_03 O
+ AP32  VDD15       P
+ AP33  GND         P
+                        28 of 30 March 3, 2005
+
+
+  IDT 89TTM553
+89TTM553 Package
+   The package is an LSI Logic FPBGA-HP, having 960 pins, with 1 mm pitch; a 34 ×34 pin array; and a 35 × 35 mm enclosure. Figure 5 shows the
+package geometry.
+                                                   Figure 5 89TTM553 Package Diagram
+                                                                 29 of 30                                                   March 3, 2005
+
+
+ IDT 89TTM553
+Ordering Information
+                Information
+   NN               A               AA                 55x             A                 A                             Legend
+                                                                                                                     A = Alpha Character
+                                                                                                                     N = Numeric Character
+ Product       Operating           Device            Product         Package        Temp range
+ Family         Voltage            Family            Detail
+                                                                                               Blank     Commercial Temperature
+                                                                                                         (See Thermal Considerations
+                                                                                                         section)
+                                                                                               BL        960-pin FCBGA
+                                                                                               552       Aggregate flow device
+                                                                                               553        Per flow device
+                                                                                               TM       Traffic Manager
+                                                                                               SF        Switch Fabric
+                                                                                               T        1.8V ±5% Core Voltage
+                                                                                               89       Serial Switching Product
+Valid Combinations
+    89TTM553BL                                            960-pin FCBGA package, Commercial Temperature
+Revision History
+  November 23, 2004: Initial publication by IDT.
+  January 12, 2005: On page 14, deleted reference to LVDS in the Core PLL Frequency Setting heading.
+  March 3, 2005: In Table 11, changed frequency for PLL_SYS_REFCLK from 125 to 100 MHz.
+                                 CORPORATE HEADQUARTERS                   for SALES:                          for Tech Support:
+                                 6024 Silver Creek Valley Road            800-345-7015 or 408-284-8200        email: ssdhelp@idt.com
+                                 San Jose, CA 95138                       fax: 408-284-2775                   phone: 408-284-8208
+                                                                          www.idt.com
+                                                                   30 of 30                                                 March 3, 2005
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Renesas Electronics:
+ 89TTM553BL

@@ -1,0 +1,1368 @@
+                  PCA9673
+                  Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and
+                  reset
+                  Rev. 2 — 29 September 2011                                          Product data sheet
+1. General description
+              The PCA9673 provides general purpose remote I/O expansion for most microcontroller
+              families via the two-line bidirectional bus (I2C-bus) and is a part of the Fast-mode Plus
+              family.
+              The PCA9673 is a drop in upgrade for the PCF8575 providing higher Fast-mode Plus
+              (Fm+) I2C-bus speeds (1 MHz versus 400 kHz) so that the output can support PWM
+              dimming of LEDs, higher I2C-bus drive (30 mA versus 3 mA) so that many more devices
+              can be on the bus without the need for bus buffers, higher total package sink capacity
+              (400 mA versus 100 mA) that supports having all 25 mA LEDs on at the same time and
+              more device addresses (16 versus 8) are available to allow many more devices on the
+              bus without address conflicts.
+              The difference between the PCA9673 and the PCF8575 is that the A2 address pin is
+              replaced by a RESET input on the PCA9673.
+              The device consists of a 16-bit quasi-bidirectional port and an I2C-bus interface. The
+              PCA9673 has a low current consumption and includes latched outputs with 25 mA high
+              current drive capability for directly driving LEDs.
+              It also possesses an interrupt line (INT) which can be connected to the interrupt logic of
+              the microcontroller. By sending an interrupt signal on this line, the remote I/O can inform
+              the microcontroller if there is incoming data on its ports without having to communicate via
+              the I2C-bus.
+              The internal Power-On Reset (POR), hardware reset pin (RESET) or software reset
+              sequence initializes the I/Os as inputs.
+2. Features and benefits
+                  1 MHz I2C-bus interface
+                  Compliant with the I2C-bus Fast and Standard modes
+                  SDA with 30 mA sink capability for 4000 pF buses
+                  2.3 V to 5.5 V operation with 5.5 V tolerant I/Os
+                  16-bit remote I/O pins that default to inputs at power-up
+                  Latched outputs with 25 mA sink capability for directly driving LEDs
+                  Total package sink capability of 400 mA
+                  Active LOW open-drain interrupt output
+                  16 programmable slave addresses using 2 address pins
+                  Readable device ID (manufacturer, device type, and revision)
+
+
+NXP Semiconductors                                                                                                 PCA9673
+                                           Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                         Low standby current
+                         40 C to +85 C operation
+                         ESD protection exceeds 2000 V HBM per JESD22-A114 and 1000 V CDM per
+                           JESD22-C101
+                         Latch-up testing is done to JEDEC standard JESD78 which exceeds 100 mA
+                         Packages offered: SO24, TSSOP24, HVQFN24, DHVQFN24
+3. Applications
+                          LED signs and displays
+                          Servers
+                          Industrial control
+                          Medical equipment
+                          PLCs
+                          Cellular telephones
+                          Gaming machines
+                          Instrumentation and test measurement
+4. Ordering information
+Table 1.    Ordering information
+ Type number     Topside      Package
+                 mark         Name             Description                                                                      Version
+ PCA9673D        PCA9673D     SO24             plastic small outline package; 24 leads; body width 7.5 mm                       SOT137-1
+ PCA9673PW       PCA9673PW TSSOP24             plastic thin shrink small outline package; 24 leads;                             SOT355-1
+                                               body width 4.4 mm
+ PCA9673BQ       9673         DHVQFN24 plastic dual in-line compatible thermal enhanced very thin quad                          SOT815-1
+                                               flat package; no leads; 24 terminals; body 3.5  5.5  0.85 mm
+ PCA9673BS       9673         HVQFN24          plastic thermal enhanced very thin quad flat package; no leads;                  SOT616-1
+                                               24 terminals; body 4  4  0.85 mm
+PCA9673                                 All information provided in this document is subject to legal disclaimers. © NXP B.V. 2011. All rights reserved.
+Product data sheet                                  Rev. 2 — 29 September 2011                                                               2 of 33
+
+
+NXP Semiconductors                                                                                                                        PCA9673
+                                          Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+5. Block diagram
+                                     PCA9673
+                                                                  INTERRUPT
+                          INT                                                                                       LP FILTER
+                                                                       LOGIC
+                         AD0
+                         AD1
+                                                                                                                                                    P00 to P07
+                         SCL                     INPUT                     I2C-BUS                        SHIFT                      I/O
+                                                                                                      REGISTER         16 BITS     PORT
+                                                FILTER                    CONTROL
+                        SDA                                                                                                                         P10 to P17
+                                                                                                       write pulse
+                      RESET                                                                            read pulse
+                                                       POWER-ON
+                         VDD                              RESET
+                         VSS
+                                                                                                                                        002aac300
+                   Fig 1.     Block diagram of PCA9673
+                                                                                                                                               VDD
+                                    write pulse                                                                                IOH
+                                                                                                                       100 μA
+                                                                                                             Itrt(pu)
+                       data from Shift Register                         D      Q
+                                                                            FF                                                                 P00 to P07
+                                                                        CI                                                     IOL             P10 to P17
+                                                                            S
+                                power-on reset                                                                                                 VSS
+                                                                                               D        Q
+                                                                                                   FF
+                                    read pulse                                                 CI
+                                                                                                    S
+                                                                                                                                               to interrupt logic
+                          data to Shift Register
+                                                                                                                                   002aab631
+                   Fig 2.     Simplified schematic diagram of P00 to P17
+PCA9673                                All information provided in this document is subject to legal disclaimers.                           © NXP B.V. 2011. All rights reserved.
+Product data sheet                                 Rev. 2 — 29 September 2011                                                                                         3 of 33
+
+
+NXP Semiconductors                                                                                                                                     PCA9673
+                                                 Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+6. Pinning information
+                     6.1 Pinning
+                                   INT   1                                                           24 VDD                 INT    1                                   24 VDD
+                                   AD1   2                                                           23 SDA                 AD1    2                                   23 SDA
+                               RESET     3                                                           22 SCL           RESET        3                                   22 SCL
+                                   P00   4                                                           21 AD0                 P00    4                                   21 AD0
+                                   P01   5                                                           20 P17                 P01    5                                   20 P17
+                                   P02   6                                                           19 P16                 P02    6                                   19 P16
+                                                        PCA9673D                                                                             PCA9673PW
+                                   P03   7                                                           18 P15                 P03    7                                   18 P15
+                                   P04   8                                                           17 P14                 P04    8                                   17 P14
+                                   P05   9                                                           16 P13                 P05    9                                   16 P13
+                                   P06 10                                                            15 P12                 P06 10                                     15 P12
+                                   P07 11                                                            14 P11                 P07 11                                     14 P11
+                                   VSS 12                                                            13 P10                 VSS 12                                     13 P10
+                                                                             002aac301                                                                   002aac302
+                          Fig 3.    Pin configuration for SO24                                                     Fig 4.     Pin configuration for TSSOP24
+                                                                                                                                                          24 VDD
+                                                                                                                      terminal 1              INT
+                                                                                                                     index area
+                                                                                                                                              1
+                                             24 RESET
+                                                                                                                             AD1       2                           23 SDA
+                                                        23 AD1   22 INT
+                                                                          21 VDD   20 SDA   19 SCL
+                            terminal 1                                                                                   RESET         3                           22 SCL
+                           index area
+                                                                                                                             P00       4                           21 AD0
+                                                                                                                             P01       5                           20 P17
+                                   P00   1                                                           18 AD0
+                                                                                                                             P02       6                           19 P16
+                                   P01   2                                                           17 P17                                  PCA9673BQ
+                                                                                                                             P03       7                           18 P15
+                                   P02   3                                                           16 P16
+                                                        PCA9673BS                                                            P04       8                           17 P14
+                                   P03   4                                                           15 P15
+                                                                                                                             P05       9                           16 P13
+                                   P04   5                                                           14 P14
+                                                                                                                             P06 10                                15 P12
+                                   P05   6                                                           13 P13
+                                                                                                                             P07 11                                14 P11
+                                                                          P10 10   P11 11   P12 12
+                                             7          8        9
+                                             P06        P07      VSS                                                                          VSS 12      P10 13
+                                                                                                       002aac305                                                        002aac306
+                                              Transparent top view                                                                         Transparent top view
+                          Fig 5.    Pin configuration for HVQFN24                                                  Fig 6.     Pin configuration for DHVQFN24
+PCA9673                                      All information provided in this document is subject to legal disclaimers.                                 © NXP B.V. 2011. All rights reserved.
+Product data sheet                                               Rev. 2 — 29 September 2011                                                                                      4 of 33
+
+
+NXP Semiconductors                                                                                                                     PCA9673
+                                              Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                   6.2 Pin description
+                       Table 2.      Pin description
+                        Symbol         Pin                                                                  Description
+                                       SO24, TSSOP24,                           HVQFN24
+                                       DHVQFN24
+                        INT            1                                        22                          interrupt output (active LOW)
+                        AD1            2                                        23                          address input 1
+                        RESET          3                                        24                          reset input (active LOW)
+                        P00            4                                        1                           quasi-bidirectional I/O 00
+                        P01            5                                        2                           quasi-bidirectional I/O 01
+                        P02            6                                        3                           quasi-bidirectional I/O 02
+                        P03            7                                        4                           quasi-bidirectional I/O 03
+                        P04            8                                        5                           quasi-bidirectional I/O 04
+                        P05            9                                        6                           quasi-bidirectional I/O 05
+                        P06            10                                       7                           quasi-bidirectional I/O 06
+                        P07            11                                       8                           quasi-bidirectional I/O 07
+                        VSS            12[1]                                    9[1]                        supply ground
+                        P10            13                                       10                          quasi-bidirectional I/O 10
+                        P11            14                                       11                          quasi-bidirectional I/O 11
+                        P12            15                                       12                          quasi-bidirectional I/O 12
+                        P13            16                                       13                          quasi-bidirectional I/O 13
+                        P14            17                                       14                          quasi-bidirectional I/O 14
+                        P15            18                                       15                          quasi-bidirectional I/O 15
+                        P16            19                                       16                          quasi-bidirectional I/O 16
+                        P17            20                                       17                          quasi-bidirectional I/O 17
+                        AD0            21                                       18                          address input 0
+                        SCL            22                                       19                          serial clock line input
+                        SDA            23                                       20                          serial data line input/output
+                        VDD            24                                       21                          supply voltage
+                       [1]  HVQFN24 and DHVQFN24 package die supply ground is connected to both the VSS pin and the exposed
+                            center pad. The VSS pin must be connected to supply ground for proper device operation. For enhanced
+                            thermal, electrical, and board-level performance, the exposed pad needs to be soldered to the board using
+                            a corresponding thermal pad on the board, and for proper heat conduction through the board thermal vias
+                            need to be incorporated in the PCB in the thermal pad region.
+PCA9673                                    All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2011. All rights reserved.
+Product data sheet                                     Rev. 2 — 29 September 2011                                                                                  5 of 33
+
+
+NXP Semiconductors                                                                                                               PCA9673
+                                            Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+7. Functional description
+                       Refer to Figure 1 “Block diagram of PCA9673”.
+                   7.1 Device address
+                       Following a START condition, the bus master must send the address of the slave it is
+                       accessing and the operation it wants to perform (read or write). The address of the
+                       PCA9673 is shown in Figure 7. Slave address pins AD1 and AD0 choose 1 of 16 slave
+                       addresses. To conserve power, no internal pull-up resistors are incorporated on AD1 and
+                       AD0. Address values depending on AD1 and AD0 can be found in Table 3 “PCA9673
+                       address map”.
+                       Remark: The General Call address (0000 0000b) and the Device ID address
+                       (1111 100Xb) are reserved and cannot be used as device address. Failure to follow this
+                       requirement will cause the PCA9673 not to acknowledge.
+                       Remark: Reserved I2C-bus addresses must be used with caution since they can interfere
+                       with:
+                         • “reserved for future use” I2C-bus addresses (0000 011, 1111 101, 1111 110, 1111 111)
+                         • slave devices that use the 10-bit addressing scheme (1111 0xx)
+                         • High speed mode (Hs-mode) master code (0000 1xx)
+                                                                                       slave address
+                                                                        A6     A5      A4      A3      A2      A1   A0 R/W
+                                                                                      programmable
+                                                                                                                    002aab636
+                         Fig 7.  PCA9673 address
+                       The last bit of the first byte defines the operation to be performed. When set to logic 1 a
+                       read is selected, while a logic 0 selects a write operation.
+                       When AD1 and AD0 are held to VDD or VSS, the same address as the PCF8575 is applied.
+                7.1.1 Address maps
+                       Table 3.    PCA9673 address map
+                        AD1     AD0       A6                A5              A4              A3                A2        A1    A0   Address (hex)
+                        SCL     VSS       0                 0               1               0                 1         0     0    28h
+                        SCL     VDD       0                 0               1               0                 1         0     1    2Ah
+                        SDA     VSS       0                 0               1               0                 1         1     0    2Ch
+                        SDA     VDD       0                 0               1               0                 1         1     1    2Eh
+                        SCL     SCL       0                 0               1               1                 1         0     0    38h
+                        SCL     SDA       0                 0               1               1                 1         0     1    3Ah
+                        SDA     SCL       0                 0               1               1                 1         1     0    3Ch
+                        SDA     SDA       0                 0               1               1                 1         1     1    3Eh
+PCA9673                                  All information provided in this document is subject to legal disclaimers.              © NXP B.V. 2011. All rights reserved.
+Product data sheet                                   Rev. 2 — 29 September 2011                                                                            6 of 33
+
+
+NXP Semiconductors                                                                                                              PCA9673
+                                           Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                       Table 3.    PCA9673 address map …continued
+                       AD1      AD0      A6                A5              A4              A3                A2        A1    A0   Address (hex)
+                       VSS      VSS      0                 1               0               0                 1         0     0    48h
+                       VSS      VDD      0                 1               0               0                 1         0     1    4Ah
+                       VDD      VSS      0                 1               0               0                 1         1     0    4Ch
+                       VDD      VDD      0                 1               0               0                 1         1     1    4Eh
+                       VSS      SCL      0                 1               0               1                 1         0     0    58h
+                       VSS      SDA      0                 1               0               1                 1         0     1    5Ah
+                       VDD      SCL      0                 1               0               1                 1         1     0    5Ch
+                       VDD      SDA      0                 1               0               1                 1         1     1    5Eh
+                   7.2 Software Reset call, and Device ID addresses
+                       Two other different addresses can be sent to the PCA9673.
+                        • General Call address: allows to reset the PCA9673 through the I2C-bus upon
+                           reception of the right I2C-bus sequence. See Section 7.2.1 “Software Reset” for more
+                           information.
+                        • Device ID address: allows to read ID information from the device (manufacturer, part
+                           identification, revision). See Section 7.2.2 “Device ID (PCA9673 ID field)” for more
+                           information.
+                                                                                                                        R/W
+                                                                        0     0        0       0        0      0    0    0
+                                                                                                                   002aac155
+                        Fig 8.   General Call address
+                                                                        1     1        1       1        1      0    0  R/W
+                                                                                                                   002aab638
+                        Fig 9.   Device ID address
+PCA9673                                 All information provided in this document is subject to legal disclaimers.              © NXP B.V. 2011. All rights reserved.
+Product data sheet                                  Rev. 2 — 29 September 2011                                                                            7 of 33
+
+
+NXP Semiconductors                                                                                                                      PCA9673
+                                          Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                7.2.1 Software Reset
+                      The Software Reset Call allows all the devices in the I2C-bus to be reset to the power-up
+                      state value through a specific formatted I2C-bus command. To be performed correctly, it
+                      implies that the I2C-bus is functional and that there is no device hanging the bus.
+                      The Software Reset sequence is defined as following:
+                       1. A START command is sent by the I2C-bus master.
+                       2. The reserved General Call I2C-bus address ‘0000 000’ with the R/W bit set to 0 (write)
+                          is sent by the I2C-bus master.
+                       3. The PCA9673 device(s) acknowledge(s) after seeing the General Call address
+                          ‘0000 0000’ (00h) only. If the R/W bit is set to 1 (read), no acknowledge is returned to
+                          the I2C-bus master.
+                       4. Once the General Call address has been sent and acknowledged, the master sends
+                          1 byte. The value of the byte must be equal to 06h.
+                          a. The PCA9673 acknowledges this value only. If the byte is not equal to 06h, the
+                              PCA9673 does not acknowledge it.
+                          If more than 1 byte of data is sent, the PCA9673 does not acknowledge any more.
+                       5. Once the right byte has been sent and correctly acknowledged, the master sends a
+                          STOP command to end the Software Reset sequence: the PCA9673 then resets to
+                          the default value (power-up value) and is ready to be addressed again within the
+                          specified bus free time. If the master sends a Repeated START instead, no reset is
+                          performed.
+                      The I2C-bus master must interpret a non-acknowledge from the PCA9673 (at any time) as
+                      a ‘Software Reset Abort’. The PCA9673 does not initiate a reset of its registers.
+                      The unique sequence that initiates a Software Reset is described in Figure 10.
+                                              SWRST Call I2C-bus address                                     SWRST data = 06h
+                                          S     0     0     0     0      0   0     0     0      A     0     0     0 0  0 1   1    0   A   P
+                                          START condition                              R/W                                acknowledge
+                                                                                                                          from slave(s)
+                                                                             acknowledge
+                                                                              from slave(s)
+                                                                                                                      PCA9673 is(are) reset.
+                                                                                            Registers are set to default power-up values.
+                                                                                                                                   002aac307
+                       Fig 10. Software Reset sequence
+PCA9673                                All information provided in this document is subject to legal disclaimers.                        © NXP B.V. 2011. All rights reserved.
+Product data sheet                                 Rev. 2 — 29 September 2011                                                                                      8 of 33
+
+
+NXP Semiconductors                                                                                                 PCA9673
+                                           Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                7.2.2 Device ID (PCA9673 ID field)
+                      The Device ID field is a 3-byte read-only (24 bits) word giving the following information:
+                       • 8 bits with the manufacturer name, unique per manufacturer (for example,
+                          NXP Semiconductors).
+                       • 13 bits with the part identification, assigned by manufacturer, the 7 MSBs with the
+                          category ID and the 6 LSBs with the feature ID (for example, PCA9673 16-bit
+                          quasi-output I/O expander).
+                       • 3 bits with the die revision, assigned by manufacturer (for example, Rev X).
+                      The Device ID is read-only, hardwired in the device and can be accessed as follows:
+                       1. START command
+                       2. The master sends the Reserved Device ID I2C-bus address ‘1111 100’ with the R/W
+                          bit set to 0 (write).
+                       3. The master sends the I2C-bus slave address of the slave device it needs to identify.
+                          The LSB is a ‘Don’t care’ value. Only one device must acknowledge this byte (the one
+                          that has the I2C-bus slave address).
+                       4. The master sends a Re-START command.
+                          Remark: A STOP command followed by a START command will reset the slave state
+                          machine and the Device ID read cannot be performed.
+                          Remark: A STOP command or a Re-START command followed by an access to
+                          another slave device will reset the slave state machine and the Device ID read cannot
+                          be performed.
+                       5. The master sends the Reserved Device ID I2C-bus address ‘1111 100’ with the R/W
+                          bit set to 1 (read).
+                       6. The device ID read can be done, starting with the 8 manufacturer bits (first byte +
+                          4 MSB of the second byte), followed by the 13 part identification bits and then the
+                          3 die revision bits (3 LSB of the third byte).
+                       7. The master ends the reading sequence by NACKing the last byte, thus resetting the
+                          slave device state machine and allowing the master to send the STOP command.
+                          Remark: The reading of the Device ID can be stopped anytime by sending a NACK
+                          command.
+                          Remark: If the master continues to ACK the bytes after the third byte, the PCA9673
+                          rolls back to the first byte and keeps sending the Device ID sequence until a NACK
+                          has been detected.
+                          For the PCA9673, the Device ID is as shown in Figure 11.
+PCA9673                                 All information provided in this document is subject to legal disclaimers. © NXP B.V. 2011. All rights reserved.
+Product data sheet                                  Rev. 2 — 29 September 2011                                                               9 of 33
+
+
+NXP Semiconductors                                                                                                                          PCA9673
+                                        Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                                                                             manufacturer             0      0     0     0      0     0     0     0
+                                  part identification        0        0      0      0         0       0      1     0     0      0     1     0     0
+                                                                       category identification                          feature identification
+                                                                                                                         revision     0     0     0
+                                                                                                                                           002aac333
+                   Fig 11. PCA9673 ID
+                                                                   acknowledge from one                              acknowledge from
+                                                                   or several slave(s)                               slave to be identified
+                                                                                                                                             acknowledge from
+                            device ID address                                                         don't care                          slave to be identified
+                     S   1  1   1   1       1    0     0    0      A A6 A5 A4 A3 A2 A1 A0 X                          A    1    1    1   1    1   0    0     1      A
+                                                                          I2C-bus slave address of                            device ID address
+                     START condition                       R/W           the device to be identified                                                      R/W
+                                                                   acknowledge                                       acknowledge                no acknowledge
+                                                                   from master                                       from master                    from master
+                        M7 M6 M5 M4 M3 M2 M1 M0 A C6 C5 C4 C3 C2 C1 C0 F5 A F4 P3 P2 P1 P0 R2 R1 R0 A                                                                    P
+                                                                            category identification                                            revision = 000
+                     manufacturer name                                             = 0000001
+                        = 00000000                                                                              feature identification                            STOP
+                                                                                                                      = 000100                               condition
+                                                                                                                                                              002aac334
+                            If more than 2 bytes are read, the slave device loops back to the first byte (manufacturer byte) and
+                            keeps sending data until the master generates a ‘no acknowledge’.
+                   Fig 12. Device ID field reading
+PCA9673                              All information provided in this document is subject to legal disclaimers.                               © NXP B.V. 2011. All rights reserved.
+Product data sheet                               Rev. 2 — 29 September 2011                                                                                           10 of 33
+
+
+NXP Semiconductors                                                                                                                      PCA9673
+                                             Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+8. I/O programming
+                   8.1 Quasi-bidirectional I/O architecture
+                       The PCA9673’s 16 ports (see Figure 2) are entirely independent and can be used either
+                       as input or output ports. Input data is transferred from the ports to the microcontroller in
+                       the Read mode (see Figure 15). Output data is transmitted to the ports in the Write mode
+                       (see Figure 14).
+                       Every data transmission from the PCA9673 must consist of an even number of bytes, the
+                       first byte will be referred to as P07 to P00, and the second byte as P17 to P10. The third
+                       will be referred to as P07 to P00, and so on.
+                       This quasi-bidirectional I/O can be used as an input or output without the use of a control
+                       signal for data directions. At power-on the I/Os are HIGH. In this mode only a current
+                       source (IOH) to VDD is active. An additional strong pull-up to VDD (Itrt(pu)) allows fast rising
+                       edges into heavily loaded outputs. These devices turn on when an output is written HIGH,
+                       and are switched off by the negative edge of SCL. The I/Os should be HIGH before being
+                       used as inputs. After power-on, as all the I/Os are set HIGH, all of them can be used as
+                       inputs. Any change in setting of the I/Os as either inputs or outputs can be done with the
+                       write mode.
+                       Remark: If a HIGH is applied to an I/O which has been written earlier to LOW, a large
+                       current (IOL) will flow to VSS.
+                   8.2 Writing to the port (Output mode)
+                       To write, the master (microcontroller) first addresses the slave device. By setting the last
+                       bit of the byte containing the slave address to logic 0 the Write mode is entered. The
+                       PCA9673 acknowledges and the master sends the first data byte for P07 to P00. After the
+                       first data byte is acknowledged by the PCA9673, the second data byte P17 to P10 is sent
+                       by the master. Once again, the PCA9673 acknowledges the receipt of the data. Each 8-bit
+                       data is presented on the port lines after it has been acknowledged by the PCA9673.
+                       The number of data bytes that can be sent successively is not limited. After every two
+                       bytes, the previous data is overwritten.
+                       The first data byte in every pair refers to Port 0 (P07 to P00), whereas the second data
+                       byte in every pair refers to Port 1 (P17 to P10). See Figure 13.
+                                                         first byte                                                     second byte
+                                    07   06       05     04      03      02     01      00       A       17     16   15   14  13    12 11    10     A
+                                   P07 P06 P05 P04 P03 P02 P01 P00                                      P17 P16 P15 P14 P13 P12 P11 P10
+                                                                                                                                            002aab634
+                         Fig 13. Correlation between bits and ports
+PCA9673                                   All information provided in this document is subject to legal disclaimers.                      © NXP B.V. 2011. All rights reserved.
+Product data sheet                                    Rev. 2 — 29 September 2011                                                                                  11 of 33
+
+
+NXP Semiconductors                                                                                                                                    PCA9673
+                                                      Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+          SCL    1    2    3  4   5   6  7   8  9
+                         slave address                             data to port 0                                        data to port 1
+        SDA S A6 A5 A4 A3 A2 A1 A0 0             A 07 P P 1 P P P P P A P 1 P P P P P P A
+                                                            06         04 03 02 01 00                      17           15 14 13 12 11 10
+             START condition               R/W                    P05                                             P16                            acknowledge
+                                                 acknowledge                                          acknowledge                                from slave
+                                                 from slave                                           from slave
+            write to port
+                                                                                                               tv(Q)                                   tv(Q)
+           data output from port                                                                                       data A0 and B0 valid          data A0 and B0 valid
+           P05 output voltage
+                                                                                         Itrt(pu)
+           P05 pull-up output current
+                                                                                                                  IOH
+           P16 output voltage
+                                                                                                                                        Itrt(pu)
+           P16 pull-up output current
+                                                                                                                                                         IOH
+           INT
+                                                                                          td(rst)
+                                                                                                                                                               002aab632
+  Fig 14. Write mode (output)
+                       8.3 Reading from a port (Input mode)
+                                All ports programmed as input should be set to logic 1. To read, the master
+                                (microcontroller) first addresses the slave device after it receives the interrupt. By setting
+                                the last bit of the byte containing the slave address to logic 1 the Read mode is entered.
+                                The data bytes that follow on the SDA are the values on the ports. If the data on the input
+                                port changes faster than the master can read, this data may be lost.
+PCA9673                                            All information provided in this document is subject to legal disclaimers.                           © NXP B.V. 2011. All rights reserved.
+Product data sheet                                             Rev. 2 — 29 September 2011                                                                                       12 of 33
+
+
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxx x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx xx xx xxxxx
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx xxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxx x x
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxx
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxx xxx
+Product data sheet
+                             PCA9673
+                                                                                                                                                                                                                                                                                                                                                                     NXP Semiconductors
+                                                                                                            SCL      1   2     3     4     5   6    7    8    9
+                                                                                                                                                                              P0x                                P1x                      P0x                      P1x
+                                                                                                            SDA
+                                                                                                                  S A6 A5 A4 A3 A2 A1 A0 1                    A             DATA 00              A             DATA 11              A   DATA 00              A   DATA 12              1    P
+                             All information provided in this document is subject to legal disclaimers.
+                                                                                                                                                                                                                                                                                               Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                                                                                                                  START condition                       R/W                           acknowledge                        acknowledge              acknowledge            no acknowledge
+                                                                                                                                                                                       from master                        from master              from master               from master
+Rev. 2 — 29 September 2011
+                                                                                                                                               acknowledge
+                                                                                                                                                 from slave
+                                                                                                            read from port 0
+                                                                                                            data into port 0                       DATA 00
+                                                                                                            read from port 1
+                                                                                                            data into port 1                       DATA 10                                           DATA 11                            DATA12
+                                                                                                            INT
+                                                                                                                                   tv(D)                          td(rst)                                                                                                          002aac312
+                             © NXP B.V. 2011. All rights reserved.                                                                                                                                                                                                                                                                                                   PCA9673
+13 of 33
+                                                                                                                    Transfer of data can be stopped at any moment by a STOP condition. When this occurs, data present at the latest acknowledge phase is valid (output mode).
+                                                                                                          Fig 15. Read input port register, scenario 1
+
+
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxx x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx xx xx xxxxx
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx xxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxx x x
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxx
+                                                                                                                      xxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxx xxx
+Product data sheet
+                             PCA9673
+                                                                                                                                                                                                                                                                                                                                                                    NXP Semiconductors
+                                                                                                            SCL      1   2     3     4     5   6   7     8     9
+                                                                                                                                                                                   P0x                          P1x                      P0x                      P1x
+                                                                                                            SDA
+                                                                                                                  S A6 A5 A4 A3 A2 A1 A0 1                     A                 DATA 00                A     DATA 10              A   DATA 03              A   DATA 12              1    P
+                             All information provided in this document is subject to legal disclaimers.
+                                                                                                                                                                                                                                                                                              Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                                                                                                                  START condition                      R/W                                 acknowledge                  acknowledge              acknowledge            no acknowledge
+                                                                                                                                                                                            from master                  from master              from master               from master
+Rev. 2 — 29 September 2011
+                                                                                                                                               acknowledge
+                                                                                                                                                 from slave
+                                                                                                            read from port 0
+                                                                                                                                                       th(D)                                                            tsu(D)
+                                                                                                            data into port 0                       DATA 00                          DATA 01                 DATA 02                    DATA 03
+                                                                                                                                                                                                th(D)
+                                                                                                            read from port 1
+                                                                                                                                                                                                                                                 tsu(D)
+                                                                                                            data into port 1                                       DATA 10                                              DATA 11                                 DATA12
+                                                                                                            INT
+                                                                                                                                   tv(D)                               td(rst)                                                                                                    002aac313
+                             © NXP B.V. 2011. All rights reserved.                                                                                                                                                                                                                                                                                                  PCA9673
+14 of 33
+                                                                                                                    Transfer of data can be stopped at any moment by a STOP condition. When this occurs, data present at the latest acknowledge phase is valid (output mode).
+                                                                                                          Fig 16. Read input port register, scenario 2
+
+
+NXP Semiconductors                                                                                                      PCA9673
+                                            Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                   8.4 Power-on reset
+                       When power is applied to VDD, an internal Power-On Reset (POR) holds the PCA9673 in
+                       a reset condition until VDD has reached VPOR. At that point, the reset condition is released
+                       and the PCA9673 registers and I2C-bus/SMBus state machine will initialize to their default
+                       states. Thereafter VDD must be lowered below 0.2 V to reset the device.
+                   8.5 Interrupt output (INT)
+                       The PCA9673 provides an open-drain interrupt (INT) which can be fed to a corresponding
+                       input of the microcontroller (see Figure 15, Figure 16, and Figure 17). This gives these
+                       chips a kind of master function which can initiate an action elsewhere in the system.
+                       An interrupt is generated by any rising or falling edge of the port inputs. After time t(v)D the
+                       signal INT is valid.
+                       The interrupt disappears when data on the port is changed to the original setting or data is
+                       read from or written to the device which has generated the interrupt.
+                       In the write mode, the interrupt may become deactivated (HIGH) on the rising edge of the
+                       write to port pulse. On the falling edge of the write to port pulse the interrupt is definitely
+                       deactivated (HIGH).
+                       The interrupt is reset in the read mode on the rising edge of the read from port pulse.
+                       During the resetting of the interrupt itself, any changes on the I/Os may not generate an
+                       interrupt. After the interrupt is reset any change in I/Os will be detected and transmitted as
+                       an INT.
+                                                                  VDD               device 1                   device 2       device 8
+                                                                                 PCA9673                      PCA9673       PCA9673
+                                MICROCOMPUTER
+                                                                                        INT                        INT           INT
+                                                    INT
+                                                                                                                                002aac308
+                         Fig 17. Application of multiple PCA9673s with interrupt
+                   8.6 RESET input
+                       A reset can be accomplished by holding the RESET pin LOW for a minimum of tw(rst). The
+                       PCA9673 registers and I2C-bus state machine will be held in their default state until the
+                       RESET input is once again HIGH.
+PCA9673                                  All information provided in this document is subject to legal disclaimers.     © NXP B.V. 2011. All rights reserved.
+Product data sheet                                   Rev. 2 — 29 September 2011                                                                 15 of 33
+
+
+NXP Semiconductors                                                                                                       PCA9673
+                                           Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+9. Characteristics of the I2C-bus
+                       The I2C-bus is for 2-way, 2-line communication between different ICs or modules. The two
+                       lines are a serial data line (SDA) and a serial clock line (SCL). Both lines must be
+                       connected to a positive supply via a pull-up resistor when connected to the output stages
+                       of a device. Data transfer may be initiated only when the bus is not busy.
+                   9.1 Bit transfer
+                       One data bit is transferred during each clock pulse. The data on the SDA line must remain
+                       stable during the HIGH period of the clock pulse as changes in the data line at this time
+                       will be interpreted as control signals (see Figure 18).
+                                             SDA
+                                             SCL
+                                                                              data line                change
+                                                                                stable;                 of data
+                                                                              data valid               allowed       mba607
+                         Fig 18. Bit transfer
+                9.1.1 START and STOP conditions
+                       Both data and clock lines remain HIGH when the bus is not busy. A HIGH-to-LOW
+                       transition of the data line while the clock is HIGH is defined as the START condition (S).
+                       A LOW-to-HIGH transition of the data line while the clock is HIGH is defined as the STOP
+                       condition (P) (see Figure 19).
+                                 SDA
+                                 SCL
+                                                      S                                                                  P
+                                           START condition                                                         STOP condition
+                                                                                                                                  mba608
+                         Fig 19. Definition of START and STOP conditions
+                   9.2 System configuration
+                       A device generating a message is a ‘transmitter’; a device receiving is the ‘receiver’. The
+                       device that controls the message is the ‘master’ and the devices which are controlled by
+                       the master are the ‘slaves’ (see Figure 20).
+PCA9673                                 All information provided in this document is subject to legal disclaimers.        © NXP B.V. 2011. All rights reserved.
+Product data sheet                                  Rev. 2 — 29 September 2011                                                                    16 of 33
+
+
+NXP Semiconductors                                                                                                                            PCA9673
+                                              Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+        SDA
+        SCL
+                   MASTER                                       SLAVE                                                    MASTER
+                                    SLAVE                                                    MASTER                                            I2C-BUS
+               TRANSMITTER/       RECEIVER               TRANSMITTER/                    TRANSMITTER                  TRANSMITTER/
+                                                                                                                                             MULTIPLEXER
+                 RECEIVER                                    RECEIVER                                                   RECEIVER
+                                                                                                                             SLAVE
+                                                                                                                                                    002aaa966
+  Fig 20. System configuration
+                   9.3 Acknowledge
+                         The number of data bytes transferred between the START and the STOP conditions from
+                         transmitter to receiver is not limited. Each byte of eight bits is followed by one
+                         acknowledge bit. The acknowledge bit is a HIGH level put on the bus by the transmitter,
+                         whereas the master generates an extra acknowledge related clock pulse.
+                         A slave receiver which is addressed must generate an acknowledge after the reception of
+                         each byte. Also a master must generate an acknowledge after the reception of each byte
+                         that has been clocked out of the slave transmitter. The device that acknowledges has to
+                         pull down the SDA line during the acknowledge clock pulse, so that the SDA line is stable
+                         LOW during the HIGH period of the acknowledge related clock pulse; set-up and hold
+                         times must be taken into account.
+                         A master receiver must signal an end of data to the transmitter by not generating an
+                         acknowledge on the last byte that has been clocked out of the slave. In this event, the
+                         transmitter must leave the data line HIGH to enable the master to generate a STOP
+                         condition.
+                                           data output
+                                        by transmitter
+                                                                                                                          not acknowledge
+                                          data output
+                                          by receiver
+                                                                                                                              acknowledge
+                                     SCL from master                                     1                    2                   8             9
+                                                                   S
+                                                                                                                             clock pulse for
+                                                               START                                                     acknowledgement
+                                                              condition                                                                        002aaa987
+                           Fig 21. Acknowledgement on the I2C-bus
+PCA9673                                    All information provided in this document is subject to legal disclaimers.                          © NXP B.V. 2011. All rights reserved.
+Product data sheet                                     Rev. 2 — 29 September 2011                                                                                      17 of 33
+
+
+NXP Semiconductors                                                                                                                          PCA9673
+                                          Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+10. Application design-in information
+                10.1 Bidirectional I/O expander applications
+                     In the 8-bit I/O expander application shown in Figure 22, P00 and P01 are inputs, and P02
+                     to P07 are outputs. When used in this configuration, during a write, the input (P00 and
+                     P01) must be written as HIGH so the external devices fully control the input ports. The
+                     desired HIGH or LOW logic levels may be written to the I/Os used as outputs (P02 to
+                     P07). During a read, the logic levels of the external devices driving the input ports (P00
+                     and P01) and the previous written logic level to the output ports (P02 to P07) will be read.
+                     The GPIO also has an interrupt line (INT) that can be connected to the interrupt logic of
+                     the microprocessor. By sending an interrupt signal on this line, the remote I/O informs the
+                     microprocessor that there is incoming data or a change of data on its ports without having
+                     to communicate via the I2C-bus.
+                                                                                                                                              VDD
+                                                             VDD
+                                                                                                 VDD
+                                                                                        SDA               P00        temperature sensor
+                                              CORE                                      SCL               P01        battery status
+                                       PROCESSOR                                        INT               P02        control for latch
+                                                                                        RESET             P03        control for switch
+                                                                                                          P04        control for audio
+                                                                                                          P05        control for camera
+                                                                                        AD0               P06        control for MP3
+                                                                                        AD1               P07
+                                                                                                                                         002aac310
+                       Fig 22. Bidirectional I/O expander application
+                10.2 High current-drive load applications
+                     The GPIO has a maximum sinking current of 25 mA per bit. In applications requiring
+                     additional drive, two port pins in the same octal may be connected together to sink up to
+                     50 mA current. Both bits must then always be turned on or off together. Up to 8 pins (one
+                     octal) can be connected together to drive 200 mA.
+                                                                       VDD
+                                                                                                           VDD                         VDD
+                                                                                                  SDA             P00
+                                                      CORE                                        SCL             P01
+                                                 PROCESSOR                                        INT             P02
+                                                                                                  RESET           P03                 LOAD
+                                                                                                                  P04
+                                                                                                                  P05
+                                                                                                  AD0             P06
+                                                                                                  AD1             P07
+                                                                                                                                    002aac311
+                       Fig 23. High current-drive load application
+PCA9673                                All information provided in this document is subject to legal disclaimers.                             © NXP B.V. 2011. All rights reserved.
+Product data sheet                                 Rev. 2 — 29 September 2011                                                                                         18 of 33
+
+
+NXP Semiconductors                                                                                                             PCA9673
+                                             Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                10.3 Differences between the PCA9673 and the PCF8575
+                     The PCA9673 is a drop in replacement for the PCF8575 and can used without electrical
+                     or software modifications, but there is a difference in interrupt output release timing during
+                     the read operation.
+                     Write operations are identical. At the completion of each 8-bit write sequence the data is
+                     stored in its associated 8-bit write register at ACK or NACK. The first byte goes to P0n
+                     while the second goes to P1n. Subsequent writes without a STOP wrap around to P0n
+                     then P1n again. Any write will update both read registers and clear interrupts.
+                     Read operations are identical. Both devices update the byte register with the pin data as
+                     each 8-bit read is initiated, the very first read after an address cycle corresponds to ports
+                     P0n while the second (even byte) corresponds to P1n and subsequent reads without a
+                     STOP wrap around to P0n then P1n again.
+                     During read operations, the PCA9673 interrupt output will be cleared in a byte-wise
+                     fashion as each byte is read. Reading the first byte will clear any interrupts associated
+                     with the P0n pins. This first byte read operation will have no effect on interrupts associated
+                     with changes of state on the P1n pins. Interrupts associated with the P1n pins will be
+                     cleared when the second byte is read. Reading the second byte has no effect on
+                     interrupts associated with the changes of state on the P0x pins. The PCF8575 interrupt
+                     output will clear after reading both bytes of data regardless of whether data was changed
+                     in the first byte or the second byte or both bytes.
+11. Limiting values
+                     Table 4.       Limiting values
+                     In accordance with the Absolute Maximum Rating System (IEC 60134).
+                      Symbol         Parameter                                                  Conditions           Min       Max                    Unit
+                      VDD            supply voltage                                                                  0.5      +6                     V
+                      IDD            supply current                                                                  -         100                   mA
+                      ISS            ground supply current                                                           -         600                   mA
+                      VI             input voltage                                                                   VSS  0.5 5.5                    V
+                      II             input current                                                                   -         20                    mA
+                      IO             output current                                                                  -         50[1]                 mA
+                      Ptot           total power dissipation                                                         -         600                    mW
+                      P/out          power dissipation per output                                                    -         200                    mW
+                      Tstg           storage temperature                                                             65       +150                   C
+                      Tamb           ambient temperature                                        operating            40       +85                    C
+                     [1]   Total package (maximum) output current is 600 mA.
+PCA9673                                   All information provided in this document is subject to legal disclaimers.           © NXP B.V. 2011. All rights reserved.
+Product data sheet                                    Rev. 2 — 29 September 2011                                                                       19 of 33
+
+
+NXP Semiconductors                                                                                                                          PCA9673
+                                                     Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+12. Static characteristics
+Table 5.       Static characteristics
+VDD = 2.3 V to 5.5 V; VSS = 0 V; Tamb = 40 C to +85 C; unless otherwise specified.
+ Symbol       Parameter                                    Conditions                                                            Min    Typ       Max                 Unit
+ Supplies
+ VDD          supply voltage                                                                                                     2.3    -         5.5                 V
+ IDD          supply current                               operating mode; no load;                                              -      200       500                 A
+                                                           VI = VDD or VSS; fSCL = 400 kHz
+ Istb         standby current                              standby mode; no load;                                                -      2.5       10                  A
+                                                           VI = VDD or VSS
+ VPOR         power-on reset voltage                                                                                         [1] -      1.8       2.0                 V
+ Input SCL; input/output SDA
+ VIL          LOW-level input voltage                                                                                            0.5   -         +0.3VDD V
+ VIH          HIGH-level input voltage                                                                                           0.7VDD -         5.5                 V
+ IOL          LOW-level output current                     VOL = 0.4 V; VDD = 2.3 V                                              20     -         -                   mA
+                                                           VOL = 0.4 V; VDD = 3.0 V                                              25     -         -                   mA
+                                                           VOL = 0.4 V; VDD = 4.5 V                                              30     -         -                   mA
+ IL           leakage current                              VI = VDD or VSS                                                       1     -         +1                  A
+ Ci           input capacitance                            VI = VSS                                                              -      4         10                  pF
+ I/Os; P00 to P07 and P10 to P17
+ IOL          LOW-level output current                     VOL = 0.5 V; VDD = 2.3 V                                          [2] 12     27        -                   mA
+                                                           VOL = 0.5 V; VDD = 3.0 V                                          [2] 17     35        -                   mA
+                                                           VOL = 0.5 V; VDD = 4.5 V                                          [2] 25     42        -                   mA
+ IOL(tot)     total LOW-level output current               VOL = 0.5 V; VDD = 4.5 V                                          [2] -      -         400                 mA
+ IOH          HIGH-level output current                    VOH = VSS                                                             30    150      300                A
+ Itrt(pu)     transient boosted pull-up current            VOH = VSS; see Figure 14                                              0.5   1.0      -                   mA
+ Ci           input capacitance                                                                                              [3] -      4         10                  pF
+ Co           output capacitance                                                                                             [3] -      4         10                  pF
+ Interrupt INT
+ IOL          LOW-level output current                     VOL = 0.4 V                                                           6      -         -                   mA
+ Co           output capacitance                                                                                                 -      3         5                   pF
+ Input RESET
+ VIL          LOW-level input voltage                                                                                            0.5   -         +0.8                V
+ VIH          HIGH-level input voltage                                                                                           2      -         5.5                 V
+ ILI          input leakage current                                                                                              1     -         +1                  A
+ Ci           input capacitance                                                                                                  -      3         5                   pF
+ Inputs AD0, AD1
+ VIL          LOW-level input voltage                                                                                            0.5   -         +0.3VDD V
+ VIH          HIGH-level input voltage                                                                                           0.7VDD -         5.5                 V
+ ILI          input leakage current                                                                                              1     -         +1                  A
+ Ci           input capacitance                                                                                                  -      3         5                   pF
+[1]    The power-on reset circuit resets the I2C-bus logic with VDD < VPOR and set all I/Os to logic 1 (with current source to VDD).
+PCA9673                                           All information provided in this document is subject to legal disclaimers.                 © NXP B.V. 2011. All rights reserved.
+Product data sheet                                            Rev. 2 — 29 September 2011                                                                             20 of 33
+
+
+NXP Semiconductors                                                                                                                         PCA9673
+                                                      Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+[2]    Each bit must be limited to a maximum of 25 mA and the total package limited to 400 mA due to internal busing limits.
+[3]    The value is not tested, but verified on sampling basis.
+13. Dynamic characteristics
+Table 6.        Dynamic characteristics
+VDD = 2.3 V to 5.5 V; VSS = 0 V; Tamb = 40 C to +85 C; unless otherwise specified.
+ Symbol Parameter                                 Conditions                          Standard mode Fast mode I2C-bus                       Fast-mode                   Unit
+                                                                                            I2C-bus                                        Plus I2C-bus
+                                                                                        Min              Max                  Min      Max Min           Max
+ fSCL         SCL clock frequency                                                         0               100                  0       400   0          1000            kHz
+ tBUF         bus free time between a                                                    4.7                 -                1.3       -   0.5             -           s
+              STOP and START condition
+ tHD;STA      hold time (repeated) START                                                 4.0                 -                0.6       -  0.26             -           s
+              condition
+ tSU;STA      set-up time for a repeated                                                 4.7                 -                0.6       -  0.26             -           s
+              START condition
+ tSU;STO      set-up time for STOP                                                       4.0                 -                0.6       -  0.26             -           s
+              condition
+ tHD;DAT      data hold time                                                              0                  -                  0       -    0              -           ns
+ tVD;ACK      data valid acknowledge time                                       [1]      0.3             3.45                 0.1      0.9 0.05          0.45           s
+ tVD;DAT      data valid time                                                   [2]     300                  -                 50       -   50           450            ns
+ tSU;DAT      data set-up time                                                          250                  -                100       -   50              -           ns
+ tLOW         LOW period of the SCL clock                                                4.7                 -                1.3       -   0.5             -           s
+ tHIGH        HIGH period of the SCL                                                     4.0                 -                0.6       -  0.26             -           s
+              clock
+ tf           fall time of both SDA and                                    [4][5]         -               300           20 + 0.1Cb [3] 300   -           120            ns
+              SCL signals
+ tr           rise time of both SDA and                                                   -              1000           20 + 0.1Cb [3] 300   -           120            ns
+              SCL signals
+ tSP          pulse width of spikes that                                        [6]       -                50                   -      50    -            50            ns
+              must be suppressed by the
+              input filter
+ Port timing; CL  100 pF (see Figure 14 and Figure 15)
+ tv(Q)        data output valid time                                                      -                  4                  -       4    -             4            s
+ tsu(D)       data input set-up time                                                      0                  -                  0       -    0              -           s
+ th(D)        data input hold time                                                        4                  -                  4       -    4              -           s
+ Interrupt timing; CL  100 pF (see Figure 14 and Figure 15)
+ tv(D)        data input valid time                                                       -                  4                  -       4    -             4            s
+ td(rst)      reset delay time                                                            -                  4                  -       4    -             4            s
+ Reset timing (see Figure 25)
+ tw(rst)      reset pulse width                                                           4                  -                 4        -    4              -           ns
+ trec(rst)    reset recovery time                                                         0                  -                 0        -    0              -           ns
+ trst         reset time                                                                100                  -                100       -  100              -           ns
+[1]    tVD;ACK = time for Acknowledgement signal from SCL LOW to SDA (out) LOW.
+[2]    tVD;DAT = minimum time for SDA data out to be valid following SCL LOW.
+PCA9673                                            All information provided in this document is subject to legal disclaimers.                © NXP B.V. 2011. All rights reserved.
+Product data sheet                                             Rev. 2 — 29 September 2011                                                                            21 of 33
+
+
+NXP Semiconductors                                                                                                                                             PCA9673
+                                                              Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+[3]   Cb = total capacitance of one bus line in pF.
+[4]   A master device must internally provide a hold time of at least 300 ns for the SDA signal (refer to the VIL of the SCL signal) in order to
+      bridge the undefined region SCL’s falling edge.
+[5]   The maximum tf for the SDA and SCL bus lines is specified at 300 ns. The maximum fall time for the SDA output stage tf is specified at
+      250 ns. This allows series protection resistors to be connected between the SDA and the SCL pins and the SDA/SCL bus lines without
+      exceeding the maximum specified tf.
+[6]   Input filters on the SDA and SCL inputs suppress noise spikes less than 50 ns.
+                                    START             bit 7                                                                                  STOP
+                                                                              bit 6                       bit 0      acknowledge
+                   protocol        condition          MSB                                                                                  condition
+                                                                              (A6)                       (R/W)               (A)
+                                       (S)            (A7)                                                                                     (P)
+                               tSU;STA           tLOW     tHIGH
+                                                                            1 / fSCL
+                                                                                                                                                              0.7 × VDD
+                       SCL
+                                                                                                                                                              0.3 × VDD
+                                 tBUF                                    tf
+                                                   tr
+                                                                                                                                                              0.7 × VDD
+                       SDA
+                                                                                                                                                              0.3 × VDD
+                                        tHD;STA                        tSU;DAT          tHD;DAT                tVD;DAT                tVD;ACK      tSU;STO
+                                                                                                                                                               002aab175
+              Rise and fall times refer to VIL and VIH.
+  Fig 24. I2C-bus timing diagram
+                                              START                                                                                    ACK or read cycle
+                    SCL
+                    SDA
+                                                30 %
+                                                                                                                                            trst
+                  RESET     50 %                                                                                                50 %             50 %
+                                     trec(rst)
+                                                                                                                             tw(rst)
+                                                                                                                                            trst
+                                                                                                                                                      50 %
+                 P0n, P1n
+                                                                                                                                                           output off
+                                                                                                                                                                  002aac282
+  Fig 25. Reset timing
+PCA9673                                                    All information provided in this document is subject to legal disclaimers.                            © NXP B.V. 2011. All rights reserved.
+Product data sheet                                                     Rev. 2 — 29 September 2011                                                                                        22 of 33
+
+
+NXP Semiconductors                                                                                                                                          PCA9673
+                                                           Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+14. Package outline
+  SO24: plastic small outline package; 24 leads; body width 7.5 mm                                                                                                        SOT137-1
+                                                D                                                                                      E                     A
+                                                                                                                                                                    X
+                                                                                                       c
+                     y                                                                                                                HE                               v M A
+                   Z
+                 24                                                                     13
+                                                                                                                                                  Q
+                                                                                                                   A2                                            A
+                                                                                                                         A1                           (A 3)
+                        pin 1 index
+                                                                                                                                                               θ
+                                                                                                                                                 Lp
+                                                                                                                                                L
+                  1                                                                     12                                              detail X
+                                            e                                             w M
+                                                                            bp
+                                                                 0                          5                           10 mm
+                                                                                          scale
+      DIMENSIONS (inch dimensions are derived from the original mm dimensions)
+                    A
+         UNIT             A1       A2      A3     bp       c         D (1)     E (1)         e        HE           L          Lp     Q        v      w        y       Z
+                                                                                                                                                                        (1)
+                                                                                                                                                                                   θ
+                 max.
+                          0.3     2.45           0.49    0.32       15.6        7.6                 10.65                    1.1    1.1                               0.9
+          mm      2.65                    0.25                                             1.27                   1.4                       0.25    0.25     0.1
+                          0.1     2.25           0.36    0.23       15.2        7.4                 10.00                    0.4    1.0                               0.4          8o
+                                                                                                                                                                                      o
+                         0.012 0.096            0.019 0.013         0.61       0.30                 0.419                   0.043  0.043                            0.035          0
+        inches     0.1                    0.01                                             0.05                 0.055                      0.01     0.01    0.004
+                         0.004 0.089            0.014 0.009         0.60       0.29                 0.394                   0.016  0.039                            0.016
+      Note
+      1. Plastic or metal protrusions of 0.15 mm (0.006 inch) maximum per side are not included.
+            OUTLINE                                                REFERENCES                                                             EUROPEAN
+                                                                                                                                                                 ISSUE DATE
+            VERSION                   IEC                JEDEC                           JEITA                                           PROJECTION
+                                                                                                                                                                   99-12-27
+            SOT137-1                075E05               MS-013
+                                                                                                                                                                   03-02-19
+Fig 26. Package outline SOT137-1 (SO24)
+PCA9673                                                 All information provided in this document is subject to legal disclaimers.                            © NXP B.V. 2011. All rights reserved.
+Product data sheet                                                  Rev. 2 — 29 September 2011                                                                                        23 of 33
+
+
+NXP Semiconductors                                                                                                                                          PCA9673
+                                                          Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+   TSSOP24: plastic thin shrink small outline package; 24 leads; body width 4.4 mm                                                                                        SOT355-1
+                                                 D                                                                                 E                  A
+                                                                                                                                                             X
+                                                                                                  c
+                              y                                                                                                   HE                           v M A
+                            Z
+                         24                                                   13
+                                                                                                                                                  Q
+                                                                                                         A2                                           (A 3)     A
+                                                                                                                 A1
+                                  pin 1 index
+                                                                                                                                                             θ
+                                                                                                                                              Lp
+                                                                                                                                            L
+                          1                                                   12
+                                                                                                                                     detail X
+                                                                                 w M
+                                               e                     bp
+                                                                      0                   2.5                   5 mm
+                                                                                         scale
+      DIMENSIONS (mm are the original dimensions)
+                    A
+        UNIT               A1      A2      A3     bp       c        D (1)      E (2)        e        HE           L          Lp      Q         v     w       y       Z (1)         θ
+                  max.
+         mm
+                          0.15    0.95           0.30   0.2          7.9       4.5                   6.6                    0.75     0.4                             0.5          8o
+                   1.1                     0.25                                           0.65                    1                           0.2   0.13    0.1
+                          0.05    0.80           0.19   0.1          7.7       4.3                   6.2                    0.50     0.3                             0.2          0o
+      Notes
+      1. Plastic or metal protrusions of 0.15 mm maximum per side are not included.
+      2. Plastic interlead protrusions of 0.25 mm maximum per side are not included.
+            OUTLINE                                               REFERENCES                                                                EUROPEAN
+                                                                                                                                                                ISSUE DATE
+            VERSION                    IEC              JEDEC                            JEITA                                             PROJECTION
+                                                                                                                                                                  99-12-27
+            SOT355-1                                    MO-153
+                                                                                                                                                                  03-02-19
+Fig 27. Package outline SOT355-1 (TSSOP24)
+PCA9673                                                All information provided in this document is subject to legal disclaimers.                            © NXP B.V. 2011. All rights reserved.
+Product data sheet                                                 Rev. 2 — 29 September 2011                                                                                        24 of 33
+
+
+NXP Semiconductors                                                                                                                                           PCA9673
+                                                          Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+   HVQFN24: plastic thermal enhanced very thin quad flat package; no leads;
+   24 terminals; body 4 x 4 x 0.85 mm                                                                                                                                    SOT616-1
+                                                       D                                  B      A
+                     terminal 1
+                     index area
+                                                                                                                               A
+                                                                                                                                    A1
+                                                                                                E                                                                       c
+                                                                                                                                               detail X
+                                                      e1                                                                                                   C
+                                                             1/2 e
+                                                                                                                                  y1 C                       y
+                                             e                     b                           v M C A B
+                                          7                                 12                 w M C
+                              L
+                                                                                       13
+                                 6
+                                                                                           e
+                             Eh                                                                    e2
+                                                                                           1/2 e
+                                 1
+                                                                                       18
+                     terminal 1
+                     index area           24                            19
+                                                      Dh                                                                                                  X
+                                                      0                                   2.5                                 5 mm
+                                                                                         scale
+      DIMENSIONS (mm are the original dimensions)
+                A(1)
+        UNIT             A1      b       c     D (1)  Dh        E (1)     Eh           e        e1        e2           L        v      w      y        y1
+               max.
+        mm              0.05    0.30           4.1   2.25       4.1      2.25                                        0.5
+                 1                     0.2                                           0.5        2.5      2.5                   0.1    0.05   0.05     0.1
+                        0.00    0.18           3.9   1.95       3.9      1.95                                        0.3
+      Note
+      1. Plastic or metal protrusions of 0.075 mm maximum per side are not included.
+            OUTLINE                                                REFERENCES                                                               EUROPEAN
+                                                                                                                                                                ISSUE DATE
+            VERSION                   IEC                JEDEC                           JEITA                                             PROJECTION
+                                                                                                                                                                   01-08-08
+            SOT616-1                  ---               MO-220                            ---
+                                                                                                                                                                   02-10-22
+Fig 28. Package outline SOT616-1 (HVQFN24)
+PCA9673                                                All information provided in this document is subject to legal disclaimers.                            © NXP B.V. 2011. All rights reserved.
+Product data sheet                                                 Rev. 2 — 29 September 2011                                                                                        25 of 33
+
+
+NXP Semiconductors                                                                                                                                           PCA9673
+                                                             Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+   DHVQFN24: plastic dual in-line compatible thermal enhanced very thin quad flat package;
+   no leads; 24 terminals; body 3.5 x 5.5 x 0.85 mm                                                                                                                       SOT815-1
+                                                         D                                                   B       A
+                                                                                                                                          A
+                                                                                                                     E                        A1
+                                                                                                                                                                           c
+                                                                                                                                                      detail X
+          terminal 1
+          index area
+                                                                                                                                                                  C
+          terminal 1                                     e1
+          index area                                                                                            v M C A B                   y1 C                      y
+                                 e                                                      b
+                                                                                                               w M C
+                             2                                                                    11
+                  L
+                                                                                                         12
+                       1
+                 Eh                                                                                             e2
+                     24
+                                                                                                         13
+                              23                                                              14
+                                                        Dh                                                                                                        X
+                                                      0                                       2.5                                      5 mm
+                                                                                            scale
+      DIMENSIONS (mm are the original dimensions)
+        UNIT      A(1)    A1       b      c     D (1)    Dh        E (1)      Eh          e        e1        e2           L          v     w       y   y1
+                 max.
+                         0.05    0.30           5.6     4.25        3.6      2.25                                        0.5
+         mm        1                     0.2                                             0.5      4.5        1.5                   0.1    0.05   0.05 0.1
+                         0.00    0.18           5.4     3.95        3.4      1.95                                        0.3
+      Note
+      1. Plastic or metal protrusions of 0.075 mm maximum per side are not included.
+            OUTLINE                                                  REFERENCES                                                                EUROPEAN
+                                                                                                                                                                 ISSUE DATE
+            VERSION                   IEC                  JEDEC                            JEITA                                            PROJECTION
+            SOT815-1                  ---                      ---                           ---                                                                    03-04-29
+Fig 29. Package outline SOT815-1 (DHVQFN24)
+PCA9673                                                   All information provided in this document is subject to legal disclaimers.                          © NXP B.V. 2011. All rights reserved.
+Product data sheet                                                    Rev. 2 — 29 September 2011                                                                                      26 of 33
+
+
+NXP Semiconductors                                                                                                PCA9673
+                                          Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+15. Handling information
+                     All input and output pins are protected against ElectroStatic Discharge (ESD) under
+                     normal handling. When handling ensure that the appropriate precautions are taken as
+                     described in JESD625-A or equivalent standards.
+16. Soldering of SMD packages
+                     This text provides a very brief insight into a complex technology. A more in-depth account
+                     of soldering ICs can be found in Application Note AN10365 “Surface mount reflow
+                     soldering description”.
+                16.1 Introduction to soldering
+                     Soldering is one of the most common methods through which packages are attached to
+                     Printed Circuit Boards (PCBs), to form electrical circuits. The soldered joint provides both
+                     the mechanical and the electrical connection. There is no single soldering method that is
+                     ideal for all IC packages. Wave soldering is often preferred when through-hole and
+                     Surface Mount Devices (SMDs) are mixed on one printed wiring board; however, it is not
+                     suitable for fine pitch SMDs. Reflow soldering is ideal for the small pitches and high
+                     densities that come with increased miniaturization.
+                16.2 Wave and reflow soldering
+                     Wave soldering is a joining technology in which the joints are made by solder coming from
+                     a standing wave of liquid solder. The wave soldering process is suitable for the following:
+                       • Through-hole components
+                       • Leaded or leadless SMDs, which are glued to the surface of the printed circuit board
+                     Not all SMDs can be wave soldered. Packages with solder balls, and some leadless
+                     packages which have solder lands underneath the body, cannot be wave soldered. Also,
+                     leaded SMDs with leads having a pitch smaller than ~0.6 mm cannot be wave soldered,
+                     due to an increased probability of bridging.
+                     The reflow soldering process involves applying solder paste to a board, followed by
+                     component placement and exposure to a temperature profile. Leaded packages,
+                     packages with solder balls, and leadless packages are all reflow solderable.
+                     Key characteristics in both wave and reflow soldering are:
+                       •  Board specifications, including the board finish, solder masks and vias
+                       •  Package footprints, including solder thieves and orientation
+                       •  The moisture sensitivity level of the packages
+                       •  Package placement
+                       •  Inspection and repair
+                       •  Lead-free soldering versus SnPb soldering
+                16.3 Wave soldering
+                     Key characteristics in wave soldering are:
+PCA9673                                All information provided in this document is subject to legal disclaimers. © NXP B.V. 2011. All rights reserved.
+Product data sheet                                 Rev. 2 — 29 September 2011                                                             27 of 33
+
+
+NXP Semiconductors                                                                                                          PCA9673
+                                          Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                       • Process issues, such as application of adhesive and flux, clinching of leads, board
+                          transport, the solder wave parameters, and the time during which components are
+                          exposed to the wave
+                       • Solder bath specifications, including temperature and impurities
+                16.4 Reflow soldering
+                     Key characteristics in reflow soldering are:
+                       • Lead-free versus SnPb soldering; note that a lead-free reflow process usually leads to
+                          higher minimum peak temperatures (see Figure 30) than a SnPb process, thus
+                          reducing the process window
+                       • Solder paste printing issues including smearing, release, and adjusting the process
+                          window for a mix of large and small components on one board
+                       • Reflow temperature profile; this profile includes preheat, reflow (in which the board is
+                          heated to the peak temperature) and cooling down. It is imperative that the peak
+                          temperature is high enough for the solder to make reliable solder joints (a solder paste
+                          characteristic). In addition, the peak temperature must be low enough that the
+                          packages and/or boards are not damaged. The peak temperature of the package
+                          depends on package thickness and volume and is classified in accordance with
+                          Table 7 and 8
+                     Table 7.    SnPb eutectic process (from J-STD-020C)
+                      Package thickness (mm)                   Package reflow temperature (C)
+                                                               Volume (mm3)
+                                                               < 350                                                  350
+                      < 2.5                                    235                                                   220
+                       2.5                                    220                                                   220
+                     Table 8.    Lead-free process (from J-STD-020C)
+                      Package thickness (mm)                   Package reflow temperature (C)
+                                                               Volume (mm3)
+                                                               < 350                                       350 to 2000     > 2000
+                      < 1.6                                    260                                         260             260
+                      1.6 to 2.5                               260                                         250             245
+                      > 2.5                                    250                                         245             245
+                     Moisture sensitivity precautions, as indicated on the packing, must be respected at all
+                     times.
+                     Studies have shown that small packages reach higher temperatures during reflow
+                     soldering, see Figure 30.
+PCA9673                                All information provided in this document is subject to legal disclaimers.            © NXP B.V. 2011. All rights reserved.
+Product data sheet                                 Rev. 2 — 29 September 2011                                                                        28 of 33
+
+
+NXP Semiconductors                                                                                                       PCA9673
+                                        Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+                                                                 maximum peak temperature
+                            temperature                              = MSL limit, damage level
+                                                                  minimum peak temperature
+                                                        = minimum soldering temperature
+                                                                                                                   peak
+                                                                                                                temperature
+                                                                                                                                      time
+                                                                                                                              001aac844
+                              MSL: Moisture Sensitivity Level
+                     Fig 30. Temperature profiles for large and small components
+                   For further information on temperature profiles, refer to Application Note AN10365
+                   “Surface mount reflow soldering description”.
+17. Abbreviations
+                   Table 9.    Abbreviations
+                    Acronym               Description
+                    CDM                   Charged Device Model
+                    CMOS                  Complementary Metal Oxide Semiconductor
+                    ESD                   ElectroStatic Discharge
+                    GPIO                  General Purpose Input/Output
+                    HBM                   Human Body Model
+                    I2C-bus               Inter-Integrated Circuit bus
+                    ID                    Identification
+                    LED                   Light Emitting Diode
+                    LSB                   Least Significant Bit
+                    MSB                   Most Significant Bit
+                    PLC                   Programmable Logic Controller
+                    RAID                  Redundant Array of Independent Disks
+                    SMBus                 System Management Bus
+PCA9673                              All information provided in this document is subject to legal disclaimers.           © NXP B.V. 2011. All rights reserved.
+Product data sheet                               Rev. 2 — 29 September 2011                                                                       29 of 33
+
+
+NXP Semiconductors                                                                                                          PCA9673
+                                              Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+18. Revision history
+Table 10.    Revision history
+ Document ID          Release date         Data sheet status                                          Change notice   Supersedes
+ PCA9673 v.2          20110929             Product data sheet                                         -               PCA9673 v.1
+ Modifications:        •  Section 2 “Features and benefits”:]
+                          – 13th bullet item: deleted phrase “200 V MM per JESD22-A115”
+                          – 15th bullet item: deleted “SSOP24, QSOP24”
+                       •  Table 1 “Ordering information”: removed discontinued products
+                          – removed type number PCA9673DB (SSOP24)
+                          – removed type number PCA9673DK (SSOP24 [also known as QSOP24])
+                       •  Section 6.1 “Pinning”:
+                          – deleted (old) Figure 5, Pin configuration for SSOP24 (QSOP24)
+                          – deleted (old) Figure 6, Pin configuration for SSOP24
+                       •  Table 2 “Pin description”: deleted “SSOP24” from heading of second column
+                       •  Table 5 “Static characteristics”, sub-section “Input RESET” is corrected by removing
+                          “IOH, HIGH-level output current” table row.
+                       •  Figure 24 “I2C-bus timing diagram” modified: added 0.7  VDD and 0.3  VDD level lines
+                       •  Section 14 “Package outline”:
+                          – deleted package outline SOT340-1 (SSOP24)
+                          – deleted package outline SOT556-1 (SSOP24)
+ PCA9673 v.1          20070201             Product data sheet                                         -               -
+PCA9673                                    All information provided in this document is subject to legal disclaimers.        © NXP B.V. 2011. All rights reserved.
+Product data sheet                                     Rev. 2 — 29 September 2011                                                                    30 of 33
+
+
+NXP Semiconductors                                                                                                                                             PCA9673
+                                                                      Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+19. Legal information
+19.1 Data sheet status
+ Document status[1][2]                   Product status[3]                    Definition
+ Objective [short] data sheet            Development                          This document contains data from the objective specification for product development.
+ Preliminary [short] data sheet          Qualification                        This document contains data from the preliminary specification.
+ Product [short] data sheet              Production                           This document contains the product specification.
+[1]    Please consult the most recently issued document before initiating or completing a design.
+[2]    The term ‘short data sheet’ is explained in section “Definitions”.
+[3]    The product status of device(s) described in this document may have changed since this document was published and may differ in case of multiple devices. The latest product status
+       information is available on the Internet at URL http://www.nxp.com.
+19.2 Definitions                                                                                           malfunction of an NXP Semiconductors product can reasonably be expected
+                                                                                                           to result in personal injury, death or severe property or environmental
+                                                                                                           damage. NXP Semiconductors accepts no liability for inclusion and/or use of
+Draft — The document is a draft version only. The content is still under
+                                                                                                           NXP Semiconductors products in such equipment or applications and
+internal review and subject to formal approval, which may result in
+                                                                                                           therefore such inclusion and/or use is at the customer’s own risk.
+modifications or additions. NXP Semiconductors does not give any
+representations or warranties as to the accuracy or completeness of                                        Applications — Applications that are described herein for any of these
+information included herein and shall have no liability for the consequences of                            products are for illustrative purposes only. NXP Semiconductors makes no
+use of such information.                                                                                   representation or warranty that such applications will be suitable for the
+                                                                                                           specified use without further testing or modification.
+Short data sheet — A short data sheet is an extract from a full data sheet
+with the same product type number(s) and title. A short data sheet is intended                             Customers are responsible for the design and operation of their applications
+for quick reference only and should not be relied upon to contain detailed and                             and products using NXP Semiconductors products, and NXP Semiconductors
+full information. For detailed and full information see the relevant full data                             accepts no liability for any assistance with applications or customer product
+sheet, which is available on request via the local NXP Semiconductors sales                                design. It is customer’s sole responsibility to determine whether the NXP
+office. In case of any inconsistency or conflict with the short data sheet, the                            Semiconductors product is suitable and fit for the customer’s applications and
+full data sheet shall prevail.                                                                             products planned, as well as for the planned application and use of
+                                                                                                           customer’s third party customer(s). Customers should provide appropriate
+Product specification — The information and data provided in a Product                                     design and operating safeguards to minimize the risks associated with their
+data sheet shall define the specification of the product as agreed between                                 applications and products.
+NXP Semiconductors and its customer, unless NXP Semiconductors and
+customer have explicitly agreed otherwise in writing. In no event however,                                 NXP Semiconductors does not accept any liability related to any default,
+shall an agreement be valid in which the NXP Semiconductors product is                                     damage, costs or problem which is based on any weakness or default in the
+deemed to offer functions and qualities beyond those described in the                                      customer’s applications or products, or the application or use by customer’s
+Product data sheet.                                                                                        third party customer(s). Customer is responsible for doing all necessary
+                                                                                                           testing for the customer’s applications and products using NXP
+                                                                                                           Semiconductors products in order to avoid a default of the applications and
+19.3 Disclaimers                                                                                           the products or of the application or use by customer’s third party
+                                                                                                           customer(s). NXP does not accept any liability in this respect.
+Limited warranty and liability — Information in this document is believed to                               Limiting values — Stress above one or more limiting values (as defined in
+be accurate and reliable. However, NXP Semiconductors does not give any                                    the Absolute Maximum Ratings System of IEC 60134) will cause permanent
+representations or warranties, expressed or implied, as to the accuracy or                                 damage to the device. Limiting values are stress ratings only and (proper)
+completeness of such information and shall have no liability for the                                       operation of the device at these or any other conditions above those given in
+consequences of use of such information.                                                                   the Recommended operating conditions section (if present) or the
+                                                                                                           Characteristics sections of this document is not warranted. Constant or
+In no event shall NXP Semiconductors be liable for any indirect, incidental,
+                                                                                                           repeated exposure to limiting values will permanently and irreversibly affect
+punitive, special or consequential damages (including - without limitation - lost
+                                                                                                           the quality and reliability of the device.
+profits, lost savings, business interruption, costs related to the removal or
+replacement of any products or rework charges) whether or not such                                         Terms and conditions of commercial sale — NXP Semiconductors
+damages are based on tort (including negligence), warranty, breach of                                      products are sold subject to the general terms and conditions of commercial
+contract or any other legal theory.                                                                        sale, as published at http://www.nxp.com/profile/terms, unless otherwise
+Notwithstanding any damages that customer might incur for any reason                                       agreed in a valid written individual agreement. In case an individual
+whatsoever, NXP Semiconductors’ aggregate and cumulative liability towards                                 agreement is concluded only the terms and conditions of the respective
+customer for the products described herein shall be limited in accordance                                  agreement shall apply. NXP Semiconductors hereby expressly objects to
+with the Terms and conditions of commercial sale of NXP Semiconductors.                                    applying the customer’s general terms and conditions with regard to the
+                                                                                                           purchase of NXP Semiconductors products by customer.
+Right to make changes — NXP Semiconductors reserves the right to make
+changes to information published in this document, including without                                       No offer to sell or license — Nothing in this document may be interpreted or
+limitation specifications and product descriptions, at any time and without                                construed as an offer to sell products that is open for acceptance or the grant,
+notice. This document supersedes and replaces all information supplied prior                               conveyance or implication of any license under any copyrights, patents or
+to the publication hereof.                                                                                 other industrial or intellectual property rights.
+Suitability for use — NXP Semiconductors products are not designed,                                        Export control — This document as well as the item(s) described herein
+authorized or warranted to be suitable for use in life support, life-critical or                           may be subject to export control regulations. Export might require a prior
+safety-critical systems or equipment, nor in applications where failure or                                 authorization from competent authorities.
+PCA9673                                                            All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2011. All rights reserved.
+Product data sheet                                                             Rev. 2 — 29 September 2011                                                                                31 of 33
+
+
+NXP Semiconductors                                                                                                                                     PCA9673
+                                                              Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+Non-automotive qualified products — Unless this data sheet expressly                               own risk, and (c) customer fully indemnifies NXP Semiconductors for any
+states that this specific NXP Semiconductors product is automotive qualified,                      liability, damages or failed product claims resulting from customer design and
+the product is not suitable for automotive use. It is neither qualified nor tested                 use of the product for automotive applications beyond NXP Semiconductors’
+in accordance with automotive testing or application requirements. NXP                             standard warranty and NXP Semiconductors’ product specifications.
+Semiconductors accepts no liability for inclusion and/or use of
+non-automotive qualified products in automotive equipment or applications.
+In the event that customer uses the product for design-in and use in                               19.4 Trademarks
+automotive applications to automotive specifications and standards, customer
+                                                                                                   Notice: All referenced brands, product names, service names and trademarks
+(a) shall use the product without NXP Semiconductors’ warranty of the
+                                                                                                   are the property of their respective owners.
+product for such automotive applications, use and specifications, and (b)
+whenever customer uses the product for automotive applications beyond                              I2C-bus — logo is a trademark of NXP B.V.
+NXP Semiconductors’ specifications such use shall be solely at customer’s
+20. Contact information
+For more information, please visit: http://www.nxp.com
+For sales office addresses, please send an email to: salesaddresses@nxp.com
+PCA9673                                                    All information provided in this document is subject to legal disclaimers.                    © NXP B.V. 2011. All rights reserved.
+Product data sheet                                                     Rev. 2 — 29 September 2011                                                                                32 of 33
+
+
+NXP Semiconductors                                                                                                                        PCA9673
+                                                        Remote 16-bit I/O expander for Fm+ I2C-bus with interrupt and reset
+21. Contents
+1     General description . . . . . . . . . . . . . . . . . . . . . . 1         19.1             Data sheet status . . . . . . . . . . . . . . . . . . . . . .      31
+2     Features and benefits . . . . . . . . . . . . . . . . . . . . 1           19.2             Definitions . . . . . . . . . . . . . . . . . . . . . . . . . . .  31
+3     Applications . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2    19.3             Disclaimers . . . . . . . . . . . . . . . . . . . . . . . . . .    31
+                                                                                19.4             Trademarks . . . . . . . . . . . . . . . . . . . . . . . . . .     32
+4     Ordering information . . . . . . . . . . . . . . . . . . . . . 2
+                                                                                20            Contact information . . . . . . . . . . . . . . . . . . . .           32
+5     Block diagram . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+                                                                                21            Contents. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   33
+6     Pinning information . . . . . . . . . . . . . . . . . . . . . . 4
+6.1     Pinning . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+6.2     Pin description . . . . . . . . . . . . . . . . . . . . . . . . . 5
+7     Functional description . . . . . . . . . . . . . . . . . . . 6
+7.1     Device address . . . . . . . . . . . . . . . . . . . . . . . . . 6
+7.1.1   Address maps. . . . . . . . . . . . . . . . . . . . . . . . . . 6
+7.2     Software Reset call, and Device ID addresses. 7
+7.2.1   Software Reset . . . . . . . . . . . . . . . . . . . . . . . . . 8
+7.2.2   Device ID (PCA9673 ID field) . . . . . . . . . . . . . . 9
+8     I/O programming . . . . . . . . . . . . . . . . . . . . . . . 11
+8.1     Quasi-bidirectional I/O architecture . . . . . . . . 11
+8.2     Writing to the port (Output mode) . . . . . . . . . . 11
+8.3     Reading from a port (Input mode) . . . . . . . . . 12
+8.4     Power-on reset . . . . . . . . . . . . . . . . . . . . . . . . 15
+8.5     Interrupt output (INT) . . . . . . . . . . . . . . . . . . . 15
+8.6     RESET input . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+9     Characteristics of the I2C-bus . . . . . . . . . . . . 16
+9.1     Bit transfer . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+9.1.1   START and STOP conditions . . . . . . . . . . . . . 16
+9.2     System configuration . . . . . . . . . . . . . . . . . . . 16
+9.3     Acknowledge . . . . . . . . . . . . . . . . . . . . . . . . . 17
+10    Application design-in information . . . . . . . . . 18
+10.1    Bidirectional I/O expander applications . . . . . 18
+10.2    High current-drive load applications . . . . . . . . 18
+10.3    Differences between the PCA9673
+        and the PCF8575 . . . . . . . . . . . . . . . . . . . . . . 19
+11    Limiting values. . . . . . . . . . . . . . . . . . . . . . . . . 19
+12    Static characteristics. . . . . . . . . . . . . . . . . . . . 20
+13    Dynamic characteristics . . . . . . . . . . . . . . . . . 21
+14    Package outline . . . . . . . . . . . . . . . . . . . . . . . . 23
+15    Handling information. . . . . . . . . . . . . . . . . . . . 27
+16    Soldering of SMD packages . . . . . . . . . . . . . . 27
+16.1    Introduction to soldering . . . . . . . . . . . . . . . . . 27
+16.2    Wave and reflow soldering . . . . . . . . . . . . . . . 27
+16.3    Wave soldering . . . . . . . . . . . . . . . . . . . . . . . . 27
+16.4    Reflow soldering . . . . . . . . . . . . . . . . . . . . . . . 28
+17    Abbreviations . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+18    Revision history . . . . . . . . . . . . . . . . . . . . . . . . 30
+19    Legal information. . . . . . . . . . . . . . . . . . . . . . . 31
+                                                                                Please be aware that important notices concerning this document and the product(s)
+                                                                                described herein, have been included in section ‘Legal information’.
+                                                                                © NXP B.V. 2011.                                                 All rights reserved.
+                                                                                For more information, please visit: http://www.nxp.com
+                                                                                For sales office addresses, please send an email to: salesaddresses@nxp.com
+                                                                                                                                     Date of release: 29 September 2011
+                                                                                                                                          Document identifier: PCA9673
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+NXP:
+ PCA9673BQ,118 PCA9673BS,118 PCA9673D,112 PCA9673DB,112 PCA9673DB,118 PCA9673DK,118
+PCA9673D,118 PCA9673PW,112 PCA9673PW,118

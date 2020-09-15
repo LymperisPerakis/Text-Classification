@@ -1,0 +1,1507 @@
+                                                                                                                     STUSB4700
+                                                                                                                               Datasheet
+                Standalone autonomous USB PD controller with short-to-VBUS protections
+                                                        Features
+                                                         •    USB power delivery (PD) controller
+                                                         •    Type-C attach and cable orientation detection
+                                                         •    Single role: provider
+                                                         •    Full hardware solution - no software
+                                                         •    I2C interface + interrupt (optional connection to MCU)
+                                                         •    Supports up to 5 power data objects (PDO)
+                                                         •    Configurable start-up profiles
+                                                         •    Integrated VBUS voltage monitoring
+                                                         •    Internal and/or external VBUS discharge path
+                                                         •    Short-to-VBUS protections on CC pins (22 V)
+                                                         •    High voltage protections on VBUS pins (28 V)
+                                                         •    High and/or low voltage power supply:
+                                                              –     VSYS = [3.0 V; 5.5 V]
+                                                              –     VDD = [4.1 V; 22 V]
+                                                         •    Automotive grade available
+                                                         •    Fully compatible with:
+                                                              –     USB Type-C™ rev 1.2
+                                                              –     USB PD rev 2.0
+                                                              –     Certification test ID 1030023
+               Product status link
+                  STUSB4700                             Applications
+                                                         •    AC adapters and power supplies for: computer, consumer or portable consumer
+                                                              applications
+                                                         •    Smart plugs and wall adapters
+                                                         •    Power hubs and docking stations
+                                                         •    Displays
+                                                         •    Any Type-C source device
+                                                        Description
+                                                        The STUSB4700 is a new family of USB power delivery controllers communicating
+                                                        over Type-C™ configuration channel pin (CC) to negotiate a given amount of power
+                                                        to be sourced to an inquiring consumer device.
+                                                        The STUSB4700 addresses provider/DFP devices such as notebooks, tablets and
+                                                        AC adapters. The device can handle any connections to a sink or DRP without any
+                                                        MCU control, from the device attachment to power negotiation, including VBUS
+                                                        discharge and protections.
+DS11977 - Rev 5 - October 2019                                                                                                    www.st.com
+For further information contact your local STMicroelectronics sales office.
+
+
+                                                                                                                     STUSB4700
+                                                                                                                 Functional description
+1               Functional description
+                The STUSB4700 is an autonomous USB power delivery controller optimized as a provider. It offers an open drain
+                GPIO interface to make direct interconnection with a power regulation stage.
+                The STUSB4700 offers the benefits of a full hardware USB PD stack allowing robust and safe USB PD
+                negotiation in line with USB PD standard. The STUSB4700 is ideal for provider applications in which digital or
+                software intelligence is limited or missing.
+                The STUSB4700 main functions are:
+                •     Detect the connection between two USB ports (attach detection)
+                •     Establish a valid host to device connection
+                •     Discover and configure VBUS: Type-C low, medium or high current mode
+                •     Resolve cable orientation
+                •     Negotiate a USB power delivery contract with a PD capable device
+                •     Configure the power source accordingly
+                •     Monitor VBUS, manage transitions, handle protections and ensure user and device safety
+                Additionally, the STUSB4700 offers 5 customizable power data objects (PDOs), 5 general purpose I/Os, an
+                integrated discharge path, and is natively robust to high voltage peaks.
+                                                         Figure 1. Functional block diagram
+                                  VDD                                                                                VBUS_SENSE
+                                 VSYS                                                voltage
+                                               Internal       VBUS status
+                                                                                   monitoring
+                           VREG_2V7             supply                                               Discharge
+                                                                                                        path
+                           VREG_1V2
+                       VBUS_EN_SRC                                                                   VCONN SW
+                                                                                                                      VCONN
+                            A_B_SIDE                                                                 (OVP & OCP)
+                                                                                      Port C
+                                   SCL
+                                                I²C                                 controller
+                                  SDA
+                                              slave                                                      CC          CC1
+                               ALERT#                           port status                             line
+                                                                                                                     CC2
+                         VVAR_ADDR0                                                                    access
+                         VBUS_DISCH         Control
+                            GPIO[4..0]
+                                                         Device
+                                            POR &                        Policy Protocol     Physical     BMC
+                                                         Policy
+                                RESET        reset                      Engine   Layer         Layer      driver
+                                           generator    Manager
+                                  GND
+DS11977 - Rev 5                                                                                                               page 2/43
+
+
+                                                                                                                               STUSB4700
+                                                                                                                                Inputs/outputs
+2                 Inputs/outputs
+2.1               Pinout
+                                           Figure 2. Pin connections (top view)
+                                                        VREG_2V7            VREG_1V2   VBUS_EN_SRC   VBUS_DISCH
+                                                 VDD               VSYS
+                                      NC        1 24 23            22        21         20            19
+                                                                                                           18     VBUS_SENSE
+                                     CC1        2                                                          17     A_B_SIDE
+                                   VCONN        3                                                          16     GPIO4
+                                     CC2        4                       EP                                 15     GPIO3
+                                      NC        5                                                          14     GPIO2
+                                                6                                                           13    VVAR_ADDR0
+                                   RESET            7       8       9       10          11             12
+                                                                   ALERT#
+                                                 SCL                         GND
+                                                                                       GPIO1
+                                                         SDA
+                                                                                                        GPIO0
+DS11977 - Rev 5                                                                                                                      page 3/43
+
+
+                                                                                                        STUSB4700
+                                                                                                                     Pin list
+2.2             Pin list
+                                      Table 1. Pin function list
+  Pin               Name        Type                         Description                            Connection
+   1                 NC                    Ground reference channel 1                    To ground
+   2                 CC1      HV AIO       Type-C configuration channel 1                Type-C receptacle A5
+   3               VCONN        PWR        Power input for active plug                   5 V power source
+   4                 CC2      HV AIO       Type-C configuration channel 2                Type-C receptacle B5
+   5                 NC           -        Ground reference channel 2                    To ground
+   6                RESET         DI       Reset input (active high)
+   7                 SCL          DI       I²C clock input                               To I²C master – ext. pull-up
+   8                 SDA       DI/OD       I2C data input/output – active low open drain To I²C master – ext. pull-up
+   9               ALERT#        OD        I2C interrupt – active low open drain         To I²C master – ext. pull-up
+  10                 GND        GND        Ground                                        To ground
+  11                GPIO1        OD        General purpose I/O #1
+  12                GPIO0        OD        General purpose I/O #0
+                                           Variable voltage output I2C device address 0
+  13             VVAR_ADDR0      AIO
+                                           bit (at start-up)
+  14                GPIO2        OD        General purpose I/O #2
+  15                GPIO3        OD        General purpose I/O #3
+  16                GPIO4        OD        General purpose I/O #4
+                                                                                         USB SuperSpeed mux select –
+  17              A_B_SIDE       OD        Cable orientation - active low open drain
+                                                                                         ext. pull-up
+  18             VBUS_SENSE    HV AI       VBUS voltage monitoring and discharge path    From VBUS
+                                           External output discharge path enable,
+  19             VBUS_DISCH    HV OD
+                                           active low open drain
+                                           VBUS source power path enable – active low    To switch or power system – ext.
+  20            VBUS_EN_SRC    HV OD
+                                           open drain                                    pull-up
+  21              VREG_1V2      PWR        1.2 V internal regulator output               1 µF typ. decoupling capacitor
+                                                                                         System low power (connect to
+  22                VSYS        PWR        Power supply from system
+                                                                                         ground if not used)
+  23              VREG_2V7      PWR        2.7 V internal regulator output               1 µF typ. decoupling capacitor
+  24                 VDD      HV PWR       Power supply from USB power line              From VBUS (system side)
+   -                  EP    Exposed pad    Exposed pad is connected to ground            To ground
+DS11977 - Rev 5                                                                                                    page 4/43
+
+
+                                                         STUSB4700
+                                                              Pin list
+                                       Table 2. Legend
+                Type                         Description
+                  D  Digital
+                  A  Analog
+                 O   Output pad
+                  I  Input pad
+                 IO  Bidirectional pad
+                 OD  Open drain output
+                 PD  Pull-down
+                 PU  Pull-up
+                 HV  High voltage
+                PWR  Power
+                GND  Ground
+DS11977 - Rev 5                                              page 5/43
+
+
+                                                                                                                      STUSB4700
+                                                                                                                         Pin description
+2.3             Pin description
+2.3.1           CC1 / CC2
+                CC1 and CC2 are the configuration channel pins used for connection and attachment detection, plug orientation
+                determination and system configuration management across USB Type-C cable. CC1 and CC2 are high
+                impedance (HiZ) during reset.
+2.3.2           RESET
+                Active high reset. This pin resets all analog signals, states machine and reloads configuration.
+2.3.3           I²C interface pins
+                                                                Table 3. I2C interface pin list
+                           Name                                                       Description
+                            SCL              I²C clock – need external pull-up
+                            SDA              I²C data – need external pull-up
+                          ALERT#             I²C interrupt – need external pull-up
+2.3.4           A_B_SIDE
+                This output pin provides cable orientation. It is used to establish USB SuperSpeed signals routing. The cable
+                orientation is also provided by an internal I2C register. This signal is not required in case of USB 2.0 support or in
+                case of supply only.
+                                                                Table 4. USB data mux select
+                          Value                                                    CC pin position
+                           HiZ            CC1 pin is attached to CC line
+                            0             CC2 pin is attached to CC line
+2.3.5           VBUS_SENSE
+                This input pin is used to sense VBUS presence, monitor VBUS voltage and discharge VBUS on USB Type-C
+                receptacle side.
+2.3.6           VBUS_EN_SRC
+                In source power role, this pin allows enabling of the outgoing VBUS power when the connection to a sink is
+                established and VBUS is in the valid operating range. The open-drain output allows a PMOS transistor to be driven
+                directly. The logic value of the pin is also advertised in a dedicated I2C register bit.
+2.3.7           VSYS
+                This is the low voltage power supply from the system (if any). VSYS connection is optional, and can be connected
+                directly to a single cell Lithium battery or a system power supply delivering 3.3 V or 5 V. If not used, it is
+                recommended to connect the pin to ground.
+DS11977 - Rev 5                                                                                                                page 6/43
+
+
+                                                                                                                       STUSB4700
+                                                                                                                         Pin description
+2.3.8           VDD
+                This is the main power supply from the USB power line for applications powered by VBUS.
+                This pin can be used to sense the voltage level of the main power supply providing VBUS. It allows UVLO and
+                OVLO voltage thresholds to be considered independently on VDD pin as additional conditions to enable the VBUS
+                power path through VBUS_EN_SRC pin.
+2.3.9           GND
+                Ground.
+2.3.10          VVAR_ADDR0
+                At start-up, this pin is latched to set I²C device address 0 bit. During operation, this output can be used as an
+                analog voltage output to control the power management unit. Analog value is one tenth of the requested VBUS
+                value. This function can be enabled through appropriate non-volatile-memory (NVM) configuration.
+2.3.11          VREG_2V7
+                This pin is used only for external decoupling of 2.7 V internal regulator.
+                Recommended decoupling capacitor: 1 µF typ. (0.5 µF min.; 10 µF max.).
+                This pin must not be used to supply any external component.
+2.3.12          VREG_1V2
+                This pin is used for external decoupling of 1.2 V internal regulator.
+                Recommended decoupling capacitor: 1 µF typ. (0.5 µF min.; 10 µF max.).
+                This pin must not be used to supply any external component.
+2.3.13          VBUS_DISCH
+                This output pin allows an external VBUS discharge path to be controlled in addition to the internal discharge path
+                when required by the application. The output pin is active at the same time as the activation of the internal
+                discharge path.
+2.3.14          VCONN
+                This power input is connected to a power source that can be a 5 V power supply, or a lithium battery. It is used to
+                supply e-marked cables. It is internally connected to power switches that are protected against short-circuit and
+                overvoltage. When a valid source-to-sink connection is determined and VCONN power switches enabled, VCONN is
+                provided by the source to the unused CC pin.
+DS11977 - Rev 5                                                                                                                page 7/43
+
+
+                                                                                                                   STUSB4700
+                                                                                                                      Pin description
+2.3.15          GPIO [4:0]
+                                                     Table 5. GPIO0 (pin #12) configuration
+                      Select           NVM value                   Configuration                          Comments
+                                           00b         Attach                              Attached to sink (active low)
+                                           01b         Reserved
+                    GPIO0_sel                                                              Do not use
+                                           10b         Reserved
+                                           11b         Sel_PDO2                            PDO2 contract (active low)
+                                                     Table 6. GPIO1 (pin #11) configuration
+                      Select           NVM value                   Configuration                          Comments
+                                           00b         VBUS_VALID                          VBUS at expected voltage (active low)
+                                           01b         Reserved
+                    GPIO1_sel                                                              Do not use
+                                           10b         Reserved
+                                           11b         Sel_PDO3                            PDO3 contract (active low)
+                                 Table 7. GPIO2 (pin #14) – GPIO3 (pin #15) – GPIO4 (pin #16) configuration
+                      Select           NVM value       Configuration                       Comments
+                                                       GPIO2 = Sel_PDO2                    PDO2 contract (active low)
+                                           00b         GPIO3 = Sel_PDO3                    PDO3 contract (active low)
+                                                       GPIO4 = VBUS_EN_SRC_N               Not VBUS_EN_SRC (active high)
+                                                       GPIO2 = ADDR1                       I2C device address 1 bit (at start-up)
+                                           01b
+                                                       GPIO3 = ADDR2                       I2C device address 2 bit (at start-up)
+                 GPIO234_sel[1:0]                                                          SNK_DEBUG_ACCESSORY from
+                                                       GPIO4 = DEBUG1
+                                                                                           Type-C
+                                           10b         Reserved                            Do not use
+                                                       GPIO2 = Sel_PDO4                    PDO4 contract (active low)
+                                                       GPIO3 = Sel_PDO5                    PDO5 contract (active low)
+                                           11b
+                                                                                           PDO transition up (active low for
+                                                       GPIO4 = V_TRANS_UP
+                                                                                           280 ms)
+                Other configurations are available (please contact our customer support).
+DS11977 - Rev 5                                                                                                               page 8/43
+
+
+                                                                                                                    STUSB4700
+                                                                                                                   Block descriptions
+3               Block descriptions
+3.1             CC interface
+                The STUSB4700 controls the connection to the configuration channel (CC) pins, CC1 and CC2, through two main
+                blocks, the CC lines interface block and the CC control logic block.
+                The CC lines interface block is used to:
+                •     Configure the pull-up termination mode on the CC pins
+                •     Monitor the CC pin voltage values relative to the attachment detection thresholds
+                •     Configure VCONN on the unconnected CC pin when required
+                •     Protect the CC pins against over voltage
+                The CC control logic block is used to:
+                •     Execute the Type-C FSM relative to the Type-C source power mode
+                •     Determine the electrical state for each CC pins relative to the detected thresholds
+                •     Evaluate the conditions relative to the CC pin states and VBUS voltage value to transition from one state to
+                      another in the Type-C state machine
+                •     Detect and establish a valid source-to-sink connection
+                •     Determine the attached device type: sink or accessory
+                •     Determine cable orientation to allow external routing of the USB SuperSpeed data
+                •     Expose VBUS power capability: USB default, Type-C medium or Type-C high current mode
+                •     Handle hardware faults
+                The CC control logic block implements the Type-C state machines corresponding to source power role with
+                accessory support.
+3.2             BMC
+                This block is the physical link between USB PD protocol layer and CC pin. In TX mode, it converts the data into
+                bi-phase mark coding (BMC), and drives the CC line to correct voltages. In RX mode, it recovers BMC data from
+                the CC line, and converts to baseband signaling for the protocol layer.
+3.3             Protocol layer
+                The protocol layer has the responsibility to manage the messages from/to the physical layer. It automatically
+                manages the protocol receive timeouts, the message counter, the retry counter and the GoodCRC messages.
+                It communicates with the internal policy engine.
+3.4             Policy engine
+                The policy engine implements the power negotiation with the connected device according to its source role, it
+                implements all states machine that controls protocol layer forming and scheduling the messages.
+                The policy engine uses the protocol layer to send/receive messages.
+                The policy engine interprets the device policy manager’s input in order to implement policy for port and directs the
+                protocol layer to send appropriate messages.
+3.5             Device policy manager
+                The device policy manager is managing the power resources.
+3.6             VBUS power path control
+DS11977 - Rev 5                                                                                                             page 9/43
+
+
+                                                                                                                     STUSB4700
+                                                                                                              VBUS power path control
+3.6.1           VBUS monitoring
+                The VBUS monitoring block supervises from the VBUS_SENSE input pin the VBUS voltage on the USB Type-C
+                receptacle side.
+                This block is used to check that VBUS is within a valid voltage range:
+                •      To establish a valid source-to-sink connection according to USB Type-C standard specification
+                •      To enable safely the VBUS power path through VBUS_EN_SRC pin
+                It allows detection of unexpected VBUS voltage conditions such as undervoltage or overvoltage relative to the
+                valid VBUS voltage range. When such conditions occur, the STUSB4700 reacts as follows:
+                •      At attachment, it prevents the source-to-sink connection and the VBUS power path assertion
+                •      After attachment, it deactivates the source-to-sink connection and disables the VBUS power path. The device
+                       goes into error recovery state
+                The VBUS voltage value is automatically adjusted at attachment and at each PDO transition. The monitoring is
+                then disabled during T_Transition_To_PDO (default 288 ms changed through NVM programming). Additionally, if
+                a transition occurs to a lower voltage, the discharge path is activated during this time.
+                The valid VBUS voltage range is defined from the VBUS nominal voltage by a high threshold voltage and a low
+                threshold voltage whose minimal values are respectively VBUS+5% and VBUS-5%. The nominal threshold limits
+                can be shifted by a fraction of VBUS from +1% to +15% for the high threshold voltage and from -1% to -15% for
+                the low threshold voltage. It means the threshold limits can vary from VBUS+5% to VBUS+20% for the high limit
+                and from VBUS-5% to VBUS-20% for the low limit.
+                The threshold limits are preset by default in the NVM with different shift coefficients (see Section 8.3 Electrical
+                and timing characteristics). The threshold limits can be changed independently through NVM programming (see
+                Section 4 User-defined start-up configuration) and also by software during attachment through the I2C interface
+                (see Section 6 I²C register map).
+3.6.2           VBUS discharge
+                The monitoring block handles also the internal VBUS discharge path connected to the VBUS_SENSE input pin.
+                The discharge path is activated at detachment, during transition to a lower PDO voltage, or when the device goes
+                into the error recovery state (see Section 3.8 Hardware fault management).
+                The automatic VBUS discharge path feature is enabled by default in the NVM and can be disabled through NVM
+                programming only (see Section 4 User-defined start-up configuration). Discharge time duration
+                (T_Transition_To_PDO and T_Transition_To_0V) are also preset by default in the NVM (see Section
+                 8.3 Electrical and timing characteristics). The discharge time duration can be changed through NVM
+                programming (see Section 4 User-defined start-up configuration) and also by software through the I2C interface
+                (see Section 6 I²C register map).
+3.6.3           VBUS power path assertion
+                The STUSB4700 can control the assertion of the VBUS power path on USB Type-C port, directly or indirectly,
+                through VBUS_EN_SRC pin.
+                The following table summarizes the configurations of the STUSB4700 and the operation conditions that determine
+                the electrical value of the VBUS_EN_SRC pin during system operations.
+DS11977 - Rev 5                                                                                                             page 10/43
+
+
+                                                                                                                       STUSB4700
+                                                                                                                High voltage protection
+                                          Table 8. Conditions for VBUS power path assertion
+                                                               Operating conditions
+                     Electrical
+       Pin                                                                           VBUS-SENSE pin                      Comment
+                        value       Type-C attached state        VDD monitoring
+                                                                                     monitoring
+                                  Attached.SRC               VDD > VDDUVLO if UVLO   VBUS < VMONUSBH and VBUS
+                                                             threshold detection     > VMONUSBL if VBUS voltage   The signal is asserted
+                                  UnorientedDebug
+                                                             enabled                 range detection enabled or      only if all the valid
+                          0       Accessory.SRC
+                                                             and/or VDD < VDDOVLO if VBUS > VTHUSB if VBUS         operation conditions
+                                  OrientedDebug              OVLO threshold          voltage range detection               are met
+                                  Accessory.SRC              detection enabled       disabled
+ VBUS_EN_SRC
+                                                             VDD < VDD if UVLO       VBUS > VMONUSBH or VBUS <
+                                                             threshold detection                                      The signal is de-
+                                                                                     VMONUSBL if VBUS voltage
+                                                             enabled                                                 asserted when at
+                                                                                     range detection enabled or
+                         HiZ      Any other state                                                                   least one non-valid
+                                                             or VDD > VDDOVLO if     VBUS < VTHUSB if VBUS
+                                                                                                                  operation condition is
+                                                             OVLO threshold          voltage range detection                 met
+                                                             detection enabled       disabled
+Note:           Activation of the UVLO and OVLO threshold detections can be done through NVM programming (see Section
+                 4 User-defined start-up configuration) and also by software through the I2C interface (see Section 6 I²C
+                register map). When the UVLO and/or OVLO threshold detection is activated, the VBUS_EN_SRC pin is
+                asserted only if the device is attached and the valid threshold conditions on VDD are met. Once the
+                VBUS_EN_SRC pin is asserted, the VBUS monitoring is done on VBUS_SENSE pin instead of the VDD pin.
+3.7             High voltage protection
+                The STUSB4700 can be safely used in systems or connected to systems that handle high voltage on the VBUS
+                power path. The device integrates an internal circuitry on the CC pins that tolerates high voltage and ensures a
+                protection up to 22 V in case of unexpected short circuit with VBUS or in case of connection to a device supplying
+                high voltage on VBUS.
+3.8             Hardware fault management
+                The STUSB4700 handles hardware fault conditions related to the device itself and to the VBUS power path during
+                system operation.
+                When such conditions happen, the circuit goes into a transient error recovery state named ErrorRecovery in the
+                Type-C FSM. The error recovery state is equivalent to force a detach event. When entering this state, the device
+                de-asserts the VBUS power path by disabling the VBUS_EN_SRC pin, and it removes the terminations from the
+                CC pins during several tens of milliseconds. Then, it transitions to the unattached source state.
+                The STUSB4700 goes into error recovery state when at least one condition listed below is met:
+                •     If an overtemperature is detected, the “THERMAL_FAULT” bit is set to 1b
+                •     If an internal pull-up voltage on CC pins is below UVLO threshold, the “VPU_VALID” bit is set to 0b
+                •     If an overvoltage is detected on the CC pins, the “VPU_OVP_FAULT” bit is set to 1b
+                •     If the VBUS voltage is out of the valid voltage range during attachment, the “VBUS_VALID” bit is set to 0b
+                •     If an undervoltage is detected on the VDD pin during attachment when UVLO detection is enabled, the
+                      “VDD_UVLO_DISABLE” bit is set to 0b
+                •     If an overvoltage is detected on the VDD pin during attachment when OVLO detection is enabled, the
+                      “VDD_OVLO_DISABLE” bit is set to 0b
+                The I2C register bits mentioned above in quotes give either the state of the hardware fault when it occurs or the
+                setting condition to detect the hardware fault.
+3.9             Accessory mode detection
+                The STUSB4700 supports the detection of audio accessory mode and debug accessory mode as defined in the
+                USB Type-C standard specification source power role with accessory support.
+DS11977 - Rev 5                                                                                                                    page 11/43
+
+
+                                                                                                                    STUSB4700
+                                                                                                           Accessory mode detection
+3.9.1           Audio accessory mode detection
+                The STUSB4700 detects an audio accessory device when both the CC1 and CC2 pins are pulled down to ground
+                by a Ra resistor from the connected device. The audio accessory detection is advertised through the
+                CC_ATTACHED_MODE bits of the I2C register CC_CONNECTION_STATUS.
+3.9.2           Debug accessory mode detection
+                The STUSB4700 detects a connection to a debug and test system (DTS). The debug accessory detection is
+                advertised through the CC_ATTACHED_MODE bits of the I2C register CC_CONNECTION_STATUS.
+                The VBUS_EN_SRC pin is also asserted to allow the VBUS power path to be enabled as defined in the USB
+                Type-C standard specification.
+                A debug accessory device is detected when both the CC1 and CC2 pins are pulled down to ground by a Rd
+                resistor from the connected device. The orientation detection is performed in two steps as described in the table
+                below. The A_B_SIDE pin indicates the orientation of the connection. The orientation detection is advertised
+                through the TYPEC_FSM_STATE bits of the I2C register CC_OPERATION_STATUS.
+                                                          Table 9. The orientation detection
+                                                                                         A_B_SIDE pin
+                     CC1 pin    CC2 pin                                                                 Orientation detection state
+                 #                                      Detection process                  CC1/CC2
+                    (CC2 pin) (CC1 pin)                                                                TYPEC_FSM_STATE bit value
+                                                                                          (CC2/CC1)
+                 1     Rd         Rd        1st step: debug accessory mode detected        HiZ (HiZ)  UnorientedDebugAccessory.SRC
+                                          2nd step: orientation detected (DTS presents a
+                 2     Rd        ≤ Ra    resistance to GND with a value ≤ Ra on its CC2     HiZ (0)    OrientedDebugAccessory.SRC
+                                                                 pin)
+DS11977 - Rev 5                                                                                                             page 12/43
+
+
+                                                                                                                      STUSB4700
+                                                                                                     User-defined start-up configuration
+4               User-defined start-up configuration
+4.1             Parameter overview
+                The STUSB4700 has a set of user-defined parameters that can be customized by NVM re-programming and/or
+                by software through I2C interface. It allows changing the preset configuration of USB Type-C and PD interface
+                and to define a new configuration to meet specific customer requirements addressing various applications, use
+                cases or specific implementations.
+                The NVM re-programming overrides the initial default setting to define a new default setting that will be used at
+                power-up or after a reset. The default value is copied at power-up, or after a reset, from the embedded NVM into
+                dedicated I2C register bits. The NVM re-programming is possible few times with a customer password.
+                                                       Table 10. PDO configurations in NVM
+                     Feature            Parameter                                              Value
+                                          Voltage          5V
+                      PDO1
+                                          Current          Configurable – defined by PDO1_I [3:0]
+                                          Voltage          Configurable – defined by PDO2_V [1:0]
+                      PDO2
+                                          Current          Configurable – defined by PDO2_I [3:0]
+                                          Voltage          Configurable – defined by PDO3_V [1:0]
+                      PDO3
+                                          Current          Configurable – defined by PDO3_I [3:0]
+                                          Voltage          Configurable – defined by PDO4_V [1:0]
+                      PDO4
+                                          Current          Configurable – defined by PDO4_I [3:0]
+                                          Voltage          Configurable – defined by PDO5_V [1:0]
+                      PDO5
+                                          Current          Configurable – defined by PDO5_I [3:0]
+                When a default value is changed during system boot by software, the new settings apply as long as the
+                STUSB4700 operates and until it is changed again. But after power-off and power-up, or after a hardware reset,
+                the STUSB4700 takes back default values defined in the NVM.
+DS11977 - Rev 5                                                                                                               page 13/43
+
+
+                                                                                                                  STUSB4700
+                                                                                                 PDO - voltage configuration in NVM
+4.2             PDO – voltage configuration in NVM
+                PDO2_V [1:0], PDO3_V [1:0], PDO4_V [1:0] and PDO5_V [1:0] can be configured with the following values:
+                                                 Table 11. PDO NVM voltage configuration
+                              Value                                                  Configuration
+                              2b00                                                        9V
+                              2b01                                                       15 V
+                              2b10                                                   PDO_FLEX_V1
+                               2b11                                                  PDO_FLEX_V2
+                PDO_FLEX_V1 and PDO_FLEX_V2 are defined in a specific 10-bit register, value is being expressed in 50 mV
+                units.
+                For instance:
+                •     PDO_FLEX_V1 = 10b0100100010 → 14.5 V
+                •     PDO_FLEX_V2 = 10b0110000110 → 19.5 V
+4.3             PDO – current configuration in NVM
+                PDO1_I [3:0], PDO2_I [3:0], PDO3_I [3:0], PDO4_I [3:0] and PDO5_I [3:0] can be configured with the following
+                fixed values:
+                                                 Table 12. PDO NVM current configuration
+                                  Value                                                 Configuration
+                                 4b0000                                                 PDO_FLEX_I
+                                 4b0001                                                    1.50 A
+                                 4b0010                                                    1.75 A
+                                 4b0011                                                    2.00 A
+                                 4b0100                                                    2.25 A
+                                 4b0101                                                    2.50 A
+                                 4b0110                                                    2.75 A
+                                 4b0111                                                    3.00 A
+                                 4b1000                                                    3.25 A
+                                 4b1001                                                    3.50 A
+                                 4b1010                                                    3.75 A
+                                 4b1011                                                    4.00 A
+                                 4b1100                                                    4.25 A
+                                 4b1101                                                    4.50 A
+                                 4b1110                                                    4.75 A
+                                 4b1111                                                    5.00 A
+                PDO_FLEX_I is defined in a specific 10-bit register, value is being expressed in 10 mA units. For instance:
+                •     PDO_FLEX_I = 10b0011100001 → 2.25 A
+DS11977 - Rev 5                                                                                                            page 14/43
+
+
+                                                                                                             STUSB4700
+                                                                                             Monitoring configuration in NVM
+4.4             Monitoring configuration in NVM
+                •  T_Transition_To_PDO (TDISUSBPDO) can be configured from 20 to 300 ms by increments of 20 ms (0 is not
+                   recommended)
+                •  T_Transition_To_0V (TDISUSB0V) can be configured from 84 to 1260 ms by increments of 84 ms (0 is not
+                   recommended)
+                •  V_Shift_High (VSHUSBH) can be configured from 1% to 15% of VBUS by step of 1%
+                •  V_Shift_Low (VSHUSBL) can be configured from 1% to 15% of VBUS by step of 1%
+4.5             Factory settings
+                                                        Table 13. Factory NVM setting
+                                Parameter                             STUSB4700QTR                 STUSB4700YQTR
+                             Number of PDO                                     5                             3
+                           PDO1 (UVLO; OVLO)                       5 V / 3 A (-10%; +12%)       5 V / 3 A (-10%; +12%)
+                                   PDO2                            9 V / 3 A (-10%; +10%)        9 V / 3 A (-10%; +10%)
+                                   PDO3                            12 V / 3 A (-10%; +10%)      12 V / 3 A (-10%; +10%)
+                                   PDO4                            15 V / 3 A (-10%; +10%)                   -
+                                   PDO5                           20 V / 2.25 A (-10%; +8%)                  -
+                                  GPIO0                                   Sel_PDO2                      Sel_PDO2
+                                  GPIO1                                   Sel_PDO3                      Sel_PDO3
+                                  GPIO2                                   Sel_PDO4                      Sel_PDO2
+                                  GPIO3                                   Sel_PDO5                      Sel_PDO3
+                                  GPIO4                                 V_TRANS_UP                 VBUS_EN_SRC_N
+                     Discharge time: transition to PDO                      240 ms                       240 ms
+                      Discharge time: transition to 0 V                     168 ms                       168 ms
+DS11977 - Rev 5                                                                                                      page 15/43
+
+
+                                                                                                                      STUSB4700
+                                                                                                                           I²C interface
+5               I²C interface
+5.1             Read and write operations
+                The I²C interface is used to configure, control and read the status of the device. It is compatible with the Philips
+                I²C Bus® (version 2.1). The I²C is a slave serial interface based on two signals:
+                •      SCL - serial clock line: input clock used to shift data
+                •      SDA - serial data line: input/output bidirectional data transfers
+                A filter rejects the potential spikes on the bus data line to preserve data integrity.
+                The bidirectional data line supports transfers up to 400 Kbit/s (fast mode). The data are shifted to and from the
+                chip on the SDA line, MSB first.
+                The first bit must be high (START) followed by the 7-bit device address and the read/write control bit.
+                Eigth 7-bit device addresses are available for the STUSB4700 thanks to the external programming of DevADDR0,
+                DevADDR11 and/or DevADDR2 through VVAR_ADDR0, ADDR1 and ADDR2 pins respectively. It allows eight
+                STUSB4700 devices to be connected on the same I2C bus.
+                Two addresses are available by default, i.e. 0x28 or 0x29, depending on the setting of the VVAR_ADDR0 pin
+                (ADDR1 and ADDR2 set to 0 by default).
+                                                    Table 14. Device address format
+      Bit7                  Bit6              Bit5               Bit4             Bit3              Bit2             Bit1         Bit0
+   DevADDR6             DevADDR5          DevADDR4           DevADDR3          DevADDR2         DevADDR1          DevADDR0        R/W
+         0                   1                  0                 1              ADDR2            ADDR1            ADDR0           0/1
+                                                   Table 15. Register address format
+      Bit7                Bit6             Bit5             Bit4             Bit3            Bit2            Bit1            Bit0
+  RegADDR7            RegADDR6         RegADDR5          RegADDR4         RegADDR3       RegADDR2         RegADDR1        RegADDR0
+                                                      Table 16. Register data format
+      Bit7                Bit6             Bit5             Bit4             Bit3            Bit2            Bit1            Bit0
+     DATA7              DATA6            DATA5             DATA4            DATA3          DATA2            DATA1           DATA0
+                                                                Figure 3. Read operation
+DS11977 - Rev 5                                                                                                               page 16/43
+
+
+                                                                                                             STUSB4700
+                                                                                                         Timing specifications
+                                                              Figure 4. Write operation
+5.2             Timing specifications
+                The device uses a standard slave I²C channel at speed up to 400 kHz.
+                                                   Table 17. I2C timing parameters - VDD = 5 V
+                  Symbol                                 Parameter                              Min.     Typ.   Max.    Unit
+                    Fscl                            SCL clock frequency                           0        -    400      kHz
+                   thd,sta                Hold time (repeated) START condition                   0.6       -      -       µs
+                     tlow                       LOW period of the SCL clock                      1.3       -      -       µs
+                    thigh                      HIGH period of the SCL clock                      0.6       -      -       µs
+                   tsu,dat               Setup time for repeated START condition                 0.6       -      -       µs
+                   thd,dat                             Data hold time                           0.04       -     0.9      µs
+                   tsu,dat                            Data setup time                            100       -      -       µs
+                       tr                 Rise time of both SDA and SCL signals              20 + 0.1 Cb   -    300       ns
+                       tf                 Fall time of both SDA and SCL signals              20 + 0.1 Cb   -    300       ns
+                   tsu,sto                     Setup time for STOP condition                     0.6       -      -       µs
+                     tbuf          Bus free time between a STOP and START condition              1.3       -      -       µs
+                      Cb                      Capacitive load for each bus line                   -        -    400       pF
+DS11977 - Rev 5                                                                                                      page 17/43
+
+
+                                                STUSB4700
+                                             Timing specifications
+                Figure 5. I²C timing diagram
+DS11977 - Rev 5                                         page 18/43
+
+
+                                                                                                                     STUSB4700
+                                                                                                                      I²C register map
+6               I²C register map
+                                                      Table 18. Register access legend
+                    Access code        Expanded name         Description
+                        RO                Read only          Register can be read only
+                       R/W                Read/write         Register can be read or written
+                        RC              Read and clear       Register can be read and is cleared after it is read
+                                        Table 19. STUSB4700 register map overview
+  Address                Register name            Access                                       Description
+ 00h to 0Ah                Reserved                  RO    Do not use
+    0Bh                 ALERT_STATUS                 RC    Alert register linked to transition registers
+    0Ch           ALERT_STATUS_MASK_CTRL            R/W    Allows the interrupt mask on the ALERT_STATUS register to be changed
+    0Dh         CC_CONNECTION_STATUS_TRANS           RC    Alerts about transition in CC_CONNECTION_STATUS register
+    0Eh            CC_CONNECTION_STATUS              RO    Gives status on CC connection
+    0Fh           MONITORING_STATUS_TRANS            RC    Alerts about transition in MONITORING_STATUS register
+    10h              MONITORING_STATUS               RO    Gives status on VBUS voltage monitoring
+    11h            CC_CONNECTION_STATUS              RO    Gives status on CC connection
+    12h            HW_FAULT_STATUS_TRANS             RC    Alerts about transition in HW_FAULT_STATUS register
+    13h               HW_FAULT_STATUS                RO    Gives status on hardware faults
+ 14h to 17h                Reserved                  RO    Do not use
+    18h              CC_CAPABILITY_CTRL             R/W    Allows CC capabilities to be changed
+ 19h to 22h                Reserved                  RO    Do not use
+    23h                  RESET_CTRL                 R/W    Controls the device reset by software
+    24h                    Reserved                  RO    Do not use
+    25h          VBUS_DISCHARGE_TIME_CTRL           R/W    Allows the VBUS discharge time parameters to be changed
+    26h            VBUS_DISCHARGE_STATUS             RO    Gives status on VBUS discharge path activation
+    27h             VBUS_ENABLE_STATUS               RO    Gives status on VBUS power path activation
+ 28h to 2Dh                Reserved                  RO    Do not use
+    2Eh            VBUS_MONITORING_CTRL             R/W    Allows the monitoring conditions of VBUS voltage to be changed
+ 2Fh to 70h                Reserved                  RO    Do not use
+ 71h to 74h               SRC_PDO1                  R/W    PDO1 capabilities configuration
+ 75h to 78h               SRC_PDO2                  R/W    PDO2 capabilities configuration
+ 79h to 7Ch               SRC_PDO3                  R/W    PDO3 capabilities configuration
+ 7Dh to 80h               SRC_PDO4                  R/W    PDO4 capabilities configuration
+ 81h to 84h               SRC_PDO5                  R/W    PDO5 capabilities configuration
+ 85h to 90h                Reserved                  RO    Do not use
+ 91h to 94h                SRC_RDO                   RO    PDO request status
+DS11977 - Rev 5                                                                                                              page 19/43
+
+
+                                                                                         STUSB4700
+                                                                                          I²C register map
+                                  Table 20. Register access legend
+      Access code Expanded name                                             Description
+            RO       Read only            Register can be read only
+           R/W      Read / Write          Register can be read or written
+            RC     Read and clear         Register can be read and is cleared after read
+DS11977 - Rev 5                                                                                  page 20/43
+
+
+                                                                                                                                                                                                                                                                                 STUSB4700
+                                                                                                                                                                                                                                                                                 Typical use cases
+7                 Typical use cases
+7.1               Power supply – buck topology
+                                                                                                     Figure 6. Power supply - buck topology
+                                                                                                                                       Power Control
+                                                                              C21    100nF
+                                                          U2           1                                                                                                                                                                        T2         T3
+                                                          ST1S14PHR                                     L21                                                                                                                                  STL6P3LLH6    STL6P3LLH6
+                            Vin                       7                               8         SW                                                  Vsrc                                                                                             HC                        Vbus
+                                                                       Boot
+                                                          Vin                 SW
+                                                                                      2                  68µH                                                                                                                                                                                J1
+                                                                                                                                                                                                                        T1
+                                                                                                                                                                                                                                                                        C4
+                                                                                                                                  220 µF
+                                                                               PG
+                                                      5                                                                                                                                                                                      R9           R10
+                                  C22 10 µF
+                                                                                                                                                                                                                                                                        10µF
+                                                                                                                                           10 µF
+                                                          EN2
+                                                                 GND
+                                                      3
+                                                          /EN1                 FB
+                                                                                      4         FB    C24     100pF                                                                                                                          10k          10k
+                                              C23                                                                                                                                                                                                                                A1                     B12
+                                                                                                                                                                                                                        STR2P3LLH6
+                                                                                                                                   +
+                                                                                    D21
+                                                                                                                                                                                                                                                                                      GND          GND
+                                                                                                                                                                                                                                                                                 A2                     B11
+                                  C32 10µF
+                                                                 6
+                                              220nF                                                                                                                                                                                                                                   Tx+1         Rx+1
+                                                                                                                                                                                                                                                                                 A3                     B10
+                                                                                                                                   C25     C35
+                                                                                                                                                                                                                                      R8                  R11
+                                                                                    STPS5L25B
+                                                                                                                                                                                                                                                                                      Tx-1         Rx-1
+                                                                                                                                                                                                                                      820                 2k2                    A4                     B9
+                                                                                                                                                                                                                                                                                      Vbus         Vbus
+                                                                                                     Small signal                                                                                                                                                                A5                     B8
+                                                                                                                                                                                                                                                                                      CC1          Sbu2
+                                                                                                                                                                                                                                     GND                                   TC-DP A6   D+1           D-2
+                                                                                                                                                                                                                                                                                                        B7 TC-DM
+                                                                                                     Power plane                                               C3    1µF                                                                                                   TC-DM A7                     B6 TC-DP
+                                                                                                                                                                                                                                                                                      D-1           D+2
+                                                                                                                                  GND                          C1    1µF                                                                                                         A8                     B5
+                           GND                                                                                                                                                                                                                                                        Sbu1          CC2
+                                                                                                                                                               C2    1µF                                                                                                         A9   Vbus USB 3.1 Vbus
+                                                                                                                                                                                                                                                                                                        B4
+                                                                                                                                                                                                                                                                                A10        TYPE C Tx-2 B3
+                                                                                                                   Vsrc                                                                     GND                                                                                       Rx-2
+                                                                                                                                                          GND                                                           U1                                                      A11   Rx+2         Tx+2
+                                                                                                                                                                                                                                                                                                        B2
+                                                                                                                          R1                                          23         21                    22      24       STUSB4700
+                                                                                                                                                                                             VCONN 3
+                                                                                                                                                                                                                                                                                A12                     B1
+                                                                                                                          200k                                                                                                                                                         GND        GND
+                                                                                                                                                                      VReg_2V7   VReg_1V2
+                                                                                                                                                                                                       VSYS   VDD
+                                                                                                              FB                                                                                                     VBus_DISCH 19
+                                                                                                                          R2                        16
+                                                                                                                                                         GPIO4                                                      VBus_EN_SRC 20
+                                                                                                                          13k
+                                                                                                                                                    15
+                                                                                                                                                         GPIO3                                                       VBus_Sense 18
+                                                                                                                                                                                                                                                                                             GND
+                                                                                                                          R3                        14
+                                                                                                                                                         GPIO2                                                         A_B_Side 17
+                                                                                                                          4k7
+                                                                                                                                                    11                                                                                                                                       R12
+                                                                                                                                                         GPIO1                                                                                                                    TC-DM            TC-DP
+                                                                                                                          R4                        12
+                                                                                                                                                         GPIO0                                                          CC1GND 1
+                                                                                                                          4k87                                        Autonomous USB                                                                                                         100
+                                                                                                                                                    9
+                                                                                                                                                         ALERT#       PD controller                                            CC1 2                            CC1
+                                                                                                                          R5                  SCL                     with integrated                                                                           CC2
+                                                                                                                                                    7
+                                                                                                                                                         SCL                                                                   CC2 4
+                                                                                                                          8k66                                        discharge path
+                                                                                                                                              SDA   8
+                                                                                                                                                         SDA                                                            CC2GND 5
+                                                                                                                          R6                        6
+                                                                                                                                                         Reset
+                                                                                                                          33k
+                                                                                                                                       R7           13
+                                                                                                                                                         Addr0
+                                                                                                                                       100k
+                                                                                                                   GND                                                     GND                              ExpPAD
+                                                                                                                                  GND                                     10                                   0
+                                                                                                                                                                           GND
+                                                                                                                                                                                                              GND                          GND
+                  The STUSB4700 offers the possibility to have up to 5 PDOs.
+                                                                                          Figure 7. Power supply - buck topology extract
+                                                                                                                          Vsrc
+                                                                                                                                 R1
+                                                                                                                                 200k
+                                                                                                              FB
+                                                                                                                                 R2                                                              16
+                                                                                                                                                                                                              GPIO4
+                                                                                                                                 13k
+                                                                                                                                                                                                 15
+                                                                                                                                                                                                              GPIO3
+                                                                                                                                 R3                                                              14
+                                                                                                                                                                                                              GPIO2
+                                                                                                                                 4k7
+                                                                                                                                                                                                 11
+                                                                                                                                                                                                              GPIO1
+                                                                                                                                 R4                                                              12
+                                                                                                                                                                                                              GPIO0
+                                                                                                                                 4k87
+                                                                                                                                                                                                       9
+                                                                                                                                                                                                              ALERT#
+                                                                                                                                 R5                                 SCL                                7
+                                                                                                                                                                                                              SCL
+                                                                                                                                 8k66
+                                                                                                                                                                    SDA                                8
+                                                                                                                                                                                                              SDA
+                                                                                                                                 R6                                                                    6
+                                                                                                                                                                                                              Reset
+                                                                                                                                 33k
+                                                                                                                                                            R7                                   13
+                                                                                                                                                                                                              Addr0
+                                                                                                                                                            100k
+                                                                                                                          GND
+                                                                                                                                                    GND
+                  In the above example, the Vsafe5V is generated by R1 and the full ladder R2+R3+R4+R5+R6. When a power
+                  delivery negotiation results in a PD contract that is not 5 V (PDO2, PDO3, PDO4 and PDO5), GPIO0, GPIO1,
+                  GPIO2 and GPIO3 are asserted (active low), respectively. This shorts R6, R5, R4 and R3 according to the
+                  following table.
+DS11977 - Rev 5                                                                                                                                                                                                                                                                                      page 21/43
+
+
+                                                                                                                                                                                                                                                                                                            STUSB4700
+                                                                                                                                                                                                                                                              Power supply – flyback topology
+                                                                                                                                             Table 21. Resistor value
+                           PDO                            VOUT                                                                                   Calculation                                                                                                                         Resistor value (ohm)
+                                                                                                                                                           R1                                                                                                                                          200 k
+                                                                                                                                                     1.22
+                             5                                  20                                                                      R2 = R1 ∙                                                                                                                                                          13 k
+                                                                                                                                                  VOUT − 1.22
+                                                                                                                                                1.22
+                             4                                  15                                                                 R3 = R1 ∙             − R2                                                                                                                                              4.7 k
+                                                                                                                                             VOUT − 1.22
+                                                                                                                                        1.22
+                             3                                  12                                                         R4 = R1 ∙             − R2 − R3                                                                                                                                            4.87 k
+                                                                                                                                     VOUT − 1.22
+                                                                                                                                 1.22
+                             2                                   9                                                  R5 = R1 ∙             − R2 − R3 − R4                                                                                                                                              8.66 k
+                                                                                                                              VOUT − 1.22
+                                                                                                                               1.22
+                             1                                   5                                                R6 = R1 ∙             − R2 − R3 − R4 − R5                                                                                                                                                33 k
+                                                                                                                            VOUT − 1.22
+                  To implement a different VBUS output voltage for every PDO, the Resistor matrix needs to be calculated using the
+                  following formula:
+                                                                                                                                                                      R1
+                                                                                                                                VBUS = 1.22 ∙                                                                                                                                                                                          (1)
+                                                                                                                                                            R2 + R3 + R4 + R5 + R6
+7.2               Power supply – flyback topology
+                                                                                                                                            Figure 8. Flyback topology
+                                                                                                                                                                                                                                                                                                                       J1
+                                                                                                                    3                                                                                                                                                                                              A1 GND       GND
+                                                                                                                                                                                                                                                                                                                                       B12
+            ~     +                                                                                                                                                                                                                                                                                                A2 Tx+1             B11
+                                 + C20                                                C21                                                                                                                                                                                   T2                                                 Rx+1
+                                                                            R20                                                                                                                                                                                                                                    A3 Tx-1
+            ~     -                              VDD                        100k      2.2nF                                                                                                                                                                                 STS10P3LLH6                                           Rx-1 B10
+                                 68µF                           C22                                                 2                   A                                                                                                                                                         Vbus             A4 Vbus             B9 Vbus
+            U20                                                                                                                                                                                                                                                                                                                   Vbus
+                                                                                                                                                                                                                                                                                                                   A5 CC1              B8
+                                                                                   R21                                                       R22                                                                                                        R8            R9             R10                                         Sbu2
+                                                           100nF                   220 D20                                                   33                                                                                                         1k5           10k            10k         + C4              A6 D+1              B7
+                                                                                                                    1                   B                  + C23                                                                                                                                   10 µF
+                                                                                                                                                                                                                                                                                                                                  D -2
+                           U21
+                                   1             8
+                                                    STCH02                                                                                   C24             680                                                                              T1                                                                   A7 D-1        D+2
+                                                                                                                                                                                                                                                                                                                                       B6
+                                                                                                                                                             µF
+                                       HV        VDD                         R23 STTH1R06A                          4                        1.5nF                                                                                                                                   R11                           A8 Sbu1             B5
+                                                                                                    STF10LN80K5
+                            2.5V                                                                                                                                                                                                      STS5P3LLH6                                                                                 CC2
+                       4           +            currentGD 7                                                                                                                                                                                                                          2k2                      Vbus A9 Vbus       Vbus
+                                                                                                                                                                                                                                                                                                                                       B4 Vbus
+                           ZCD     -            control                      4.7                                                                                                                                                                                                                                  A10 Rx-2 USB 3.1Tx-2 B3
+                                                                                                                                                                                                                                                                       Vbus_EN_SRC
+                                                                                                                                                  D21
+                                                       sense
+                                                                                                                                                                                                                                                         Vbus_DISCH
+                       2 NC                                                                                         5                                                                                                                                                                                             A11 Rx+2 TYPE CTx+2 B2
+                                                GND
+                                        3 FB
+                                                                         D22
+                                                                                                                        Tr20
+                                               6      5                 1N4148WS             T20                                                                                                                                                                                                                  A12 GND       GND
+                                                                                                                                                                                                                                                                                                                                       B1
+                                                                                                                                C25
+                                                                                                   R24
+                                                                                                   0.15                        1000pF
+                                                                             R25                                                                                                        C3    µF
+                                                                                                                                                                                               1
+                                                                                                                                                                                        C1    µF
+                                                                                                                                                                                               1
+                      R26                                                    360k                                                                           R27
+                      22k                                                                                                                                                               C2    µF
+                                                                                                                                                                                               1
+                                                      VDD
+                                                                    T21              D23                                                               1k
+                                                                                              R28
+                                                                   BC847C                                                                   U22A      R29          R1                                                                            U1
+                                                                                                                                            SFH617A-2 12k          100k                       23 21                            22 24             STUSB4700
+                                                                                                                                                                                                                     VCONN 3
+                                                                            R30             4.7
+                                                                                      BAV103
+                                                                                                                                                                                                                               VSYS
+                                                                                                                                                                                               VReg_2V7   VReg_1V2
+                                                       + C26           D24 20k     + C27                                                                                                                                              VDD     VBus_DISCH 19
+                                                                                                                                            R31      C28
+                                                         22 µF         15V           22 µF                                                                                       16 GPIO4                                                   VBus_EN_SRC 20
+                                                                                                                                            1k     33nF                          15 GPIO3
+                                                                                                                                                                   R3                                                                         VBus_Sense 18
+                                                                                                                                                                   8k87
+                                                                                                                                                                                 14 GPIO2                                                      A_B_Side 17
+                                                                                                                                             D25                                 11 GPIO1
+                                                                                                                                             TLVH431AIL3T          R4
+                                                                                                                                                                   2k49
+                                                                                                                                                                                 12 GPIO0                                                       CC1GND 1
+                                               R32             C29
+                                               30k             220pF                                                                                               R5            9 ALERT#                                                          CC1 2                                   CC1
+                                                                         U22B                                                                                      4k42
+                                                                         SFH617A-2                                                                                           SCL 7 SCL                                 CC2                               4                                 CC2
+                                                                                                                                                                                             Autonomous USB PD
+                                                                                                                                                                   R6        SDA 8 SDA                             CC2GND 5
+                                                                                                                                                                   16k2                      controller with
+                                                                                                                                                                                  6 Reset    Integrated discharge path
+                                                                                                                                                                                 13 Addr0
+                                                                                                                                                                           R7                   GND                               ExpPAD
+                                                                                                                                                                          100k                 10                                  0
+                                                                                                                                                                                                                                                               GND
+DS11977 - Rev 5                                                                                                                                                                                                                                                                                                             page 22/43
+
+
+                                                                                                                      STUSB4700
+                                                                                                        Power supply – flyback topology
+                In the above example, only 4 power profiles are used: 5 V, 9 V, 12 V and 15 V.
+                                                       Figure 9. Flyback topology extract
+                                                                          R27
+                                                                          1k
+                                                                         R29     R1
+                                                             U22A
+                                                                         12k     100k
+                                                             SFH617A-2
+                                                            R31    C28
+                                                                                              16
+                                                                                                 GPIO4
+                                                            1k     33nF           R3          15
+                                                                                                 GPIO3
+                                                                                  8k87
+                                                                                              14
+                                                                                                 GPIO2
+                                                               D25                            11
+                                                                                  R4             GPIO1
+                                                               TLVH431AIL3T
+                                                                                  2k49
+                                                                                              12
+                                                                                                 GPIO0
+                                                                                  R5           9
+                                                                                                 ALERT#
+                                                                                  4k42
+                                                                                           SCL 7
+                                                                                                 SCL
+                                                                                  R6       SDA 8
+                                                                                                 SDA
+                                                                                  16k2
+                                                                                               6
+                                                                                                 Reset
+                                                                                              13
+                                                                                                 Addr0
+                                                                                         R7
+                                                                                        100k
+                The Vsafe5V is generated by R1 and the full ladder R3+R4+R5+ R6.When a power delivery negotiation results in a
+                PD contract that is not 5 V (PDO2, PDO3, PDO4), GPIO0, GPIO1 and GPIO2 are asserted (active low),
+                respectively. This shorts R6, R5, R4 according to the following table.
+                                                             Table 22. Resistor value
+                                                                                                                 Resistor value
+                    PDO        VOUT                                 Calculation
+                                                                                                                        (Ω)
+                                                                          R1                                           100 k
+                                                                               1.24
+                     4          15                           R3 = R1 ∙                                                8.87 k
+                                                                         VOUT − 1.24
+                                                                            1.24
+                     3          12                         R4 = R1 ∙                   − R3                           2.49 k
+                                                                       VOUT − 1.24
+                                                                        1.24
+                     2           9                      R5 = R1 ∙                   − R3 − R4                         4.42 k
+                                                                   VOUT − 1.24
+                                                                     1.24
+                     1           5                    R6 = R1 ∙                 − R3 − R4 − R5                        16.2 k
+                                                                VOUT − 1.24
+                To implement a different VBUS output voltage for every PDO, the Resistor matrix needs to be calculated using the
+                following formula:
+                                                                                    R1
+                                                       VBUS = 1.24 ∙                                                                 (2)
+                                                                        R3 + R4 + R5 + R6
+DS11977 - Rev 5                                                                                                               page 23/43
+
+
+                                                                                                 STUSB4700
+                                                                                         Electrical characteristics
+8               Electrical characteristics
+8.1             Absolute maximum ratings
+                All voltages are referenced to GND.
+                                               Table 23. Absolute maximum ratings
+                Symbol                                         Parameter            Value                 Unit
+ VDD                                   Supply voltage on VDD pin                      28                    V
+ VSYS                                  Supply voltage on VSYS pin                      6                    V
+ VCC1
+                                       High voltage on CC pins                        22                    V
+ VCC2
+ VVBUS_EN_SRC
+                                       High voltage on VBUS pins                      28                    V
+ VVBUS_SENSE
+ VSCL
+ VSDA
+ VALERT#
+                                       Operating voltage on I/O pins               -0.3 to 6                V
+ VRESET
+ VA_B_SIDE
+ VGPIO[4 :0]
+ VCONN                                 VCONN voltage                                   6                    V
+ TSTG                                  Storage temperature                        -55 to 150               °C
+ TJ                                    Maximum junction temperature                  145                   °C
+                                       HBM                                             4
+ ESD                                                                                                       kV
+                                       CDM                                            1.5
+DS11977 - Rev 5                                                                                          page 24/43
+
+
+                                                                                                                       STUSB4700
+                                                                                                                   Operating conditions
+8.2             Operating conditions
+                                                           Table 24. Operating conditions
+                           Symbol                                      Parameter                                  Value         Unit
+                 VDD                       Supply voltage on VDD pin                                            4.1 to 22         V
+                 VSYS                      Supply voltage on VSYS pin                                           3.0 to 5.5        V
+                 VCC1, VCC2                CC pins  (1)                                                        -0.3 to 5.5        V
+                 VVBUS_EN_SRC
+                 VVBUS_DISCH               High voltage pins                                                     0 to 22          V
+                 VVBUS_SENSE
+                 VSCL VSDA
+                 VALERT#
+                 VRESET                    Operating voltage on I/O pins                                         0 to 4.5         V
+                 VA_B_SIDE
+                 VGPIO[4 :4]
+                 VCONN                     VCONN voltage                                                        2.7 to 5.5        V
+                 ICONN                     VCONN rated current (default = 0.35 A)                               0.1 to 0.6        A
+                 TA                        Operating temperature                                               -40 to 105        °C
+                1. Transient voltage on CC1 and CC2 pins are allowed to go down to -0.3 during BMC communication from connected
+                    devices.
+DS11977 - Rev 5                                                                                                               page 25/43
+
+
+                                                                                                                       STUSB4700
+                                                                                                    Electrical and timing characteristics
+8.3             Electrical and timing characteristics
+                Unless otherwise specified: VDD = 5 V, TA = +25 °C, all voltages are referenced to GND.
+                                                  Table 25. Electrical characteristics
+        Symbol             Parameter                 Conditions              Min.           Typ.             Max.             Unit
+                                            Device idle as source (not connected, no communication)
+ IIDD(SRC)           Current consumption    VSYS @ 3.3 V                       –            158                 –              µA
+                                            VDD @ 5.0 V                        –            188                 –              µA
+ CC1 and CC2 pins
+ IP-USB                                                                     -20%             80              +20%              µA
+                                            CC pin voltage VCC =
+ IP-1.5              CC current sources     -0.3 to 2.6 V                    -8%            180               +8%              µA
+                                            -40° < TA < +105°
+ IP-3.0                                                                      -8%            330               +8%              µA
+                                            CC unconnected,
+ VCCO                CC open pin voltage                                     2.75             –                 –               V
+                                            VDD=3.0 to 5.5 V
+ RINCC               CC input impedance     Terminations off                 200              –                 –              kΩ
+                                            Max. Ra detection by
+ VTH0.2              Detection threshold 1                                   0.15            0.2              0.25              V
+                                            source at IP = IP -USB
+                                            Max. Ra detection by
+ VTH0.4              Detection threshold 2                                   0.35            0.4              0.45              V
+                                            source at IP = IP-1.5
+                                            Max. Ra detection by
+ VTH0.8              Detection threshold 3                                   0.75            0.8              0.85              V
+                                            source at IP = IP-3.0
+                                            Max. Rd detection by
+ VTH1.6              Detection threshold 4  source at IP = IP-USB and         1.5            1.6              1.65              V
+                                            IP = IP-1.5
+                                            Max. Rd detection by
+                                            source at IP-3.0,
+ VTH2.6              Detection threshold 5                                   2.45            2.6              2.75              V
+                                            max. CC voltage for
+                                            connected sink
+ VCONN pin and power switches
+                     VCONN power path       IVCONN = 0.2 A
+ RVCONN                                                                      0.25            0.5             0.975              Ω
+                     resistance             -40 °C < TA < +105 °C
+                                            Programmable current              85            100               125
+                                            limit threshold (from 100
+ IOCP                Overcurrent protection                                  300            350               400              mA
+                                            mA to 600 mA by step of
+                                            50 mA)                           550            600               650
+                     Overvoltage protection
+ VOVP                                                                         5.9             6                6.1              V
+                     on CC output pins
+                     Undervoltage           Low UVLO threshold                2.6           2.65               2.7
+ VUVP                protection on VCONN    High UVLO threshold                                                                 V
+                     input pin                                                4.6           4.65               4.8
+                                            (default)
+ VDD pin monitoring
+                                            OVLO threshold
+ VDDOVLO             Overvoltage lockout    detection enabled, VDD      5.8             6               6.2                     V
+                                            pin supplied
+DS11977 - Rev 5                                                                                                                page 26/43
+
+
+                                                                                                                      STUSB4700
+                                                                                                   Electrical and timing characteristics
+      Symbol                 Parameter               Conditions              Min.           Typ.            Max.             Unit
+                                              UVLO threshold
+ VDDUVLO              Undervoltage lockout    detection enabled, VDD   3.8            3.9              4.0                    V
+                                              pin supplied
+ VBUS_SENSE pin monitoring and driving
+                      VBUS presence
+ VTHUSB                                       VSYS=3.0 to 5.5 V               3.8            3.9               4              V
+                      threshold (UVLO)
+                      VBUS safe 0V
+ VTH0V                                        VSYS=3.0 to 5.5 V               0.5            0.6              0.7             V
+                      threshold (vSafe0V)
+                      VBUS discharge
+ RDISUSB                                                                     600            700              800              Ω
+                      resistor
+                                              Coefficient TDISPAR0V
+                      VBUS discharge time     programmable by NVM,
+ TDISUSB0V                                                              70 *TDISPAR0V  84 *TDISPAR0V   100 *TDISPAR0V         ms
+                      to 0 V                  default TDISPAR0V = 2,
+                                              TDISUSB0V = 168 ms
+                                              Coefficient TDISPARPDO
+                      VBUS transition
+                                              programmable by NVM,            20             24               28
+ TDISUSBPDO           discharge time to new                                                                                   ms
+                                              default TDISPARPDO = 12,   *TDISPARPDO    *TDISPARPDO     *TDISPARPDO
+                      PDO
+                                              TDISUSBPDO = 288 ms
+                                              Coefficient VSHUSBH
+                                              programmable by NVM
+                                              from 1% to 15% of VBUS
+                                              by step of 1%, default
+                      VBUS monitoring high    VMONUSBH = VBUS+12%                        VBUS +5%
+ VMONUSBH                                                                      –                               –              V
+                      voltage limit           (PDO1)                                     +VSHUSBH
+                                              VMONUSBH = VBUS+10%
+                                              (PDO2, PDO3, PDO4)
+                                              VMONUSBH = VBUS+8%
+                                              (PDO5)
+                                              Coefficient VSHUSBL
+                                              programmable by NVM
+                      VBUS monitoring low     from 1% to 15% of VBUS                     VBUS -5% -
+ VMONUSBL                                     by step of 1%, default           –                               –              V
+                      voltage limit                                                       VSHUSBL
+                                              VMONUSBL = VBUS-10%
+                                              (all PDOs)
+ Digital input/output (SCL, SDA, ALERT#, A_B_SIDE, RESET)
+                      High level input
+ VIH                                                                          1.2             –                –              V
+                      voltage
+ VIL                  Low level input voltage                                  –              –              0.35             V
+                      Low level output
+ VOL                                          Ioh = 3 mA                       –              –               0.4             V
+                      voltage
+ 20 V open-drain outputs (VBUS_EN_SRC)
+                      Low level output
+ VOL                                          Ioh = 3 mA                       –              –               0.4             V
+                      voltage
+DS11977 - Rev 5                                                                                                               page 27/43
+
+
+                                                                                                                STUSB4700
+                                                                                                              Package information
+9               Package information
+                In order to meet environmental requirements, ST offers these devices in different grades of ECOPACK packages,
+                depending on their level of environmental compliance. ECOPACK specifications, grade definitions and product
+                status are available at: www.st.com. ECOPACK is an ST trademark.
+DS11977 - Rev 5                                                                                                         page 28/43
+
+
+                                                                                         STUSB4700
+                                                                       QFN24 EP 4x4 mm package information
+9.1             QFN24 EP 4x4 mm package information
+                                   Figure 10. QFN24 EP 4x4 mm package outline
+DS11977 - Rev 5                                                                                  page 29/43
+
+
+                                                                                  STUSB4700
+                                                                QFN24 EP 4x4 mm package information
+                           Figure 11. QFN24 EP 4x4 mm package outline
+                       Table 26. QFN24 EP 4x4 mm package mechanical data
+                                                               mm
+                Symbol
+                                         Min.                Typ.                   Max.
+                  A                      0.80                                       1.00
+                  A1                     0.00                                       0.05
+                  A2                                         0.65
+                  A3                                         0.20
+                  b                      0.20                0.25                   0.30
+                  D                       3.9                 4.0                    4.1
+                  D2                      2.7                 2.8                    2.9
+                  e                                           0.5
+                  E                       3.9                 4.0                    4.1
+DS11977 - Rev 5                                                                           page 30/43
+
+
+                                                                                                         STUSB4700
+                                                                                       QFN24 EP 4x4 mm package information
+                                                                                      mm
+                              Symbol
+                                                              Min.                  Typ.                   Max.
+                                E2                             2.7                   2.8                    2.9
+                                 L                            0.30                  0.35                   0.40
+                                 k                            0.20
+                                 N                                                    24
+                                                 Table 27. Tolerance of form and position
+                                       Symbol                                                mm
+                                         aaa                                                 0.15
+                                         bbb                                                 0.10
+                                         ccc                                                 0.10
+                                         ddd                                                 0.05
+                                         eee                                                 0.08
+                                          fff                                                0.10
+Note:           Dimensioning and tolerance schemes conform to ASME Y14.5M-1994
+                                           Figure 12. QFN24 EP 4x4 mm recommended footprint
+DS11977 - Rev 5                                                                                                  page 31/43
+
+
+                                                                                                                               STUSB4700
+                                                                                              QFN24 EP 4x4 mm wettable flank package information
+9.2               QFN24 EP 4x4 mm wettable flank package information
+                                   Figure 13. QFN24 EP 4x4 mm wettable flank package outline
+                                                                         D
+                            TOP VIEW                                                                             E
+                                                                                                  Detail A
+                           SIDE VIEW
+                                           A3
+                                           A2                                                                A1          A
+                                                                         D
+                                                                                                                 L2
+                                                 19                                            24
+                                       b   18                                                                1
+                                                                                                                  e
+                                                                    C0.35
+                         BOTTOM VIEW                   E2                                                                E
+                                                                         D2
+                                       J
+                                                                                                                     L
+                                           13                                                                6
+                                                 12                                             7
+                                                DETAIL A
+                                                                Terminal length
+                                                 L1
+                                                            L                      L1
+                                                                              L3
+                                                                                   Terminal thickness
+                                                      L3            L2
+                                                   FRONT VIEW            SECTION VIEW
+DS11977 - Rev 5                                                                                                                        page 32/43
+
+
+                                                                                          STUSB4700
+                                                         QFN24 EP 4x4 mm wettable flank package information
+                         Table 28. QFN24 EP 4x4 mm wettable flank mechanical data
+                                                        Dimensions (mm)
+                Ref.
+                                     Min.                     Typ.                        Max.
+                 A                   0.90                     0.95                        1.00
+                A1                     -                      0.10                          -
+                A2                   0.00                     0.02                        0.05
+                A3                     -                      0.20                          -
+                  b                  0.20                     0.25                        0.30
+                 D                   3.85                     4.00                        4.15
+                D2                   2.40                     2.50                        2.60
+                 E                   3.85                     4.00                        4.15
+                E2                   2.40                     2.50                        2.60
+                 e                     -                      0.50                          -
+                  J                    -                      0.35                          -
+                  L                  0.30                     0.40                        0.50
+                 L1                    -                      0.20                          -
+                 L2                    -                      0.05                          -
+                 L3                    -                      0.10                          -
+                     Figure 14. QFN24 EP 4x4 mm wettable flank recommended footprint
+DS11977 - Rev 5                                                                                   page 33/43
+
+
+                                                                                    STUSB4700
+                                                                                  Packing information
+9.3             Packing information
+                                           Figure 15. Reel information
+                                            Table 29. Tape dimensions
+                         Package         Pitch                  Carrier width       Reel
+                QFN 4x4 - 24L       8 mm                  12 mm               13"
+DS11977 - Rev 5                                                                             page 34/43
+
+
+                                                                                         STUSB4700
+                                                                                       Thermal information
+10              Thermal information
+                                                  Table 30. Thermal information
+      Symbol                                             Parameter                 Value          Unit
+ RθJA              Junction-to-ambient thermal resistance                       37
+                                                                                            °C/W
+ RθJC              Junction-to-case thermal resistance                          5
+DS11977 - Rev 5                                                                                  page 35/43
+
+
+                                                                                                                           STUSB4700
+                                                                                                                    Terms and abbreviations
+11              Terms and abbreviations
+                                                   Table 31. List of terms and abbreviations
+                    Term                                                      Description
+                            Audio adapter accessory mode. It is defined by the presence of Ra/Ra on the CC1/CC2 pins.
+                  Accessory
+                   modes    Debug accessory mode. It is defined by the presence of Rd/Rd on CC1/CC2 pins in source power role or
+                            Rp/Rp on CC1/CC2 pins in sink power role.
+                            Downstream facing port, associated with the flow of data in a USB connection. Typically, the ports on a host
+                    DFP     or the ports on a hub to which devices are connected. In its initial state, the DFP sources VBUS and VCONN
+                            and supports data.
+                            Dual-role port. A port that can operate as either a source or a sink. The port role may be changed
+                    DRP
+                            dynamically.
+                    Sink    Port asserting Rd on the CC pins and consuming power from the VBUS; most commonly a device.
+                   Source   Port asserting Rp on the CC pins and providing power over the VBUS; usually a host or hub DFP.
+                            Upstream facing port, specifically associated with the flow of data in a USB connection. The port on a device
+                    UFP     or a hub that connects to a host or the DFP of a hub. In its initial state, the UFP sinks the VBUS and supports
+                            data.
+DS11977 - Rev 5                                                                                                                    page 36/43
+
+
+                                                                                    STUSB4700
+                                                                                Ordering information
+12              Ordering information
+                                         Table 32. Ordering information
+                    Order code  AEC-Q100            Package             Marking Temperature range
+                  STUSB4700QTR     No           QFN24 EP 4x4 mm           4700
+                                                QFN24 EP 4x4 mm                   -40 °C to 105 °C
+                 STUSB4700YQTR     Yes                                   4700Y
+                                                  Wettable flanks
+DS11977 - Rev 5                                                                              page 37/43
+
+
+                                                                                                                      STUSB4700
+Revision history
+                                                      Table 33. Document revision history
+                    Date    Version                                                 Changes
+                24-Jan-2017    1    Initial release.
+                                    Updated comments columns in Table 7: "GPIO1 (pin #11) configuration" and Table 8: "GPIO2 (pin
+                                    #14) – GPIO3 (pin #15) – GPIO4 (pin #16) configuration", and ESD parameter description in Table
+                22-Mar-2017    2    18: "Absolute maximum rating".
+                                    In Table 19: "Operating conditions " replaced VVBUS_EN_SNK with VVBUS_DISCH. Replaced
+                                    Figure 6: "Power supply - buck topology" with a new figure. Minor changes throughout the document.
+                                    On cover page:
+                                    - updated title description
+                                    - updated feature regarding protections
+                                    - added feature regarding Automotive grade availability
+                06-Dec-2017    3    - updated feature regarding Certification test ID
+                                    - updated Table 1: "Device summary table"
+                                    Updated Section 7.1 Power supply – buck topology
+                                    Updated Section 7.2 Power supply – flyback topology
+                                    Added Section 9.2 QFN24 EP 4x4 mm wettable flank package information
+                12-Jun-2018    4    Minor text changes
+                                    Updated Table 13. Factory NVM setting.
+                16-Oct-2019    5
+                                    Updated Figure 6. Power supply - buck topology and Figure 8. Flyback topology.
+DS11977 - Rev 5                                                                                                                page 38/43
+
+
+                                                                                                                                                   STUSB4700
+                                                                                                                                                               Contents
+Contents
+1      Functional description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+2      Inputs/outputs . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .3
+       2.1      Pinout . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+       2.2      Pin list . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+       2.3      Pin description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.1       CC1 / CC2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.2       RESET . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.3       I2C interface pins . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.4       A_B_SIDE. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.5       VBUS_SENSE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.6       VBUS_EN_SRC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.7       VSYS . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+                2.3.8       VDD . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                2.3.9       GND . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                2.3.10      VVAR_ADDR0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                2.3.11      VREG2V7 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                2.3.12      VREG1V2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                2.3.13      VBUS_DISCH . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                2.3.14      VCONN. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+                2.3.15      GPIO [4:0]. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+3      Block descriptions. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .9
+       3.1      CC interface . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+       3.2      BMC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+       3.3      Protocol layer. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+       3.4      Policy engine . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+       3.5      Device policy manager . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+       3.6      VBUS power path control . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+                3.6.1       VBUS monitoring . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+                3.6.2       VBUS discharge . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+                3.6.3       VBUS power path assertion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+DS11977 - Rev 5                                                                                                                                               page 39/43
+
+
+                                                                                                                                             STUSB4700
+                                                                                                                                                         Contents
+       3.7      High voltage protection. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+       3.8      Hardware fault management . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+       3.9      Accessory mode detection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+                3.9.1    Audio accessory mode detection. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+                3.9.2    Debug accessory mode detection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+4      User-defined startup configuration. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .13
+       4.1      Parameter overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+       4.2      PDO – voltage configuration in NVM . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+       4.3      PDO – current configuration in NVM. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+       4.4      Monitoring configuration in NVM . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+       4.5      Factory settings . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+5      I²C interface . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .16
+       5.1      Read and write operations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+       5.2      Timing specifications. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+6      I²C register map . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .19
+7      Typical use cases. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .21
+       7.1      Power supply – buck topology . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+       7.2      Power supply – flyback topology . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+8      Electrical characteristics. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .24
+       8.1      Absolute maximum ratings. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+       8.2      Operating conditions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+       8.3      Electrical and timing characteristics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+9      Package information. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .28
+       9.1      QFN24 EP 4x4 mm package information. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+       9.2      QFN24 EP 4x4 mm wettable flank package information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+       9.3      Packing information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+10     Thermal information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .35
+11     Terms and abbreviations. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .36
+12     Ordering information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .37
+Revision history . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .38
+DS11977 - Rev 5                                                                                                                                         page 40/43
+
+
+                                                                                                                                                    STUSB4700
+                                                                                                                                                           List of tables
+List of tables
+Table 1.     Pin function list . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+Table 2.     Legend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+Table 3.     I2C interface pin list . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+Table 4.     USB data mux select . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+Table 5.     GPIO0 (pin #12) configuration . . . . . . . . . . . . . . . . . . . . . . . . . .            . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+Table 6.     GPIO1 (pin #11) configuration . . . . . . . . . . . . . . . . . . . . . . . . . . .          . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+Table 7.     GPIO2 (pin #14) – GPIO3 (pin #15) – GPIO4 (pin #16) configuration                            . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+Table 8.     Conditions for VBUS power path assertion . . . . . . . . . . . . . . . . . .                 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  11
+Table 9.     The orientation detection. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  12
+Table 10.    PDO configurations in NVM. . . . . . . . . . . . . . . . . . . . . . . . . . . . .           . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  13
+Table 11.    PDO NVM voltage configuration . . . . . . . . . . . . . . . . . . . . . . . . .              . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  14
+Table 12.    PDO NVM current configuration . . . . . . . . . . . . . . . . . . . . . . . . . .            . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  14
+Table 13.    Factory NVM setting. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  15
+Table 14.    Device address format . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  16
+Table 15.    Register address format . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  16
+Table 16.    Register data format. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  16
+Table 17.    I2C timing parameters - VDD = 5 V. . . . . . . . . . . .             . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  17
+Table 18.    Register access legend . . . . . . . . . . . . . . . . . . .         . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  19
+Table 19.    STUSB4700 register map overview . . . . . . . . . . .                . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  19
+Table 20.    Register access legend . . . . . . . . . . . . . . . . . . .         . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  20
+Table 21.    Resistor value . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  22
+Table 22.    Resistor value . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  23
+Table 23.    Absolute maximum ratings . . . . . . . . . . . . . . .               . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  24
+Table 24.    Operating conditions . . . . . . . . . . . . . . . . . . . . .       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  25
+Table 25.    Electrical characteristics . . . . . . . . . . . . . . . . . . .     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  26
+Table 26.    QFN24 EP 4x4 mm package mechanical data . . . .                      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  30
+Table 27.    Tolerance of form and position . . . . . . . . . . . . . . .         . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  31
+Table 28.    QFN24 EP 4x4 mm wettable flank mechanical data                       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  33
+Table 29.    Tape dimensions . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  34
+Table 30.    Thermal information . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  35
+Table 31.    List of terms and abbreviations . . . . . . . . . . . . . .          . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  36
+Table 32.    Ordering information. . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  37
+Table 33.    Document revision history . . . . . . . . . . . . . . . . . .        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  38
+DS11977 - Rev 5                                                                                                                                                 page 41/43
+
+
+                                                                                                                                                  STUSB4700
+                                                                                                                                                        List of figures
+List of figures
+Figure 1.       Functional block diagram . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+Figure 2.       Pin connections (top view) . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+Figure 3.       Read operation. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+Figure 4.       Write operation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+Figure 5.       I²C timing diagram. . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+Figure 6.       Power supply - buck topology . . . . . . . . . . . . . . . . . . . . .        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+Figure 7.       Power supply - buck topology extract. . . . . . . . . . . . . . . .           . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+Figure 8.       Flyback topology. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+Figure 9.       Flyback topology extract . . . . . . . . . . . . . . . . . . . . . . . .      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+Figure 10.      QFN24 EP 4x4 mm package outline . . . . . . . . . . . . . . . .               . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+Figure 11.      QFN24 EP 4x4 mm package outline . . . . . . . . . . . . . . . .               . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+Figure 12.      QFN24 EP 4x4 mm recommended footprint . . . . . . . . . . .                   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+Figure 13.      QFN24 EP 4x4 mm wettable flank package outline . . . . . .                    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+Figure 14.      QFN24 EP 4x4 mm wettable flank recommended footprint .                        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+Figure 15.      Reel information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+DS11977 - Rev 5                                                                                                                                               page 42/43
+
+
+                                                                                                                                             STUSB4700
+                                                       IMPORTANT NOTICE – PLEASE READ CAREFULLY
+ STMicroelectronics NV and its subsidiaries (“ST”) reserve the right to make changes, corrections, enhancements, modifications, and improvements to ST
+ products and/or to this document at any time without notice. Purchasers should obtain the latest relevant information on ST products before placing orders. ST
+ products are sold pursuant to ST’s terms and conditions of sale in place at the time of order acknowledgement.
+ Purchasers are solely responsible for the choice, selection, and use of ST products and ST assumes no liability for application assistance or the design of
+ Purchasers’ products.
+ No license, express or implied, to any intellectual property right is granted by ST herein.
+ Resale of ST products with provisions different from the information set forth herein shall void any warranty granted by ST for such product.
+ ST and the ST logo are trademarks of ST. For additional information about ST trademarks, please refer to www.st.com/trademarks. All other product or service
+ names are the property of their respective owners.
+ Information in this document supersedes and replaces information previously supplied in any prior versions of this document.
+                                                          © 2019 STMicroelectronics – All rights reserved
+DS11977 - Rev 5                                                                                                                                        page 43/43
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+STMicroelectronics:
+ STUSB4700QTR STUSB4700YQTR

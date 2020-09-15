@@ -1,0 +1,1412 @@
+                                                                                                               MT9122
+                                                                                   Dual Voice Echo Canceller with Tone
+                                                                                                             Detection
+                                                                                                                                  Data Sheet
+Features                                                                                                                           September 2005
+•    Dual channel 64 ms or single channel 128 ms                                                   Ordering Information
+     echo cancellation                                                                    MT9122AE    28 Pin PDIP      Tubes
+•    Conforms to ITU-T G.165 requirements                                                 MT9122AP    28 Pin PLCC      Tubes
+                                                                                          MT9122APR   28 Pin PLCC      Tape & Reel
+•    ITU-T G.165/G.164 disable tone detection                                             MT9122AP1   28 Pin PLCC*     Tubes
+     supported on all audio paths                                                         MT9122APR1 28 Pin PLCC*      Tape & Reel
+•    Narrow-band signal detection                                                                   *Pb Free Matte Tin
+•    Programmable double-talk detection threshold                                                              -40°C to +85°C
+•    Non-linear processor with adaptive suppression                                Applications
+     threshold and comfort noise insertion
+•    Offset nulling of all PCM channels                                            •   Wireless Telephony
+•    Controllerless mode or Controller mode with                                   •   Trunk echo cancellers
+     serial interface
+                                                                                   Description
+•    ST-BUS or variable-rate SSI PCM interfaces
+•    Selectable µ/A-Law ITU-T G.711; µ/A-Law Sign                                  The MT9122 Voice Echo Canceller implements a
+     Mag; linear 2’s complement                                                    cost effective solution for telephony voice-band echo
+                                                                                   cancellation     conforming      to    ITU-T    G.165
+•    Per channel selectable 12 dB attenuator                                       requirements. The MT9122 architecture contains two
+•    Transparent data transfer and mute option                                     echo cancellers which can be configured to provide
+•    19.2 MHz master clock operation                                               dual channel 64 millisecond echo cancellation or
+                                                                                   single channel 128 millisecond echo cancellation.
+                                                                                   The MT9122 supports ITU-T G.165 or G.164 tone
+                                                                                   disable requirements.
+        Sin                Linear/        Offset                      Non-Linear                     Linear/
+                          µ/A-Law                      +                                                                             Sout
+                                          Null                        Processor                      µ/A-Law
+                                                   -
+                               Disable Tone                                            Microprocessor
+                                                   Adaptive
+                                                                                          Interface
+                                                                     Control
+                                 Detector
+                                                    Filter
+                                                                                       Double-Talk
+                                                                                        Detector
+                       Programmable
+                       Bypass                                      Narrow-Band                       Disable Tone
+                                                                    Detector                           Detector
+                                      Linear/                         12dB                     Offset            Linear/
+       Rout                                                                                                                          Rin
+                                      µ/A-Law                      Attenuator                  Null             µ/A-Law
+      ENA2                                                                                                                           ENA1
+      ENB2                                                                                                                           ENB1
+       NLP                                             Echo Canceller A                                                              CONFIG1
+       REV                                                                                                                           CONFIG2
+       LAW                                                                                                                           S1/DATA1
+    FORMAT                                             Echo Canceller B                                                              S2/DATA2
+       TD1                                                                                                                           S3/CS
+       TD2                                                                                                                           S4/SCLK
+                 VDD         VSS         PWRDN                IC                   F0od         F0i        BCLK/C4i        MCLK
+                                           Figure 1 - Functional Block Diagram
+                                                                               1
+                                                    Zarlink Semiconductor Inc.
+                   Zarlink, ZL and the Zarlink Semiconductor logo are trademarks of Zarlink Semiconductor Inc.
+                               Copyright 1996-2005, Zarlink Semiconductor Inc. All Rights Reserved.
+
+
+                                                  MT9122                                                  Data Sheet
+The MT9122 operates in two major modes: Controller or Controllerless. Controller mode allows access to an
+array of features for customizing the MT9122 operation. Controllerless mode is for applications where default
+register settings are sufficient.
+                                                                               ENB2
+                                                                               ENA2
+                                                                               ENB1
+                                                                               ENA1
+                                                                               CONFIG2
+           ENA1     1          28   CONFIG2                                    CONFIG1
+                                                                               BCLK/C4i
+           ENB1     2          27   CONFIG1
+           ENA2     3          26   BCLK/C4i                                    4
+                                                                                3
+                                                                                2
+                                                                                1
+                                                                               28
+                    4                                                              •
+                                                                               27
+           ENB2
+                                                                               26
+                               25   F0i                        Rin        5               25   F0i
+             Rin    5          24   Rout                       Sin        6               24   Rout
+             Sin    6   PDIP   23   Sout                                  7               23   Sout
+                                                              VSS
+            VSS     7          22   VDD                      MCLK         8      PLCC     22   VDD
+           MCLK     8          21   F0od                        IC        9               21   F0od
+              IC    9          20   S1/DATA1                  NLP         10              20   S1/DATA1
+            NLP    10          19   S2/DATA2                  REV         11   12
+                                                                               13
+                                                                               14         19   S2/DATA2
+                                                                               15
+                   11               S3/CS
+                                                                               16
+            REV                18
+                                                                               17
+                                                                               18
+            LAW    12          17   S4/SCLK                                        LAW
+         FORMAT    13                                                          FORMAT
+                               16   TD1                                         PWRDN
+                   14                                                              TD2
+          PWRDN                15   TD2                                            TD1
+                                                                               S4/SCLK
+                                                                                 S3/CS
+                                           Figure 2 - Pin Connections
+Pin Description
+ Pin #    Name                                                Description
+   1      ENA1     SSI Enable Strobe / ST-BUS Mode for Rin/Sout (Input). This pin has dual functions
+                   depending on whether SSI or ST-BUS is selected.
+                   For SSI, this strobe must be present for frame synchronization. This is an active high channel
+                   enable strobe, 8 or 16 data bits wide, enabling serial PCM data transfer for Echo Canceller A
+                   on Rin/Sout pins. Strobe period is 125 microseconds.
+                   For ST-BUS, this pin, in conjunction with the ENB1 pin, will select the proper ST-BUS mode
+                   for Rin/Sout pins (see ST-BUS Operation description). The selected mode applies to both
+                   Echo Canceller A and B.
+   2      ENB1     SSI Enable Strobe / ST-BUS Mode for Rin/Sout (Input).This pin has dual functions
+                   depending on whether SSI or ST-BUS is selected.
+                   For SSI, this is an active high channel enable strobe, 8 or 16 data bits wide, enabling serial
+                   PCM data transfer for Echo Canceller B on Rin/Sout pins. Strobe period is 125 microseconds.
+                   For ST-BUS, this pin, in conjunction with the ENA1 pin, will select the proper ST-BUS mode
+                   for Rin/Sout pins (see ST-BUS Operation description). The selected mode applies to both
+                   Echo Canceller A and B.
+   3      ENA2     SSI Enable Strobe / ST-BUS Mode for Sin/Rout (Input).This pin has dual functions
+                   depending on whether SSI or ST-BUS is selected.
+                   For SSI, this is an active high channel enable strobe, 8 or 16 data bits wide, enabling serial
+                   PCM data transfer for Echo Canceller A on Sin/Rout pins. Strobe period is 125 microseconds.
+                   For ST-BUS, this pin, in conjunction with the ENB2 pin, will select the proper ST-BUS mode
+                   for Sin/Rout pins (see ST-BUS Operation description). The selected mode applies to both
+                   Echo Canceller A and B.
+                                                         2
+                                             Zarlink Semiconductor Inc.
+
+
+                                                     MT9122                                             Data Sheet
+Pin Description (continued)
+ Pin #    Name                                                  Description
+   4      ENB2     SSI Enable Strobe / ST-BUS Mode for Sin/Rout (Input).This pin has dual functions
+                   depending on whether SSI or ST-BUS is selected.
+                   For SSI, this is an active high channel enable strobe, 8 or 16 data bits wide, enabling serial
+                   PCM data transfer for Echo Canceller B on Sin/Rout pins. Strobe period is 125 microseconds.
+                   For ST-BUS, this pin, in conjunction with the ENA2 pin, will select the proper ST-BUS mode
+                   for Sin/Rout pins (see ST-BUS Operation description). The selected mode applies to both
+                   Echo Canceller A and B.
+   5       Rin     Receive PCM Signal Input (Input). 128 kbit/s to 4096 kbit/s serial PCM input stream. Data
+                   may be in either companded or 2’s complement linear format. Two PCM channels are time-
+                   multiplexed on this pin. These are the Receive Input reference channels for Echo Cancellers
+                   A and B. Data bits are clocked in following SSI or ST-BUS timing requirements.
+   6       Sin     Send PCM Signal Input (Input). 128 kbit/s to 4096 kbit/s serial PCM input stream. Data
+                   may be in either companded or 2’s complement linear format. Two PCM channels are time-
+                   multiplexed on this pin. These are the Send Input channels (after echo path) for Echo
+                   Cancellers A and B. Data bits are clocked in following SSI or ST-BUS timing requirements.
+   7       VSS     Digital Ground: Nominally 0 volts.
+   8      MCLK     Master Clock (Input): Nominal 20 MHz Master Clock input. May be connected to an
+                   asynchronous (relative to frame signal) clock source.
+   9        IC     Internal Connection (Input): Must be tied to Vss.
+  10       NLP     Non-Linear Processor Control (Input):
+                   Controllerless Mode: An active high enables the Non-Linear Processors in Echo Cancellers A
+                   and B. Both NLP’s are disabled when low. Intended for conformance testing to G.165 and it is
+                   usually tied to Vdd for normal operation.
+                   Controller Mode: This pin is ignored (tie to Vdd or Vss). The non-linear processor operation is
+                   controlled by the NLPDis bit in Control Register 2. Refer to the Register Summary.
+   11     REV      Reversal Detection (Input):
+                   Controllerless Mode: An active high configures all the tone detectors to trigger only when a
+                   2100Hz disable tone with periodic phase reversal is present (per G.165). When low, the tone
+                   detectors will trigger upon detection of any 2100Hz disable tone, with or without periodic
+                   phase reversal (per G.164).
+                   Controller Mode: This pin is ignored (tie to VDD or VSS). The operation is controlled by the
+                   PHDis bit in Control Register 2. Refer to the Register Summary.
+  12      LAW      A/µ Law Select (Input):
+                   An active low selects µ−Law companded PCM. When high, selects A-Law companded PCM.
+                   This control is for both echo cancellers and is valid for both controller and controllerless
+                   modes.
+  13    FORMAT ITU-T/Sign Mag (Input):
+                   An active low selects sign-magnitude PCM code. When high, selects ITU-T (G.711) PCM
+                   code. This control is for both echo cancellers and is valid for both controller and controllerless
+                   modes.
+  14    PWRDN Power-down (Input): An active low resets the device and puts the MT9122 into a low-power
+                   stand-by mode.
+                                                           3
+                                               Zarlink Semiconductor Inc.
+
+
+                                                    MT9122                                              Data Sheet
+Pin Description (continued)
+ Pin #    Name                                                 Description
+  15       TD2     Tone Detect 2 (Output):
+                   An active low output occurs when Echo Canceller B detects the presence of a valid 2100 Hz
+                   disabling tone (G.164 or G.165) on Rin or Sin pins. This output returns to a logic high once the
+                   release criteria are met. The behavior of this pin is identical in both controller and
+                   controllerless modes.
+  16       TD1     Tone Detect 1 (Output):
+                   An active low output occurs when Echo Canceller A detects the presence of a valid 2100 Hz
+                   disabling tone (G.164 or G.165) on Rin or Sin pins. This output returns to a logic high once the
+                   release criteria are met. The behavior of this pin is identical in both controller and
+                   controllerless modes.
+ 17/18    S4/S3    Selection of Echo Canceller B Functional States (Input):
+                   Controllerless Mode: Selects Echo Canceller B functional states according to Table 2.
+                   Controller Mode: S4 and S3 pins become SCLK and CS pins respectively.
+  17      SCLK     Serial Port Synchronous Clock (Input): Data clock for the serial microport interface.
+  18       CS      Chip Select (Input): Enables serial microport interface data transfers. Active low.
+ 19/20    S2/S1    Selection of Echo Canceller A Functional States (Input):
+                   Controllerless Mode: Selects Echo Canceller A functional states according to Table 2.
+                   Controller Mode: S2 and S1 pins become DATA2 and DATA1 pins respectively.
+  19     DATA2     Serial Data Receive (Input):
+                   In Motorola/National serial microport operation, the DATA2 pin is used for receiving data. In
+                   Intel serial microport operation, the DATA2 pin is not used and must be tied to Vss or Vdd.
+  20     DATA1     Serial Data Port (Bidirectional):
+                   In Motorola/National serial microport operation, the DATA1 pin is used for transmitting data. In
+                   Intel serial microport operation, the DATA1 pin is used for transmitting and receiving data.
+  21      F0od     Delayed Frame Pulse Output (Output):
+                   In ST-BUS operation, this pin generates a delayed frame pulse after the 4th channel time slot
+                   and is used for daisy-chaining multiple ST-BUS devices. See Figures 5 to 8.
+                   In SSI operation, this pin outputs logic low.
+  22      VDD      Positive Power Supply: Nominally 5 volts.
+  23      Sout     Send PCM Signal Output (Output):
+                   128 kbit/s to 4096 kbit/s serial PCM output stream. Data may be in either companded or 2’s
+                   complement linear PCM format. Two PCM channels are time-multiplexed on this pin. These
+                   are the Send Out signals after echo cancellation and Non-linear processing. Data bits are
+                   clocked out following SSI or ST-BUS timing requirements.
+  24      Rout     Receive PCM Signal Output (Output):
+                   128 kbit/s to 4096 kbit/s serial PCM output stream. Data may be in either companded or 2’s
+                   complement linear PCM format. Two PCM channels are time-multiplexed on this pin. This
+                   output pin is provided for convenience in some applications and may not always be required.
+                   Data bits are clocked out following SSI or ST-BUS timing requirements.
+  25       F0i     Frame Pulse (input):
+                   In ST-BUS operation, this is a frame alignment low going pulse. SSI operation is enabled by
+                   connecting this pin to Vss.
+                                                          4
+                                              Zarlink Semiconductor Inc.
+
+
+                                                                MT9122                                                      Data Sheet
+Pin Description (continued)
+  Pin #        Name                                                        Description
+    26      BCLK/C4i Bit Clock/ST-BUS Clock (Input):
+                         In SSI operation, BCLK pin is a 128 kHz to 4.096 MHz bit clock. This clock must be
+                         synchronous with ENA1, ENA2, ENB1 and ENB2 enable strobes.
+                         In ST-BUS operation, C4i pin must be connected to the 4.096 MHz (C4) system clock.
+  27/28 CONFIG1/ Device Configuration Pins (Inputs).
+            CONFIG2 When CONFIG1 and CONFIG2 pins are both logic 0, the MT9122 serial microport is enabled.
+                         This configuration is defined as Controller Mode. When CONFIG1 and CONFIG2 pins are in
+                         any other logic combination, the MT9122 is configured in Controllerless Mode. See Table 3.
+Notes:
+1. All unused inputs should be connected to logic low or high unless otherwise stated. All outputs should be left open circuit when not used.
+2. All inputs have TTL compatible logic levels except for MCLK, Sin and Rin pins which have CMOS compatible logic levels and PWRDN pin
+   which has Schmitt trigger compatible logic levels.
+3. All outputs are CMOS pins with CMOS logic levels.
+Functional Description
+The MT9122 architecture contains two individually controlled echo cancellers (Echo Canceller A and B). They can
+be set in three distinct configurations: Normal, Back-to-Back and Extended Delay (see Figure 3). Under Normal
+configuration, the two echo cancellers are positioned in parallel providing 64 millisecond echo cancellation in two
+channels simultaneously. In Back-to-Back configuration, the two echo cancellers are positioned to cancel echo
+coming from both directions in a single channel. In Extended-Delay configuration, the two echo cancellers are
+internally cascaded into one 128 millisecond echo canceller.
+Each echo canceller contains the following main elements (see Figure 1).
+•   Adaptive Filter for estimating the echo channel
+•   Subtracter for cancelling the echo
+•   Double-Talk detector for disabling the filter adaptation during periods of double-talk
+•   Non-Linear Processor for suppression of residual echo
+•   Disable Tone Detectors for detecting valid disable tones at the input of receive and send paths
+•   Narrow-Band Detector for preventing Adaptive Filter divergence caused by narrow-band signals
+•   Offset Null filters for removing the DC component in PCM channels
+•   12dB attenuator for signal attenuation
+•   Serial controller interface compatible with Motorola, National and Intel microcontrollers
+•   PCM encoder/decoder compatible with µ/A-Law ITU-T G.711, µ/A-Law Sign-Mag or linear 2’s complement
+    coding
+The MT9122 has two modes of operation: Controllerless and Controller. Controllerless mode is intended for
+applications where customization is not required. Controller mode allows access to all registers for customizing the
+MT9122 operation. Refer to Table 7 for a complete list. Controller mode is selected when CONFIG1 and CONFIG2
+pins are both connected to Vss.
+Each echo canceller in the MT9122 has four functional states: Mute, Bypass, Disable Adaptation and Enable
+Adaptation. These are explained in the section entitled Echo Canceller Functional States.
+                                                                      5
+                                                          Zarlink Semiconductor Inc.
+
+
+                                                                  MT9122                                                                     Data Sheet
+                                                                                         PORT 2                                                     PORT 1
+               PORT 2                                            PORT 1                               channel A
+                                                                                           Sin                               +                         Sout
+                       channel A                                                                                           -
+           Sin                          +                                 Sout
+                                                                                       echo
+                                      -                                                 path A                      Adaptive Filter
+                                                                                                                        (128 ms)
+          echo
+          path A                    Adaptive                                                         channel A
+                                 Filter (64ms)                                            Rout                                                         Rin
+                       channel A
+          Rout                                                                                                                   Optional -12dB pad
+                                                                           Rin                         E.C.A
+                        E.C.A
+                                           Optional -12dB pad                           b) Extended Delay Configuration (128ms)
+                                                                                   PORT 2                                                           PORT 1
+                       channel B
+                                        +
+                                                                                     Sin               +                                               Sout
+                                     -
+                                                                                                    -    Optional -12dB pad
+         echo                      Adaptive                                         echo                                           Adaptive          echo
+         path B                                                                     path                                         Filter (64ms)       path
+                                 Filter (64ms)                                                   Adaptive
+                      channel B                                                                Filter (64ms)
+                                                                                                                                             -
+                                                                                   Rout                                                  +             Rin
+                                          Optional -12dB pad
+                        E.C.B                                                                                     Optional -12dB pad
+                                                                                                   E.C.A                              E.C.B
+                   a) Normal Configuration (64ms)                                        c) Back-to-Back Configuration (64ms)
+                                                     Figure 3 - Device Configuration
+Adaptive Filter
+The adaptive filter is a 1024 tap FIR filter which is divided into two sections. Each section contains 512 taps
+providing 64 ms of echo estimation. In Normal configuration, the first section is dedicated to channel A and the
+second section to channel B. In Extended Delay configuration, both sections are cascaded to provide 128 ms of
+echo estimation in channel A.
+Double-Talk Detector
+Double-Talk is defined as those periods of time when signal energy is present in both directions simultaneously.
+When this happens, it is necessary to disable the filter adaptation to prevent divergence of the adaptive filter
+coefficients. Note that when double-talk is detected, the adaptation process is halted but the echo canceller
+continues to cancel echo.
+A double-talk condition exists whenever the Sin signal level is greater than the expected return echo level. The
+relative signal levels of Rin (Lrin) and Sin (Lsin) are compared according to the following expression to identify a
+double-talk condition:
+                                                        Lsin > Lrin + 20log10(DTDT)
+where DTDT is the Double-Talk Detection Threshold. Lsin and Lrin are the relative signal levels expressed in
+dBm0.
+A different method is used when it is uncertain whether Sin consists of a low level double-talk signal or an echo
+return. During these periods, the adaptation process is slowed down but it is not halted.
+                                                                        6
+                                                            Zarlink Semiconductor Inc.
+
+
+                                                       MT9122                                           Data Sheet
+Controllerless Mode
+In G.165 standard, the echo return loss is expected to be at least 6 dB. This implies that the Double-Talk Detector
+Threshold (DTDT) should be set to 0.5 (-6 dB). However, in order to get additional guardband, the DTDT is set
+internally to 0.5625 (-5 dB). In controllerless mode, the Double-Talk Detector is always active.
+Controller Mode
+In some applications the return loss can be higher or lower than 6 dB. The MT9122 allows the user to change the
+detection threshold to suit each application’s need. This threshold can be set by writing the desired threshold value
+into the DTDT register.
+The DTDT register is 16 bits wide. The register value in hexadecimal can be calculated with the following equation:
+                                            DTDT(hex) = hex(DTDT(dec) * 32768)
+where 0 < DTDT(dec) < 1
+Example: For DTDT = 0.5625 (-5dB), the
+             hexadecimal value becomes
+             hex(0.5625 * 32768) = 4800h
+Non-Linear Processor (NLP)
+After echo cancellation, there is always a small amount of residual echo which may still be audible. The MT9122
+uses an NLP to remove residual echo signals which have a level lower than the Adaptive Suppression Threshold
+(TSUP in G.165). This threshold depends upon the level of the Rin (Lrin) reference signal as well as the
+programmed value of the Non-Linear Processor Threshold register (NLPTHR). TSUP can be calculated by the
+following equation:
+                                              TSUP = Lrin + 20log10(NLPTHR)
+where NLPTHR is the Non-Linear Processor Threshold register value and Lrin is the relative power level expressed
+in dBm0.
+When the level of residual error signal falls below TSUP, the NLP is activated further attenuating the residual signal
+to less than -65 dBm0. To prevent a perceived decrease in background noise due to the activation of the NLP, a
+spectrally-shaped comfort noise, equivalent in power level to the background noise, is injected. This keeps the
+perceived noise level constant. Consequently, the user does not hear the activation and de-activation of the NLP.
+Controllerless Mode
+The NLP processor can be disabled by connecting the NLP pin to Vss.
+Controller Mode
+The NLP processor can be disabled by setting the NLPDis bit to 1 in Control Register 2.
+The NLPTHR register is 16 bits wide. The register value in hexadecimal can be calculated with the following
+equation:
+                                         NLPTHR(hex) = hex(NLPTHR(dec) * 32768)
+                                                             7
+                                                 Zarlink Semiconductor Inc.
+
+
+                                                       MT9122                                          Data Sheet
+where 0 < NLPTHR(dec) < 1
+The comfort noise injection can be disabled by setting the INJDis bit to 1 in Control Register 1.
+It should be noted that the NLPTHR is valid and the comfort noise injection is active only when the NLP is enabled.
+Disable Tone Detector
+G.165 recommendation defines the disable tone as having the following characteristics: 2100 Hz (± 21 Hz)
+sinewave, a power level between -6 to -31 dBm0, and a phase reversal of 180 degrees (± 25 degrees) every
+450 ms (± 24 ms). If the disable tone is present for a minimum of one second with at least one phase reversal, the
+Tone Detector will trigger.
+G.164 recommendation defines the disable tone as a 2100 Hz (±21Hz) sinewave with a power level between -6 to -
+31 dBm0. If the disable tone is present for a minimum of one second, with or without phase reversal, the Tone
+Detector will trigger.
+The MT9122 has four Tone Detectors in order to monitor the occurrence of a valid disable tone on channels A and
+B on both Rin and Sin. Upon detection of a disable tone, output pins TD1 or TD2 will go low as illustrated in Figure
+4.
+                                   Rin          Tone Detector
+                                                                             TD1
+                                   Sin          Tone Detector
+                                                 Echo Canceller A
+                                   Rin          Tone Detector
+                                                                             TD2
+                                   Sin          Tone Detector
+                                                 Echo Canceller B
+                                            Figure 4 - Disable Tone Detection
+Once a Tone Detector has been triggered, the MT9122 no longer needs a valid disable tone (G.164 or G.165) to
+maintain Tone Detector status (e.g. TD1, TD2 pins low). The Tone Detector status will only release (e.g. TD1, TD2
+pins high) if the signals Rin and Sin fall below -30 dBm0, in the frequency range of 390 Hz to 700 Hz, and below -
+34 dBm0, in the frequency range of 700 Hz to 3400 Hz, for at least 400 ms.
+Controllerless Mode
+The selection between G.165 and G.164 tone disable is controlled by the REV pin. When the REV pin is connected
+to Vss, G.164 is selected. This applies to all four Tone Detectors.
+In response to a valid disable tone, the MT9122 must be switched from the Enable Adaptation state to the Bypass
+state. In an application, the Tone Detect outputs, TD1 and TD2, may be used to switch the echo cancellers between
+these two states. This is achieved by connecting S1 and S3 pins to Vdd and by connecting the TD1 and TD2
+outputs to the S2 and S4 input pins respectively.
+Controller Mode
+The selection between G.165 and G.164 tone disable is controlled by the PHDis bit in Control Register 2. When the
+PHDis bit is set to 1, G.164 tone disable requirements are selected. This applies to all four Tone Detectors.
+                                                             8
+                                                 Zarlink Semiconductor Inc.
+
+
+                                                       MT9122                                           Data Sheet
+In response to a valid disable tone, the MT9122 must be switched from the Enable Adaptation state to the Bypass
+state. This can be done in two ways, automatically or externally. In automatic mode, the Tone Detectors internally
+control the switching between Enable Adaptation and Bypass states. The automatic mode can be activated by
+setting the AutoTD bit in Control Register 2 to high. In external mode, an external controller is needed to poll the TD
+bit in Status Register A or B. Following the detection of a disable tone (TD bit high), the external controller should
+switch the echo canceller from Enable Adaptation to Bypass state.
+The TD1 and TD2 output pins remain active, as in Controllerless mode, and they can be used as an interrupt to an
+external controller.
+Narrow Band Signal Detector (NBSD)
+Single or dual frequency tones (e.g. DTMF tones) present in the reference input (Rin) of the echo canceller for a
+prolonged period of time may cause the adaptive filter to diverge. The Narrow Band Signal Detector (NBSD) is
+designed to prevent this divergence by detecting single or dual tones of arbitrary frequency, phase, and amplitude.
+When narrow band signals are detected, the adaptation process is halted but the echo canceller continues to
+cancel echo.
+Controllerless Mode
+The NBSD is always active and automatically disables the filter adaptation process when narrow band signals are
+detected.
+Controller Mode
+The NBSD can be disabled by setting the NBDis bit to 1 in Control Register 2.
+Offset Null Filter
+Adaptive filters in general do not operate properly when a DC offset is present on either the reference signal (Rin)
+or the echo composite signal (Sin). To remove the DC component, the MT9122 incorporates Offset Null filters in
+both Rin and Sin inputs.
+Controllerless Mode
+The Offset Null filters are always active.
+Controller Mode
+The offset null filters can be disabled by setting the HPFDis bit to 1 in Control Register 2.
+Echo Canceller Functional States
+Each echo canceller has four functional states: Mute, Bypass, Disable Adaptation and Enable Adaptation.
+Mute:
+The Mute state forces the echo canceller to transmit quiet code and halts the filter adaptation process.
+                                                             9
+                                                 Zarlink Semiconductor Inc.
+
+
+                                                                   MT9122                                Data Sheet
+In Normal configuration, the PCM output data on Rout is replaced with the quiet code according to the following
+table.
+                LINEAR           SIGN/             CCITT (G.711)
+                 16 bits      MAGNITUDE
+                    2’s          µ-Law         µ-Law        A-Law
+             complement          A-Law
+   +Zero          0000h           80h            FFh          D5h
+   (quiet
+   code)
+         Table 1 - Quiet PCM Code Assignment
+In Back-to-Back configuration, both echo cancellers are combined to implement a full duplex echo canceller.
+Therefore muting Echo Canceller A causes quiet code to be transmitted on Rout, while muting Echo Canceller B
+causes quiet code to be transmitted on Sout.
+In Extended Delay configuration, both echo cancellers are cascaded to make one 128ms echo canceller. In this
+configuration, muting Echo Canceller A causes quiet code to be transmitted on Rout.
+Bypass:
+The Bypass state directly transfers PCM codes from Rin to Rout and from Sin to Sout. When Bypass state is
+selected, the adaptive filter coefficients are reset to zero.
+Disable Adaptation:
+When the Disable Adaptation state is selected, the adaptive filter coefficients are frozen at their current value. In
+this state, the adaptation process is halted however the MT9122 continues to cancel echo.
+Enable Adaptation:
+In Enable Adaptation state, the adaptive filter coefficients are continually updated. This allows the echo canceller to
+model the echo return path characteristics in order to cancel echo. This is the normal operating state.
+Controllerless Mode
+The four functional states can be selected via S1, S2, S3, and S4 pins as shown in the following table.
+       Echo                                                Echo
+  Canceller A                                            Canceller B
+                          Functional State
+       S2/S1                                               S4/S3
+         00                      Mute(1)                     00
+         01                     Bypass(2)                    01
+         10              Disable  Adaptation(1,3)            10
+         11               Enable Adaptation(3)               11
+       Table 2 - Functional States Control Pins
+(1) Filter coefficients are frozen (adaptation disabled)
+(2) The adaptive filter coefficients are reset to zero
+(3) The MT9122 cancels echo
+                                                                        10
+                                                             Zarlink Semiconductor Inc.
+
+
+                                                       MT9122                                           Data Sheet
+Controller Mode
+The echo canceller functions are selected in Control Register 1 and Control Register 2 through four control bits:
+MuteS, MuteR, Bypass and AdaptDis. See Register Summary for details.
+MT9122 Throughput Delay
+The throughput delay of the MT9122 varies according to the data path and the device configuration. For all device
+configurations, except for Bypass state, Rin to Rout has a delay of two frames and Sin to Sout has a delay of three
+frames. In Bypass state, the Rin to Rout and Sin to Sout paths have a delay of two frames. In ST-BUS operation,
+the D and C channels have a delay of one frame.
+Power Down
+Forcing the PWRDN pin to logic low, will put the MT9122 into a power down state. In this state all internal clocks are
+halted, the DATA1, Sout and Rout pins are tristated and the F0od, TD1, and TD2 pins output high.
+The device will automatically begin the execution of its initialization routines when the PWRDN pin is returned to
+logic high and a clock is applied to the MCLK pin. The initialization routines execute for one frame and will set the
+MT9122 to default register values.
+Device Configuration
+The MT9122 architecture contains two individually controlled echo cancellers (Echo Canceller A and B). They can
+be set in three distinct configurations: Normal, Back-to-Back, and Extended Delay. See Figure 3.
+Normal Configuration:
+In this configuration, the two echo cancellers (Echo Canceller A and B) are positioned in parallel, as shown in
+Figure 3a, providing 64 milliseconds of echo cancellation in two channels simultaneously.
+In SSI operation, both channels are available in different timeslots on the same TDM (Time Division Multiplexing)
+bus. For Echo Canceller A, the ENA1 enable strobe pin defines the Rin/Sout (PORT1) time slot while the ENA2
+enable strobe pin defines the Sin/Rout (PORT2) time slot. The ENB1 and ENB2 enable strobes perform the same
+function for Echo Canceller B.
+In ST-BUS operation, the ENA1, ENA2, ENB1 and ENB2 pins are used to determine the PCM data format and the
+channel locations. See Table 4.
+Back-to-Back Configuration:
+In this configuration, the two echo cancellers are positioned to cancel echo coming from both directions in a single
+channel providing full duplex 64 millisecond echo-cancellation. See Figure 3c. This configuration uses only one
+timeslot on PORT1 and PORT2, allowing a no-glue interface for applications where bidirectional echo cancellation
+is required.
+In SSI operation, ENA1 and ENA2 enable pins are used to strobe data on Rin/Sout and Sin/Rout respectively. In
+ST-BUS operation, ENA1, ENA2, ENB1 and ENB2 inputs are used to select the ST-BUS mode according to Table
+4.
+Examples of Back-to-Back configuration include positioning the MT9122 between a codec and a transmission
+device or between two codecs for echo control on analog trunks.
+Extended Delay Configuration:
+In this configuration, the two echo cancellers are internally cascaded into one 128 millisecond echo canceller. See
+Figure 3b. In SSI operation, ENA1 and ENA2 enable pins are used to strobe data on Rin/Sout and Sin/Rout
+                                                            11
+                                                 Zarlink Semiconductor Inc.
+
+
+                                                        MT9122                                   Data Sheet
+respectively. In ST-BUS operation, ENA1, ENA2, ENB1 and ENB2 inputs are used to select the ST-BUS mode
+according to Table 4.
+Controllerless Mode
+The three configurations can be selected through the CONFIG1 and CONFIG2 pins as shown in the following table.
+                      CONFIG1          CONFIG2                          CONFIGURATION
+                           0                 0                       (selects Controller Mode)
+                           0                 1                         Extended Delay Mode
+                           1                 0                          Back-to-Back Mode
+                           1                 1                             Normal Mode
+                               Table 3 - Configuration in Controllerless Mode
+Controller Mode
+In Control Register 1, the Normal configuration can be programmed by setting both BBM and Extended-Delay bits
+to 0. Back-to-Back configuration can be programmed by setting the BBM bit to 1 and Extended-Delay bit to 0.
+Extended-Delay configuration can be programmed by setting the Extended-Delay bit to 1 and BBM bit to 0. Both
+BBM and Extended-Delay bits in Control Register 1 can not be set to 1 at the same time.
+PCM Data I/O
+The PCM data transfer for the MT9122 is provided through two PCM ports. PORT1 consists of Rin and Sout pins
+while PORT2 consists of Sin and Rout Pins. The Data is transferred through these ports according to either ST-
+BUS or SSI conventions. The device determines the mode of operation by monitoring the signal applied to the F0i
+pin. When a valid ST-BUS frame pulse is applied to the F0i pin, the MT9122 will assume ST-BUS operation. If F0i is
+tied continuously to Vss the MT9122 will assume SSI operation.
+ST-BUS Operation
+The ST-BUS PCM interface conforms to Zarlink’s ST-BUS standard and it is used to transport 8 bit companded
+PCM data (using one timeslot) or 16 bit 2’s complement linear PCM data (using two timeslots). Pins ENA1 and
+ENB1 select timeslots on PORT1 while pins ENA2 and ENB2 select timeslots on PORT2. See Table 4 and Figures
+5 to 8.
+                                PORT1                  ST-BUS Mode                  PORT2
+                               Rin/Sout                   Selection                Sin/Rout
+                               Enable Pins                                         Enable Pins
+                              ENB1 ENA1                                           ENB2   ENA2
+                                0      0    Mode 1. 8 bit companded PCM I/O on      0       0
+                                            timeslots 0 & 1.
+                                0      1    Mode 2. 8 bit companded PCM I/O on      0       1
+                                            timeslots 2 & 3.
+                                1      0    Mode 3. 8 bit companded PCM I/O on      1       0
+                                            timeslots 2 & 3. Includes D & C chan-
+                                            nel bypass in timeslots 0 & 1.
+                                           Table 4 - ST-BUS Mode Select
+                                                               12
+                                                  Zarlink Semiconductor Inc.
+
+
+                                                          MT9122                                              Data Sheet
+                                   PORT1                 ST-BUS Mode                 PORT2
+                                  Rin/Sout                  Selection               Sin/Rout
+                                   1      1    Mode 4. 16 bit 2’s complement linear  1    1
+                                               PCM I/O on timeslots 0 - 3.
+                                             Table 4 - ST-BUS Mode Select
+Note that if the device is in back-to-back or extended delay configurations, the second timeslot in any ST-BUS
+Mode contains undefined data. This means that the following timeslots contain undefined data: timeslot 1 in ST-
+BUS Mode 1; timeslot 3 in ST-BUS Modes 2 & 3 and timeslots 2 and 3 in ST-BUS Mode 4.
+SSI Operation
+The SSI PCM interface consists of data input pins (Rin, Sin), data output pins (Sout, Rout), a variable rate bit clock
+(BCLK), and four enable pins (ENA1,ENB1, ENA2 and ENB2) to provide strobes for data transfers. The active high
+enable may be either 8 or 16 BCLK cycles in duration. Automatic detection of the data type (8 bit companded or 16
+bit 2’s complement linear) is accomplished internally. The data type cannot change dynamically from one frame to
+the next.
+In SSI operation, the frame boundary is determined by the rising edge of the ENA1 enable strobe (see Figure 9).
+The other enable strobes (ENB1, ENA2 and ENB2) are used for parsing input/output data and they must pulse
+within 125 microseconds of the rising edge of ENA1. If they are unused, they must be tied to Vss.
+In SSI operation, the enable strobes may be a mixed combination of 8 or 16 BCLK cycles allowing the flexibility to
+mix 2’s complement linear data on one port (e.g., Rin/Sout) with companded data on the other port (e.g., Sin/Rout).
+                               Enable Strobe Pin                   Echo Canceller            Port
+                                     ENA1                                  A                  1
+                                     ENB1                                  B                  1
+                                     ENA2                                  A                  2
+                                     ENB2                                  B                  2
+                                            Table 5 - SSI Enable Strobe Pins
+PCM Law and Format Control (LAW, FORMAT)
+The PCM companding/coding law used by the MT9122 is controlled through the LAW and FORMAT pins. ITU-T
+G.711 companding curves for µ-Law and A-Law are selected by the LAW pin. PCM coding ITU-T G.711 and Sign-
+Magnitude are selected by the FORMAT pin. See Table 6.
+Linear PCM
+The 16-bit 2’s complement PCM linear coding permits a dynamic range beyond that which is specified in ITU-T
+G.711 for companded PCM. The echo-cancellation algorithm will accept 16 bits 2’s complement linear code which
+gives a dynamic range of +15 dBm0. Note however that the tone detectors must be limited to the maximum
+dynamic range specified in G.711 (+3.14 or +3.17 dBm0).
+Linear PCM data must be formatted as 14-bit, 2’s complement data with three bits of sign extension in the most
+significant positions (i.e.: S,S,S,12,11, ...1,0) for a total of 16 bits where “S” is the extended sign bit. When A-Law is
+converted to 2’s complement linear format, it must be scaled up by 6 dB (i.e., left shifted one bit) with a zero
+inserted into the least significant bit position. See Figure 8.
+                                                                 13
+                                                    Zarlink Semiconductor Inc.
+
+
+                                                         MT9122                                         Data Sheet
+                                                  Sign-Magnitude           ITU-T (G.711)
+                                                    FORMAT=0                FORMAT=1
+                                   PCM Code
+                                                      µ/A-LAW         µ-LAW          A-LAW
+                                                    LAW = 0 or 1     LAW = 0         LAW =1
+                                   + Full Scale      1111 1111      1000 0000       1010 1010
+                                      + Zero         1000 0000      1111 1111       1101 0101
+                                      - Zero         0000 0000      0111 1111       0101 0101
+                                   - Full Scale      0111 1111      0000 0000       0010 1010
+                                                Table 6 - Companded PCM
+Bit Clock (BCLK/C4i)
+The BCLK/C4i pin is used to clock the PCM data in both SSI (BCLK) and ST-BUS (C4i) operations.
+In SSI operation, the bit rate is determined by the BCLK frequency. This input must contain either eight or sixteen
+clock cycles within the valid enable strobe window. BCLK may be any rate between 128 KHz to 4.096 MHz and can
+be discontinuous outside of the enable strobe windows defined by ENA1, ENB1, ENA2 and ENB2 pins. Incoming
+PCM data (Rin, Sin) are sampled on the falling edge of BCLK while outgoing PCM data (Sout, Rout) are clocked
+out on the rising edge of BCLK. See Figure 17.
+In ST-BUS operation, connect the system C4 (4.096 MHz) clock to the C4i pin.
+Master Clock (MCLK)
+A nominal 20 MHz master clock (MCLK) is required for execution of the MT9122 algorithms. The MCLK input may
+be asynchronous with the 8 KHz frame. If only one channel operation is required, (Echo Canceller A only) the
+MCLK can be as low as 9.6 MHz.
+Microport
+The serial microport provides access to all MT9122 internal read and write registers and it is enabled when
+CONFIG1 and CONFIG2 pins are both set to logic 0. This microport is compatible with Intel MCS-51 (mode 0),
+Motorola SPI (CPOL=0, CPHA=0), and National Semiconductor Microwire specifications. The microport consists of
+a transmit/receive data pin (DATA1), a receive data pin (DATA2), a chip select pin (CS) and a synchronous data
+clock pin (SCLK).
+The MT9122 automatically adjusts its internal timing and pin configuration to conform to Intel or Motorola/National
+requirements. The microport dynamically senses the state of the SCLK pin each time CS pin becomes active (i.e.
+high to low transition). If SCLK pin is high during CS activation, then Intel mode 0 timing is assumed. In this case
+DATA1 pin is defined as a bi-directional (transmit/receive) serial port and DATA2 is internally disconnected. If SCLK
+is low during CS activation, then Motorola/National timing is assumed and DATA1 is defined as the data transmit pin
+while DATA2 becomes the data receive pin. The MT9122 supports Motorola half-duplex processor mode (CPOL=0
+and CPHA=0). This means that during a write to the MT9122, by the Motorola processor, output data from the
+DATA1 pin must be ignored. This also means that input data on the DATA2 pin is ignored by the MT9122 during a
+valid read by the Motorola processor.
+All data transfers through the microport are two bytes long. This requires the transmission of a Command/Address
+byte followed by the data byte to be written or read from the addressed register. CS must remain low for the
+duration of this two-byte transfer. As shown in Figures 10 and 11, the falling edge of CS indicates to the MT9122
+that a microport transfer is about to begin. The first 8 clock cycles of SCLK after the falling edge of CS are always
+used to receive the Command/Address byte from the microcontroller. The Command/Address byte contains
+                                                              14
+                                                   Zarlink Semiconductor Inc.
+
+
+                                                             MT9122                                                         Data Sheet
+information detailing whether the second byte transfer will be a read or a write operation and at what address. The
+next 8 clock cycles are used to transfer the data byte between the MT9122 and the microcontroller. At the end of
+the two-byte transfer, CS is brought high again to terminate the session. The rising edge of CS will tri-state the
+DATA1 pin. The DATA1 pin will remain tri-stated as long as CS is high.
+Intel processors utilize Least Significant Bit (LSB) first transmission while Motorola/National processors use Most
+Significant Bit (MSB) first transmission. The MT9122 microport automatically accommodates these two schemes
+for normal data bytes. However, to ensure timely decoding of the R/W and address information, the
+Command/Address byte is defined differently for Intel and Motorola/National operations. Refer to the relative timing
+diagrams of Figures 10 and 11.
+Receive data is sampled on the rising edge of SCLK while transmit data is clocked out on the falling edge of SCLK.
+Detailed microport timing is shown in Figure 19 and Figure 20.
+       Function                           Controllerless                                              Controller
+                                selected when pins CONFIG1 & 2 ≠ 00                      selected when pins CONFIG1 & 2 = 00
+  Normal Configuration Set pins CONFIG1 to 1 and CONFIG2 1 to select this      Set bits Extended-Delay to 0 and BBM to 0 in Control Reg-
+                       configuration.                                          ister 1 to select.
+  Back-to-Back         Set pins CONFIG1 to 1 and CONFIG2 to 0 to select        Set bit BBM to 1 in Control Register 1 to select.
+  Configuration        this configuration.
+  Extended Delay       Set pins CONFIG1 to 0 and CONFIG2 to 1 to select        Set bit Extended-Delay to 1 in Control Register 1 to select.
+  Configuration        this configuration.
+  Mute                 Set pins S2/S1 to 00 and S4/S3 to 00 to select for Echo Set bit MuteR to 1 or MuteS to 1 in Control Register 2 to
+                       Canceller A and Echo Canceller B respectively.          select.
+  Bypass               Set pins S2/S1 to 01 and S4/S3 to 01 to select for Echo Set bit Bypass to 1 in Control Register 1 to select.
+                       Canceller A and Echo Canceller B, respectively.
+  Disable Adaptation   Set pins S2/S1 to 10 and S4/S3 to 10 to select for Echo Set bit AdaptDis to 1 in Control Register 1 to select.
+                       Canceller A and Echo Canceller B, respectively.
+  Enable Adaptation    Set pins S2/S1 to 11 and S4/S3 to 11 to select for Echo Set bits AdaptDis to 0 and Bypass to 0 in Control Register
+                       Canceller A and Echo Canceller B, respectively.         1 to select.
+  SSI                  Tie pin F0i to VSS to select.                           Tie pin F0i to VSS to select.
+  ST-BUS               Apply a valid ST-BUS frame pulse to F0i pin to select.  Apply a valid ST-BUS frame pulse to F0i pin to select.
+  12dB Attenuator      Always disabled.                                        Set bit PAD to 1 in Control Register 1 to enable.
+  Double-Talk          Continuously enabled which disables filter adaptation   The detection threshold can be controlled via Double-Talk
+  Detector             when double-talk is detected.                           Detection Threshold Register 1 and 2.
+  Disable Tone         It is continuously enabled and puts TD1 or TD2 or both  Set bit TDis to 1 in Control Register 2 to disable tone
+  Detector             into active low when disable tone is detected. The TD1  detectors.
+                       and TD2 outputs have to be externally manipulated by
+                       the user to bypass the echo canceller.
+  Disable Tone         Set pin REV to 1 to select disable tone with phase      Set bit PHDis to 1 in Control Register 2 to select disable
+                       reversal (G.165).                                       tone without phase reversal (G164).
+  Non-Linear           Set pin NLP to 1 to enable.                             Set bit NLPDis to 1 to disable.
+  Processor
+  PCM Law              Set pin LAW to 1 or 0 to select A-Law or µ-Law          Set pin LAW to 1or 0 to select A-Law or µ-Law
+                       respectively.                                           respectively.
+  PCM Format           Set pin FORMAT to 0 or 1 to select Sign-Magnitude or    Set pin FORMAT to 0 or 1 to select Sign-Magnitude or
+                       ITU-T format respectively.                              ITU-T format respectively.
+  Narrow-Band Signal   Continuously enabled which disables the filter adapta-  Set bit NBDis to 1 in Control Register 2 to disable.
+  Detector             tion when narrow band signal is detected.
+                                      Table 7 - MT9122 Function Control Summary
+                                                                   15
+                                                       Zarlink Semiconductor Inc.
+
+
+                                                          MT9122                                                       Data Sheet
+     Function                            Controllerless                                            Controller
+                               selected when pins CONFIG1 & 2 ≠ 00                    selected when pins CONFIG1 & 2 = 00
+Offset Null Filter     Continuously enabled which removes the DC compo-     Set bit HPFDis to 1 in Control Register 2 to disable.
+                       nent in the PCM input.
+                              Table 7 - MT9122 Function Control Summary (continued)
+      C4i
+      F0i
+                                         0                   1                      2                      3                    4
+      F0od
+      PORT1                             ECA                 ECB
+      Rin                      7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+      Sout                      7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+      PORT2                             ECA                  ECB
+      Sin                       7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+      Rout                      7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+                   outputs=High impedance
+                    inputs = don’t care
+In ST-BUS Mode 1, both echo canceller I/O channels are assigned to ST-BUS timeslots 0 and 1. Note that the user
+could configure PORT1 and PORT2 into different ST-BUS modes. The pin F0od is always delayed 4 time slots to
+permit a more flexible interleave of ST-BUS modes.
+                     Figure 5 - ST-BUS 8 Bit Companded PCM I/O on Timeslots 0 & 1 (Mode 1)
+                                                               16
+                                                    Zarlink Semiconductor Inc.
+
+
+                                                     MT9122                                        Data Sheet
+    C4i
+    F0i
+                                       0            1                     2            3               4
+    F0od
+    PORT1                                                            ECA           ECB
+    Rin                                                       7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+    Sout                                                      7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+    PORT2                                                             ECA          ECB
+    Sin                                                       7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+    Rout                                                      7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+                   outputs=High impedance
+                   inputs = don’t care
+In ST-BUS Mode 2, both echo canceller I/O channels are assigned to ST-BUS timeslots 2 and 3. Note that the user
+could configure PORT1 and PORT2 into different ST-BUS modes. The pin F0od is always delayed 4 time slots to
+permit a more flexible interleave of ST-BUS modes.
+                    Figure 6 - ST-BUS 8 Bit Companded PCM I/O on Timeslots 2 & 3 (Mode 2)
+                                                          17
+                                               Zarlink Semiconductor Inc.
+
+
+                                                                   MT9122                           Data Sheet
+   C4i
+   F0i
+                                    0                        1                      2    3          4
+   F0od
+    PORT1
+   Rin                 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+                                                                                   ECA ECB
+   Sout                7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+   PORT2
+   Sin                 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+                                                                                   ECA ECB
+   Rout                7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
+                  outputs=High impedance
+                  inputs = don’t care
+                  indicates that an input channel is bypassed to an output channel
+ST-BUS Mode 3 supports connection to 2B+D devices where timeslots 0 and 1 transport D and C channels and both
+echo canceller I/O channels are assigned to ST-BUS timeslots 2 and 3. Both PORT1 and PORT2 must be configured in
+ST-BUS Mode 3.
+                   Figure 7 - ST-BUS 8 Bit Companded PCM I/O with D and C channels (Mode 3)
+                                                                         18
+                                                            Zarlink Semiconductor Inc.
+
+
+                                                    MT9122                                             Data Sheet
+   C4i
+   F0i
+   F0od
+   Rin           S S S 12 11 10 9 8 7 6 5 4 3 2 1 0 S S S 12 11 10 9 8 7 6 5 4 3 2 1 0
+   PORT1
+                                   ECA                                   ECB
+   Sout          S S S 12 11 10 9 8 7 6 5 4 3 2 1 0 S S S 12 11 10 9 8 7 6 5 4 3 2 1 0
+   Sin           S S S 12 11 10 9 8 7 6 5 4 3 2 1 0 S S S 12 11 10 9 8 7 6 5 4 3 2 1 0
+   PORT2
+                                   ECA                                   ECB
+   Rout          S S S 12 11 10 9 8 7 6 5 4 3 2 1 0 S S S 12 11 10 9 8 7 6 5 4 3 2 1 0
+              outputs=High impedance
+               inputs = don’t care
+ST-BUS Mode 4 allows 16 bits 2’s complement linear data to be transferred using ST-BUS I/O timing. Note that PORT1
+and PORT2 need not necessarily both be in mode 4.
+                         Figure 8 - ST-BUS 16 Bit 2’s Complement Linear PCM I/O (Mode 4)
+                                                         19
+                                              Zarlink Semiconductor Inc.
+
+
+                                                       MT9122                                             Data Sheet
+      BCLK
+      PORT1                                                  ECA                ECB
+      ENA1
+      ENB1
+                                                           8 or 16 bits     8 or 16 bits
+      Rin
+                                                           8 or 16 bits     8 or 16 bits
+      Sout
+      PORT2                                                  ECA                ECB
+      ENA2
+      ENB2
+                                                           8 or 16 bits     8 or 16 bits
+      Sin
+                                                           8 or 16 bits     8 or 16 bits
+      Rout
+                    outputs=High impedance
+                    inputs = don’t care
+Note that the two ports are independent so that, for example, PORT1 can operate with 8 bit enable strobes and PORT2
+can operate with 16 bit enable strobes.
+                                                 Figure 9 - SSI Operation
+                                                            20
+                                                 Zarlink Semiconductor Inc.
+
+
+                                                             MT9122                                               Data Sheet
+                  COMMAND/ADDRESS ➄                 ➀          DATA INPUT/OUTPUT
+DATA 1        R/W A0   A1 A2 A3 A4 A5         X          D0 D1 D2 D3 D4 D5 D6 D7
+SCLK ➁
+   CS                                                                                  ➃
+             ➂
+➀   Delays due to internal processor timing which are transparent to the MT9122.
+➁   The MT9122: latches receive data on the rising edge of SCLK
+                    outputs transmit data on the falling edge of SCLK
+➂   The falling edge of CS indicates that a COMMAND/ADDRESS byte will be transmitted from the microprocessor. The subsequent
+    byte is always data followed by CS returning high.
+➃   A new COMMAND/ADDRESS byte may be loaded only by CS cycling high then low again.
+➄   The COMMAND/ADDRESS byte contains:           1 bit - Read/Write
+                                                 6 bits - Addressing Data
+                                                 1 bit - Unused
+                                  Figure 10 - Serial Microport Timing for Intel Mode 0
+                        COMMAND/ADDRESS ➄                 ➀         DATA INPUT
+DATA 2            R/W A5 A4 A3 A2 A1 A0             X          D7 D6 D5 D4 D3 D2 D1 D0
+Receive
+                                                                  DATA OUTPUT
+DATA 1                                                         D7 D6 D5 D4 D3 D2 D1 D0
+Transmit                   High Impedance
+ SCLK ➁
+    CS                                                                                       ➃
+                  ➂
+➀   Delays due to internal processor timing which are transparent to the MT9122.
+➁   The MT9122:     latches receive data on the rising edge of SCLK
+                    outputs transmit data on the falling edge of SCLK
+➂   The falling edge of CS indicates that a COMMAND/ADDRESS byte will be transmitted from the microprocessor. The subsequent
+    byte is always data followed by CS returning high.
+➃   A new COMMAND/ADDRESS byte may be loaded only by CS cycling high then low again.
+➄   The COMMAND/ADDRESS byte contains: 1 bit - Read/Write
+                                                6 bits - Addressing Data
+                                                1 bit - Unused
+               Figure 11 - Serial Microport Timing for Motorola Mode 00 or National Microwire
+                                                                  21
+                                                       Zarlink Semiconductor Inc.
+
+
+                                                                MT9122                                                     Data Sheet
+Register Summary
+  Echo Canceller A, Control Register 1                                                    ADDRESS = 00h WRITE/READ VERIFY
+                                                                                        Extended                 Power Reset Value
+  CRA1          Reset      INJDis     BBM         PAD      Bypass AdaptDis        0      Delay                       0000 0000
+                   7           6        5           4         3          2       1           0
+  Echo Canceller B, Control Register 1                                                    ADDRESS = 20h WRITE/READ VERIFY
+  CRB1          Reset                                      Bypass AdaptDis                                       Power Reset Value
+                           INJDis     BBM         PAD                            1            0                      0000 0010
+                   7           6        5           4         3          2       1           0
+ Extended-   When high, Echo Cancellers A and B are internally cascaded into one 128ms echo canceller.
+ Delay       When low, Echo Cancellers A and B operate independently.
+             Do not enable both Extended-Delay and BBM configurations at the same time.
+ AdaptDis    When high, echo canceller adaptation is disabled.
+             When low, the echo canceller dynamically adapts to the echo path characteristics.
+ Bypass      When high, Sin data is by-passed to Sout and Rin data is by-passed to Rout.
+             When low, output data on both Sout and Rout is a function of the echo canceller algorithm.
+ PAD         When high, 12dB of attenuation is inserted into the Rin to Rout path.
+             When low the Rin to Rout path gain is 0dB.
+ BBM         When high the Back to Back configuration is enabled.
+             When low the Normal configuration is enabled. Do not enable Extended-Delay and BBM configurations at the same time.
+             Always set both BBM bits of the two echo cancellers to the same logic value to avoid conflict.
+ INJDis      When high, the noise injection process is disabled. When low noise injection is enabled.
+ Reset       When high, the power-up initialization is executed presetting all register bits including this bit.
+ Note: Bits marked as “1” or “0” are reserved bits and should be written as indicated.
+  Echo Canceller A, Control Register 2                                                    ADDRESS = 01h WRITE/READ VERIFY
+  Echo Canceller B, Control Register 2                                                    ADDRESS = 21h WRITE/READ VERIFY
+  CR2           TDis                                       NBDis      HPFDis                                     Power Reset Value
+                           PHDis     NLPDis     AutoTD                        MuteS      MuteR                       0000 0000
+                   7           6        5           4         3          2       1           0
+ MuteR       When high, data on Rout is muted to quiet code. When low, Rout carries active code.
+ MuteS       When high, data on Sout is muted to quiet code. When low, Sout carries active code.
+ HPFDis      When high, the offset nulling high pass filters are bypassed in the Rin and Sin paths.
+             When low, the offset nulling filters are active and will remove DC offsets on PCM input signals.
+ NBDis       When high, the narrow-band detector is disabled. When low, the narrow-band detector is enabled.
+ AutoTD      When high, the echo canceller is in Bypass mode when the tone detectors detect the presence of 2100Hz tones. See PHDis
+             for qualification of 2100Hz tones.
+             When low, the echo canceller algorithm will remain operational regardless of the state of the 2100Hz tone detectors.
+ NLPDis      When high, the non-linear processor is disabled.
+             When low, the non-linear processors function normally. Useful for G.165 conformance testing.
+ PHDis       When high, the tone detectors will trigger upon the presence of a 2100Hz tone regardless of the presence/absence of periodic
+             phase reversals.
+             When low, the tone detectors will trigger only upon the presence of a 2100Hz tone with periodic phase reversals.
+ TDis        When high, tone detection is disabled entirely. When low, tone detection is enabled.
+                                                                       22
+                                                          Zarlink Semiconductor Inc.
+
+
+                                                           MT9122                                                        Data Sheet
+ Echo Canceller A, Status Register                                                                       ADDRESS = 02h READ
+ Echo Canceller B, Status Register                                                                       ADDRESS = 22h READ
+                                                                                                                Power Reset Value
+ SR                    TD        DTDet      Conv     Down      Active      TDG         NB                           0000 0000
+               7         6          5          4        3         2         1          0
+NB       Logic high indicates the presence of a narrow-band signal on Rin.
+TDG      Tone detection status bit gated with the AutoTD bit.
+         Logic high indicates that AutoTD has been enabled and the tone detector has detected the presence of a 2100Hz tone.
+Active   Logic high indicates that the power level on Rin is above the threshold level (i.e., low power condition).
+Down     Decision indicator for the non-linear processor gain adjustment.
+Conv     Decision indicator for rapid adaptation convergence. Logic high indicates a rapid convergence state.
+DTDet    Logic high indicates the presence of a double-talk condition.
+TD       Logic high indicates the presence of a 2100Hz tone.
+                                                                23
+                                                    Zarlink Semiconductor Inc.
+
+
+                                                                   MT9122                                                     Data Sheet
+Echo Canceller A, Flat Delay Register                                                      ADDRESS = 04h WRITE/READ VERIFY
+Echo Canceller B, Flat Delay Register                                                      ADDRESS = 24h WRITE/READ VERIFY
+                                                                                                                    Power Reset Value
+FD                  FD7        FD6        FD5        FD4       FD3        FD2       FD1       FD0                           00h
+                      7          6          5         4          3        2         1         0
+Echo Canceller A, Decay Step Number Register                                               ADDRESS = 07h WRITE/READ VERIFY
+Echo Canceller B, Decay Step Number Register                                               ADDRESS = 27h WRITE/READ VERIFY
+                                                                                                                   Power Reset Value
+NS                NS7        NS6        NS5        NS4        NS3       NS2       NS1       NS0                            00h
+                     7          6          5         4          3         2        1         0
+Echo Canceller A, Decay Step Size Control Register                                         ADDRESS = 06h WRITE/READ VERIFY
+Echo Canceller B, Decay Step Size Control Register                                         ADDRESS = 26h WRITE/READ VERIFY
+                                                                                                                    Power Reset Value
+SSC                  0           0          0         0         0        SSC2      SSC1      SSC0                          04h
+                     7           6         5          4         3         2         1         0
+                Note: Bits marked with “0” are reserved bits and should be written “0”.
+       Amplitude of MU
+                                                      FIR Filter Length (512 or 1024 taps)
+         1.0
+                                                                                               Step Size (SS)
+                    Flat Delay (FD7-0)
+          2-16                                                                                                                 Time
+                                                                                                          Number of Steps (NS7-0)
+The Exponential Decay registers (Decay Step Number and Decay Step Size) and Flat Delay register allow the LMS adaptation
+step-size (MU) to be programmed over the length of the FIR filter. A programmable MU profile allows the performance of the echo
+canceller to be optimized for specific applications. For example, if the characteristic of the echo response is known to have a flat
+delay of several milliseconds and a roughly exponential decay of the echo impulse response, then the MU profile can be
+programmed to approximate this expected impulse response thereby improving the convergence characteristics of the adaptive
+filter. Note that in the following register descriptions, one tap is equivalent to 125µs (64ms/512 taps).
+FD7-0         Flat Delay: This register defines the flat delay of the MU profile, (i.e., where the MU value is 2-16). The delay is defined
+              as FD7-0 x 8 taps. For example; if FD7-0 = 5, then MU=2-16 for the first 40 taps of the echo canceller FIR filter. The valid
+              range of FD7-0 is: 0 <= FD7-0 <= 64 in normal mode and 0 <= FD7-0 <= 128 in extended-delay mode. The default value of
+              FD7-0 is zero.
+SSC2-0        Decay Step Size Control: This register controls the step size (SS) to be used during the exponential decay of MU. The
+              decay rate is defined as a decrease of MU by a factor of 2 every SS taps of the FIR filter, where SS = 4 x2SSC2-0. For
+              example; If SSC2-0 = 4, then MU is reduced by a factor of 2 every 64 taps of the FIR filter. The default value of SSC2-0
+              is 04h.
+NS7-0         Decay Step Number: This register defines the number of steps to be used for the decay of MU where each step has a
+              period of SS taps (see SSC2-0). The start of the exponential decay is defined as:
+              Filter Length (512 or 1024) - [ Decay Step Number (NS7-0) x Step Size (SS) ] where SS = 4 x2SSC2-0.
+              For example, if NS7-0=4 and SSC2-0=4, then the exponential decay start value is 512 - [NS7-0 x SS] = 512 - [4 x (4x24)] =
+              256 taps for a filter length of 512 taps.
+                                                                        24
+                                                           Zarlink Semiconductor Inc.
+
+
+                                                            MT9122                                                         Data Sheet
+Echo Canceller A, Rin Peak Detect Register 2                                                             ADDRESS = 0Dh READ
+Echo Canceller B, Rin Peak Detect Register 2                                                             ADDRESS = 2Dh READ
+                                                                                                                Power Reset Value
+RP             RP15     RP14      RP13       RP12       RP11     RP10       RP9        RP8                             N/A
+                   7       6         5         4          3        2          1         0
+ Echo Canceller A, Rin Peak Detect Register 1                                                            ADDRESS = 0Ch READ
+ Echo Canceller B, Rin Peak Detect Register 1                                                            ADDRESS = 2Ch READ
+                                                                                                                Power Reset Value
+RP              RP7     RP6        RP5        RP4        RP3     RP2        RP1        RP0                              N/A
+                   7       6          5         4         3         2          1        0
+These peak detector registers allow the user to monitor the receive in signal (Rin) peak signal level. The information is in 16-bit 2’s
+complement linear coded format presented in two 8 bit registers for each echo canceller. The high byte is in Register 2 and the low
+byte is in Register 1.
+Echo Canceller A, Sin Peak Detect Register 2                                                              ADDRESS = 0Fh READ
+Echo Canceller B, Sin Peak Detect Register 2                                                              ADDRESS = 2Fh READ
+                                                                                                                Power Reset Value
+SP             SP15     SP14      SP13       SP12       SP11     SP10       SP9        SP8                             N/A
+                   7       6         5         4          3        2          1         0
+ Echo Canceller A, Sin Peak Detect Register 1                                                            ADDRESS = 0Eh READ
+ Echo Canceller B, Sin Peak Detect Register 1                                                            ADDRESS = 2Eh READ
+                                                                                                                Power Reset Value
+SP              SP7     SP6        SP5        SP4        SP3     SP2        SP1        SP0                              N/A
+                   7       6          5         4         3         2          1        0
+These peak detector registers allow the user to monitor the send in signal (Sin) peak signal level. The information is in 16-bit 2’s
+complement linear coded format presented in two 8 bit registers for each echo canceller. The high byte is in Register 2 and the low
+byte is in Register 1.
+Echo Canceller A, Error Peak Detect Register 2                                                           ADDRESS = 11h READ
+Echo Canceller B, Error Peak Detect Register 2                                                           ADDRESS = 31h READ
+                                                                                                                Power Reset Value
+EP             EP15     EP14      EP13       EP12       EP11     EP10       EP9        EP8                             N/A
+                   7       6         5         4          3        2          1         0
+Echo Canceller A, Error Peak Detect Register 1                                                            ADDRESS = 10h READ
+Echo Canceller B, Error Peak Detect Register 1                                                            ADDRESS = 30h READ
+                                                                                                                Power Reset Value
+EP              EP7     EP6        EP5        EP4        EP3     EP2        EP1        EP0                              N/A
+                   7       6          5         4         3         2          1        0
+These peak detector registers allow the user to monitor the error signal peak level. The information is in 16-bit 2’s complement
+linear coded format presented in two 8 bit registers for each echo canceller. The high byte is in Register 2 and the low byte is in
+Register 1.
+                                                                  25
+                                                      Zarlink Semiconductor Inc.
+
+
+                                                              MT9122                                                    Data Sheet
+Echo Canceller A, Double-Talk Detection Threshold Register 2 ADDRESS = 15h WRITE/READ VERIFY
+Echo Canceller B, Double-Talk Detection Threshold Register 2 ADDRESS = 35h WRITE/READ VERIFY
+                                                                                                              Power Reset Value
+DTDT            DTDT15 DTDT14 DTDT13          DTDT12     DTDT11 DTDT10       DTDT9    DTDT8                         48h
+                   7         6         5        4          3         2         1       0
+ Echo Canceller A, Double-Talk Detection Threshold Register 1 ADDRESS = 14h WRITE/READ VERIFY
+ Echo Canceller B, Double-Talk Detection Threshold Register 1 ADDRESS = 34h WRITE/READ VERIFY
+                                                                                                              Power Reset Value
+DTDT             DTDT7    DTDT6      DTDT5     DTDT4      DTDT3    DTDT2     DTDT1    DTDT0                          00h
+                    7         6        5         4          3        2         1       0
+This register allows the user to program the level of Double-Talk Detection Threshold (DTDT). The 16 bit 2’s complement linear
+value defaults to 4800h= 0.5625 or -5dB. The maximum value is 7FFFh = 0.9999 or 0 dB. The high byte is in Register 2 and
+the low byte is in Register 1.
+Echo Canceller A, Non-Linear Processor Threshold Register 2 ADDRESS = 19h WRITE/READ VERIFY
+Echo Canceller B, Non-Linear Processor Threshold Register 2 ADDRESS = 39h WRITE/READ VERIFY
+                                                                                                              Power Reset Value
+NLPTHR           NLP15    NLP14     NLP13     NLP12      NLP11    NLP10      NLP9     NLP8                           08h
+                   7         6         5        4          3         2         1       0
+ Echo Canceller A, Non-Linear Processor Threshold Register 1 ADDRESS = 18h WRITE/READ VERIFY
+ Echo Canceller B, Non-Linear Processor Threshold Register 1 ADDRESS = 38h WRITE/READ VERIFY
+                                                                                                              Power Reset Value
+ NLPTHR           NLP7    NLP6       NLP5      NLP4       NLP3     NLP2      NLP1     NLP0                           00h
+                    7         6        5         4          3        2         1        0
+This register allows the user to program the level of the Non-Linear Processor Threshold (NLPTHR). The 16 bit 2’s complement
+linear value defaults to 0800h = 0.0625 or -24.1dB. The maximum value is 7FFFh = 0.9999 or 0 dB. The high byte is in
+Register 2 and the low byte is in Register 1.
+Echo Canceller A, Adaptation Step Size (MU) Register 2                              ADDRESS = 1Bh WRITE/READ VERIFY
+Echo Canceller B, Adaptation Step Size (MU) Register 2                              ADDRESS = 3Bh WRITE/READ VERIFY
+                                                                                                              Power Reset Value
+MU               MU15     MU14      MU13      MU12       MU11     MU10       MU9      MU8                            40h
+                   7         6         5        4          3         2         1       0
+ Echo Canceller A, Adaptation Step Size (MU) Register 1                              ADDRESS = 1Ah WRITE/READ VERIFY
+ Echo Canceller B, Adaptation Step Size (MU) Register 1                              ADDRESS = 3Ah WRITE/READ VERIFY
+                                                                                                              Power Reset Value
+MU                MU7     MU6        MU5       MU4        MU3      MU2       MU1      MU0                            00h
+                    7         6        5         4          3        2         1        0
+This register allows the user to program the level of MU. MU is a 16 bit 2’s complement value which defaults to 4000h = 1.0
+The high byte is in Register 2 and the low byte is in Register 1.
+                                                                   26
+                                                        Zarlink Semiconductor Inc.
+
+
+                                                      MT9122                                      Data Sheet
+Applications
+                                               MT9122 is in SSI mode
+                  MT8910 2B1Q
+                  MT8972 Bi-Phase
+                  MT8931 S-INT
+                                                 MT9122                    MT9125 ADPCM
+                           DSTo             Sin          Sout              DSTi
+                                                                                  ADPCMo     Din
+      T                                                                            ADPCMi    Dout
+      R
+                                                         ENA               EN1
+                            DSTi                         ENB               EN2
+                                                        BCLK               C20               BCLK
+ echo               C4o    F0b
+ paths                                      Rout          Rin              DSTo              STB1
+                                                                           F0i    MCLK
+                                                                                           Dual RF Section
+                            Figure 12 - (Basic Rate ISDN) Wireless Application Diagram
+                   MT9160 5V CODEC               MT9122 is in SSI mode
+                               Dout
+   T
+   R                             Din
+ echo                Clockin     F0i
+ path
+                   MT9160 5V CODEC                MT9122                    MT9125 ADPCM
+                               Dout          Sin
+                                                          Sout             DSTi    ADPCMo     Din
+                                                                                    ADPCMi    Dout
+   T                                                      ENA              EN1
+  R
+                                 Din                      ENB              EN2
+                                                         BCLK              C20                BCLK
+ echo                Clockin     F0i         Rout          Rin             DSTo               STB1
+ path
+                                                                           F0i      MCLK    Dual RF Section
+       MT8941 PLL
+              F0
+             C4
+                              Figure 13 - (Analog Trunk) Wireless Application Diagram
+                                                           27
+                                                Zarlink Semiconductor Inc.
+
+
+                                                MT9122                                              Data Sheet
+               MT9160 5V CODEC           MT9122 connected in ST-BUS mode 1
+                            Dout
+T
+R                            Din
+                 Clockin     F0i
+echo
+path
+               MT9160 5V CODEC                MT9122                 MT9125 ADPCM
+                            Dout         Sin
+                                                       Sout          DSTi   ADPCMo              Din
+                                                                            ADPCMi              Dout
+T
+R
+                             Din         Rout
+                                                                                 C20            BCLK
+                                                        Rin          DSTo
+                                                                                 EN1            STB1
+                 Clockin F0i
+echo                                        F0i    C4i
+path
+                                                                      F0i    MCLK             Dual RF Section
+    MT8941 PLL
+            F0
+            C4
+                         Figure 14 - (Analog Trunk) Wireless Application Diagram
+                                               MT9122 in ST-BUS mode 1
+                                               Back-To-Back Configuration
+                                               using D&C channel bypass
+                       MT8910 2B1Q
+                       MT8972 Bi-phase
+                       MT8931 S-INT
+                                                       MT9122             MT909x Digital Phone
+                                DSTo              Sin         Sout         DSTi
+           T
+           R
+        echo                     DSTi             Rout          Rin        DSTo
+        path
+                         C4o  F0b                      F0i  C4i
+                                                                             F0i     MCLK           Handset
+                 Figure 15 - (Basic Rate ISDN) Wired Telephone Application Diagram
+                                                      28
+                                          Zarlink Semiconductor Inc.
+
+
+                                                                 MT9122                                                    Data Sheet
+ Absolute Maximum Ratings*
+                                   Parameter                                    Symbol                Min.            Max.      Units
+   1    Supply Voltage                                                          VDD-VSS               -0.3             7.0         V
+   2    Voltage on any digital pin                                                  Vi/o           VSS-0.3          VDD+ 0.3       V
+   3    Continuous Current on any digital pin                                       Ii/o                               ±20       mA
+   4    Storage Temperature                                                        TST                -65              150        °C
+   5 Package Power Dissipation                                                      PD                                 500       mW
+* Exceeding these values may cause permanent damage. Functional operation under these conditions is not implied.
+Recommended Operating Conditions - Voltages are with respect to ground (VSS) unless otherwise stated.
+                  Characteristics                    Sym.        Min.     Typ.‡      Max.       Units             Test Conditions
+  1    Supply Voltage                                 VDD         4.5      5.0         5.5         V
+  2    TTL Input High Voltage                                     2.4                 VDD          V       400mV noise margin
+  3    TTL Input Low Voltage                                     VSS                   0.4         V       400mV noise margin
+  4    CMOS Input High Voltage                                    4.5                 VDD          V
+  5    CMOS Input Low Voltage                                    VSS                   0.5         V
+  6    Operating Temperature                           TA         -40                 +85         °C
+‡ Typical figures are at 25°C and are for design aid only: not guaranteed and not subject to production testing.
+ DC Electrical Characteristics* - Voltages are with respect to ground (VSS) unless otherwise stated.
+                   Characteristics                  Sym.         Min.     Typ.‡       Max.      Units            Conditions/Notes
+    1   Supply Current                                ICC                              100        µA      PWRDN = 0
+                                                      IDD                   70                   mA       PWRDN = 1, clocks active
+    2   Input HIGH voltage (TTL)                      VIH         2.0                              V      All except MCLK,Sin,Rin
+    3   Input LOW voltage (TTL)                       VIL                              0.8         V      All except MCLK,Sin,Rin
+    4   Input HIGH voltage (CMOS)                    VIHC         3.5                              V      MCLK,Sin,Rin
+    5   Input LOW voltage (CMOS)                     VILC                              1.5         V      MCLK,Sin,Rin
+    6   Input leakage current                       IIH/IIL                0.1          10        µA      VIN=VSS to VDD
+    7   High level output voltage                    VOH       0.9VDD                              V      IOH=2.5mA
+    8   Low level output voltage                     VOL                            0.1VDD         V      IOL=5.0mA
+    9   High impedance leakage                        IOZ                   1           10        µA      VIN=VSS to VDD
+   10 Output capacitance                              Co                    10                    pF
+   11   Input capacitance                              Ci                   8                     pF
+   12 PWRDN
+           Positive Threshold Voltage                 V+         3.75                              V
+           Hysteresis                                 VH                   1.0                     V
+           Negative Threshold Voltage                  V-                             1.25         V
+‡ Typical figures are at 25°C and are for design aid only: not guaranteed and not subject to production testing.
+* DC Electrical Characteristics are over recommended temperature and supply voltage.
+                                                                      29
+                                                           Zarlink Semiconductor Inc.
+
+
+                                                                  MT9122                                 Data Sheet
+                                                                                                                  . .
+ AC Electrical Characteristics† - Serial Data Interfaces (see Figures 17 and 18)
+ Voltages are with respect to ground (VSS) unless otherwise stated.
+                       Characteristics                        Sym.        Min.      Max. Units      Test Notes
+   1     MCLK Clock High                                       tMCH        20             ns
+   2     MCLK Clock Low                                        tMCL        20             ns
+   3     MCLK Frequency
+              Dual Channel                                    fDCLK      19.15      20.5 MHz
+              Single Channel                                  fSCLK       9.58           MHz
+   4     BCLK/C4i Clock High                                  tBCH,        90             ns
+                                                               tC4H
+   5     BCLK/C4i Clock Low                                    tBLL,       90             ns
+                                                                tC4L
+   6     BCLK/C4i Period                                       tBCP       240       7900  ns
+   7     SSI Enable Strobe to Data Delay (first                  tSD                 80   ns   CL=150pF
+         bit)
+   8     SSI Data Output Delay (excluding first                  tDD                 80   ns   CL=150pF
+         bit)
+   9     SSI Output Active to High Impedance                    tAHZ                 80   ns   CL=150pF
+  10     SSI Enable Strobe Signal Setup                        tSSS        10       tBCP  ns
+                                                                                     -15
+  11     SSI Enable Strobe Signal Hold                         tSSH        15       tBCP  ns
+                                                                                     -10
+  12     SSI Data Input Setup                                   tDIS       10             ns
+  13     SSI Data Input Hold                                    tDIH       15             ns
+  14     F0i Setup                                             tF0iS       20        150  ns
+  15     F0i Hold                                              tF0iH       20        150  ns
+  16     ST-BUS Data Output delay                              tDSD                  80   ns   CL=150pF
+  17     ST-BUS Output Active to High                         tASHZ                  80   ns   CL=150pF
+         Impedance
+  18     ST-BUS Data Input Hold time                           tDSH        20             ns
+  19     ST-BUS Data Input Setup time                          tDSS        20             ns
+  20     F0od Delay                                            tDFD                  80   ns   CL=150pF
+  21 F0od Pulse Width Low                                      tDFW       200             ns   CL=150pF
+† Timing is over recommended temperature and power supply voltages.
+                                                                     30
+                                                         Zarlink Semiconductor Inc.
+
+
+                                                            MT9122                                           Data Sheet
+ AC Electrical Characteristics† - Microport Timing (see Figure 17)
+                      Characteristics                  Sym.        Min.       Max.    Units           Test Notes
+   1     Input Data Setup                                tIDS      100                 ns
+   2     Input Data Hold                                 tIDH       30                 ns
+   3     Output Data Delay                              tODD                   100     ns      CL=150pF
+   4     Serial Clock Period                            tSCP       500                 ns
+   5     SCLK Pulse Width High                          tSCH       250                 ns
+   6     SCLK Pulse Width Low                            tSCL      250                 ns
+   7     CS Setup-Intel                                 tCSSI      200                 ns
+   8     CS Setup-Motorola                             tCSSM       100                 ns
+   9     CS Hold                                        tCSH       100                 ns
+  10     CS to Output High Impedance                    tOHZ                   100     ns      CL=150pF
+† Timing is over recommended temperature range and recommended power supply voltages.
+              Characteristic                     Symbol                TTL Pin            CMOS Pin            Units
+ TTL reference level                                VTT                    1.5                  -               V
+ CMOS reference level                               VCT                      -              0.5*VDD             V
+ Input HIGH level                                    VH                    2.4              0.9*VDD             V
+ Input LOW level                                     VL                    0.4              0.1*VDD             V
+ Rise/Fall HIGH measurement point                   VHM                    2.0              0.7*VDD             V
+ Rise/Fall LOW measurement point                    VHL                    0.8              0.3*VDD             V
+                           Table 8 - Reference Level Definition for Timing Measurements
+                                             tMCH
+                         VH
+            MCLK (3)                                                                                VCT
+                          VL
+                                                                         tMCL
+                                               Figure 16 - Master Clock - MCLK
+Notes: 1. CMOS output
+       2. TTL input compatible
+       3. CMOS input
+       (see Table 8 for symbol definitions)
+                                                                31
+                                                     Zarlink Semiconductor Inc.
+
+
+                                                                    MT9122                                           Data Sheet
+                                          Bit 0            Bit 1
+      Sout/Rout (1)                                                                                                    VCT
+                                tSD               tDD             tBCH                                    tAHZ
+                        VH
+      BCLK (2)                                                                                                         VTT
+                        VL
+                                 tSSS                  tBCP                             tBCL         tSSH
+                        VH
+      ENA1/ENA2 (2)
+      or                                                                                                               VTT
+      ENB1/ENB2 (2)     VL
+                                                                   tDIS tDIH
+                        VH             Bit 0           Bit 1
+      Rin/Sin (3)                                                                                                      VCT
+                        VL
+                                                      Figure 17 - SSI Data Port Timing
+Notes: 1. CMOS output
+       2. TTL input compatible
+       3. CMOS input
+       (see Table 8 for symbol definitions)
+                                                Bit 0                 Bit 1
+      Sout/Rout (1)                                                                                                     VCT
+                                                         tDSD tC4H                                             tASHZ
+                    VH
+      C4i (2)                                                                                                           VTT
+                     VL
+                            tF0iS tF0iH                                      tC4L
+                    VH
+      F0i (2)                                                                                                           VTT
+                     VL
+                                              tDSS tDSH
+                    VH
+      Rin/Sin (3)                                                                                                       VCT
+                     VL
+                                                 Bit 0                 Bit 1
+                                                                                             tDFD
+      F0od (1)                                                                                                          VCT
+                                                                                                  tDFW
+                                                   Figure 18 - ST-BUS Data Port Timing
+Notes: 1. CMOS output
+       2. TTL input compatible
+       3. CMOS input
+       (see Table 8 for symbol definitions)
+                                                                          32
+                                                             Zarlink Semiconductor Inc.
+
+
+                                                                MT9122                                               Data Sheet
+                                             DATA INPUT                              DATA OUTPUT
+           DATA1 (1, 2)                                                                                            VTT,VCT
+                                          tIDS tIDH              tSCH                             tODD       tOHZ
+                         VH
+           SCLK (2)                                                                                                VTT
+                         VL
+                               tCSSI                     tSCL                                   tSCP   tCSH
+                         VH
+           CS (2)                                                                                                  VTT
+                         VL
+                                             Figure 19 - INTEL Serial Microport Timing
+Notes: 1. CMOS output
+       2. TTL input compatible
+       3. CMOS input
+       (see Table 8 for symbol definitions)
+                          VH
+            DATA2 (2)                                                                                               VTT
+            (Input)        VL
+                                  tIDS tIDH                tSCH                         tSCP
+                          VH
+            SCLK (2)                                                                                                VTT
+                           VL
+                                tCSSM               tSCL                                                 tCSH
+                          VH
+            CS (2)                                                                                                  VTT
+                           VL
+                                                                                             tODD             tOHZ
+            DATA1 (1)                                                                                               VCT
+            (Output)
+                                        Figure 20 - MOTOROLA Serial Microport Timing
+Notes: 1. CMOS output
+       2. TTL input compatible
+       3. CMOS input
+       (see Table 8 for symbol definitions)
+                                                                      33
+                                                          Zarlink Semiconductor Inc.
+
+
+ c Zarlink Semiconductor 2005. All rights reserved.                        Package Code
+ISSUE                                               Previous package codes
+ACN
+DATE
+APPRD.
+
+
+
+
+                                           For more information about all Zarlink products
+                                                                    visit our Web Site at
+                                                                 www.zarlink.com
+Information relating to products and services furnished herein by Zarlink Semiconductor Inc. or its subsidiaries (collectively “Zarlink”) is believed to be reliable.
+However, Zarlink assumes no liability for errors that may appear in this publication, or for liability otherwise arising from the application or use of any such
+information, product or service or for any infringement of patents or other intellectual property rights owned by third parties which may result from such application or
+use. Neither the supply of such information or purchase of product or service conveys any license, either express or implied, under patents or other intellectual
+property rights owned by Zarlink or licensed from third parties by Zarlink, whatsoever. Purchasers of products are also hereby notified that the use of product in
+certain ways or in combination with Zarlink, or non-Zarlink furnished goods or services may infringe patents or other intellectual property rights owned by Zarlink.
+This publication is issued to provide information only and (unless agreed by Zarlink in writing) may not be used, applied or reproduced for any purpose nor form part
+of any order or contract nor to be regarded as a representation relating to the products or services concerned. The products, their specifications, services and other
+information appearing in this publication are subject to change by Zarlink without notice. No warranty or guarantee express or implied is made regarding the
+capability, performance or suitability of any product or service. Information concerning possible methods of use is provided as a guide only and does not constitute
+any guarantee that such methods of use will be satisfactory in a specific piece of equipment. It is the user’s responsibility to fully determine the performance and
+suitability of any equipment using such information and to ensure that any publication or data used is up to date and has not been superseded. Manufacturing does
+not necessarily include testing of all functions or parameters. These products are not suitable for use in any medical products whose failure to perform may result in
+significant injury or death to the user. All products and materials are sold and services provided subject to Zarlink’s conditions of sale which are available on request.
+Purchase of Zarlink’s I2C components conveys a licence under the Philips I2C Patent rights to use these components in and I2C System, provided that the system
+conforms to the I2C Standard Specification as defined by Philips.
+Zarlink, ZL and the Zarlink Semiconductor logo are trademarks of Zarlink Semiconductor Inc.
+Copyright Zarlink Semiconductor Inc. All Rights Reserved.
+                                               TECHNICAL DOCUMENTATION - NOT FOR RESALE
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ MT9122AP1 MT9122APR1

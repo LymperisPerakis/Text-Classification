@@ -1,0 +1,2657 @@
+                                                                          FDC37C78
+                            Floppy Disk Controller
+                                            FEATURES
+• 3.3/5 Volt Operation                               -   Swap Drives A and B
+• Intelligent Auto Power Management                  -   Non-Burst Mode DMA Option
+• 2.88MB FDC37C78 Floppy Disk Controller             -   Detects All Overrun and Underrun
+   -     Licensed CMOS 765B Floppy Disk                  Conditions
+         Controller                                  -   Sophisticated Power Control Circuitry
+   -     Software and Register Compatible with           (PCC) Including Multiple Powerdown
+         SMSC's Proprietary 82077AA                      Modes for Reduced Power
+         Compatible Core                                 Consumption
+   -     Supports Two Floppy Drives Directly      • Enhanced Digital Data Separator
+   -     Supports Vertical Recording Format         - 2 Mbps (Only Available When VCC = 5V),
+   -     16 Byte Data FIFO                             1 Mbps, 500 Kbps, 300 Kbps, 250 Kbps
+   -     100% IBM Compatibility                        Data Rates
+   -     DMA Enable Logic                           - Programmable Precompensation Modes
+   -     Data Rate and Drive Control Registers    • 48 pin TQFP Package
+
+
+                                                  TABLE OF CONTENTS
+FEATURES...............................................................................................................................................1
+GENERAL DESCRIPTION .......................................................................................................................3
+PIN CONFIGURATION.............................................................................................................................4
+DESCRIPTION OF PIN FUNCTIONS ......................................................................................................6
+FUNCTIONAL DESCRIPTION ...............................................................................................................10
+   FDC37C78 REGISTERS ..................................................................................................................10
+   HOST PROCESSOR INTERFACE ..................................................................................................10
+   FLOPPY DISK CONTROLLER .........................................................................................................11
+   FLOPPY DISK CONTROLLER INTERNAL REGISTERS.................................................................11
+COMMAND SET/DESCRIPTIONS .........................................................................................................29
+INSTRUCTION SET ...............................................................................................................................32
+AUTO POWER MANAGEMENT.............................................................................................................58
+CONFIGURATION..................................................................................................................................62
+OPERATIONAL DESCRIPTION.............................................................................................................71
+   MAXIMUM GUARANTEED RATINGS ..............................................................................................71
+   DC ELECTRICAL CHARACTERISTICS ...........................................................................................71
+TIMING DIAGRAMS ...............................................................................................................................75
+                                                                      2
+
+
+                                        GENERAL DESCRIPTION
+The SMSC FDC37C78 Floppy Disk Controller               The FDC37C78 incorporates sophisticated power
+utilizes SMSC's proven SuperCell technology            control circuitry (PCC).    The PCC supports
+for increased product reliability and functionality.   multiple low power down modes.
+The FDC37C78 optimized for motherboard
+applications. The FDC37C78 supports both 1             The      FDC37C78     Floppy   Disk   Controller
+Mbps and 2 Mbps data rates and vertical vertical       incorporates Software Configurable Logic (SCL)
+recording operation at 1 Mbps Data Rate.               for ease of use. Use of the SCL feature allows
+                                                       programmable system configuration of key
+The FDC37C78 incorporates SMSC's true CMOS             functions of FDC
+765B floppy disk controller, advanced digital data
+separator, 16 byte data FIFO, on-chip 12 mA bus        The FDC37C78 does not require any external
+drivers and two floppy direct drive support. The       filter components, and is, therefore easy to use
+true CMOS 765B core provides 100%                      and offers lower system cost and reduced board
+compatibility with IBM PC/XT and PC/AT                 area. The FDC37C78 is software and register
+architectures in addition to providing data overflow   compatible with SMSC's proprietary 82077AA
+and underflow protection. The SMSC advanced            core.
+digital data separator incorporates SMSC's
+patented data separator technology, allowing for
+ease of testing and use.
+                                                     3
+
+
+                                                PIN CONFIGURATION
+             DRQ   nIOW   nIOR    nCS      A0         A1    A2    VSS       X1       X2        RESET     nDS0
+             48    47     46      45       44         43    42    41        40       39        38        37
+nDACK   1                                                                                                         36   nMTR0
+   D0   2                                                                                                         35   nDS1/PD
+   D1   3                                                                                                         34   nMTR1/IDLE
+   D2   4                                                                                                         33   nDIR
+   D3   5                                                                                                         32   VCC
+  VSS   6                                                                                                         31   nSTEP
+                                                     FDC37C78
+ VCC    7                                                                                                         30   VSS
+   D4   8                                                                                                         29   nHDSEL
+   D5   9                                                                                                         28   nWGATE
+   D6   10                                                                                                        27   nWDATA
+   D7   11                                                                                                        26   MEDIA_ID1
+ VCC    12                                                                                                        25   MEDIA_ID0
+             13    14     15      16       17         18    19    20        21       22        23        24
+                                           nWRTPRT                nDSKCHG            DRVDEN0   DRVDEN1
+                                  nINDEX                                                                 DENSEL
+                                                      VSS   VCC
+                                                                            nRDATA
+                          nTRK0
+             IRQ   TC
+                                                            4
+
+
+                                        FDC37C78 PIN OUT
+                                        FDC37C78 48 Pin FDC
+                             PIN #      NAME       PIN #       NAME
+                           1         nDACK       25         MEDIA_ID0
+                           2         D0          26         MEDIA_ID1
+                           3         D1          27         nWDATA
+                           4         D2          28         nWGATE
+                           5         D3          29         nHDSEL
+                           6         VSS         30         VSS
+                           7         VCC         31         nSTEP
+                           8         D4          32         VCC
+                           9         D5          33         nDIR
+                           10        D6          34         nMTR1/IDLE
+                           11        D7          35         nDS1/PD
+                           12        VCC         36         nMTR0
+                           13        IRQ         37         nDS0
+                           14        TC          38         RESET
+                           15        nTRK0       39         X2
+                           16        nINDEX      40         X1
+                           17        nWRTPRT     41         VSS
+                           18        VSS         42         A2
+                           19        VCC         43         A1
+                           20        nDSKCHG     44         A0
+                           21        nRDATA      45         nCS
+                           22        DRVDEN0     46         nIOR
+                           23        DRVDEN1     47         nIOW
+                           24        DENSEL      48         DRQ
+Note: “n” denotes active low signal.
+                                                5
+
+
+DESCRIPTION OF PIN FUNCTIONS
+                            DESCRIPTION OF PIN FUNCTIONS
+                                       BUFFER
+ PIN NO.       NAME          SYMBOL     TYPE                   DESCRIPTION
+                               HOST PROCESSOR INTERFACE
+   2-5,  Data Bus 0-7      D0-D7        I/O12  The data bus connection used by the host
+   8-11                                        microprocessor to transmit data to and from
+                                               the chip. These pins are in a high-impedance
+                                               state when not in the output mode.
+    46   I/O Read          nIOR            I   This active low signal is issued by the host
+                                               microprocessor to indicate a read operation.
+    47   I/O Write         nIOW            I   This active low signal is issued by the host
+                                               microprocessor to indicate a write operation.
+  44-42  I/O Address       A0-A2           I   These host address bits determine the I/O
+                                               address to be accessed during nIOR and
+                                               nIOW cycles.        These bits are latched
+                                               internally by the leading edge of nIOR and
+                                               nIOW.
+    48    DMA Request      DRQ           O12   This active high output is the DMA request for
+                                               byte transfers of data between the host and
+                                               the chip. This signal is cleared on the last
+                                               byte of the data transfer by the nDACK signal
+                                               going low (or by nIOR going low if nDACK
+                                               was already low as in demand mode).
+     1   n DMA             nDACK           I   An active low input acknowledging the
+         Acknowledge                           request for a DMA transfer of data between
+                                               the host and the chip. This input enables the
+                                               DMA read or write internally.
+    14   Terminal Count    TC              I   This signal indicates to the chip that DMA
+                                               data transfer is complete.         TC is only
+                                               accepted when nDACK is low. TC is active
+                                               high.
+    13   Interrupt Request IRQ           O12   The interrupt request from the logical device
+                                               is output on the IRQ signal. Refer to the
+                                               configuration registers for more information.
+    45   Chip Select Input nCS             I   When enabled, this active low pin serves as
+                                               an input for an external decoder circuit which
+                                               is used to qualify address lines above A2.
+                                             6
+
+
+                        DESCRIPTION OF PIN FUNCTIONS
+                                  BUFFER
+PIN NO.       NAME       SYMBOL    TYPE                     DESCRIPTION
+   38   Reset          RESET         IS    This active high signal resets the chip and
+                                           must be valid for 500 ns minimum. The effect
+                                           on the internal registers is described in the
+                                           appropriate section.        The configuration
+                                           registers are not affected by this reset.
+                            FLOPPY DISK INTERFACE
+   21   Read Disk Data nRDATA        IS    Raw serial bit stream from the disk drive, low
+                                           active. Each falling edge represents a flux
+                                           transition of the encoded data.
+   27   Write          nWDATA      OD20    This active low high current driver provides
+        Data                               the encoded data to the disk drive. Each
+                                           falling edge causes a flux transition on the
+                                           media.
+   29   Head           nHDSEL      OD20    This high current output selects the floppy
+        Select                             disk side for reading or writing. A logic "1" on
+                                           this pin means side 0 will be accessed, while
+                                           a logic "0" means side 1 will be accessed.
+   33   Direction      nDIR        OD20    This high current low active output determines
+        Control                            the direction of the head movement. A logic
+                                           "1" on this pin means outward motion, while a
+                                           logic "0" means inward motion.
+   31   Step Pulse     nSTEP       OD20    This active low high current driver issues a
+                                           low pulse for each track-to-track movement of
+                                           the head.
+   20   Disk Change    nDSKCHG       IS    This input senses that the drive door is open
+                                           or that the diskette has possibly been
+                                           changed since the last drive selection. This
+                                           input is inverted and read via bit 7 of I/O
+                                           address 3F7H.
+  22,   DRVDEN 0,      DRVDEN0,    OD20    Indicates the drive and media selected. Refer
+   23   DRVDEN 1       DRVDEN1             to configuration registers CR03, CR0B,
+                                           CR1F.
+   24   Density Select DENSEL      OD20    Indicates whether a low (250/300 Kb/s) or
+                                           high (500 Kb/s) data rate has been selected.
+                                           This is determined by the IDENT bit in
+                                           Configuration Register 3.
+                                       7
+
+
+                          DESCRIPTION OF PIN FUNCTIONS
+                                    BUFFER
+PIN NO.       NAME         SYMBOL    TYPE                    DESCRIPTION
+  25,   Media ID0,       MEDIA_ID0,    I    In Floppy Enhanced Mode 2 - These bits are
+   26   Media ID1        MEDIA_ID1          the Media ID 0,1 inputs. The value of these
+                                            bits can be read as bits 6 and 7 of the Floppy
+                                            Tape Register.
+   28   Write Gate       nWGATE      OD20   This active low high current driver allows
+                                            current to flow through the write head. It
+                                            becomes active just prior to writing to the
+                                            diskette.
+   15   Track 0          nTRK0        IS    This active low Schmitt Trigger input senses
+                                            from the disk drive that the head is positioned
+                                            over the outermost track.
+   16   Index            nINDEX       IS    This active low Schmitt Trigger input senses
+                                            from the disk drive that the head is positioned
+                                            over the beginning of a track, as marked by
+                                            an index hole.
+   17   nWrite Protected nWRTPRT      IS    This active low Schmitt Trigger input senses
+                                            from the disk drive that a disk is write
+                                            protected. Any write command is ignored.
+   36   nMotor On 0      nMTR0       OD20   This active low open drain output selects
+                                            motor drive 0.
+   37   nDrive Select 0  nDS0        OD20   This active low open drain output selects drive
+                                            0.
+   34   nMotor On 1      nMTR1       OD20   This active low open drain output select motor
+                                            drive 0.
+        Idle             IDLE        OD20   This pin indicates that the part is in the IDLE
+                                            state and can be powered down. Whenever
+                                            the part is in this state, IDLE pin is active
+                                            high. If the part is powered down by the Auto
+                                            Powerdown Mode, IDLE pin is set high and if
+                                            the part is powered down by setting the DSR
+                                            POWERDOWN bit (direct), IDLE pin is set
+                                            low.
+   35   nDrive Select 1  nDS1        OD20   This active low open drain output selects drive
+                                            0.
+        Powerdown        PD          OD20   This pin is active high whenever the part is in
+                                            powerdown        state,   either     via   DSR
+                                            POWERDOWN bit (direct) or via the Auto
+                                            Powerdown Mode. This pin can be used to
+                                            disable an external oscillator’s output.
+                                         8
+
+
+                             DESCRIPTION OF PIN FUNCTIONS
+                                             BUFFER
+ PIN NO.        NAME          SYMBOL          TYPE                      DESCRIPTION
+                                        MISCELLANEOUS
+    40     CLOCK 1          X1                 ICLK      The external connection for a parallel
+                                                         resonant 24 MHz crystal.            A CMOS
+                                                         compatible oscillator is required if crystal is
+                                                         not used.
+    39     CLOCK 2          X2                OCLK       24 MHz crystal. If an external clock is used,
+                                                         this pin should not be connected. This pin
+                                                         should not be used to drive any other drivers.
+7, 12, 19, Power            VCC                          Positive Supply Voltage.
+    32
+6, 18, 30, Ground           GND                          Ground Supply.
+    41
+BUFFER TYPE DESCRIPTIONS
+Note: These values are for 3.3V operation. See Operational Description for 3.3V/5V values.
+    BUFFER TYPE                                    DESCRIPTION
+         I/O12      Input/output. 12 mA sink; 6 mA source
+          O12       Output. 12 mA sink; 6 mA source
+         OD20       Open drain. 20 mA sink
+         OCLK       Output to external crystal
+         ICLK       Input to Crystal Oscillator Circuit (CMOS levels)
+            I       Input TTL compatible.
+           IS       Input with Schmitt Trigger
+                                                  9
+
+
+                                     FUNCTIONAL DESCRIPTION
+FDC37C78 REGISTERS                                         HOST PROCESSOR INTERFACE
+The address map, shown below in Table 1, shows             The host processor communicates with the
+the addresses of the different blocks of the               FDC37C78 through a series of read/write
+FDC37C78 immediately after power up. Some                  registers. The port addresses for these registers
+addresses are used to access more than one                 are shown in Table 1.           Register access is
+register.                                                  accomplished through programmed I/O or DMA
+                                                           transfers. All registers are 8 bits wide.
+                                   Table 1 - FDC37C78 Block Addresses
+                     ADDRESS                   BLOCK NAME                        NOTES
+           +0, +1                            Configuration          Write only; Note 1, 2
+           Base +0,1                         Floppy Disk            Read only; Disabled at power
+                                                                    up; Note 2
+           Base +[2:5, 7]                    Floppy Disk            Disabled at power up; Note 2
+Note 1: Configuration registers can only be modified in configuration mode, refer to the configuration
+          register description for more information. Access to status registers A and B of the floppy disk is
+          disabled in configuration mode.
+Note 2: The fdc must be enabled in the configuration registers before accessing the registers.
+                                                      10
+
+
+FLOPPY DISK CONTROLLER                                    The FDC37C78 is            compatible     to    the
+                                                          82077AA using SMSC's proprietary floppy disk
+The Floppy Disk Controller (FDC) provides the             controller core.
+interface between a host microprocessor and the
+floppy disk drives.      The FDC integrates the           FLOPPY DISK         CONTROLLER          INTERNAL
+functions of the Formatter/Controller, Digital Data       REGISTERS
+Separator, Write Precompensation and Data Rate
+Selection logic for an IBM XT/AT compatible FDC.          The Floppy Disk Controller contains eight internal
+ The true CMOS 765B core guarantees 100% IBM              registers which facilitate the interfacing between
+PC XT/AT compatibility in addition to providing           the host microprocessor and the disk drive. Table
+data overflow and underflow protection.                   2 shows the addresses required to access these
+                                                          registers. Registers other than the ones shown
+                                                          are not supported.        The rest of the FDC
+                                                          description assumes the Base I/O Address is 3F0.
+                              Table 2 - Status, Data and Control Registers
+                  BASE I/O
+                 ADDRESS                                REGISTER
+                     +0                     Reserved
+                     +1                     Reserved
+                     +2           R/W       Digital Output Register                    DOR
+                     +3           R/W       Tape Drive Register                        TSR
+                     +4             R       Main Status Register                       MSR
+                     +4             W       Data Rate Select Register                  DSR
+                     +5           R/W       Data (FIFO)                                FIFO
+                     +6                     Reserved
+                     +7             R       Digital Input Register                     DIR
+                     +7             W       Configuration Control Register             CCR
+                                                      11
+
+
+DIGITAL OUTPUT REGISTER (DOR)                               contains the enable for the DMA logic and
+                                                            contains a software reset bit. The contents of the
+Address 3F2 READ/WRITE                                      DOR are unaffected by a software reset. The
+The DOR controls the drive select and motor                 DOR can be written to at any time.
+enables of the disk interface outputs. It also
+                           7         6         5         4         3            2         1        0
+                         MOT       MOT       MOT       MOT     DMAEN nRESET DRIVE DRIVE
+                          EN3      EN2       EN1        EN0                             SEL1     SEL0
+             RESET         0         0         0         0         0            0         0        0
+             COND.
+BIT 0 and 1 DRIVE SELECT                                    BIT 4 MOTOR ENABLE 0
+These two bit a are binary encoded for the four             This bit controls the MTR0 disk interface output. A
+drive selects DS0-DS3, thereby allowing only                logic "1" in this bit will cause the output pin to go
+one drive to be selected at one time.                       active.
+BIT 2 nRESET                                                BIT 5 MOTOR ENABLE 1
+A logic "0" written to this bit resets the Floppy disk      This bit controls the MTR1 disk interface output. A
+controller. This reset will remain active until a logic     logic "1" in this bit will cause the output pin to go
+"1" is written to this bit. This software reset does        active.
+not affect the DSR and CCR registers, nor does it
+affect the other bits of the DOR register. The              BIT 6 MOTOR ENABLE 2
+minimum reset duration required is 100ns,                   This bit controls the MTR2 disk interface output. A
+therefore toggling this bit by consecutive writes to        logic "1" in this bit will cause the output pin to go
+this register is a valid method of issuing a software       active.
+reset.
+                                                            BIT 7 MOTOR ENABLE 3
+BIT 3 DMAEN                                                 This bit controls the MTR3 disk interface output. A
+Writing this bit to logic "1" will enable the DRQ,          logic "1" in this bit causes the output to go active.
+nDACK, TC and IRQ outputs. This bit being a
+logic "0" will disable the nDACK and TC inputs,                      Table 3 - Drive Activation Values
+and hold the DRQ and IRQ outputs in a high                           DRIVE                  DOR VALUE
+impedance state. This bit is a logic "0" after a
+reset and in these modes.                                                0                      1CH
+                                                                         1                      2DH
+                                                                         2                      4EH
+                                                                         3                       8FH
+                                                         12
+
+
+TAPE DRIVE REGISTER (TDR)
+Address 3F3 READ/WRITE
+This register is included for 82077 software                          Table 4- Tape Select Bits
+compatability. The robust digital data separator                                                    DRIVE
+used in the FDC37C78 does not require its                      TAPE SEL1       TAPE SEL2         SELECTED
+characteristics modified for tape support. The
+contents of this register are not used internal to the               0                0              None
+device. The TDR is unaffected by a software                          0                1                 1
+reset. Bits 2-7 are tri-stated when read in this                     1                0                 2
+mode.                                                                1                1                 3
+                                 Table 5 - Internal 4 Drive Decode - Normal
+          DIGITAL OUTPUT REGISTER                   DRIVE SELECT OUTPUTS              MOTOR ON OUTPUTS
+                                                         (ACTIVE LOW)                     (ACTIVE LOW)
+  Bit 7  Bit 6    Bit 5   Bit 4   Bit1   Bit 0   nDS3     nDS2   nDS1   nDS0   nMTR3    nMTR2    nMTR1    nMTR0
+   X      X         X       1      0      0        1        1      1      0    nBIT 7    nBIT 6   nBIT 5  nBIT 4
+   X      X         1       X      0      1        1        1      0      1    nBIT 7    nBIT 6   nBIT 5  nBIT 4
+   X       1        X       X      1      0        1        0      1      1    nBIT 7    nBIT 6   nBIT 5  nBIT 4
+   1      X         X       X      1      1        0        1      1      1    nBIT 7    nBIT 6   nBIT 5  nBIT 4
+   0       0        0       0      X      X        1        1      1      1    nBIT 7    nBIT 6   nBIT 5  nBIT 4
+                        Table 6 - Internal 4 Drive Decode - Drives 0 and 1 Swapped
+         DIGITAL OUTPUT REGISTER                  DRIVE SELECT OUTPUTS                MOTOR ON OUTPUTS
+                                                        (ACTIVE LOW)                     (ACTIVE LOW)
+  Bit 7  Bit 6    Bit 5   Bit 4  Bit1   Bit 0   nDS3     nDS2   nDS1   nDS0   nMTR3     nMTR2    nMTR1    nMTR0
+   X      X        X       1       0      0       1        1      0      1    nBIT 7    nBIT 6    nBIT 4  nBIT 5
+   X      X        1       X       0      1       1        1      1      0    nBIT 7    nBIT 6    nBIT 4  nBIT 5
+   X      1        X       X       1      0       1        0      1      1    nBIT 7    nBIT 6    nBIT 4  nBIT 5
+   1      X        X       X       1      1       0        1      1      1    nBIT 7    nBIT 6    nBIT 4  nBIT 5
+   0      0        0       0      X       X       1        1      1      1    nBIT 7    nBIT 6    nBIT 4  nBIT 5
+                                                         13
+
+
+                      Table 7 - External 2 to 4 Drive Decode - Normal
+                                                            DRIVE SELECT
+            DIGITAL OUTPUT REGISTER                            OUTPUTS     MOTOR ON OUTPUTS
+                                                             (ACTIVE LOW)     (ACTIVE LOW)
+Bit 7 Bit 6      Bit 5       Bit 4     Bit1       Bit 0    nDS1       nDS0  nMTR1      nMTR0
+ X     X          X           1          0          0        0          0     1          0
+ X     X          1           X          0          1        0          1     1          0
+ X     1          X           X          1          0        1          0     1          0
+ 1     X          X           X          1          1        1          1     1          0
+ X     X          X           0          0          0        0          0     1          1
+ X     X          0           X          0          1        0          1     1          1
+ X     0          X           X          1          0        1          0     1          1
+ 0     X          X           X          1          1        1          1     1          1
+            Table 8 - External 2 to 4 Drive Decode - Drives 0 and 1 Swapped
+                                                            DRIVE SELECT
+            DIGITAL OUTPUT REGISTER                            OUTPUTS     MOTOR ON OUTPUTS
+                                                             (ACTIVE LOW)     (ACTIVE LOW)
+Bit 7 Bit 6      Bit 5       Bit 4     Bit1       Bit 0    nDS1       nDS0  nMTR1      nMTR0
+ X     X          X           1          0          0        0          1     1          0
+ X     X          1           X          0          1        0          0     1          0
+ X     1          X           X          1          0        1          0     1          0
+ 1     X          X           X          1          1        1          1     1          0
+ X     X          X           0          0          0        0          1     1          1
+ X     X          0           X          0          1        0          0     1          1
+ X     0          X           X          1          0        1          0     1          1
+ 0     X          X           X          1          1        1          1     1          1
+                                              14
+
+
+Normal Floppy Mode
+Normal mode. Register 3F3 contains only bits 0 and 1. When this register is read, bits 2 - 7 are a high
+impedance.
+                DB7          DB6         DB5          DB4           DB3       DB2            DB1        DB0
+  REG 3F3     Tri-state    Tri-state   Tri-state   Tri-state     Tri-state  Tri-state     tape sel1  tape sel0
+Enhanced Floppy Mode 2 (OS2)
+Register 3F3 for Enhanced Floppy Mode 2 operation.
+                DB7          DB6         DB5          DB4          DB3        DB2           DB1        DB0
+  REG 3F3       Media       Media          Drive Type ID          Floppy Boot Drive     tape sel1   tape sel0
+                 ID1          ID0
+For this mode, DRATE0 and DRATE1 pins are                  Bits 1 and 0 - Tape Drive Select (READ/WRITE).
+inputs, and these inputs are gated into bits 6 and 7       Same as in Normal and Enhanced Floppy Mode.
+of the 3F3 register. These two bits are not                1.
+affected by a hard or soft reset.
+                                                                                Table 9a
+BIT 7 Media ID 1; Read Only (See Table 9a)                                             Media ID1
+                                                             Pin 26                        Bit 7
+BIT 6 Media ID 0; Read Only (See Table 9b)                                 CR7-DB3=0              CR7-DB3=1
+                                                                0                0                     1
+BITS 5 and 4 Drive Type ID - These Bits reflect
+                                                                1                1                     0
+two of the bits of configuration register 6; which
+two bits depends on the last drive selected in the
+                                                                                 Table 9b
+Digital Output Register (3F2). (See Table 11)
+                                                                                       Media ID0
+BITS 3 and 2 Floppy Boot Drive - These bits                  Pin 25                        Bit 6
+reflect the value of configuration register 7 bits 1,                      CR7-DB2=0              CR7-DB2=1
+0. Bit 3 = CR7 Bit DB1. Bit 2 = CR7 Bit DB0.                    0                0                     1
+                                                                1                1                     0
+                                           Table 9c - Drive Type ID
+                   Digital Output Register                  Register 3F3 - Drive Type ID
+                    Bit 1             Bit 0                   Bit 5                   Bit 4
+                     0                  0                 CR6 - Bit 1             CR6 - Bit 0
+                     0                  1                 CR6 - Bit 3             CR6 - Bit 2
+                     1                  0                 CR6 - Bit 5             CR6 - Bit 4
+                     1                  1                 CR6 - Bit 7             CR6 - Bit 6
+                                                       15
+
+
+DATA RATE SELECT REGISTER (DSR)                           not the DSR, for PC/AT and Microchannel
+                                                          applications. Other applications can set the data
+Address 3F4 WRITE ONLY                                    rate in the DSR. The data rate of the floppy
+This register is write only. It is used to program        controller is the most recent write of either the
+the data rate, amount of write precompensation,           DSR or CCR. The DSR is unaffected by a
+power down status, and software reset. The data           software reset. A hardware reset will set the DSR
+rate is programmed using the Configuration                to 02H, which corresponds to the default
+Control                Register              (CCR)        precompensation setting and 250 kbps.
+                       7          6        5           4           3          2          1        0
+                      S/W     POWER        0         PRE-       PRE-        PRE-    DRATE DRATE
+                    RESET DOWN                     COMP2       COMP1      COMP0 SEL1           SEL0
+         RESET         0          0        0           0           0          0          1        0
+          COND.
+BIT 0 and 1 DATA RATE SELECT                              floppy controller clock and data separator circuits
+These bits control the data rate of the floppy            will be turned off. The controller will come out of
+controller.    See Table 13 for the settings              manual low power mode after a software reset or
+corresponding to the individual data rates. The           access to the Data Register or Main Status
+data rate select bits are unaffected by a software        Register.
+reset, and are set to 250 kbps after a hardware
+reset.                                                    BIT 7 SOFTWARE RESET
+                                                          This active high bit has the same function as the
+BIT 2 through 4             PRECOMPENSATION               DOR RESET (DOR bit 2) except that this bit is self
+SELECT                                                    clearing.
+These three bits select the value of write
+precompensation that will be applied to the                      Table 10 - Precompensation Delays
+WDATA output signal. Table 12 shows the                      PRECOMP       PRECOMPENSATION DELAY
+precompensation values for the combination of                    432
+these bits settings. Track 0 is the default starting
+track number to start precompensation. this                      111             0.00 ns-DISABLED
+starting track number can be changed by the                      001                   41.67 ns
+configure command.                                               010                   83.34 ns
+                                                                 011                  125.00 ns
+BIT 5 UNDEFINED                                                  100                  166.67 ns
+Should be written as a logic "0".                                101                  208.33 ns
+                                                                 110                  250.00 ns
+BIT 6 LOW POWER                                                  000            Default (See Table 14)
+A logic "1" written to this bit will put the floppy
+controller into Manual Low Power mode. The
+                                                      16
+
+
+                                         Table 11 - Data Rates
+   DRIVE RATE          DATA RATE         DATA RATE                   DENSEL (1)        DRATE (2)
+  DRT1      DRT0      SEL1    SEL0      MFM        FM         IDENT=1         IDENT=0  1      2
+    0         0         1       1       1Meg        ---           1              0     1      1
+    0         0         0       0        500       250            1              0     0      0
+    0         0         0       1        300       150            0              1     0      1
+    0         0         1       0        250       125            0              1     1      0
+    0         1         1       1       1Meg        ---           1              0     1      1
+    0         1         0       0        500       250            1              0     0      0
+    0         1         0       1        500       250            0              1     0      1
+    0         1         1       0        250       125            0              1     1      0
+    1         0         1       1       1Meg        ---           1              0     1      1
+    1         0         0       0        500       250            1              0     0      0
+    1         0         0       1       2Meg        ---           0              1     0      1
+    1         0         1       0        250       125            0              1     1      0
+Drive Rate Table (Recommended)     00 = 360K, 1.2M, 720K, 1.44M and 2.88M Vertical Format
+                                   01 = 3-Mode Drive
+                                   10 = 2 Meg Tape
+Note 1: This is for DENSEL in normal mode.
+Note 2: This is for DRATE0, DRATE1 when Drive Opt are 00.
+                             Table 12 - Default Precompensation Delays
+                                                   PRECOMPENSATION
+                                DATA RATE                 DELAYS
+                                   2 Mbps                   20.8 ns
+                                   1 Mbps                  41.67 ns
+                                  500 Kbps                  125 ns
+                                  300 Kbps                  125 ns
+                                  250 Kbps                  125 ns
+                           *The 2 Mbps data rate is only available if VCC = 5V.
+                                                   17
+
+
+MAIN STATUS REGISTER                                    time. The MSR indicates when the disk controller
+                                                        is ready to receive data via the Data Register. It
+Address 3F4 READ ONLY                                   should be read before each byte transferring to or
+The Main Status Register is a read-only register        from the data register except in DMA mode. NO
+and indicates the status of the disk controller. The    delay is required when reading the MSR after a
+ Main Status Register can be read at any                data transfer.
+              7            6           5         4         3           2          1          0
+            RQM          DIO         NON        CMD     DRV3         DRV2       DRV1       DRV0
+                                     DMA       BUSY     BUSY         BUSY       BUSY       BUSY
+BIT 0 - 3 DRVx BUSY                                     BIT 5 NON-DMA
+These bits are set to 1s when a drive is in the seek    This mode is selected in the SPECIFY command
+portion of a command, including implied and             and will be set to a 1 during the execution phase of
+overlapped seeks and recalibrates.                      a command. This is for polled data transfers and
+                                                        helps differentiate between the data transfer phase
+BIT 4 COMMAND BUSY                                      and the reading of result bytes.
+This bit is set to a 1 when a command is in
+progress. This bit will go active after the command     BIT 6 DIO
+byte has been accepted and goes inactive at the         Indicates the direction of a data transfer once a
+end of the results phase. If there is no result         RQM is set. A 1 indicates a read and a 0 indicates
+phase (Seek, Recalibrate commands), this bit is         a write is required.
+returned to a 0 after the last command byte.
+                                                        BIT 7 RQM
+                                                        Indicates that the host can transfer data if set to a
+                                                        1. No access is permitted if set to a 0.
+                                                     18
+
+
+DATA REGISTER (FIFO)                                     FIFO. The data is based upon the following
+                                                         formula:
+Address 3F5 READ/WRITE
+All command parameter information, disk data and           Threshold # x      1     x8  - 1.5 µs = DELAY
+result status are transferred between the host                            DATA RATE
+processor and the floppy disk controller through
+the Data Register.
+                                                         At the start of a command, the FIFO action is
+Data transfers are governed by the RQM and DIO           always disabled and command parameters must
+bits in the Main Status Register.                        be sent based upon the RQM and DIO bit settings.
+                                                          As the command execution phase is entered, the
+The Data Register defaults to FIFO disabled mode         FIFO is cleared of any data to ensure that invalid
+after any form of reset. This maintains PC/AT            data is not transferred.
+hardware compatibility. The default values can be
+changed through the Configure command (enable            An overrun or underrun will terminate the current
+full FIFO operation with threshold control). The         command and the transfer of data. Disk writes will
+advantage of the FIFO is that it allows the system       complete the current sector by generating a 00
+a larger DMA latency without causing a disk error.       pattern and valid CRC. Reads require the host to
+ Table 15 gives several examples of the delays           remove the remaining data so that the result
+with a                                                   phase may be entered.
+                                      Table 13- FIFO Service Delay
+                       FIFO THRESHOLD           MAXIMUM DELAY TO SERVICING AT
+                          EXAMPLES                       2 Mbps* DATA RATE
+                              1 byte           1 x 4 µs - 1.5 µs = 2.5 µs
+                             2 bytes           2 x 4 µs - 1.5 µs = 6.5 µs
+                             8 bytes           8 x 4 µs - 1.5 µs = 30.5 µs
+                            15 bytes           15 x 4 µs - 1.5 µs = 58.5 µs
+                       FIFO THRESHOLD           MAXIMUM DELAY TO SERVICING AT
+                          EXAMPLES                        1 Mbps DATA RATE
+                              1 byte           1 x 8 µs - 1.5 µs = 6.5 µs
+                             2 bytes           2 x 8 µs - 1.5 µs = 14.5 µs
+                             8 bytes           8 x 8 µs - 1.5 µs = 62.5 µs
+                            15 bytes           15 x 8 µs - 1.5 µs = 118.5 µs
+                       FIFO THRESHOLD           MAXIMUM DELAY TO SERVICING AT
+                          EXAMPLES                      500 Kbps DATA RATE
+                              1 byte           1 x 16 µs - 1.5 µs = 14.5 µs
+                             2 bytes           2 x 16 µs - 1.5 µs = 30.5 µs
+                             8 bytes           8 x 16 µs - 1.5 µs = 126.5 µs
+                            15 bytes           15 x 16 µs - 1.5 µs = 238.5 µs
+                             *The 2 Mbps data rate is only available if VCC = 5V.
+                                                     19
+
+
+DIGITAL INPUT REGISTER (DIR)
+Address 3F7 READ ONLY
+This register is read-only.
+                            7      6         5     4         3        2        1        0
+                          DSK
+                         CHG
+             RESET        N/A     N/A       N/A   N/A      N/A       N/A      N/A      N/A
+             COND.
+BIT 0 - 6 UNDEFINED                                  BIT 7 DSKCHG
+The data bus outputs D0 - 6 will remain in a high    This bit monitors the pin of the same name and
+impedance state during a read of this register.      reflects the opposite value seen on the disk cable.
+                                                  20
+
+
+CONFIGURATION CONTROL REGISTER (CCR)
+Address 3F7 WRITE ONLY
+                        7        6        5       4        3        2        1          0
+                                                                          DRATE DRATE
+                                                                           SEL1      SEL0
+            RESET      N/A     N/A       N/A     N/A     N/A      N/A        1          0
+            COND.
+BIT 0 and 1 DATA RATE SELECT 0 and 1                BIT 2 - 7 RESERVED
+These bits determine the data rate of the floppy    Should be set to a logical "0" by the DOR and the
+controller. See Table 13 for the appropriate        DSR resets.
+values.
+                                                 21
+
+
+STATUS REGISTER ENCODING
+During the Result Phase of certain commands, the Data Register contains data bytes that give the status of
+the command just executed.
+                                       Table 14 - Status Register 0
+    BIT NO.        SYMBOL           NAME                             DESCRIPTION
+      7,6        IC             Interrupt Code 00 - Normal termination of command. The specified
+                                                command was properly executed and completed without
+                                                error.
+                                                01 - Abnormal termination of command. Command
+                                                execution was started, but was not successfully
+                                                completed.
+                                                10 - Invalid command. The requested command could
+                                                not be executed.
+                                                11 - Abnormal termination caused by Polling.
+       5         SE             Seek End        The FDC completed a Seek, Relative Seek or
+                                                Recalibrate command (used during a Sense Interrupt
+                                                Command).
+       4         EC             Equipment       The TRK0 pin failed to become a "1" after:
+                                Check           1. 80 step pulses in the Recalibrate command.
+                                                2. The Relative Seek command caused the FDC to
+                                                     step outward beyond Track 0.
+       3                                        Unused. This bit is always "0".
+       2         H              Head Address The current head address.
+      1,0        DS1,0          Drive Select    The current selected drive.
+                                                    22
+
+
+                           Table 15 - Status Register 1
+    BIT NO.   SYMBOL     NAME                               DESCRIPTION
+       7     EN      End of         The FDC tried to access a sector beyond the final sector
+                     Cylinder       of the track (255D*). Will be set if TC is not issued after
+                                    Read or Write Data command.
+       6                            Unused. This bit is always "0".
+       5     DE      Data Error     The FDC detected a CRC error in either the ID field or
+                                    the data field of a sector.
+       4     OR      Overrun/       Becomes set if the FDC does not receive CPU or DMA
+                     Underrun       service within the required time interval, resulting in data
+                                    overrun or underrun.
+       3                            Unused. This bit is always "0".
+       2     ND      No Data        Any one of the following:
+                                    1.         Read Data, Read Deleted Data command -
+                                            the FDC did not find the specified sector.
+                                    2.         Read ID command - the FDC cannot read the
+                                             ID field without an error.
+                                    3.         Read A Track command - the FDC cannot
+                                            find the proper sector sequence.
+       1     NW      Not Writable   WP pin became a "1" while the FDC is executing a Write
+                                    Data, Write Deleted Data, or Format A Track command.
+       0     MA      Missing        Any one of the following:
+                     Address Mark   1.         The FDC did not detect an ID address mark
+                                            at the specified track after encountering the
+                                         index pulse from the IDX pin twice.
+                                    2.         The FDC cannot detect a data address mark
+                                           or a deleted data address mark on the
+                                         specified track.
+* D= Decimal
+                                        23
+
+
+                      Table 16 - Status Register 2
+BIT NO.  SYMBOL     NAME                             DESCRIPTION
+   7                           Unused. This bit is always "0".
+   6    CM      Control Mark   Any one of the following:
+                               1.        Read Data command - the FDC encountered a
+                                    deleted data address mark.
+                               2.        Read Deleted Data command - the FDC
+                                    encountered a data address mark.
+   5    DD      Data Error in  The FDC detected a CRC error in the data field.
+                Data Field
+   4    WC      Wrong          The track address from the sector ID field is different
+                Cylinder       from the track address maintained inside the FDC.
+   3                           Unused. This bit is always "0".
+   2                           Unused. This bit is always "0".
+   1    BC      Bad Cylinder   The track address from the sector ID field is different
+                               from the track address maintained inside the FDC and is
+                               equal to FF hex, which indicates a bad track with a hard
+                               error according to the IBM soft-sectored format.
+   0    MD      Missing Data   The FDC cannot detect a data address mark or a deleted
+                Address Mark   data address mark.
+                                   24
+
+
+                                          Table 17 - Status Register 3
+     BIT NO.         SYMBOL             NAME                              DESCRIPTION
+         7                                         Unused. This bit is always "0".
+         6         WP               Write          Indicates the status of the WP pin.
+                                    Protected
+         5                                         Unused. This bit is always "1".
+         4         T0               Track 0        Indicates the status of the TRK0 pin.
+         3                                         Unused. This bit is always "1".
+         2         HD               Head Address Indicates the status of the HDSEL pin.
+        1,0        DS1,0            Drive Select   Indicates the status of the DS1, DS0 pins.
+RESET                                                      DOR Reset vs. DSR Reset (Software Reset)
+There are three sources of system reset on the             These two resets are functionally the same. Both
+FDC: the RESET pin of the FDC37C78, a reset                will reset the FDC core, which affects drive status
+generated via a bit in the DOR, and a reset                information and the FIFO circuits. The DSR reset
+generated via a bit in the DSR. At power on, a             clears itself automatically while the DOR reset
+Power On Reset initializes the FDC. All resets             requires the host to manually clear it. DOR reset
+take the FDC out of the power down state.                  has precedence over the DSR reset. The DOR
+                                                           reset is set automatically upon a pin reset. The
+All operations are terminated upon a RESET, and            user must manually clear this reset bit in the DOR
+the FDC enters an idle state. A reset while a disk         to exit the reset state.
+write is in progress will corrupt the data and CRC.
+                                                           MODE OF OPERATION
+On exiting the reset state, various internal
+registers are cleared, including the Configure             PC/AT mode - (IDENT high, MFM a "don't care")
+command information, and the FDC waits for a
+new command. Drive polling will start unless               The PC/AT register set is enabled, the DMA
+disabled by a new Configure command.                       enable bit of the DOR becomes valid (IRQ and
+                                                           DRQ can be hi Z), and TC and DENSEL become
+RESET Pin (Hardware Reset)                                 active high signals.
+The RESET pin is a global reset and clears all
+registers except those programmed by the Specify
+command. The DOR reset bit is enabled and
+must be cleared by the host to exit the reset state.
+                                                       25
+
+
+DMA TRANSFERS                                        Before writing to the FDC, the host must examine
+                                                     the RQM and DIO bits of the Main Status Register.
+DMA transfers are enabled with the Specify            RQM and DIO must be equal to "1" and "0"
+command and are initiated by the FDC by              respectively before command bytes may be
+activating the DRQ pin during a data transfer        written. RQM is set false by the FDC after each
+command. The FIFO is enabled directly by             write cycle until the received byte is processed.
+asserting nDACK and addresses need not be            The FDC asserts RQM again to request each
+valid.                                               parameter byte of the command unless an illegal
+                                                     command condition is detected. After the last
+Note that if the DMA controller (i.e. 8237A) is      parameter byte is received, RQM remains "0" and
+programmed to function in verify mode, a pseudo      the FDC automatically enters the next phase as
+read is performed by the FDC based only on           defined by the command definition.
+nDACK. This mode is only available when the
+FDC has been configured into byte mode (FIFO         The FIFO is disabled during the command phase
+disabled) and is programmed to do a read. With       to provide for the proper handling of the "Invalid
+the FIFO enabled, the FDC can perform the above      Command" condition.
+operation by using the new Verify command; no
+DMA operation is needed.                             Execution Phase
+CONTROLLER PHASES                                    All data transfers to or from the FDC occur during
+                                                     the execution phase, which can proceed in DMA
+For simplicity, command handling in the FDC can      or non-DMA mode as indicated in the Specify
+be divided into three phases:            Command,    command.
+Execution, and Result. Each phase is described in
+the following sections.                              After a reset, the FIFO is disabled. Each data byte
+                                                     is transferred by an IRQ or DRQ depending on the
+Command Phase                                        DMA mode. The Configure command can enable
+                                                     the FIFO and set the FIFO threshold value.
+After a reset, the FDC enters the command phase
+and is ready to accept a command from the host.      The following paragraphs detail the operation of
+For each of the commands, a defined set of           the FIFO flow control. In these descriptions,
+command code bytes and parameter bytes has to        <threshold> is defined as the number of bytes
+be written to the FDC before the command phase       available to the FDC when service is requested
+is complete. (Please refer to Table 18 for the       from the host and ranges from 1 to 16. The
+command set descriptions). These bytes of data       parameter FIFOTHR, which the user programs, is
+must be transferred in the order prescribed.         one less and ranges from 0 to 15.
+                                                  26
+
+
+A low threshold value (i.e. 2) results in longer        DMA Mode - Transfers from the FIFO to the Host
+periods of time between service requests, but
+requires faster servicing of the request for both       The FDC activates the DDRQ pin when the FIFO
+read and write cases. The host reads (writes)           contains (16 - <threshold>) bytes, or the last byte
+from (to) the FIFO until empty (full), then the         of a full sector transfer has been placed in the
+transfer request goes inactive. The host must be        FIFO. The DMA controller must respond to the
+very responsive to the service request. This is the     request by reading data from the FIFO. The FDC
+desired case for use with a "fast" system.              will deactivate the DDRQ pin when the FIFO
+                                                        becomes empty. DRQ goes inactive after nDACK
+A high value of threshold (i.e. 12) is used with a       goes active for the last byte of a data transfer
+"sluggish" system by affording a long latency           (or on the active edge of nIOR, on the last byte, if
+period after a service request, but results in more     no edge is present on nDACK). A data underrun
+frequent service requests.                              may occur if DRQ is not removed in time to
+                                                        prevent an unwanted cycle.
+Non-DMA Mode - Transfers from the FIFO to the
+Host                                                    DMA Mode - Transfers from the Host to the FIFO
+The IRQ pin and RQM bits in the Main Status             The FDC activates the DRQ pin when entering the
+Register are activated when the FIFO contains           execution phase of the data transfer commands.
+(16-<threshold>) bytes or the last bytes of a full      The DMA controller must respond by activating the
+sector have been placed in the FIFO. The IRQ pin        nDACK and nIOW pins and placing data in the
+can be used for interrupt-driven systems, and           FIFO.     DRQ remains active until the FIFO
+RQM can be used for polled systems. The host            becomes full. DRQ is again set true when the
+must respond to the request by reading data from        FIFO has <threshold> bytes remaining in the
+the FIFO. This process is repeated until the last       FIFO. The FDC will also deactivate the DRQ pin
+byte is transferred out of the FIFO. The FDC will       when TC becomes true (qualified by nDACK),
+deactivate the IRQ pin and RQM bit when the             indicating that no more data is required. DRQ
+FIFO becomes empty.                                     goes inactive after nDACK goes active for the
+                                                        last byte of a data transfer (or on the active edge
+Non-DMA Mode - Transfers from the Host to the           of nIOW of the last byte, if no edge is present on
+FIFO                                                    nDACK). A data overrun may occur if DRQ is not
+                                                        removed in time to prevent an unwanted cycle.
+The IRQ pin and RQM bit in the Main Status
+Register are activated upon entering the execution      Data Transfer Termination
+phase of data transfer commands. The host must
+respond to the request by writing data into the         The FDC supports terminal count explicitly through
+FIFO. The IRQ pin and RQM bit remain true until         the TC pin and implicitly through the
+the FIFO becomes full. They are set true again          underrun/overrun       and    end-of-track      (EOT)
+when the FIFO has <threshold> bytes remaining in        functions. For full sector transfers, the EOT
+the FIFO. The IRQ pin will also be deactivated if       parameter can define the last sector to be
+TC and nDACK both go inactive. The FDC                  transferred in a single or multi-sector transfer.
+enters the result phase after the last byte is taken
+by the FDC from the FIFO (i.e. FIFO empty
+condition).
+                                                     27
+
+
+If the last sector to be transferred is a partial      Result Phase
+sector, the host can stop transferring the data in
+mid-sector, and the FDC will continue to complete      The generation of IRQ determines the beginning
+the sector as if a hardware TC was received. The       of the result phase. For each of the commands, a
+only difference between these implicit functions       defined set of result bytes has to be read from the
+and TC is that they return "abnormal termination"      FDC before the result phase is complete. These
+result status. Such status indications can be          bytes of data must be read out for another
+ignored if they were expected.                         command to start.
+Note that when the host is sending data to the         RQM and DIO must both equal "1" before the
+FIFO of the FDC, the internal sector count will be     result bytes may be read. After all the result bytes
+complete when the FDC reads the last byte from         have been read, the RQM and DIO bits switch to
+its side of the FIFO. There may be a delay in the      "1" and "0" respectively, and the CB bit is cleared,
+removal of the transfer request signal of up to the    indicating that the FDC is ready to accept the next
+time taken for the FDC to read the last 16 bytes       command.
+from the FIFO. The host must tolerate this delay.
+                                                    28
+
+
+COMMAND SET/DESCRIPTIONS                                     is issued. The user sends a Sense Interrupt
+                                                             Status command which returns an invalid
+Commands can be written whenever the FDC is in               command error. Refer to Table 18 or explanations
+the command phase. Each command has a                        of the various symbols used. Table 19 lists the
+unique set of needed parameters and status                   required parameters and the results associated
+results. The FDC checks to see that the first byte           with each command that the FDC is capable of
+is a valid command and, if valid, proceeds with              performing.
+the command. If it is invalid, an interrupt
+                               Table 18 - Description of Command Symbols
+   SYMBOL             NAME                                          DESCRIPTION
+ C             Cylinder Address       The currently selected address; 0 to 255.
+ D             Data Pattern           The pattern to be written in each sector data field during formatting.
+ D0, D1, D2,   Drive Select 0-3       Designates which drives are perpendicular drives on the
+ D3                                   Perpendicular Mode Command. A "1" indicates a perpendicular
+                                      drive.
+ DIR           Direction Control      If this bit is 0, then the head will step out from the spindle during a
+                                      relative seek. If set to a 1, the head will step in toward the spindle.
+ DS0, DS1      Disk Drive Select         DS1      DS0       DRIVE
+                                          0        0      drive 0
+                                          0        1      drive 1
+                                          1        0      drive 2
+                                          1        1      drive 3
+ DTL           Special Sector         By setting N to zero (00), DTL may be used to control the number of
+               Size                   bytes transferred in disk read/write commands. The sector size (N =
+                                      0) is set to 128. If the actual sector (on the diskette) is larger than
+                                      DTL, the remainder of the actual sector is read but is not passed to
+                                      the host during read commands; during write commands, the
+                                      remainder of the actual sector is written with all zero bytes. The CRC
+                                      check code is calculated with the actual sector. When N is not zero,
+                                      DTL has no meaning and should be set to FF HEX.
+ EC            Enable Count           When this bit is "1" the "DTL" parameter of the Verify command
+                                      becomes SC (number of sectors per track).
+ EFIFO         Enable FIFO            This active low bit when a 0, enables the FIFO. A "1" disables the
+                                      FIFO (default).
+ EIS           Enable Implied         When set, a seek operation will be performed before executing any
+               Seek                   read or write command that requires the C parameter in the
+                                      command phase. A "0" disables the implied seek.
+ EOT           End of Track           The final sector number of the current track.
+ GAP                                  Alters Gap 2 length when using Perpendicular Mode.
+ GPL           Gap Length             The Gap 3 size. (Gap 3 is the space between sectors excluding the
+                                      VCO synchronization field).
+ H/HDS         Head Address           Selected head: 0 or 1 (disk side 0 or 1) as encoded in the sector ID
+                                                         29
+
+
+                     Table 18 - Description of Command Symbols
+ SYMBOL       NAME                                      DESCRIPTION
+                           field.
+HLT     Head Load Time     The time interval that FDC waits after loading the head and before
+                           initializing a read or write operation. Refer to the Specify command
+                           for actual delays.
+HUT     Head Unload Time The time interval from the end of the execution phase (of a read or
+                           write command) until the head is unloaded. Refer to the Specify
+                           command for actual delays.
+LOCK                       Lock defines whether EFIFO, FIFOTHR, and PRETRK parameters
+                           of the CONFIGURE COMMAND can be reset to their default values
+                           by a "software Reset". (A reset caused by writing to the appropriate
+                           bits of either tha DSR or DOR)
+MFM     MFM/FM Mode        A one selects the double density (MFM) mode. A zero selects single
+        Selector           density (FM) mode.
+MT      Multi-Track        When set, this flag selects the multi-track operating mode. In this
+        Selector           mode, the FDC treats a complete cylinder under head 0 and 1 as a
+                           single track. The FDC operates as this expanded track started at the
+                           first sector under head 0 and ended at the last sector under head 1.
+                           With this flag set, a multitrack read or write operation will
+                           automatically continue to the first sector under head 1 when the FDC
+                           finishes operating on the last sector under head 0.
+N       Sector Size Code This specifies the number of bytes in a sector. If this parameter is
+                           “00”, then the sector size is 128 bytes. The number of bytes
+                           transferred is determined by the DTL parameter. Otherwise the
+                           sector size is (2 raised to the “N’th” power) times 128. All values up
+                           to “07” hes are allowable. “07”H would equal a sector size of 16k. It
+                           is the user’s resposibility to not select combinations that are not
+                           possible with the drive.
+                                           N            SECTOR SIZE
+                                          00             128 bytes
+                                          01             256 bytes
+                                          02             512 bytes
+                                          03            1024 bytes
+                                           ..               ...
+                                          07             16 Kbytes
+NCN     New Cylinder       The desired cylinder number.
+        Number
+ND      Non-DMA Mode       When set to 1, indicates that the FDC is to operate in the non-DMA
+        Flag               mode. In this mode, the host is interrupted for each data transfer.
+                           When set to 0, the FDC operates in DMA mode, interfacing to a DMA
+                           controller by means of the DRQ and DACK signals.
+OW      Overwrite          The bits D0-D3 of the Perpendicular Mode Command can only be
+                                              30
+
+
+                      Table 18 - Description of Command Symbols
+ SYMBOL        NAME                                     DESCRIPTION
+                            modified if OW is set to 1. OW id defined in the Lock command.
+PCN     Present Cylinder    The current position of the head at the completion of Sense Interrupt
+        Number              Status command.
+POLL    Polling Disable     When set, the internal polling routine is disabled. When clear, polling
+                            is enabled.
+PRETRK  Precompensation Programmable from track 00 to FFH.
+        Start Track
+        Number
+R       Sector Address      The sector number to be read or written. In multi-sector transfers,
+                            this parameter specifies the sector number of the first sector to be
+                            read or written.
+RCN     Relative Cylinder   Relative cylinder offset from present cylinder as used by the Relative
+        Number              Seek command.
+SC      Number of Sectors The number of sectors per track to be initialized by the Format
+        Per Track           command. The number of sectors per track to be verified during a
+                            Verify command when EC is set.
+SK      Skip Flag           When set to 1, sectors containing a deleted data address mark will
+                            automatically be skipped during the execution of Read Data. If Read
+                            Deleted is executed, only sectors with a deleted address mark will be
+                            accessed. When set to "0", the sector is read or written the same as
+                            the read and write commands.
+SRT     Step Rate Interval The time interval between step pulses issued by the FDC.
+                            Programmable from 0.5 to 8 milliseconds in increments of 0.5 ms at
+                            the 1 Mbit data rate. Refer to the SPECIFY command for actual
+                            delays.
+ST0     Status 0            Registers within the FDC which store status information after a
+ST1     Status 1            command has been executed. This status information is available to
+ST2     Status 2            the host during the result phase after command execution.
+ST3     Status 3
+WGATE   Write Gate          Alters timing of WE to allow for pre-erase loads in perpendicular
+                            drives.
+                                             31
+
+
+INSTRUCTION SET
+                         Table 19 - Instruction Set
+                                READ DATA
+                             DATA BUS
+    PHASE    R/W D7  D6   D5   D4     D3   D2    D1 D0           REMARKS
+ Command      W  MT MFM   SK    0     0     1     1 0  Command Codes
+              W   0   0    0    0      0  HDS DS1 DS0
+              W         ──────── C ────────            Sector ID information prior to
+                                                       Command execution.
+              W         ──────── H ────────
+              W         ──────── R ────────
+              W         ──────── N ────────
+              W         ─────── EOT ───────
+              W         ─────── GPL ───────
+              W         ─────── DTL ───────
+ Execution                                             Data transfer between the
+                                                       FDD and system.
+ Result       R         ─────── ST0 ───────            Status information after Com-
+                                                       mand execution.
+              R         ─────── ST1 ───────
+              R         ─────── ST2 ───────
+              R         ──────── C ────────            Sector ID information after
+                                                       Command execution.
+              R         ──────── H ────────
+              R         ──────── R ────────
+              R         ──────── N ────────
+                                     32
+
+
+                        READ DELETED DATA
+                          DATA BUS
+   PHASE  R/W D7  D6   D5  D4    D3  D2  D1 D0            REMARKS
+Command    W  MT MFM   SK   0    1    1  0   0  Command Codes
+           W   0   0    0   0     0 HDS DS1 DS0
+           W         ──────── C ────────        Sector ID information prior to
+                                                Command execution.
+           W         ──────── H ────────
+           W         ──────── R ────────
+           W         ──────── N ────────
+           W         ─────── EOT ───────
+           W         ─────── GPL ───────
+           W         ─────── DTL ───────
+Execution                                       Data transfer between the
+                                                FDD and system.
+Result     R         ─────── ST0 ───────        Status information after Com-
+                                                mand execution.
+           R         ─────── ST1 ───────
+           R         ─────── ST2 ───────
+           R         ──────── C ────────        Sector ID information after
+                                                Command execution.
+           R         ──────── H ────────
+           R         ──────── R ────────
+           R         ──────── N ────────
+                                33
+
+
+                           WRITE DATA
+                          DATA BUS
+   PHASE  R/W D7  D6   D5  D4    D3  D2  D1 D0            REMARKS
+Command    W  MT MFM    0   0    0    1  0   1  Command Codes
+           W   0   0    0   0     0 HDS DS1 DS0
+           W         ──────── C ────────        Sector ID information prior to
+                                                Command execution.
+           W         ──────── H ────────
+           W         ──────── R ────────
+           W         ──────── N ────────
+           W         ─────── EOT ───────
+           W         ─────── GPL ───────
+           W         ─────── DTL ───────
+Execution                                       Data transfer between the
+                                                FDD and system.
+Result     R         ─────── ST0 ───────        Status information after Com-
+                                                mand execution.
+           R         ─────── ST1 ───────
+           R         ─────── ST2 ───────
+           R         ──────── C ────────        Sector ID information after
+                                                Command execution.
+           R         ──────── H ────────
+           R         ──────── R ────────
+           R         ──────── N ────────
+                                34
+
+
+                     WRITE DELETED DATA
+                          DATA BUS
+   PHASE  R/W D7  D6 D5   D4   D3   D2   D1  D0          REMARKS
+Command    W  MT MFM  0   0    1     0    0   1  Command Codes
+           W   0   0  0    0    0  HDS   DS1 DS0
+           W         ──────── C ────────         Sector ID information
+                                                 prior to Command
+                                                 execution.
+           W         ──────── H ────────
+           W         ──────── R ────────
+           W         ──────── N ────────
+           W         ─────── EOT ───────
+           W         ─────── GPL ───────
+           W         ─────── DTL ───────
+Execution                                        Data transfer between
+                                                 the FDD and system.
+Result     R         ─────── ST0 ───────         Status information after
+                                                 Command execution.
+           R         ─────── ST1 ───────
+           R         ─────── ST2 ───────
+           R         ──────── C ────────         Sector ID information
+                                                 after Command
+                                                 execution.
+           R         ──────── H ────────
+           R         ──────── R ────────
+           R         ──────── N ────────
+                              35
+
+
+                        READ A TRACK
+                          DATA BUS
+   PHASE  R/W D7  D6 D5   D4   D3   D2   D1  D0          REMARKS
+Command    W  0  MFM  0   0    0     0    1   0  Command Codes
+           W   0   0  0    0    0  HDS   DS1 DS0
+           W         ──────── C ────────         Sector ID information
+                                                 prior to Command
+                                                 execution.
+           W         ──────── H ────────
+           W         ──────── R ────────
+           W         ──────── N ────────
+           W         ─────── EOT ───────
+           W         ─────── GPL ───────
+           W         ─────── DTL ───────
+Execution                                        Data transfer between
+                                                 the FDD and system.
+                                                 FDC reads all of
+                                                 cylinders' contents from
+                                                 index hole to EOT.
+Result     R         ─────── ST0 ───────         Status information after
+                                                 Command execution.
+           R         ─────── ST1 ───────
+           R         ─────── ST2 ───────
+           R         ──────── C ────────         Sector ID information
+                                                 after Command
+                                                 execution.
+           R         ──────── H ────────
+           R         ──────── R ────────
+           R         ──────── N ────────
+                              36
+
+
+                             VERIFY
+                          DATA BUS
+   PHASE  R/W D7  D6  D5  D4    D3   D2   D1  D0          REMARKS
+Command    W  MT MFM  SK   1    0    1     1   0  Command Codes
+           W  EC  0    0   0    0   HDS   DS1 DS0
+           W         ──────── C ────────          Sector ID information
+                                                  prior to Command
+                                                  execution.
+           W         ──────── H ────────
+           W         ──────── R ────────
+           W         ──────── N ────────
+           W         ─────── EOT ───────
+           W         ─────── GPL ───────
+           W         ────── DTL/SC ──────
+Execution                                         No data transfer takes
+                                                  place.
+Result     R         ─────── ST0 ───────          Status information after
+                                                  Command execution.
+           R         ─────── ST1 ───────
+           R         ─────── ST2 ───────
+           R         ──────── C ────────          Sector ID information
+                                                  after Command
+                                                  execution.
+           R         ──────── H ────────
+           R         ──────── R ────────
+           R         ──────── N ────────
+                           VERSION
+                          DATA BUS
+   PHASE  R/W D7  D6  D5  D4    D3   D2   D1  D0          REMARKS
+Command    W   0  0    0   1    0    0     0   0  Command Code
+Result     R   1  0    0   1    0     0    0   0  Enhanced Controller
+                               37
+
+
+                              FORMAT A TRACK
+                                DATA BUS
+   PHASE      R/W D7  D6   D5   D4   D3    D2    D1 D0          REMARKS
+Command        W  0  MFM    0    0   1     1     0   1  Command Codes
+               W   0   0    0    0    0   HDS   DS1 DS0
+               W           ──────── N ────────          Bytes/Sector
+               W          ──────── SC ────────          Sectors/Cylinder
+               W          ─────── GPL ───────           Gap 3
+               W           ──────── D ────────          Filler Byte
+Execution for  W           ──────── C ────────          Input Sector Parameters
+Each Sector
+Repeat:
+               W           ──────── H ────────
+               W           ──────── R ────────
+               W           ──────── N ────────
+                                                        FDC formats an entire
+                                                        cylinder
+Result         R           ─────── ST0 ───────          Status information after
+                                                        Command execution
+               R           ─────── ST1 ───────
+               R           ─────── ST2 ───────
+               R         ────── Undefined ──────
+               R         ────── Undefined ──────
+               R         ────── Undefined ──────
+               R         ────── Undefined ──────
+                                    38
+
+
+                             RECALIBRATE
+                             DATA BUS
+   PHASE  R/W D7   D6    D5  D4   D3    D2   D1     D0             REMARKS
+Command    W  0    0     0    0    0    1     1      1    Command Codes
+           W   0    0     0   0    0     0  DS1    DS0
+Execution                                                 Head retracted to Track 0
+                                                          Interrupt.
+                       SENSE INTERRUPT STATUS
+                            DATA BUS
+   PHASE  R/W D7   D6    D5  D4   D3    D2  D1    D0             REMARKS
+Command    W  0    0     0    0    1    0    0    0    Command Codes
+Result     R           ─────── ST0 ───────             Status information at the end
+                                                       of each seek operation.
+           R           ─────── PCN ───────
+                                SPECIFY
+                            DATA BUS
+   PHASE  R/W D7   D6    D5  D4   D3    D2  D1    D0              REMARKS
+Command    W  0    0     0    0    0    0    1     1   Command Codes
+           W     ─── SRT ───          ─── HUT ───
+           W          ────── HLT ──────           ND
+                                   39
+
+
+                       SENSE DRIVE STATUS
+                           DATA BUS
+   PHASE  R/W D7 D6  D5   D4    D3   D2      D1    D0          REMARKS
+Command    W  0   0   0    0     0    1       0     0  Command Codes
+           W   0  0   0    0     0  HDS     DS1  DS0
+Result     R          ─────── ST3 ───────              Status information about
+                                                       FDD
+                               SEEK
+                           DATA BUS
+   PHASE  R/W D7 D6  D5   D4    D3   D2      D1    D0          REMARKS
+Command    W  0   0   0    0     1    1       1     1  Command Codes
+           W   0  0   0    0     0  HDS     DS1  DS0
+           W         ─────── NCN ───────
+Execution                                              Head positioned over
+                                                       proper cylinder on
+                                                       diskette.
+                           CONFIGURE
+                              DATA BUS
+   PHASE  R/W D7 D6    D5     D4    D3     D2    D1   D0          REMARKS
+Command    W  0   0     0      1     0      0    1      1    Configure
+                                                             Information
+           W   0  0     0      0     0      0     0     0
+           W   0 EIS EFIFO   POLL       ─── FIFOTHR ───
+Execution  W        ───────── PRETRK ─────────
+                                 40
+
+
+                             RELATIVE SEEK
+                               DATA BUS
+   PHASE  R/W D7   D6    D5   D4   D3    D2    D1     D0          REMARKS
+Command    W   1   DIR    0    0    1    1      1      1
+           W   0    0     0    0    0   HDS    DS1    DS0
+           W             ─────── RCN ───────
+                                 DUMPREG
+                                     DATA BUS
+   PHASE  R/W   D7    D6     D5      D4    D3   D2      D1     D0     REMARKS
+Command    W     0     0      0       0     1    1       1      0    *Note:
+                                                                     Registers
+                                                                     placed in
+                                                                     FIFO
+Execution
+Result     R                ────── PCN-Drive 0 ───────
+           R                ────── PCN-Drive 1 ───────
+           R                ────── PCN-Drive 2 ───────
+           R                ────── PCN-Drive 3 ───────
+           R        ──── SRT ────                 ─── HUT ───
+           R              ─────── HLT ───────                  ND
+           R                 ─────── SC/EOT ───────
+           R  LOCK     0     D3      D2    D1   D0     GAP   WGATE
+           R     0    EIS EFIFO    POLL          ── FIFOTHR ──
+           R                ──────── PRETRK ────────
+                                    41
+
+
+                             READ ID
+                           DATA BUS
+   PHASE  R/W D7  D6  D5   D4   D3    D2   D1 D0         REMARKS
+Command    W  0  MFM   0   0    1     0    1   0  Commands
+           W   0   0   0    0    0   HDS  DS1 DS0
+Execution                                         The first correct ID
+                                                  information on the
+                                                  Cylinder is stored in Data
+                                                  Register
+Result     R         ──────── ST0 ────────        Status information after
+                                                  Command execution.
+                                                  Disk status after the
+                                                  Command has
+                                                  completed
+           R         ──────── ST1 ────────
+           R         ──────── ST2 ────────
+           R          ──────── C ────────
+           R          ──────── H ────────
+           R          ──────── R ────────
+           R          ──────── N ────────
+                               42
+
+
+                                        PERPENDICULAR MODE
+                                                 DATA BUS
+    PHASE            R/W      D7    D6   D5    D4   D3    D2      D1        D0           REMARKS
+ Command              W        0    0     0    1     0     0       1         0       Command Codes
+                             OW     0    D3    D2   D1    D0     GAP      WGATE
+                                            INVALID CODES
+                                            DATA BUS
+    PHASE            R/W     D7    D6  D5    D4    D3   D2     D1    D0             REMARKS
+ Command              W             ───── Invalid Codes ─────             Invalid Command Codes
+                                                                          (NoOp - fdc goes into Standby
+                                                                          State)
+ Result               R               ─────── ST0 ───────                 ST0 = 80H
+                                                  LOCK
+                                                 DATA BUS
+    PHASE            R/W        D7     D6   D5      D4       D3    D2    D1     D0       REMARKS
+ Command              W       LOCK     0     0       1        0     1     0     0    Command Codes
+ Result               R          0     0     0     LOCK       0     0     0     0
+SC is returned if the last command that was issued was the Format command. EOT is returned if the last
+command was a Read or Write.
+NOTE: These bits are used internally only. They are not reflected in the Drive Select pins. It is the user's
+responsibility to maintain correspondence between these bits and the Drive Select pins (DOR).
+                                                   43
+
+
+DATA TRANSFER COMMANDS                                   N determines the number of bytes per sector (see
+                                                         Table 22 below). If N is set to zero, the sector size
+All of the Read Data, Write Data and Verify type         is set to 128. The DTL value determines the
+commands use the same parameter bytes and                number of bytes to be transferred. If DTL is less
+return the same results information, the only            than 128, the FDC transfers the specified number
+difference being the coding of bits 0-4 in the first     of bytes to the host. For reads, it continues to
+byte.                                                    read the entire 128-byte sector and checks for
+                                                         CRC errors. For writes, it completes the 128-byte
+An implied seek will be executed if the feature was      sector by filling in zeros. If N is not set to 00 Hex,
+enabled by the Configure command. This seek is           DTL should be set to FF Hex and has no impact
+completely transparent to the user. The Drive            on the number of bytes transferred.
+Busy bit for the drive will go active in the Main
+Status Register during the seek portion of the                          Table 20 - Sector Sizes
+command. If the seek portion fails, it will be                      N               SECTOR SIZE
+reflected in the results status normally returned for
+a Read/Write Data command. Status Register 0                        00                 128 bytes
+(ST0) would contain the error code and C would                      01                 256 bytes
+contain the cylinder on which the seek failed.                      02                 512 bytes
+                                                                    03                1024 bytes
+Read Data                                                            ..                    ...
+                                                                    07                16 Kbytes
+A set of nine (9) bytes is required to place the FDC
+in the Read Data Mode. After the Read Data
+command has been issued, the FDC loads the
+                                                         The amount of data which can be handled with a
+head (if it is in the unloaded state), waits the
+                                                         single command to the FDC depends upon MT
+specified head settling time (defined in the Specify
+                                                         (multi-track) and N (number of bytes/sector).
+command), and begins reading ID Address Marks
+and ID fields. When the sector address read off
+                                                         The Multi-Track function (MT) allows the FDC to
+the diskette matches with the sector address
+                                                         read data from both sides of the diskette. For a
+specified in the command, the FDC reads the
+                                                         particular cylinder, data will be transferred starting
+sector's data field and transfers the data to the
+                                                         at Sector 1, Side 0 and completing the last sector
+FIFO.
+                                                         of the same track at Side 1.
+After completion of the read operation from the
+                                                         If the host terminates a read or write operation in
+current sector, the sector address is incremented
+                                                         the FDC, the ID information in the result phase is
+by one and the data from the next logical sector is
+                                                         dependent upon the state of the MT bit and EOT
+read and output via the FIFO. This continuous
+                                                         byte. Refer to Table 21.
+read function is called "Multi-Sector Read
+Operation". Upon receipt of TC, or an implied TC
+(FIFO overrun/underrun), the FDC stops sending
+data but will continue to read data from the current
+sector, check the CRC bytes, and at the end of the
+sector, terminate the Read Data Command.
+                                                      44
+
+
+At the completion of the Read Data command, the            After reading the ID and Data Fields in each
+head is not unloaded until after the Head Unload           sector, the FDC checks the CRC bytes. If a
+Time Interval (specified in the Specify command)           CRC error occurs in the ID or data field, the FDC
+has elapsed. If the host issues another command            sets the IC code in Status Register 0 to "01"
+before the head unloads, then the head settling            indicating abnormal termination, sets the DE bit
+time may be saved between subsequent reads.                flag in Status Register 1 to "1", sets the DD bit in
+                                                           Status Register 2 to "1" if CRC is incorrect in the
+If the FDC detects a pulse on the nINDEX pin               ID field, and terminates the Read Data
+twice without finding the specified sector (meaning        Command. Table 22 describes the effect of the
+that the diskette's index hole passes through index        SK bit on the Read Data command execution
+detect logic in the drive twice), the FDC sets the IC      and results. Except where noted in Table 22,
+code in Status Register 0 to "01" indicating               the C or R value of the sector address is
+abnormal termination, sets the ND bit in Status            automatically incremented (see Table 24).
+Register 1 to "1" indicating a sector not found, and
+terminates the Read Data Command.
+                                      Table 21 - Effects of MT and N Bits
+                     MT      N       MAXIMUM TRANSFER              FINAL SECTOR READ
+                                           CAPACITY                      FROM DISK
+                      0      1     256 x 26 = 6,656              26 at side 0 or 1
+                      1      1     256 x 52 = 13,312             26 at side 1
+                      0      2     512 x 15 = 7,680              15 at side 0 or 1
+                      1      2     512 x 30 = 15,360             15 at side 1
+                      0      3     1024 x 8 = 8,192              8 at side 0 or 1
+                      1      3     1024 x 16 = 16,384            16 at side 1
+                                 Table 22 - Skip Bit vs Read Data Command
+                            DATA ADDRESS                             RESULTS
+               SK BIT         MARK TYPE           SECTOR       CM BIT OF        DESCRIPTION OF
+               VALUE        ENCOUNTERED            READ?        ST2 SET?             RESULTS
+                  0       Normal Data                Yes            No          Normal
+                                                                                termination.
+                  0       Deleted Data               Yes            Yes         Address not
+                                                                                incremented. Next
+                                                                                sector not
+                                                                                searched for.
+                  1       Normal Data                Yes            No          Normal
+                                                                                termination.
+                  1       Deleted Data               No             Yes         Normal
+                                                                                termination. Sector
+                                                                                not read
+                                                                                ("skipped").
+                                                       45
+
+
+Read Deleted Data                                       Table 23 describes the effect of the SK bit on the
+                                                        Read Deleted Data command execution and
+This command is the same as the Read Data               results.
+command, only it operates on sectors that contain
+a Deleted Data Address Mark at the beginning of a       Except where noted in Table 25, the C or R value
+Data Field.                                             of the sector address is automatically incremented
+                                                        (see Table 26).
+                           Table 23 - Skip Bit vs. Read Deleted Data Command
+                          DATA ADDRESS                             RESULTS
+               SK BIT        MARK TYPE          SECTOR       CM BIT OF       DESCRIPTION OF
+               VALUE      ENCOUNTERED            READ?       ST2 SET?            RESULTS
+                  0      Normal Data               Yes            Yes       Address not
+                                                                            incremented. Next
+                                                                            sector not
+                                                                            searched for.
+                  0      Deleted Data              Yes            No        Normal
+                                                                            termination.
+                  1      Normal Data                No            Yes       Normal
+                                                                            termination. Sector
+                                                                            not read
+                                                                            ("skipped").
+                  1      Deleted Data              Yes            No        Normal
+                                                                            termination.
+Read A Track                                            Register 1 to a "1" if there is no comparison. Multi-
+                                                        track or skip operations are not allowed with this
+This command is similar to the Read Data                command. The MT and SK bits (bits D7 and D5 of
+command except that the entire data field is read       the first command byte respectively) should always
+continuously from each of the sectors of a track.       be set to "0".
+Immediately after encountering a pulse on the
+nINDEX pin, the FDC starts to read all data             This command terminates when the EOT specified
+fields on the track as continuous blocks of data        number of sectors has not been read. If the FDC
+without regard to logical sector numbers. If the        does not find an ID Address Mark on the diskette
+FDC finds an error in the ID or DATA CRC check          after the second occurrence of a pulse on the IDX
+bytes, it continues to read data from the track and     pin, then it sets the IC code in Status Register 0 to
+sets the appropriate error bits at the end of the       "01" (abnormal termination), sets the MA bit in
+command. The FDC compares the ID information            Status Register 1 to "1", and terminates the
+read from each sector with the specified value in       command.
+the command and sets the ND flag of Status
+                                                     46
+
+
+                                          Table 24 - Result Phase Table
+                                 FINAL SECTOR
+                               TRANSFERRED TO                 ID INFORMATION AT RESULT PHASE
+    MT          HEAD                  HOST
+                                                             C               H            R            N
+                                  Less than EOT            NC               NC         R+1            NC
+     0              0
+                                   Equal to EOT           C+1               NC           01           NC
+                    1             Less than EOT            NC               NC         R+1            NC
+                                   Equal to EOT           C+1               NC           01           NC
+                                  Less than EOT            NC               NC         R+1            NC
+     1              0
+                                   Equal to EOT            NC              LSB           01           NC
+                    1             Less than EOT            NC               NC         R+1            NC
+                                   Equal to EOT           C+1              LSB           01           NC
+NC: No Change, the same value as the one at the beginning of command execution.
+LSB: Least Significant Bit, the LSB of H is complemented.
+Write Data                                                  one of the ID fields, it sets the IC code in Status
+                                                            Register 0 to "01" (abnormal termination), sets the
+After the Write Data command has been issued,               DE bit of Status Register 1 to "1", and terminates
+the FDC loads the head (if it is in the unloaded            the Write Data command.
+state), waits the specified head load time if
+unloaded (defined in the Specify command), and              The Write Data command operates in much the
+begins reading ID fields. When the sector address           same manner as the Read Data command. The
+read from the diskette matches the sector address           following items are the same. Please refer to the
+specified in the command, the FDC reads the data            Read Data Command for details:
+from the host via the FIFO and writes it to the
+sector's data field.                                        •    Transfer Capacity
+                                                            •    EN (End of Cylinder) bit
+After writing data into the current sector, the FDC         •    ND (No Data) bit
+computes the CRC value and writes it into the               •    Head Load, Unload Time Interval
+CRC field at the end of the sector transfer. The            •    ID information when the host terminates the
+Sector Number stored in "R" is incremented by                    command
+one, and the FDC continues writing to the next              •    Definition of DTL when N = 0 and when N does
+data field. The FDC continues this "Multi-Sector                 not = 0
+Write Operation". Upon receipt of a terminal count
+signal or if a FIFO over/under run occurs while a
+data field is being written, then the remainder of
+the data field is filled with zeros.
+The FDC reads the ID field of each sector and
+checks the CRC bytes. If it detects a CRC error in
+                                                        47
+
+
+Write Deleted Data                                        command. By setting the EC bit to "1", an implicit
+                                                          TC will be issued to the FDC. This implicit TC will
+This command is almost the same as the Write               occur when the SC value has decremented to 0
+Data command except that a Deleted Data                   (an SC value of 0 will verify 256 sectors). This
+Address Mark is written at the beginning of the           command can also be terminated by setting the
+Data Field instead of the normal Data Address             EC bit to "0" and the EOT value equal to the final
+Mark. This command is typically used to mark a            sector to be checked. If EC is set to "0", DTL/SC
+bad sector containing an error on the floppy disk.        should be programmed to 0FFH. Refer to Table
+                                                          26 and Table 27 for information concerning the
+Verify                                                    values of MT and EC versus SC and EOT value.
+The Verify command is used to verify the data             Definitions:
+stored on a disk. This command acts exactly like
+a Read Data command except that no data is                # Sectors Per Side = Number of formatted sectors
+transferred to the host. Data is read from the disk       per each side of the disk.
+and CRC is computed and checked against the
+previously-stored value.                                  # Sectors Remaining = Number of formatted
+                                                          sectors left which can be read, including side 1 of
+Because data is not transferred to the host, TC           the disk if MT is set to "1".
+(pin 25) cannot be used to terminate this
+                               Table 25 - Verify Command Result Phase Table
+     MT            EC                     SC/EOT VALUE                        TERMINATION RESULT
+      0              0         SC = DTL                                Success Termination
+                               EOT ≤ # Sectors Per Side                Result Phase Valid
+      0              0         SC = DTL                                Unsuccessful Termination
+                               EOT > # Sectors Per Side                Result Phase Invalid
+      0              1         SC ≤ # Sectors Remaining AND            Successful Termination
+                               EOT ≤ # Sectors Per Side                Result Phase Valid
+      0              1         SC > # Sectors Remaining OR             Unsuccessful Termination
+                               EOT > # Sectors Per Side                Result Phase Invalid
+      1              0         SC = DTL                                Successful Termination
+                               EOT ≤ # Sectors Per Side                Result Phase Valid
+      1              0         SC = DTL                                Unsuccessful Termination
+                               EOT > # Sectors Per Side                Result Phase Invalid
+      1              1         SC ≤ # Sectors Remaining AND            Successful Termination
+                               EOT ≤ # Sectors Per Side                Result Phase Valid
+      1              1         SC > # Sectors Remaining OR             Unsuccessful Termination
+                               EOT > # Sectors Per Side                Result Phase Invalid
+NOTE: If MT is set to "1" and the SC value is greater than the number of remaining formatted sectors on
+Side 0, verifying will continue on Side 1 of the disk.
+                                                       48
+
+
+Format A Track                                             After formatting each sector, the host must send
+                                                           new values for C, H, R and N to the FDC for the
+The Format command allows an entire track to be            next sector on the track. The R value (sector
+formatted. After a pulse from the IDX pin is               number) is the only value that must be changed by
+detected, the FDC starts writing data on the disk          the host after each sector is formatted. This
+including gaps, address marks, ID fields, and data         allows the disk to be formatted with nonsequential
+fields per the IBM System 34 or 3740 format (MFM           sector addresses (interleaving). This incrementing
+or FM respectively). The particular values that will       and formatting continues for the whole track until
+be written to the gap and data field are controlled        the FDC encounters a pulse on the IDX pin again
+by the values programmed into N, SC, GPL, and D            and it terminates the command.
+which are specified by the host during the
+command phase. The data field of the sector is             Table 28 contains typical values for gap fields
+filled with the data byte specified by D. The ID           which are dependent upon the size of the sector
+field for each sector is supplied by the host; that is,    and the number of sectors on each track. Actual
+four data bytes per sector are needed by the FDC           values can vary due to drive electronics.
+for C, H, R, and N (cylinder, head, sector number
+and sector size respectively).
+                                              FORMAT FIELDS
+                                 SYSTEM 34 (DOUBLE DENSITY) FORMAT
+                                                                               DATA
+    GAP4a   SYNC   IAM     GAP1 SYNC     IDAM    C  H   S N C GAP2 SYNC         AM          C
+     80x     12x            50x   12x            Y  D   E O R     22x   12x          DATA R GAP3 GAP 4b
+      4E     00             4E     00            L      C    C    4E     00                 C
+                  3x FC                 3x FE                                 3x FB
+                  C2                    A1                                    A1 F8
+                                SYSTEM 3740 (SINGLE DENSITY) FORMAT
+                                                                               DATA
+    GAP4a   SYNC   IAM     GAP1 SYNC     IDAM    C  H   S N C GAP2 SYNC         AM          C
+     40x      6x            26x    6x            Y  D   E O R     11x    6x          DATA R GAP3 GAP 4b
+      FF     00             FF     00            L      C    C    FF     00                 C
+                    FC                    FE                                   FB or
+                                                                                F8
+                                         PERPENDICULAR FORMAT
+                                                                               DATA
+    GAP4a   SYNC   IAM     GAP1 SYNC     IDAM    C  H   S N C GAP2 SYNC         AM          C
+     80x     12x            50x   12x            Y  D   E O R     41x   12x          DATA R GAP3 GAP 4b
+      4E     00             4E     00            L      C    C    4E     00                 C
+                  3x FC                 3x FE                                 3x FB
+                  C2                    A1                                    A1 F8
+                                                        49
+
+
+                        Table 26 - Typical Values for Formatting
+           FORMAT        SECTOR SIZE            N        SC      GPL1 GPL2
+                                128             00       12       07   09
+                                128             00       10       10   19
+                                512             02       08       18   30
+                FM             1024             03       04       46   87
+                               2048             04       02       C8   FF
+  5.25"                        4096             05       01       C8   FF
+  Drives                         ...            ...
+                                256             01       12       0A   0C
+                                256             01       10       20   32
+                               512*             02       09       2A   50
+              MFM              1024             03       04       80   F0
+                               2048             04       02       C8   FF
+                               4096             05       01       C8   FF
+                                 ...            ...
+                                128              0       0F       07   1B
+   3.5"         FM              256              1       09       0F   2A
+  Drives                        512              2       05       1B   3A
+                                256              1       0F       0E   36
+              MFM               512              2       09       1B   54
+                               1024              3       05       35   74
+GPL1 = suggested GPL values in Read and Write commands to avoid splice point
+between data field and ID field of contiguous sections.
+GPL2 = suggested GPL value in Format A Track command.
+*PC/AT values (typical)
+NOTE: All values except sector size are in hex.
+                                             50
+
+
+CONTROL COMMANDS                                         must be issued after the Recalibrate command to
+                                                         effectively terminate it and to provide verification of
+Control commands differ from the other                   the head position (PCN). During the command
+commands in that no data transfer takes place.           phase of the recalibrate operation, the FDC is in
+Three commands generate an interrupt when                the BUSY state, but during the execution phase it
+complete: Read ID, Recalibrate, and Seek. The            is in a NON-BUSY state. At this time, another
+other control commands do not generate an                Recalibrate command may be issued, and in this
+interrupt.                                               manner parallel Recalibrate operations may be
+                                                         done on up to four drives at once.
+Read ID
+                                                         Upon power up, the software must issue a
+The Read ID command is used to find the present          Recalibrate command to properly initialize all
+position of the recording heads. The FDC stores          drives and the controller.
+the values from the first ID field it is able to read
+into its registers. If the FDC does not find an ID       Seek
+address mark on the diskette after the second
+occurrence of a pulse on the nINDEX pin, it then         The read/write head within the drive is moved from
+ sets the IC code in Status Register 0 to "01"           track to track under the control of the Seek
+(abnormal termination), sets the MA bit in Status        command. The FDC compares the PCN, which is
+Register 1 to "1", and terminates the command.           the current head position, with the NCN and
+                                                         performs the following operation if there is a
+The following commands will generate an interrupt        difference:
+upon completion. They do not return any result
+bytes. It is highly recommended that control                  PCN < NCN: Direction signal to drive set to
+commands be followed by the Sense Interrupt                       "1" (step in) and issues step pulses.
+Status command. Otherwise, valuable interrupt                 PCN > NCN: Direction signal to drive set to
+status information will be lost.                                  "0" (step out) and issues step pulses.
+Recalibrate                                              The rate at which step pulses are issued is
+                                                         controlled by SRT (Stepping Rate Time) in the
+This command causes the read/write head within           Specify command. After each step pulse is
+the FDC to retract to the track 0 position. The          issued, NCN is compared against PCN, and when
+FDC clears the contents of the PCN counter and           NCN = PCN the SE bit in Status Register 0 is set
+checks the status of the nTR0 pin from the FDD.          to "1" and the command is terminated.
+As long as the nTR0 pin is low, the DIR pin
+remains 0 and step pulses are issued. When the           During the command phase of the seek or
+nTR0 pin goes high, the SE bit in Status                 recalibrate operation, the FDC is in the BUSY
+Register 0 is set to "1" and the command is              state, but during the execution phase it is in the
+terminated. If the nTR0 pin is still low after 79        NON-BUSY state. At this time, another Seek or
+step pulses have been issued, the FDC sets the           Recalibrate command may be issued, and in this
+SE and the EC bits of Status Register 0 to "1" and       manner, parallel seek operations may be done on
+terminates the command. Disks capable of                 up to four drives at once. Note that if implied seek
+handling more than 80 tracks per side may require        is not enabled, the read and write commands
+more than one Recalibrate command to return the          should be preceded by:
+head back to physical Track 0.                           1) Seek command - Step to the proper track
+                                                         2) Sense Interrupt Status command - Terminate
+The Recalibrate command does not have a result                the Seek command
+phase.      The Sense Interrupt Status command           3) Read ID - Verify head is on proper track
+                                                      51
+
+
+4) Issue Read/Write command.                           The Seek, Relative Seek, and Recalibrate
+                                                       commands have no result phase. The Sense
+The Seek command does not have a result                Interrupt Status command must be issued
+phase. Therefore, it is highly recommended that        immediately after these commands to terminate
+the Sense Interrupt Status command be issued           them and to provide verification of the head
+after the Seek command to terminate it and to          position (PCN). The H (Head Address) bit in ST0
+provide verification of the head position (PCN).       will always return a "0". If a Sense Interrupt Status
+The H bit (Head Address) in ST0 will always            is not issued, the drive will continue to be BUSY
+return to a "0". When exiting POWERDOWN                and may affect the operation of the next
+mode, the FDC clears the PCN value and the             command.
+status information to zero. Prior to issuing the
+POWERDOWN            command,       it  is   highly    Sense Drive Status
+recommended that the user service all pending          Sense Drive Status obtains drive status
+interrupts through the Sense Interrupt Status          information. It has not execution phase and goes
+command.                                               directly to the result phase from the command
+                                                       phase. Status Register 3 contains the drive status
+Sense Interrupt Status                                 information.
+An interrupt signal on IRQ pin is generated by the
+FDC for one of the following reasons:                  Specify
+1.Upon entering the Result Phase of:                   The Specify command sets the initial values for
+    a. Read Data command                               each of the three internal times. The HUT (Head
+    b. Read A Track command                            Unload Time) defines the time from the end of the
+    c. Read ID command                                 execution phase of one of the read/write
+    d. Read Deleted Data command                       commands to the head unload state. The SRT
+    e. Write Data command                              (Step Rate Time) defines the time interval between
+    f. Format A Track command                          adjacent step pulses. Note that the spacing
+    g. Write Deleted Data command                      between the first and second step pulses may be
+    h. Verify command                                  shorter than the remaining step pulses. The HLT
+2. End of Seek, Relative Seek, or Recalibrate          (Head Load Time) defines the time between when
+    command                                            the Head Load signal goes high and the read/write
+3. FDC requires a data transfer during the             operation starts. The values change with the
+    execution phase in the non-DMA mode                data rate speed selection and are documented in
+                                                       Table 28. The values are the same for MFM and
+The Sense Interrupt Status command resets the          FM.
+interrupt signal and, via the IC code and SE bit of
+Status Register 0, identifies the cause of the
+interrupt.
+        Table 27 - Interrupt Identification
+    SE        IC        INTERRUPT DUE TO
+     0        11    Polling
+     1        00    Normal termination of Seek
+                    or Recalibrate command
+                    Abnormal termination of
+     1        01    Seek or Recalibrate
+                    command
+                                                    52
+
+
+                                 Table 28 - Drive Control Delays (ms)
+                                     HUT                                            SRT
+                  2M       1M  500K      300K    250K        2M       1M       500K   300K      250K
+            0     64       128  256       426     512          4       8        16     26.7      32
+            1      4        8    16      26.7      32        3.75     7.5       15      25       30
+            ..     ..       ..    ..       ..       ..         ..      ..        ..      ..       ..
+           E      56       112  224       373     448         0.5      1         2     3.33       4
+            F     60       120  240       400     480        0.25     0.5        1     1.67       2
+                                                                  HLT
+                       2M            1M                500K               300K              250K
+           00          64            128                256                426               512
+           01          0.5            1                  2                 3.3                4
+           02           1             2                  4                 6.7                8
+            ..          ..            ..                 ..                 ..                .
+           7F          63            126                252                420               504
+           7F         63.5           127                254                423               508
+The choice of DMA or non-DMA operations is                executing a read or write command. Defaults to
+made by the ND bit. When this bit is "1", the non-        no implied seek.
+DMA mode is selected, and when ND is "0", the
+DMA mode is selected. In DMA mode, data                   EFIFO - A "1" disables the FIFO (default). This
+transfers are signalled by the FDRQ pin. Non-             means data transfers are asked for on a byte-by-
+DMA mode uses the RQM bit and the FINT pin to             byte basis. Defaults to "1", FIFO disabled. The
+signal data transfers.                                    threshold defaults to "1".
+Configure                                                 POLL - Disable polling of the drives. Defaults to
+                                                          "0", polling enabled. When enabled, a single
+The Configure command is issued to select the             interrupt is generated after a reset. No polling is
+special features of the FDC.         A Configure          performed while the drive head is loaded and the
+command need not be issued if the default values          head unload delay has not expired.
+of the FDC meet the system requirements.
+                                                          FIFOTHR - The FIFO threshold in the execution
+Configure Default Values:                                 phase of read or write commands. This is
+EIS - No Implied Seeks                                    programmable from 1 to 16 bytes. Defaults to one
+EFIFO - FIFO Disabled                                     byte. A "00" selects one byte; "0F" selects 16
+POLL - Polling Enabled                                    bytes.
+FIFOTHR - FIFO Threshold Set to 1 Byte
+PRETRK - Pre-Compensation Set to Track 0                  PRETRK - Pre-Compensation Start Track
+                                                          Number. Programmable from track 0 to 255.
+EIS - Enable Implied Seek. When set to "1", the           Defaults to track 0. A "00" selects track 0; "FF"
+FDC will perform a Seek operation before                  selects track 255.
+                                                     53
+
+
+Version                                                 increment the register). If the head was on track
+                                                        40 (d), the maximum track that the FDC could
+The Version command checks to see if the                position the head on using Relative Seek will be
+controller is an enhanced type or the older type        295 (D), the initial track + 255 (D). The maximum
+(765A). A value of 90 H is returned as the result       count that the head can be moved with a single
+byte.                                                   Relative Seek command is 255 (D).
+Relative Seek                                           The internal register, PCN, will overflow as the
+                                                        cylinder number crosses track 255 and will contain
+The command is coded the same as for Seek,              39 (D). The resulting PCN value is thus (RCN +
+except for the MSB of the first byte and the DIR        PCN) mod 256. Functionally, the FDC starts
+bit.                                                    counting from 0 again as the track number goes
+                                                        above 255 (D). It is the user's responsibility to
+DIR      Head Step Direction Control                    compensate FDC functions (precompensation
+                                                        track number) when accessing tracks greater than
+           DIR              ACTION                      255. The FDC does not keep track that it is
+             0      Step Head Out                       working in an "extended track area" (greater than
+             1      Step Head In                        255). Any command issued will use the current
+                                                        PCN value except for the Recalibrate command,
+                                                        which only looks for the TRACK0 signal.
+RCN     Relative Cylinder Number that determines        Recalibrate will return an error if the head is farther
+        how many tracks to step the head in or out      than 79 due to its limitation of issuing a maximum
+        from the current track number.                  of 80 step pulses. The user simply needs to issue
+                                                        a second Recalibrate command.               The Seek
+The Relative Seek command differs from the Seek         command and implied seeks will function correctly
+command in that it steps the head the absolute          within the 44 (D) track (299-255) area of the
+number of tracks specified in the command               "extended track area". It is the user's responsibility
+instead of making a comparison against an               not to issue a new track position that will exceed
+internal register. The Seek command is good for         the maximum track that is present in the extended
+drives that support a maximum of 256 tracks.            area. To return to the standard floppy range (0-
+Relative Seeks cannot be overlapped with other          255) of tracks, a Relative Seek should be issued to
+Relative Seeks. Only one Relative Seek can be           cross the track 255 boundary.
+active at a time. Relative Seeks may be
+overlapped with Seeks and Recalibrates. Bit 4 of        A Relative Seek can be used instead of the normal
+Status Register 0 (EC) will be set if Relative Seek     Seek, but the host is required to calculate the
+attempts to step outward beyond Track 0.                difference between the current head location and
+                                                        the new (target) head location. This may require
+As an example, assume that a floppy drive has           the host to issue a Read ID command to ensure
+300 useable tracks. The host needs to read track        that the head is physically on the track that
+300 and the head is on any track (0-255). If a          software assumes it to be.             Different FDC
+Seek command is issued, the head will stop at           commands will return different cylinder results
+track 255. If a Relative Seek command is issued,        which may be difficult to keep track of with
+the FDC will move the head the specified number         software without the Read ID command.
+of tracks, regardless of the internal cylinder          Perpendicular Mode
+position           register       (but          will
+                                                        The Perpendicular Mode command should be
+                                                        issued prior to executing Read/Write/Format
+                                                        commands that access a disk drive with
+                                                        perpendicular recording capability.          With this
+                                                     54
+
+
+command, the length of the Gap2 field and VCO          approximately 24 bytes from the start of the Gap2
+enable timing can be altered to accommodate the        field. But, when the controller operates in the 1
+unique requirements of these drives. Table 31          Mbps perpendicular mode (WGATE = 1, GAP =
+describes the effects of the WGATE and GAP bits        1), VCOEN goes active after 43 bytes to
+for the Perpendicular Mode command. Upon a             accommodate the increased Gap2 field size. For
+reset, the FDC will default to the conventional        both cases, and approximate two-byte cushion is
+mode (WGATE = 0, GAP = 0).                             maintained from the beginning of the sync field for
+                                                       the purposes of avoiding write splices in the
+Selection of the 500 Kbps and 1 Mbps                   presence of motor speed variation.
+perpendicular modes is independent of the actual
+data rate selected in the Data Rate Select             For the Write Data case, the FDC activates Write
+Register. The user must ensure that these two          Gate at the beginning of the sync field under the
+data rates remain consistent.                          conventional mode. The controller then writes a
+                                                       new sync field, data address mark, data field, and
+The Gap2 and VCO timing requirements for               CRC as shown in Figure 4. With the pre-erase
+perpendicular recording type drives are dictated by    head of the perpendicular drive, the write head
+the design of the read/write head. In the design of    must be activated in the Gap2 field to insure a
+this head, a pre-erase head precedes the normal        proper write of the new sync field. For the 1 Mbps
+read/write head by a distance of 200 micrometers.      perpendicular mode (WGATE = 1, GAP = 1), 38
+ This works out to about 38 bytes at a 1 Mbps          bytes will be written in the Gap2 space. Since the
+recording density. Whenever the write head is          bit density is proportional to the data rate, 19 bytes
+enabled by the Write Gate signal, the pre-erase        will be written in the Gap2 field for the 500 Kbps
+head is also activated at the same time. Thus,         perpendicular mode (WGATE = 1, GAP =0).
+when the write head is initially turned on, flux
+transitions recorded on the media for the first 38     It should be noted that none of the alterations in
+bytes will not be preconditioned with the pre-erase    Gap2 size, VCO timing, or Write Gate timing affect
+head since it has not yet been activated. To           normal program flow. The information provided
+accommodate        this   head     activation   and    here is just for background purposes and is not
+deactivation time, the Gap2 field is expanded to a     needed for normal operation.               Once the
+length of 41 bytes. The format field shown on          Perpendicular Mode command is invoked, FDC
+page 61 illustrates the change in the Gap2 field       software behavior from the user standpoint is
+size for the perpendicular format.                     unchanged.
+On the read back by the FDC, the controller must       The perpendicular mode command is enhanced to
+begin synchronization at the beginning of the sync     allow specific drives to be designated
+field. For the conventional mode, the internal PLL     Perpendicular        recording       drives.      This
+VCO            is        enabled           (VCOEN)     enhancement allows data transfers between
+                                                       Conventional and Perpendicular drives without
+                                                       having to issue Perpendicular mode commands
+                                                       between the accesses of the different drive types,
+                                                       nor having to change write pre-compensation
+                                                       values.
+                                                    55
+
+
+When both GAP and WGATE bits of the                       Note: Bits D0-D3 can only be overwritten when
+PERPENDICULAR MODE COMMAND are both                               OW is programmed as a "1". If either
+programmed to "0" (Conventional mode), then D0,                   GAP or WGATE is a "1" then D0-D3 are
+D1, D2, D3, and D4 can be programmed                              ignored.
+independently to "1" for that drive to be set
+automatically to Perpendicular mode. In this mode         Software and hardware resets have the following
+the following set of conditions also apply:               effect on the PERPENDICULAR MODE
+                                                          COMMAND:
+1. The GAP2 written to a perpendicular drive
+    during a write operation will depend upon the         1. "Software" resets (via the DOR or DSR
+    programmed data rate.                                     registers) will only clear GAP and WGATE bits
+2. The write pre-compensation given to a                      to "0". D0-D3 are unaffected and retain their
+    perpendicular mode drive wil be 0ns.                      previous value.
+3. For D0-D3 programmed to "0" for conventional           2. "Hardware" resets will clear all bits ( GAP,
+    mode drives any data written will be at the               WGATE and D0-D3) to "0", i.e all conventional
+    currently programmed write pre-compensation.              mode.
+                                 Table 29 - Effects of WGATE and GAP Bits
+                                                     LENGTH OF            PORTION OF GAP 2
+                                                   GAP2 FORMAT            WRITTEN BY WRITE
+             WGATE      GAP           MODE              FIELD             DATA OPERATION
+                0          0    Conventional           22 Bytes                    0 Bytes
+                0          1    Perpendicular          22 Bytes                   19 Bytes
+                                (500 Kbps)
+                1          0    Reserved               22 Bytes                    0 Bytes
+                                (Conventional)
+                1          1    Perpendicular          41 Bytes                   38 Bytes
+                                (1 Mbps)
+                                                      56
+
+
+LOCK                                                     ENHANCED DUMPREG
+In order to protect systems with long DMA                The DUMPREG command is designed to support
+latencies against older application software that        system run-time diagnostics and application
+can disable the FIFO the LOCK Command has                software      development    and    debug.     To
+been added. This command should only be used             accommodate the LOCK command and the
+by the FDC routines, and application software            enhanced PERPENDICULAR MODE command
+should refrain from using it. If an application calls    the eighth byte of the DUMPREG command has
+for the FIFO to be disabled then the CONFIGURE           been modified to contain the additional data from
+command should be used.                                  these two commands.
+The LOCK command defines whether the EFIFO,              COMPATIBILITY
+FIFOTHR, and PRETRK parameters of the
+CONFIGURE command can be RESET by the                    The FDC37C78 was designed with software
+DOR and DSR registers. When the LOCK bit is              compatibility in mind. It is a fully backwards-
+set to logic "1" all subsequent "software RESETS         compatible solution with the older generation
+by the DOR and DSR registers will not change the         765A/B disk controllers.        The FDC also
+previously set parameters to their default values.       implements on-board registers for compatibility
+All "hardware" RESET from the RESET pin will set         with PC/AT and PC/XT floppy disk controller
+the LOCK bit to logic "0" and return the EFIFO,          subsystems. After a hardware reset of the FDC, all
+FIFOTHR, and PRETRK to their default values.             registers, functions and enhancements default to a
+A status byte is returned immediately after issuing      PC/AT compatible operating mode.
+a a LOCK command. This byte reflects the value
+of the LOCK bit set by the command byte.
+                                                      57
+
+
+                                       AUTO POWER MANAGEMENT
+Power management capabilities are provided for         Disabling the auto powerdown mode cancels the
+the floppy disk. Two types of power management         timer and holds the FDC37C78 out of auto
+are provided; direct powerdown and auto                powerdown.
+powerdown.
+                                                       DSR From Powerdown
+Direct powerdown is controlled by the powerdown
+bit in the configuration registers. Auto Powerdown     If DSR powerdown is used when the part is in auto
+can be enabled by setting the Auto Powerdown           powerdown, the DSR powerdown will override the
+Enable bit in the configluation registers.             auto powerdown. However, when the part is
+                                                       awakened from DSR powerdown, the auto
+FDC Power Management                                   powerdown will once again become effective.
+Direct power management is controlled by bit 3 of      Wake Up From Auto Powerdown
+Configuration Register 0(CR0). Refer to CR0 bit
+3 for more information.                                If the part enters the powerdown state through the
+                                                       auto powerdown mode, then the part can be
+Auto Power Management is enabled by CR7 bit 7.         awakened by reset or by appropriate access to
+ When set, this bit allows FDC to enter powerdown      certain registers.
+when all of the following conditions have been met:
+                                                       If a hardware or software reset is used then the
+1.    The motor enable pins of register DOR are        part will go through the normal reset sequence. If
+      inactive (zero).                                 the access is through the selected registers, then
+                                                       the FDC37C78 resumes operation as though it
+2.    The part must be idle; MSR=80H and INT = 0       was never in powerdown. Besides activating the
+      (INT may be high even if MSR = 80H due to        RESET pin or one of the software reset bits in the
+      polling interrupts).                             DOR or DSR, the following register accesses will
+                                                       wake up the part:
+3.    The internal head unload timer must have
+      expired.                                         1.    Enabling any one of the motor enable bits in
+                                                             the DOR register (reading the DOR does not
+4.    The Auto powerdown timer (10msec) must                 awaken the part).
+      have timed out.
+                                                       2.    A read from the MSR register.
+An internal timer is initiated as soon as the auto
+powerdown command is enabled. The part is              3.    A read or write to the Data register.
+then powered down when all the conditions are
+met. During the countdown of the powerdown
+timer, any operation of read MSR or read/write
+data (FIFO) will reinitiate the timer.
+                                                    58
+
+
+Once awake, the FDC37C78 will reinitiate the            Pin Behavior
+auto powerdown timer for 10 ms. The part will
+powerdown again when all the powerdown                  The FDC37C78 is specifically designed for
+conditions are satisfied.                               portable PC systems in which power conservation
+                                                        is a primary concern. This makes the behavior of
+Register Behavior                                       the pins during powerdown very important.
+Table 30 reiterates the AT registers available. It      The pins of the FDC37C78 can be divided into
+also shows the type of access permitted. In order       two major categories: system interface and floppy
+to maintain software transparency, access to all        disk drive interface. The floppy disk drive pins are
+the registers must be maintained. As Table 30           disabled so that no power will be drawn through
+shows, two sets of registers are distinguished          the part as a result of any voltage applied to the
+based on whether their access results in the part       pin within the part's power supply range. Most of
+remaining in powerdown state or exiting it.             the system interface pins are left active to monitor
+                                                        system accesses that may wake up the part.
+Access to all other registers is possible without
+awakening the part. These registers can be              System Interface Pins
+accessed during powerdown without changing the
+status of the part. A read from these registers will    Table 31 gives the state of the system interface
+reflect the true status as shown in the register        pins in the powerdown state. Pins unaffected by
+description in the FDC description. A write to the      the powerdown are labeled "Unchanged". Input
+part will result in the part retaining the data and     pins are "Disabled" to prevent them from causing
+subsequently reflecting it when the part awakens.       currents internal to the FDC37C78 when they have
+Accessing the part during powerdown may cause           indeterminate input values.
+an increase in the power consumption by the
+part. The part will revert back to its low power
+mode when the access has been completed.
+                                                     59
+
+
+                                  Table 30 - PC/AT Available Registers
+                                             Available Registers
+                  Base + Address                   PC-AT                 Access Permitted
+                          Access to these registers DOES NOT wake up the part
+                        00H                          ----                        R
+                        01H                          ----                        R
+                        02H                       DOR (1)                      R/W
+                        03H                           ---                       ---
+                        04H                        DSR (1)                      W
+                        06H                           ---                       ---
+                        07H                          DIR                         R
+                        07H                         CCR                         W
+                                Access to these registers wakes up the part
+                        04H                         MSR                          R
+                        05H                         Data                       R/W
+Note 1: Writing to the DOR or DSR does not wake up the part, however, writing any of the motor enable
+        bits or doing a software reset (via DOR or DSR reset bits) will wake up the part
+                          Table 31 - State of System Pins in Auto Powerdown
+                               System Pins           State in Auto Powerdown
+                                                Input Pins
+                                    IOR                     Unchanged
+                                   IOW                      Unchanged
+                                   A[0:9]                   Unchanged
+                                   D[0:7]                   Unchanged
+                                 RESET                      Unchanged
+                                  IDENT                     Unchanged
+                                  DACK                      Unchanged
+                                     TC                     Unchanged
+                                               Output Pins
+                                    IRQ                   Unchanged (low)
+                                 DB[0:7]                    Unchanged
+                                  FDRQ                    Unchanged (low)
+                                                     60
+
+
+FDD Interface Pins
+                                                            used     for    local  logic    control   or    part
+All pins in the FDD interface which can be                  programming are unaffected. Table 32 depicts the
+connected directly to the floppy disk drive itself are      state of the floppy disk drive interface pins in the
+either DISABLED or TRISTATED.                    Pins       powerdown state.
+                  Table 32 - State of Floppy Disk Drive Interface Pins in Powerdown
+                                 FDD Pins              State in Auto Powerdown
+                                                    Input Pins
+                                  RDATA                            Input
+                                     WP                            Input
+                                    TRK0                           Input
+                                    INDX                           Input
+                                   DRV2                            Input
+                                 DSKCHG                            Input
+                                                   Output Pins
+                                MOTEN[0:3]                       Tristated
+                                  DS[0:3]                        Tristated
+                                     DIR                          Active
+                                   STEP                           Active
+                                 WRDATA                          Tristated
+                                     WE                          Tristated
+                                  HDSEL                           Active
+                                  DENSEL                          Active
+                                DRATE[0:1]                        Active
+                                                       61
+
+
+                                            CONFIGURATION
+The configuration of the chip is programmable           Enter Configuration Mode
+through      software     selectable   configuration
+registers.                                              To enter the configuration mode, two writes in
+                                                        succession to port +0 with 55H data are required.
+CONFIGURATION REGISTER ADDRESS                          If a write to another address or port occurs
+                                                        between these two writes, the chip does not enter
+The Configuration Registers are located at              the configuration mode.             It is strongly
+address offset +0 and +1 with nCS active.               recommended that interrupts be disabled for the
+                                                        duration of these two writes.
+CONFIGURATION REGISTERS
+                                                        Configuration Mode
+The configuration registers are used to select
+programmable options of the chip. After power up,       The chip contains configuration registers CR00-
+the chip is in the default mode. The default modes      CR1F. These registers are accessed by first
+are identified in the Configuration Mode Register       writing the number (0-1FH) of the desired register
+Description.      To program the configuration          to port +0 and then writing or reading the
+registers, the following sequence must be               configuration register through port +1.
+followed:
+                                                        Exit Configuration Mode
+1.         Enter Configuration Mode.
+2.         Configure the Configuration Registers.       The configuration mode is exited by writing an
+3.         Exit Configuration Mode.                     AAH to port +0.
+                                                        Programming Example
+                                                        The following is an example of a configuration
+                                                        program in Intel 8086 assembly language and
+                                                        assumes that the base address is set to 3F0H.
+                                                     62
+
+
+;-----------------------------.
+; ENTER CONFIGURATION MODE    |
+;-----------------------------'
+MOV   DX,3F0H
+MOV   AX,055H     ;
+CLI               ; disable interrupts
+OUT   DX,AL
+OUT   DX,AL
+STI               ; enable interrupts
+;-----------------------------.
+; CONFIGURE REGISTERS CR0-CRx |
+;-----------------------------'
+MOV   DX,3F0H
+MOV   AL,00H
+OUT   DX,AL ; Point to CR0
+MOV   DX,3F1H
+MOV   AL,3FH
+OUT   DX,AL ; Update CR0
+;
+MOV   DX,3F0H     ;
+MOV   AL,01H
+OUT   DX,AL ; Point to CR1
+MOV   DX,3F1H
+MOV   AL,9FH
+OUT   DX,AL ; Update CR1
+;
+; Repeat for all CRx registers
+;
+;-----------------------------.
+; EXIT CONFIGURATION MODE     |
+;-----------------------------'
+MOV   DX,3F0H
+MOV   AX,0AAH
+OUT   DX,AL
+                                  63
+
+
+                                        Table 33 - Configuration Registers
+  Default             DB7            DB6         DB5           DB4            DB3               DB2             DB1             DB0
+    28H     CR00      Valid        Reserved      OSC        Reserved       FDC PWR             PDEN                   Reserved
+    90H     CR01    Lock CRx                   Reserved                    Reserved           Reserved                Reserved
+    00H     CR02    Reserved                   Reserved                    Reserved                         Reserved
+    70H     CR03    Reserved        IDENT        MFM       DRVDEN 1        Reserved           Reserved        Enhanced        Reserved
+                                                                                                            FDC Mode 2
+    00H     CR04                                                        Reserved
+    00H     CR05    Reserved        EXTx4      DRV 0X1              DEN SEL                  DMA Mode                 Reserved
+   FFH      CR06        Floppy Drive D             Floppy Drive C                  Floppy Drive B                  Floppy Drive A
+    00H     CR07                 Auto Power Management                            Media ID Polarity               Floppy Boot Drive
+    00H     CR08    Reserved       Reserved    Reserved     Reserved       Reserved           Reserved        Reserved        Reserved
+    00H     CR09           Reserved                           Reserved                        Reserved        Reserved        Reserved
+    00H     CR0A                        Reserved                                                     Reserved
+    00H     CR0B         FDD3-DRTx                  FDD2-DRTx                       FDD1-DRTx                        FDD0-DRTx
+    00H     CR0C                                                        Reserved
+    78H     CR0D                                                      Device ID/ 78H
+    00H     CR0E                                                    Device Revision/00
+    00H     CR0F      Test           Test        Test          Test           Test              Test            Test            Test
+    00H     CR10      Test           Test        Test          Test           Test              Test            Test            Test
+    00H     CR11      Test           Test        Test          Test           Test              Test            Test            Test
+    00H     CR12-                                                       Reserved
+            CR1E
+    00H     CR1F          FDD3-DTx                    FDD2-DTx                       FDD1-DTx                         FDD0-DTx
+Configuration Register Description                                   before the configuration                 registers        can be
+The configuration registers consist of the                           accessed and is used to select which of the
+Configuration Select Register (CSR) and                              Configuration Registers are to be accessed at port
+Configuration Registers CR00 - CR1F. The                             +1.
+configuration select register is written to by writing
+to port +0. The Configuration Registers CR00;                        Configuration Registers CR00 -CR1F
+CR1F are accessed by reading or writing to port                      These registers are set to their default values at
++1.                                                                  power up and are not affected by RESET (except
+                                                                     where explicitly defined that a hardware reset
+Configuration Select Register (CSR)                                  causes that bit to be reset to default). They are
+This register can only be accessed when the                          accessed at port +1. Refer to the following
+chip is in the Configuration Mode. This register,                    descriptions for the function of each configuration
+located at port +0, must be initialized upon                         register.
+entering the Configuration Mode
+                                                                64
+
+
+CR00
+This register can only be accessed when the chip is in the Configuration Mode and after the CSR has
+been initialized to 00H. The default value of this register after power up is 28H.
+                                                Table 34 - CR00
+      BIT NO.          BIT NAME                                     DESCRIPTION
+         0:1       Reserved            Read only. Read as 0
+          2        PDEN                Power Down and Idle enable.
+                                       0 nDS1pin=nDS1, nMTR1pin=nMTR1
+                                       1 nDS1pin=Power Down, nMTR1pin=Idle
+          3        FDC Power           A high level on this bit, supplies power to the FDC (default). A low
+                                       level on this bit puts the FDC in low power mode.
+         4, 6      Reserved            Read only. A read returns bits 4 and 6 as a 0.
+          5        OSC                 Oscillator Control.
+                                       0 = Oscillator OFF
+                                       1 = Oscillator ON (default)
+          7        Valid               A high level on this software controlled bit can be used to indicate
+                                       that a valid configuration cycle has occurred. The control software
+                                       must take care to set this bit at the appropriate times. Set to zero
+                                       after power up. This bit has no effect on any other hardware in the
+                                       chip.
+CR01
+This register can only be accessed in the Configuration Mode and                     after the CSR has been
+initialized to 01H. The default value of this register after power up is 90H.
+                                                Table 35 - CR01
+      BIT NO.          BIT NAME                                     DESCRIPTION
+       0,1,2,3     Reserved            Read Only. A read returns a 0.
+          4        Reserved            Read Only. A read returns a 1.
+         5,6       Reserved            Read Only. A read returns a 0.
+          7        Lock CRx            A high level on this bit enables the reading and writing of CRxx
+                                       registers (Default). A low level on this bit disables the reading and
+                                       writing of all CRxx registers. Once set to 0, this bit can only be set
+                                       to 1 by a hard reset or power-up reset.
+                                                        65
+
+
+CR02
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized
+to 02H. The default value of this register after power up is 00H.
+                                               Table 36 - CR02
+    BIT NO.          BIT NAME                                     DESCRIPTION
+       0:7       Reserved              Read Only. A read returns a 0.
+CR03
+This register can only be accessed in the Configuration Mode and the CSR has been initialized
+to 03H. The default value after power up is 70H.
+                                               Table 37 - CR03
+  BIT NO.     BIT NAME                                        DESCRIPTION
+     0      Reserved         Reserved - Read as zero
+     1      Enhanced         Bit 1                 Floppy Mode - Refer to the description of the TAPE
+            Floppy Mode                            DRIVE REGISTER (TDR) for more information on these
+            2                                      modes.
+                             0                     NORMAL Floppy Mode (Default)
+                             1                     Enhanced Floppy Mode 2 (OS2)
+     2      Reserved         Reserved - Read as zero
+     3      Reserved         Reserved - Read as zero
+     4      DRVDEN1           0        DRVDEN 1 output as per DRVDEN table
+                              1        DRVDEN 1 pin is tri-state (default)
+     5      MFM              IDENT is used in conjunction with MFM to define the interface mode of
+                             operation.
+     6      IDENT                  IDENT                 MFM         MODE
+                                      1                    1         AT Mode (Default)
+                                      1                    0         Reserved
+                                      0                    1         Reserved
+                                      0                    0         Reserved
+     7      Reserved         Reserved - Read as zero
+CR04
+This register can only be accessed in the Configuration Mode and the CSR has been initialized
+to 04H. The default value after power up is 00H.
+                                               Table 38 - CR04
+    BIT NO.          BIT NAME                                     DESCRIPTION
+       0:7       Reserved              Reserved - Read as zero
+                                                      66
+
+
+CR05
+This register can only be accessed in the Configuration Mode and the CSR has been initialized
+to 05H. The default value after power up is 00H.
+                          Table 39 - CR05- Floppy Disk Extended Setup Register
+    BIT NO.            BIT NAME                                     DESCRIPTION
+       0,1         Reserved              Read Only. A read returns a 0.
+         2         FDC DMA Mode          0=(default) Burst mode is enabled for the FDC FIFO execution
+                                         phase data transfers. 1=Non-Burst mode enabled. The FDRQ and
+                                         FIRQ pins are strobed once for each byte transferred while the FIFO
+                                         is enabled.
+       4,3         DenSel                         Bit 4                   Bit 3         Densel output
+                                                    0                      0            Normal (Default)
+                                                    0                      1            Reserved
+                                                    1                      0            1
+                                                    1                      1            0
+         5         Swap Drv 0,1          A high level on this bit, swaps drives and motor sel 0 and 1 of the
+                                         FDC. A low level on this bit does not (Default).
+         6         EXTx4                 External 4 drive support: 0=Internal 2 drive decoder (default).
+                                         1=External 4 drive decoder (External 2 to 4 decoder required).
+         7         Reserved              Read Only. A read of this bit returns a 0
+CR06
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized
+to 06H. The default value of this register after power up is FFH. This register holds the floppy
+disk drive types for up to four floppy disk drives.
+CR07
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized
+to 07H. The default value of this register after power up is 00H. This register holds the value for the auto
+power management, polarity of the media ID bits and floppy boot drive information.
+                                                        67
+
+
+                                               Table 40 - CR07
+     BIT NO.           BIT NAME                                      DESCRIPTION
+        0,1            Floppy Boot      This bit is used to define the boot floppy.
+                                        0 = Drive A (default)
+                                        1 = Drive B
+         2              Media ID0       0 = Non-invert
+                         Polarity       1 = Invert
+         3              Media ID1       0 = Non-invert
+                         Polarity       1 = Invert
+        4:6             Reserved        Read as 0.
+         7             Floppy Disk      This bit controls the AUTOPOWER DOWN feature of the Floppy
+                         Enable         Disk. The function is:
+                                        0 = Auto powerdown disabled (default)
+                                        1 = Auto powerdown enabled
+                                        This bit is reset to the default state by POR or a hardware reset.
+CR08
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized to
+08H. The default value of this register after power up is 00H. This register is read only.
+CR09
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized to
+09H. The default value of this register after power up is 00H. This register is read only.
+CR0A
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized to
+0AH. The default value of this register after power up is 00H. This register is read only.
+CR0B
+This register can only be ac1cessed in the Configuration Mode and after the CSR has been initialized
+ to 0BH. The default value of this register after power up is 00H. This register indicates the data rate
+table used for each drive. Refer to CR1F for Drive Type register.
+                                               Table 41 - CR0B
+           FDD3                       FDD2                          FDD1                       FDD0
+      D7           D6             D5            D4             D3             D2          D1           D0
+    DRT1          DRT0          DRT1          DRT0            DRT1          DRT0        DRT1         DRT0
+CR0C
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized to
+0CH. The default value of this register after power up is 00H. This register is reserved.
+                                                        68
+
+
+CR0D
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized to
+0DH. This register is read only. This is the Device ID. The default value of this register after power up is
+78H.
+CR0E
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized to
+0EH. This register is read only. The default value of this register after power up is 00H. This is used to
+identify the chip revision level.
+CR0F
+This register can only be accessed in the Configuration Mode and after the CSR has
+been initialized to 0FH. The default value of this register after power up is 00H. This is a test register and
+must be left as 00H.
+                                              Table 42 - CR0F
+    BIT NO.         BIT NAME                                     DESCRIPTION
+       0:7           Reserved     Reserved For Test
+CR10
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized
+to 10H. The default value of this register after power up is 00H. This is a test register and must be left as
+00H.
+                                              Table 43 - CR10
+    BIT NO.         BIT NAME                                     DESCRIPTION
+       0:7           Reserved     Reserved For Test
+CR11
+This register can only be accessed in the Configuration Mode and after the CSR has
+been initialized to 11H. The default value of this register after power up is 00H. This is a test register and
+must be left as 00H.
+                                              Table 44 - CR11
+    BIT NO.         BIT NAME                                     DESCRIPTION
+       0:7           Reserved     Reserved For Test
+CR12-CR1E
+These registers are reserved. The default value of these registers after power up is 00H.
+                                                     69
+
+
+CR1F
+This register can only be accessed in the Configuration Mode and after the CSR has been initialized
+to 1FH. The default value of this register after power up is 00H. This register indicates the Drive Type
+used for each drive. Refer to CR0B for Data Rate Table register.
+           FDD3                      FDD2                      FDD1                     FDD0
+     D7            D6          D5           D4            D3           D2          D1            D0
+    DT0           DT1          DT0          DT1          DT0          DT1         DT0           DT1
+DTx = Drive Type select
+   DT0       DT1      DRVDEN0        DRVDEN1                            Drive Type
+                        (Note)         (Note)
+ 0         0         DENSEL       DRATE0           4/2/1 MB 3.5"
+                                                   2/1 MB 5.25" FDDS
+                                                   2/1.6/1 MB 3.5" (3-MODE)
+ 0         1         DRATE1       DRATE0
+ 1         0         nDENSEL      DRATE0
+ 1         1         DRATE0       DRATE1
+Note:    DENSEL, DRATE1 and DRATE0 map onto two output pins DRVDEN0 and DRVDEN1.
+                                                   70
+
+
+OPERATIONAL DESCRIPTION
+MAXIMUM GUARANTEED RATINGS*
+Operating Temperature Range ..............................................................................................0oC to +70oC
+Storage Temperature Range .............................................................................................. -55o to +150oC
+Lead Temperature Range (soldering, 10 seconds).........................................................................+325oC
+Positive Voltage on any pin, with respect to Ground .................................................................... VIO+0.3V
+Negative Voltage on any pin, with respect to Ground ........................................................................ -0.3V
+Maximum VIO ....................................................................................................................................... +7V
+Maximum VCC ........................................................................................................................................VIO
+*Stresses above those listed above could cause permanent damage to the device. This is a stress
+rating only and functional operation of the device at any other condition above those indicated in the
+operation sections of this specification is not implied.
+Note: When powering this device from laboratory or system power supplies, it is important that the
+Absolute Maximum Ratings not be exceeded or device failure can result. Some power supplies exhibit
+voltage spikes on their outputs when the AC power is switched on or off. In addition, voltage transients
+on the AC power line may appear on the DC output. If this possibility exists, it is suggested that a clamp
+circuit be used.
+DC ELECTRICAL CHARACTERISTICS (TA = 0°C - 70°C, Vcc = +3.3 V ± 10%)
+         PARAMETER                     SYMBOL MIN                        TYP           MAX UNITS                          COMMENTS
+ I Type Input Buffer
+ Low Input Level                            VILI                                         0.8            V       TTL Levels
+ High Input Level                           VIHI            2.0                                         V
+ IS Type Input Buffer
+ Low Input Level                            VILIS                                        0.8            V       Schmitt Trigger
+ High Input Level                          VIHIS            2.2                                         V       Schmitt Trigger
+ Schmitt Trigger Hysteresis                VHYS                           250                         mV
+ ICLK Input Buffer
+ Low Input Level                           VILCK                                         0.4            V
+ High Input Level                          VIHCK            2.2                                         V
+ Input Leakage
+ Low Input Leakage                           IIL            -10                         +10            μA       VIN = 0
+ High Input Leakage                          IIH            -10                         +10            μA       VIN = VIO
+                                                                      71
+
+
+        PARAMETER             SYMBOL       MIN     TYP       MAX     UNITS         COMMENTS
+I/O12 Type Buffer
+Low Output Level                  VOL                         0.5       V   IOL = 12 mA
+High Output Level                 VOH       2.4                         V   IOH = -6 mA
+Output Leakage                    IOL      -10               +10       μA   VIN = 0 to VIO (Note 1)
+O12 Type Buffer
+Low Output Level                  VOL                         0.5       V   IOL = 12 mA
+High Output Level                 VOH       2.4                         V   IOH = -6 mA
+Output Leakage                    IOL      -10               +10       μA   VIN = 0 to VIO (Note 1)
+OD20 Type Buffer
+Low Output Level                  VOL                         0.5       V   IOL = 20 mA
+Output Leakage                    IOH      -10               +10       μA   VOH = 0 to VIO (Note 2)
+Supply Current Active             ICC                        TBD       mA   All outputs open.
+Supply Current Standby           ICSBY                       TBD       mA   (Note 3)
+Note 1: All output leakages are measured with the current pins in high impedance.
+Note 2: Output leakage is measured with the low driving output off.
+Note 3: Defined by the device configuration.
+DC ELECTRICAL CHARACTERISTICS (TA = 0°C - 70°C, Vcc = +5 V ± 10%)
+        PARAMETER             SYMBOL MIN           TYP       MAX UNITS             COMMENTS
+I Type Input Buffer
+Low Input Level                   VILI                        0.8       V   TTL Levels
+High Input Level                  VIHI      2.0                         V
+IS Type Input Buffer
+Low Input Level                  VILIS                        0.8       V   Schmitt Trigger
+High Input Level                 VIHIS      2.2                         V   Schmitt Trigger
+Schmitt Trigger Hysteresis       VHYS               250                mV
+                                                 72
+
+
+         PARAMETER            SYMBOL       MIN     TYP       MAX     UNITS          COMMENTS
+ICLK Input Buffer
+Low Input Level                  VILCK                        0.4       V
+High Input Level                 VIHCK      3.0                         V
+Input Leakage
+Low Input Leakage                  IIL     -10               +10       μA    VIN = 0
+High Input Leakage                 IIH     -10               +10       μA    VIN = VIO
+I/O12 Type Buffer
+Low Output Level                  VOL                         0.5       V    IOL = 24 mA
+High Output Level                 VOH       2.4                         V    IOH = -12mA
+Output Leakage                    IOL      -10               +10       μA    VIN = 0 to VIO (Note 1)
+O12 Type Buffer
+Low Output Level                  VOL                         0.5       V    IOL = 24 mA
+High Output Level                 VOH       2.4                         V    IOH = -12 mA
+Output Leakage                    IOL      -10               +10       μA    VIN = 0 to VIO (Note 1)
+OD20 Type Buffer
+Low Output Level                  VOL                         0.5       V    IOL = 48 mA
+Output Leakage                    IOH      -10               +10       μA    VOH = 0 to VIO (Note 2)
+Supply Current Active             ICC                        TBD       mA    All outputs open.
+Supply Current Standby           ICSBY                       TBD       mA    (Note 3)
+Note 1: All output leakages are measured with the current pins in high impedance.
+Note 2: Output leakage is measured with the low driving output off.
+Note 3: Defined by the device configuration.
+CAPACITANCE TA = 25°C; fc = 1MHz; VCC = 3.3V, 5V
+                                                  LIMITS
+        PARAMETER             SYMBOL        MIN     TYP      MAX        UNIT        TEST CONDITION
+ Clock Input Capacitance          CIN                         20          pF       All pins except pin
+ Input Capacitance                CIN                         10          pF       under test tied to
+                                                 73
+
+
+Output Capacitance COUT    20 pF AC ground
+                        74
+
+
+TIMING DIAGRAMS
+                                                                   t3
+                   nCS
+                                  t1
+                                                       t2
+                   nIOR
+                                           t4                      t5
+                  DATA
+                                                  DATA VALID
+                (D0-D7)
+                  BUSY
+                                                                t6
+                IRQ
+                            Parameter                     min typ     max units
+            t1 nCS Set Up to nIOR Low                      40              ns
+            t2 nIOR Width                                 150              ns
+            t3 nCS Hold from nIOR High                     10              ns
+            t4 Data Access Time from nIOR Low                         100  ns
+            t5 Data to Float Delay from nIOR High          10          60  ns
+            t6 Read Strobe to Clear IRQ                       40       55  ns
+                           FIGURE 3 - MICROPROCESSOR READ TIMING
+                                                       75
+
+
+                                                            t3
+    nCS
+                                       t2
+                  t1                        t4
+   nIOW
+                                                            t5
+  DATA
+                                         DATA VALID
+(D0-D7)
+                                                        t6
+ IRQ
+                    Parameter              min      typ  max   units
+   t1   nCS Set Up to nIOW Low              40                  ns
+   t2   nIOW Width                         150                  ns
+   t3   nCS Hold from nIOW High             10                  ns
+   t4   Data Set Up Time to nIOW High       40                  ns
+   t5   Data Hold Time from nIOW High       10                  ns
+   t6   Write Strobe to Clear IRQ                    40    55   ns
+                 FIGURE 4 - MICROPROCESSOR WRITE TIMING
+                                   76
+
+
+                                                                                   t15
+     nCS
+                                                  t16
+                                               t3
+                                                    t2
+  DRQ,
+                                   t1                         t4
+  nDACK
+                                                                         t12
+                               t14
+                                           t11
+                                      t6
+    nIOR                              t5                         t8
+       or
+   nIOW
+                                                                               t10
+                                                       t7                       t9
+   DATA
+                                                                    DATA VALID
+(DO-D7)
+                                                          t13
+      TC
+                           Parameter                         min    typ      max       units
+          t1 nDACK Delay Time from DRQ High                    0                        ns
+                                                                              100
+          t2 DRQ Reset Delay from nIOR or nIOW                                100       ns
+          t3 DRQ Reset Delay from nDACK Low                                             ns
+          t4 nDACK Width                                     150                        ns
+          t5 nIOR Delay from DRQ High                          0                        ns
+          t6 nIOW Delay from DRQ High                          0                        ns
+                                                                              100
+          t7 Data Access Time from nIOR Low                                             ns
+          t8 Data Set Up Time to nIOW High                    40                        ns
+                                                                               60
+          t9 Data to Float Delay from nIOR High               10                        ns
+         t10 Data Hold Time from nIOW High                    10                        ns
+         t11 nDACK Set Up to nIOW/nIOR Low                     5                        ns
+         t12 nDACK Hold After nIOW/nIOR High                  10                        ns
+         t13 TC Pulse Width                                   60                        ns
+         t14 nCS Set Up to nIOR/nIOW                          40                        ns
+         t15 nCS Hold from nDACK                              10                        ns
+                                                                              100
+         t16 TC Active to DRQ Inactive                                                  ns
+                                      FIGURE 5 - DMA TIMING
+                                             77
+
+
+                                      t1
+                                              t2               t2
+  X1
+                                        t4
+nRESET
+  Name   Description                           min      typ       max   Units
+    t1 Clock CycleTime for 24MHZ                 40               43.33  ns
+    t2 Clock High Time/Low Time for
+                                                14                       ns
+       14.318MHZ
+       Clock Rise Time/Fall Time
+       (not shown)                                                  5    ns
+    t6 nRESET Low Time                          1.5                      us
+                                   NOTE 1:
+       The nRESET low time is dependent upon the processor clock. The
+        nRESET must be active for a minimum of 24 x16MHz clock cycles.
+                             FIGURE 6 - CLOCK TIMING
+                                        78
+
+
+                                                               t3
+        nDIR
+                                                      t4
+                            t1             t2
+      nSTEP
+                                                                t5
+     nDS0-1
+                                        t6
+     nINDEX
+                                        t7
+     nRDATA
+                                        t8
+    nWDATA
+       nIOW
+                        t9                                             t9
+    nDS0-1,
+   nMTR0-1
+                      Parameter                    min        typ  max    units
+   t1     nDIR Set Up to nSTEP Low                               4         X*
+   t2     nSTEP Active Time Low                                24          X*
+   t3     nDIR Hold Time After nSTEP                           96          X*
+   t4     nSTEP Cycle Time                                    132          X*
+   t5     nDS0-1 Hold Time from nSTEP Low                      20          X*
+   t6     nINDEX Pulse Width                                     2         X*
+   t7     nRDATA Active Time Low                               40          ns
+   t8     nWDATA Write Data Width Low                           .5         Y*
+   t9     nDS0-1, MTR0-1 from End of nIOW                      25          ns
+*X specifies one MCLK period and Y specifies one WCLK period.
+MCLK = Controller Clock to FDC (See Table 6).
+WCLK = 2 x Data Rate (See Table 6).
+                             FIGURE 7 - DISK DRIVE TIMING
+                                        79
+
+
+         FIGURE 8 – 48 PIN TQFP PACKAGE DIMENSIONS
+    MIN   NOMINAL         MAX                        REMARK
+ A   ~         ~           1.6     Overall Package Height
+A1  0.05     0.10          0.15    Standoff
+A2  1.35     1.40          1.45    Body Thickness
+ D  8.80     9.00          9.20    X Span
+                                   1
+D/2 4.40     4.50          4.60      /2 X Span Measure from Centerline
+D1  6.90     7.00          7.10    X body Size
+ E  8.80     9.00          9.10    Y Span
+                                   1
+E/2 4.40     4.50          4.60      /2 Y Span Measure from Centerline
+E1  6.90     7.00          7.10    Y body Size
+ H  0.09       ~           0.20    Lead Frame Thickness
+ L  0.45     0.60          0.75    Lead Foot Length from Centerline
+L1   ~       1.00           ~      Lead Length
+ e        0.50 Basic               Lead Pitch
+      o
+ θ   0         ~            7o     Lead Foot Angle
+W   0.17       ~           0.27    Lead Width
+R1  0.08       ~            ~      Lead Shoulder Radius
+R2  0.08       ~           0.20    Lead Foot Radius
+                                80
+
+
+                MIN            NOMINAL             MAX                            REMARK
+  ccc             ~                  ~            0.0762       Coplanarity (Assemblers)
+  ccc             ~                  ~             0.08        Coplanarity (Test House)
+Note 1: Controlling Unit: millimeter
+Note 2: Tolerance on the position of the leads is ± 0.04 mm maximum.
+Note 3: Package body dimensions D1 and E1 do not include the mold protrusion. Maximum mold
+                protrusion is 0.25 mm.
+Note 4: Dimension for foot length L measured at the gauge plane 0.25 mm above the seating plane is 0.78-
+                1.08 mm.
+Note 5: Details of pin 1 identifier are optional but must be located within the zone indicated.
+                                                        81
+
+
+80 ARKAY DRIVE, HAUPPAUGE, NY 11788 (631) 435-6000, FAX (631) 273-3123
+Copyright © 2007 SMSC or its subsidiaries. All rights reserved.
+Circuit diagrams and other information relating to SMSC products are included as a means of illustrating typical applications.
+Consequently, complete information sufficient for construction purposes is not necessarily given. Although the information has been
+checked and is believed to be accurate, no responsibility is assumed for inaccuracies. SMSC reserves the right to make changes to
+specifications and product descriptions at any time without notice. Contact your local SMSC sales office to obtain the latest
+specifications before placing your product order. The provision of this information does not convey to the purchaser of the described
+semiconductor devices any licenses under any patent rights or other intellectual property rights of SMSC or others. All sales are
+expressly conditional on your agreement to the terms and conditions of the most recently dated version of SMSC's standard Terms of
+Sale Agreement dated before the date of your order (the "Terms of Sale Agreement"). The product may contain design defects or
+errors known as anomalies which may cause the product's functions to deviate from published specifications. Anomaly sheets are
+available upon request. SMSC products are not designed, intended, authorized or warranted for use in any life support or other
+application where product failure could cause or contribute to personal injury or severe property damage. Any and all such uses
+without prior written approval of an Officer of SMSC and further testing and/or modification will be fully at the risk of the customer.
+Copies of this document or other SMSC literature, as well as the Terms of Sale Agreement, may be obtained by visiting SMSC’s
+website at http://www.smsc.com. SMSC is a registered trademark of Standard Microsystems Corporation (“SMSC”). Product names
+and company names are the trademarks of their respective holders.
+SMSC DISCLAIMS AND EXCLUDES ANY AND ALL WARRANTIES, INCLUDING WITHOUT LIMITATION ANY AND ALL
+IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND AGAINST
+INFRINGEMENT AND THE LIKE, AND ANY AND ALL WARRANTIES ARISING FROM ANY COURSE OF DEALING OR USAGE
+OF TRADE. IN NO EVENT SHALL SMSC BE LIABLE FOR ANY DIRECT, INCIDENTAL, INDIRECT, SPECIAL, PUNITIVE, OR
+CONSEQUENTIAL DAMAGES; OR FOR LOST DATA, PROFITS, SAVINGS OR REVENUES OF ANY KIND; REGARDLESS OF
+THE FORM OF ACTION, WHETHER BASED ON CONTRACT; TORT; NEGLIGENCE OF SMSC OR OTHERS; STRICT
+LIABILITY; BREACH OF WARRANTY; OR OTHERWISE; WHETHER OR NOT ANY REMEDY OF BUYER IS HELD TO HAVE
+FAILED OF ITS ESSENTIAL PURPOSE, AND WHETHER OR NOT SMSC HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES.
+                                                                                                            FDC37C78 Rev. 02-16-07
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ FDC37C78-HT

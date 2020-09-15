@@ -1,0 +1,855 @@
+                                                                                                                                CY7C64225
+                                                                               USB-to-UART Bridge Controller
+USB-to-UART Bridge Controller
+Features                                                                         ■ Full device operation from a single voltage supply of 3.3 V or 5 V
+                                                                                 ■ Low power consumption in suspend mode
+■      Universal Serial Bus (USB) Integration
+                                                                                   ❐ 225 µA at 5 V operating voltage
+       ❐ Full-Speed USB peripheral compliant with USB2.0
+              specification                                                        ❐ 207 µA at 3.3 V operating voltage
+       ❐ USB-IF certified with TID 40001425                                      ■ Integrated 24 MHz oscillator
+       ❐ Support for bus-powered and self-powered configurations
+                                                                                 ■ Integrated 3.3 V regulator
+       ❐ 3 endpoints (1 Interrupt IN, 1 Bulk OUT and 1 Bulk IN)
+       ❐ Integrated USB transceiver, 1.5 kΩ pull-up resistor on D+ line          ■ Integrated flash to store device configuration
+■      Universal Asynchronous Receiver Transmitter (UART)                        ■ Software support for ease of development
+       ❐ Baud rate generation (300 to 230400)                                      ❐ Configuration utility to program device parameters such as
+       ❐ Data format:                                                                VID, PID and string descriptors.
+              • 8 data bits                                                        ❐ Certified Cypress VCP driver for Windows (8 / 7 / Vista / XP)
+              • 1 stop bit                                                         ❐ Support for device drivers for Android, Mac, Linux, Window
+                                                                                     CE 4.2, 5.0, 6.0
+              • No parity, even parity or odd parity
+       ❐ Support for Parity, Overrun and Framing errors                          ■ 28-pin SSOP 10 mm × 7.5 mm, RoHS compliant package
+       ❐ Supports flow control using CTS,RTS,DTR, DSR                            ■ Temperature grade
+       ❐ LED signals to indicate activity on TxD and RxD lines
+                                                                                   ❐ Commercial operating temperature range of 0 °C to +70 °C
+                                                          Figure 1. CY7C64225 Block Diagram
+                                                                                                                            TxD
+                                              24MHz                                  Baud Rate
+                                                                   PLL
+                                             Oscillator                              Generator                             RxD
+                                                                                                                           CTS
+                               VDD
+                                              Voltage
+                                                                                       FLASH
+                                             Regulator                                                     UART            RTS
+                                                                                                         Controller        DTR
+                                                             Serial Interface
+                              VBUS                               Engine               Tx Buffer                            DSR
+                                D+                                (SIE)
+                                               USB
+                                            Transceiver                                                                     Tx_LED
+                                D-
+                               GND
+                                                                                     Rx Buffer                             Rx_LED
+                                                          VCFG Reset WAKE Suspend
+Cypress Semiconductor Corporation                       •   198 Champion Court          •     San Jose, CA 95134-1709           •    408-943-2600
+Document Number: 001-76294 Rev. *G                                                                                             Revised May 3, 2017
+
+
+                                                                                                                   CY7C64225
+More Information
+Cypress provides a wealth of data at www.cypress.com to help you to select the right device for your design, and to help you to quickly
+and effectively integrate the device into your design. For a comprehensive list of resources, see the document USB-Serial Bridge
+Controller Product Overview.
+■ Overview: USB Portfolio, USB Roadmap                              ■ Development Kits:
+                                                                      ❐ CYUSBS232, Cypress USB-UART LP Reference Design Kit
+■ USB 2.0 Product Selectors: USB-Serial Bridge Controller, USB
+  to UART Controller (Gen I), enCoRe II, enCoRe III, enCoRe V         ❐ CYUSBS234, Cypress USB-Serial (Single Channel)
+                                                                        Development Kit
+■ Knowledge Base Articles: Cypress offers a large number of           ❐ CYUSBS236, Cypress USB-Serial (Dual Channel)
+  USB knowledge base articles covering a broad range of topics,         Development Kit
+  from basic to advanced level. Recommended knowledge base
+                                                                    ■ Models: IBIS
+  articles for getting started with USB to UART Controller (Gen
+  I) are:                                                           Cypress USB-UART LP Reference Design Kit
+  ❐ KBA85920 – USB-UART and USB-Serial                              The Cypress USB-UART LP Reference Design Kit is a complete
+                                                ®                   development resource. It provides a platform to develop and test
+  ❐ KBA85909 – Key Features of the Cypress USB-Serial
+     Bridge Controller                                              custom projects. The development kit contains collateral
+  ❐ KBA85921 – Replacing FT232R with CY7C65213                      materials for the firmware, hardware, and software aspects of a
+     USB-UART LP Bridge Controller                                  design.
+  ❐ KBA85913 – Voltage supply range for USB-Serial
+  ❐ KBA89355 – USB Serial Cypress Default VID and PID
+  ❐ KBA92641 – USB-Serial Bridge Controller Managing I/Os
+     using API
+  ❐ KBA92442 – Non-Standard Baud Rates in USB-Serial Bridge
+     Controllers
+  ❐ KBA91366 – Binding a USB-Serial Device to a Microsoft
+                                                               ®
+     CDC Driver
+  ❐ KBA92551 – Testing a USB-Serial Bridge Controller
+     Configured as USB-UART with Linux®
+For a complete list of knowledge base articles, click here.
+■ Code Examples: USB Full-Speed
+Document Number: 001-76294 Rev. *G                                                                                        Page 2 of 21
+
+
+                                                                                                                                                        CY7C64225
+Contents
+Applications ...................................................................... 4         Interfacing CY7C64225 with Bus
+Functional Description ..................................................... 4                Powered Microcontroller ............................................ 12
+     Introduction .................................................................. 4        Interfacing CY7C64225 with Self Powered
+Functional Overview ........................................................ 4                Microcontroller ........................................................... 13
+     USB Interface .............................................................. 4       Absolute Maximum Ratings .......................................... 14
+     UART Controller .......................................................... 4         Operating Temperature .................................................. 14
+     Suspend and Resume ................................................. 4               DC Electrical Characteristics ........................................ 15
+     WAKE .......................................................................... 4        DC GPIO Specifications ............................................ 15
+     Reset ........................................................................... 4      DC Full-Speed USB Specifications ........................... 15
+     Activity Indicators ........................................................ 4       Ordering Information ...................................................... 16
+     VCFG .......................................................................... 4        Ordering Code Definitions ......................................... 16
+     VBUS ........................................................................... 4   Packaging Information ................................................... 17
+     Regulator ..................................................................... 4        Package Diagrams .................................................... 17
+     Oscillator ..................................................................... 4       Thermal Impedance .................................................. 17
+     Flash ............................................................................ 5     Solder Reflow Peak Temperature ............................. 17
+Configurations .................................................................. 5       Acronyms ........................................................................ 18
+Software and Driver Support ........................................... 5                 Reference Documents .................................................... 18
+Pin Configuration ............................................................. 6         Document Conventions ................................................. 18
+     28-pin part pinout Description ..................................... 6                   Units of Measure ....................................................... 18
+Application Circuits .......................................................... 7         Glossary .......................................................................... 18
+     Bus Powered Design ................................................... 7             Document History Page ................................................. 19
+     Bus Powered Design using External Regulator .......... 8                             Sales, Solutions, and Legal Information ...................... 21
+     Self Powered Design ................................................... 9                Worldwide Sales and Design Support ....................... 21
+Application Diagram ....................................................... 10                Products .................................................................... 21
+     USB to RS-232 Converter ......................................... 10                     PSoC® Solutions ...................................................... 21
+     USB to UART cable with TTL                                                               Cypress Developer Community ................................. 21
+    level UART signals .................................................... 11                Technical Support ..................................................... 21
+Document Number: 001-76294 Rev. *G                                                                                                                                Page 3 of 21
+
+
+                                                                                                               CY7C64225
+Applications                                                      DTR / DSR:
+                                                                  DTR / DSR signals are used to establish communication link with
+■  Enable USB connectivity in legacy peripherals with UART        the UART. These signals complement each other in the
+■  Industrial and Metering devices                                functionality like RTS & CTS.
+                                                                  Note: Flow control is not supported when operating the device
+■  Medical Devices
+                                                                  at 230400 Baud rate.
+■  Point of Sales (POS)                                           In applications where hardware flow control is desired, the CTS,
+■  USB-to-UART cables, USB to RS-232 cables                       RTS, DSR and DTR pins of the transmitting device have to be
+                                                                  connected to RTS, CTS, DTR and DSR pins of USB-to-UART
+Functional Description                                            device respectively. In cases where DTR and DSR pins are not
+                                                                  available on the transmitting device, the DTR and DSR pins of
+Introduction                                                      USB-to-UART device have to be connected. Please refer the
+                                                                  circuit diagram shown in Figure 8 on page 12.
+Cypress’s USB-to-UART bridge controller enables seamless PC
+connectivity for peripherals with UART interface. It integrates a Suspend and Resume
+USB 2.0 Full-Speed device controller, UART, voltage regulator,
+oscillator and flash memory for storing configuration parameters, The USB-to-UART device drives the SUSPEND pin to logic low
+offering a cost-effective solution. The controller supports       and enters into a low power mode whenever the USB bus goes
+bus-powered and self-powered modes, and enables efficient         into suspend state. This helps to meet the stringent suspend
+system power management with suspend and remote wake-up           current requirement of the USB 2.0 specification, while using the
+signals. It is available in 28-pin SSOP package.                  device in bus powered mode. The device will resume from
+                                                                  suspend state under any of the following conditions:
+Functional Overview                                                1. Any activity is detected on the USB bus
+                                                                   2. WAKE pin is asserted in order to generate Remote Wake-Up
+USB Interface                                                         to the host.
+The USB-to-UART device supports Full-Speed USB operation
+and is compliant with USB 2.0 Specification. The integrated USB   WAKE
+Serial Interface Engine (SIE) and USB transceiver manage the      WAKE pin is used to generate Remote Wake-Up signal on the
+USB protocol and communication.                                   USB bus. Remote Wake-Up signal is sent only if the host enables
+                                                                  this feature through SET_FEATURE request. Support for
+UART Controller                                                   Remote Wake-Up is intimated to the host from the device
+The USB-to-UART device integrates a UART controller which         through configuration descriptor during the USB enumeration
+supports the baud rates of 300, 600, 1200, 1800, 2400, 3600,      process. USB-to-UART device allows enabling/disabling the
+4800, 7200, 9600, 14400, 19200, 28800, 38400, 56000, 57600,       Remote Wake-Up feature through the configuration utility
+115200 and 230400* with even, odd or no parity.                   CyUsbUart.
+UART Flow Control                                                 Reset
+USB-to-UART device supports UART hardware flow control            No Connect (NC)
+using control signal pairs such as RTS (Request to Send) - CTS
+(Clear to Send) and DTR (Data Terminal Ready) - DSR (Data Set     Activity Indicators
+Ready). Data flow control is disabled by default. The hardware    Tx_LED pin and Rx_LED pin are active low and sink a maximum
+flow control is optional and can be selected from the host        current of 20 mA each.
+application software.
+Following is the description of flow control signals:             VCFG
+CTS (input):                                                      An active low on the VCFG indicates that the VBUS is detected
+                                                                  and the device is configured.
+This signal can pause or resume data transmission over UART
+interface. Data transmission can be stopped by de-asserting the   VBUS
+CTS signal and the data transmission can resume with CTS
+assertion. The pause and resume operation does not affect data    This pin is used for VBUS detection. A series resistor is required
+integrity.                                                        on this pin.
+RTS (Output):                                                     Regulator
+The receive buffer has a watermark level of 80%. Once the data    The USB-to-UART device integrates a 3.3 V voltage regulator
+in the receive buffer reaches that level, the RTS signal is       which can be powered by the USB bus or an external power
+de-asserted indicating the transmitting device to stop data       supply.
+transmission. Start of data consumption by application will
+reduce device data backlog and once it reaches 50% watermark      Oscillator
+level, RTS signal will be asserted to resume data reception.      The USB-to-UART device integrates a 24 MHz oscillator which
+                                                                  is used as a reference clock for SIE and UART interface.
+Document Number: 001-76294 Rev. *G                                                                                    Page 4 of 21
+
+
+                                                                                                                     CY7C64225
+Flash                                                                  Configurations
+The USB-to-UART device integrates a flash to store device
+parameters such as VID, PID, product string descriptor,                The internal flash can be used to configure the device
+manufacturer string descriptor and power mode (self-powered or         parameters listed in Table 1.
+bus-powered). Please refer Table 1 for the list of configurable
+parameters.
+Table 1. Internal Flash Default Values
+   No.               Parameter                           Default Value                                  Explanation
+    1    VID / PID                           04B4 / 0008                          A 2-byte vendor ID and product ID must be set in
+                                                                                  hexadecimal format. The VID and PID options cannot
+                                                                                  be zero or empty. The Cypress VID/PID is
+                                                                                  programmed by default.
+    2    Manufacturer String Descriptor      2012 Cypress Semiconductor           The Manufacturer string can be a value of up to 26
+                                                                                  characters.
+    3    Product String Descriptor           Cypress-USB2UART-Ver1.0G             The Product string can be a value of up to 24
+                                                                                  characters.
+    4    Bus/Self Powered                   Self                                  The USB power mode can be set to either
+                                                                                  self-powered (input supply from external power
+                                                                                  supply) or bus-powered mode (input supply from
+                                                                                  VBUS)
+    5    Remote Wake-Up                     Enabled                               When enabled, this option can be used to wake up the
+                                                                                  USB host from suspend state remotely from the
+                                                                                  attached device.
+    6    Max. Power (mA)                    100                                   The USB device current requirement value can be set
+                                                                                  by using this option.
+Software and Driver Support                                            ■ Add UART port to PCs without UART port
+                                                                       ■ Add an additional UART port to the PC
+CyUsbUart configuration utility can be used to configure the
+parameters listed in Table 1. The configuration utility is available   ■ Facilitate easy migration for systems which have a free USB
+for download from http://www.cypress.com/?rID=61047.                     port and need an additional UART port
+The Cypress driver allows existing COM port based applications         The       driver    is     available    for    download     from
+to communicate via USB to Cypress’s USB-to-UART device.                http://www.cypress.com/?rID=63794. This driver is WHQL
+The driver serves the following purposes:                              certified for the default Cypress VID / PID of 0x04B4 / 0x0008.
+Document Number: 001-76294 Rev. *G                                                                                         Page 5 of 21
+
+
+                                                                                                         CY7C64225
+Pin Configuration
+28-pin part pinout Description
+The CY7C64225 USB-to-UART Bridge device is available in a 28-pin package as shown in Figure 2. The pin description is listed in
+Table 2.
+Table 2. 28-pin part pinout (SSOP)
+Pin No.    Name         I/O               Description               Figure 2. CY7C64225 USB-UART Bridge Device
+    1       GND       Power Ground
+    2     Tx_LED      Output Active low, UART Tx_LED, max
+                             current –20 mA
+    3    SUSPEND Output Active low indicates USB is
+                             suspended
+    4       TxD       Output UART Data Transmit, Output
+    5       DTR       Output Data Terminal Ready (DTR) Pin
+    6     RESET       Input No Connect (NC)
+    7      VBUS       Input Used for VBUS monitoring. This pin
+                             requires a series resistor when
+                             connected to VBUS. The
+                             recommended values are in the range
+                             of 1 k–10 k.
+    8       DSR       Input Data Set Ready (DSR) pin
+   13       GND       Power USB Ground
+   14        D+        USB USB D+ Line
+   15        D–        USB USB D– Line
+   16       VDD       Power Supply Voltage (3.3 V or 5 V)
+   21       CTS        Input Clear to Send (CTS) input,
+                             handshake signal
+   22      WAKE        Input Active high on this pin, generates
+                             Remote Wake-Up signal on the Bus
+   23       RxD       Input UART Data Receive, Input
+   24       RTS       Output Request to Sent (RTS) output, hand-
+                             shake signal
+   26      VCFG       Output Active low indicates VBUS is detected
+                             and device is configured
+   27     Rx_LED Output Active low, UART Rx_LED, max
+                             current –20 mA
+   28       VDD       Power Supply Voltage. 3.3 V or 5 V
+    9       NC          NC No Connect
+   10        NC         NC No Connect
+   11       NC          NC No Connect
+   12        NC         NC No Connect
+   17        NC         NC No Connect
+   18        NC         NC No Connect
+   19        NC         NC No Connect
+   20        NC         NC No Connect
+   25        NC         NC No Connect
+Document Number: 001-76294 Rev. *G                                                                              Page 6 of 21
+
+
+                                                                                                                 CY7C64225
+Application Circuits                                                 required by the internal USB transceiver. The device parameters
+                                                                     such as ‘Power consumption’ and ‘Bus / Self Powered’ in the
+The following diagrams illustrates typical application schematics    internal flash can be modified as required by the application,
+circuits.                                                            using the configuration utility CyUsbUart.
+                                                                     A 1K series resistor is required for VBUS pin of CY7C64225 in
+Bus Powered Design                                                   this configuration.
+The figure below illustrates the USB bus powered design using
+CY7C64225. The internal voltage regulator provides the 3.3 V
+                                                Figure 3. Bus Powered Configuration
+                                                                                                       VDD
+                                                            VDD
+                                VDD
+                                                        VDD     VDD
+                        VBUS                    VBUS               Rx_LED
+                                     1k                                                  560
+                           D+                    D+                 VCFG
+                                     24                                                  560
+                           D-                    D-                Tx_LED
+                          GND        24                                                  560
+                                                                 SUSPEND
+                       VDD
+                              SW2
+                                                        CY7C64225
+                                                WAKEUP
+                                                                       TxD
+                                                                       RxD
+                           0.01uF
+                                          1k                          RTS
+                                                                      CTS
+                                                                      DTR
+                                NO CONNECT                            DSR
+                                                 RESET
+                                                     GND          GND
+Document Number: 001-76294 Rev. *G                                                                                      Page 7 of 21
+
+
+                                                                                                                     CY7C64225
+Bus Powered Design using External Regulator                          This design uses an external 5 V to 3.3 V regulator to supply the
+                                                                     3.3 V to CY7C64225 from VBUS. The 3.3 V to CY7C64225 can
+Figure 4 illustrates the use of CY7C64225 in bus powered mode
+                                                                     also be provided from a regulator which is already available on
+but running at 3.3 V. This design can be adopted when the circuit
+                                                                     the circuit board, being used for other components on the board.
+operating at 3.3 V is desired (RX, TX, RTS, CTS, DSR, DTR at
+3.3 V).                                                              Since the circuit is operating at 3.3 V, a voltage divider is used to
+                                                                     provide 3.3 V from VBUS of USB port to ‘VBUS’ pin of
+                                                                     CY7C64225.
+                                       Figure 4. Bus Powered Design using External Regulator
+                                              VDD
+                    VBUS     5V to 3.3V
+                              Regulator
+                                                                                                               VDD
+                                                                 VDD
+                          VBUS                             VDD       VDD
+                   VBUS                              VBUS
+                                  10k                                   Rx_LED
+                                          20k                                                 560
+                                                                          VCFG
+                       D+                            D+                                       560
+                                              24                        Tx_LED
+                       D-                            D-                                       560
+                    GND                       24
+                                                                      SUSPEND
+                              VDD
+                                      SW2                  CY7C64225
+                                                     WAKEUP                  TxD
+                                                                             RxD
+                                   0.01uF
+                                                                            RTS
+                                                  1k
+                                                                            CTS
+                                                                            DTR
+                                                                            DSR
+                                        NO CONNECT
+                                                     RESET
+                                                        GND            GND
+Document Number: 001-76294 Rev. *G                                                                                          Page 8 of 21
+
+
+                                                                                                                                                   CY7C64225
+Self Powered Design                                                                      provide 3.3 V from VBUS of USB port to VBUS pin of
+                                                                                         CY7C64225.
+Figure 5 illustrates the use of CY7C64225 in self powered mode
+operating at 3.3 V. VDD is obtained from an external power                               A self powered device can draw more current for its operation
+supply. As shown in Figure 5, a voltage divider circuit is used to                       from external supply during USB active mode as well as suspend
+                                                                                         mode as this will not affect the operation of the USB.
+                                                     Figure 5. Self Powered Design (VDD = 3.3 V)
+                                                                                                                                               VDD
+                                                      VDD                          VDD
+                                      External Supply
+                                              Note 1
+                     VBUS
+                              VBUS
+                                               *                    VBUS
+                                                                             VDD           VDD
+                                                                                              Rx_LED
+                                         10k
+                                                  20k                                                                      560
+                                                                                                VCFG
+                         D+                                         D+                                                     560
+                                                      24                                      Tx_LED
+                          D-                                        D-                                                     560
+                      GND                             24
+                                                                                            SUSPEND
+                                                                             CY7C64225
+                                   VDD
+                                             SW2
+                                                                    WAKEUP                         TxD
+                                                                                                   RxD
+                                          0.01uF                                                   RTS
+                                                            1k
+                                                                                                   CTS
+                                                                                                  DTR
+                                                                                                  DSR
+                                               NO CONNECT
+                                                                    RESET
+                                                                         GND                 GND
+Note
+ 1. Replace the voltage divider circuit (10K and 20K resistors) with 1K series resistor as shown in Figure 3, if 5 V is applied at VDD in this design.
+Document Number: 001-76294 Rev. *G                                                                                                                     Page 9 of 21
+
+
+                                                                                                                   CY7C64225
+Application Diagram                                                  also voltage level translation between the CY7C64225 UART
+                                                                     interface and RS-232 signaling. So, RS-232 line driver/receiver
+USB to RS-232 Converter                                              is used for providing the necessary polarity inversion and level
+                                                                     translation.
+In this example the procedure of using the CY7C64225 as a USB
+to RS-232 converter is illustrated. In this application, a TTL to    The connection between CY7C64225 and the RS-232 line
+RS232 Level Converter IC is used on the serial UART interface        driver/receiver is simple. The input lines (DSR, CTS and RX) of
+of the CY7C74225 to convert the TTL levels of the CY7C64225          the UART interface should be connected to the logic outputs of
+to RS-232 levels. RS-232 follows bipolar signaling i.e. the output   the RS-232 line driver/receiver chip. The output lines (DTR, RTS
+signal toggles between negative and positive polarity. In RS-232,    and TX) of the UART interface should be connected to the logic
+logic 1 is called Mark and is a –3 V input and logic 0 is called     inputs of the RS-232 line driver/receiver chip. The inverted,
+Space and is a +3 V input. The output voltage level of RS-232 is     level-translated UART output will be sent through the line driver
++/-5 V to +/-15 V. So there is not only an inversion in polarity but pins of the RS-232.
+                                         Figure 6. USB to RS-232 Converter Configuration
+                                                                                      VDD
+                                                     VDD
+                              VDD
+                                                 VDD     VDD
+                       VBUS               VBUS              Rx_LED
+                                   1k                                     560
+                          D+               D+                VCFG
+                                   24                                     560
+                          D-               D-               Tx_LED
+                        GND        24                                     560
+                                                          SUSPEND
+                     VDD
+                             SW2
+                                                CY7C64225
+                                          WAKEUP                                        Tx_1
+                                                               TxD
+                                                                                        Rx_1
+                                                               RxD
+                          0.01uF                                                                     DTR_1
+                                      1k                                    LEVEL      RTS_1         CTS_1
+                                                               RTS                                    Tx_1
+                                                                         TRANSLATOR                 RTS_1
+                                                                                       CTS_1          Rx_1
+                                                               CTS                                  DSR_1
+                                                                                       DTR_1
+                                                               DTR
+                                                               DSR                     DSR_1
+                               NO CONNECT
+                                           RESET
+                                                                                                        DB9 MALE
+                                              GND          GND                                        CONNECTOR
+Document Number: 001-76294 Rev. *G                                                                                       Page 10 of 21
+
+
+                                                                                                         CY7C64225
+USB to UART cable with TTL level UART signals
+This example illustrates a USB to UART cable design with TTL Level UART Signals using CY7C64225. This design is based on bus
+powered configuration.
+                                  Figure 7. USB to UART cable with TTL level UART signals
+                                                                                                VDD
+                                                         VDD
+                               VDD
+                                                    VDD       VDD
+                        VBUS                 VBUS                Rx_LED
+                                    1k                                              560
+                           D+                D+                    VCFG
+                                    24                                              560
+                           D-                D-                  Tx_LED
+                         GND        24                                              560
+                                                               SUSPEND
+                                                                           VDD
+                      VDD
+                                                    CY7C64225
+                              SW2                                              10k
+                                             WAKEUP
+                                                                    TxD
+                                                                                 1k
+                                                                    RxD
+                           0.01uF
+                                        1k                          RTS
+                                                                                 1k
+                                                                    CTS
+                                                                    DTR
+                                                                                 1k
+                                NO CONNECT                          DSR
+                                             RESET
+                                                 GND           GND
+                                                                                            SINGLE
+                                                                                             ROW
+                                                                                           HEADER
+Document Number: 001-76294 Rev. *G                                                                             Page 11 of 21
+
+
+                                                                                                            CY7C64225
+Interfacing CY7C64225 with Bus Powered Microcontroller
+In this scenario both CY7C64225 and the microcontroller (MCU) are powered from VBUS. When the microcontroller and CY7C64225
+controller are powered from different sources, 1K resistors are required on RXD and CTS lines of CY7C64225.
+                             Figure 8. Interfacing CY7C64225 with Bus Powered Microcontroller
+                                                             VBUS
+                                      VBUS
+                                                         VDD      VDD
+                                 VBUS              VBUS              Rx_LED
+                                            1k
+                                    D+             D+                 VCFG
+                                            24
+                                   D-              D-                Tx_LED
+                                  GND       24
+                                                                                           VBUS
+                                USB                                SUSPEND
+                            Connector
+                                                         CY7C64225
+                                                   WAKEUP
+                                                                        TxD           RxD
+                                                                        RxD           TxD
+                                               1k                              1k
+                                                                        RTS           CTS
+                                                                                           MCU
+                                                                        CTS           RTS
+                                                                               1k
+                                        NO CONNECT                     DTR
+                                                   RESET
+                                                                       DSR
+                                                       GND         GND
+Document Number: 001-76294 Rev. *G                                                                              Page 12 of 21
+
+
+                                                                                                               CY7C64225
+Interfacing CY7C64225 with Self Powered Microcontroller
+In this scenario CY7C64225 is powered from VBUS and the microcontroller is powered from an external supply.
+If both CY7C64225 and the microcontroller (MCU) are operating at 3.3 V, connect a divider circuit to provide 3.3 V to VBUS pin of
+CY7C64225 from VBUS pin of USB port.
+                            Figure 9. Interfacing CY7C64225 with Self Powered Microcontroller
+                                                           VBUS
+                                     VBUS
+                                                        VDD     VDD
+                                VBUS              VBUS             Rx_LED
+                                           1k
+                                  D+              D+                VCFG
+                                           24
+                                  D-              D-               Tx_LED
+                                 GND       24
+                                                                                          VDD_5V
+                               USB                               SUSPEND
+                            Connector
+                                                       CY7C64225
+                                                  WAKEUP
+                                                                      TxD             RxD
+                                                                      RxD             TxD
+                                              1k                             1k
+                                                                      RTS            CTS
+                                                                                           MCU
+                                                                      CTS            RTS
+                                                                            1k
+                                       NO CONNECT                    DTR
+                                                  RESET
+                                                                     DSR
+                                                     GND         GND
+Document Number: 001-76294 Rev. *G                                                                                  Page 13 of 21
+
+
+                                                                                                                                               CY7C64225
+Absolute Maximum Ratings
+Table 3. Absolute Maximum Ratings
+   Parameter                    Description                          Min              Typ             Max          Unit                     Notes
+TSTG                Storage temperature                              –55                –             +100          °C Higher storage temperatures
+                                                                                                                           reduces data retention time.
+TBAKETEMP           Bake temperature                                   –              125              See          °C –
+                                                                                                   package
+                                                                                                      label
+TBAKETIME           Bake time                                        See                –               72        Hours –
+                                                                 package
+                                                                    label
+TA                  Ambient temperature with power                     0                –              +70          °C     –
+                    applied
+VDD                 Supply voltage on VDD relative to               –0.5                –             +6.0           V     –
+                    VSS
+VIO                 DC input voltage                             VSS – 0.5              –         VDD + 0.5          V     –
+IMIO                Maximum current into any port                    –25                –              +50          mA     –
+                    pin
+ESD                 Electrostatic discharge voltage                   –                 –             2000           V     Human body model ESD.
+FlashENPB           Flash endurance (per block)                  50,000[1]              –                –           –     Erase/write cycles per block.
+FlashENT            Flash endurance (total)[2]                  1,800,000               –                –           –     Erase/write cycles.
+FlashDR             Flash data retention                              10                –                –        Years    –
+Operating Temperature
+Table 4. Operating Temperature
+   Parameter                    Description                          Min              Typ             Max          Unit                     Notes
+TAC                 Commercial ambient                                 0                –              +70          °C –
+                    temperature
+TJ                  Junction temperature                             –40                –             +100          °C     The temperature rise from
+                                                                                                                           ambient to junction is package
+                                                                                                                           specific. See Thermal Impedance
+                                                                                                                           on page 17. The user must limit
+                                                                                                                           the power consumption to comply
+                                                                                                                           with this requirement.
+Notes
+ 2. The 50,000 cycle Flash endurance per block will only be guaranteed if the Flash is operating within one voltage range. Voltage ranges are 3.0 V to 3.6 V and 4.75 V
+    to 5.25 V.
+ 3. A maximum of 36 x 50,000 block endurance cycles is allowed. This may be balanced between operations on 36x1 blocks of 50,000 maximum cycles each, 36x2
+    blocks of 25,000 maximum cycles each, or 36x4 blocks of 12,500 maximum cycles each (to limit the total number of cycles to 36x50,000 and that no single block
+    ever sees more than 50,000 cycles).
+Document Number: 001-76294 Rev. *G                                                                                                                     Page 14 of 21
+
+
+                                                                                                                   CY7C64225
+DC Electrical Characteristics
+DC GPIO Specifications
+The following table lists guaranteed maximum and minimum specifications for the voltage and temperature ranges: 4.75 V to 5.25 V
+and 0 °C < TA < 70 °C, or 3.15 V to 3.5 V and 0 °C < TA < 70 °C, respectively. Typical parameters apply to 5 V and 3.3 V at 25 °C and
+are for design guidance only.
+Table 5. DC GPIO Specifications
+   Parameter                 Description               Min          Typ           Max       Unit                Notes
+VOH              High output level                  VDD – 1.0        –              –         V   IOH = 10 mA, VDD = 4.75 to 5.25 V
+VOL              Low output level                        –           –            0.75       V    IOL = 25 mA, VDD = 4.75 to 5.25 V
+IOH              High-level source current              10           –              –       mA    –
+IOL              Low-level sink current                 25           –              –       mA    –
+VIL              Input low level                         –           –             0.8        V   VDD = 3.15 to 5.25 V
+VIH              Input high level                       2.1          –                        V   VDD = 3.15 to 5.25 V
+DC Full-Speed USB Specifications
+The following table lists guaranteed maximum and minimum specifications for the voltage and temperature ranges when the IMO is
+selected as system clock: 4.75 V to 5.25 V and 0 °C < TA < 70 °C, or 3.15 V to 3.5 V and 0 °C < TA < 70 °C, respectively. Typical
+parameters apply to 5 V and 3.3 V at 25 °C and are for design guidance only.
+Table 6. DC Full Speed (12 Mbps) USB Specifications
+   Parameter                 Description               Min          Typ           Max       Unit                Notes
+  USB Interface
+VDI              Differential input sensitivity         0.2          –              –         V   | (D+) – (D–) |
+VCM              Differential input common mode         0.8          –             2.5        V   –
+                 range
+VSE              Single-ended receiver threshold        0.8          –             2.0        V   –
+CIN              Transceiver capacitance                 –           –             20        pF   –
+IIO              High Z state data line leakage        –10           –             10        A   0 V < VIN < 3.3 V.
+REXT             External USB series resistor           23           –             25            In series with each USB pin.
+VUOH             Static output high, driven             2.8          –             3.6        V   15 k ± 5% to ground. Internal
+                                                                                                  pull-up enabled.
+VUOHI            Static output high, idle               2.7          –             3.6        V   15 k ± 5% to ground. Internal
+                                                                                                  pull-up enabled.
+VUOL             Static output low                       –           –             0.3        V   15 k ± 5% to ground. Internal
+                                                                                                  pull-up enabled.
+ZO               USB driver output impedance            28           –             44            Including REXT resistor.
+VCRS             D+/D– crossover voltage                1.3          –             2.0        V   –
+DC Chip Level Specifications
+The following table lists guaranteed maximum and minimum specifications for the voltage and temperature ranges when the IMO is
+selected as system clock: 4.75 V to 5.25 V and 0 °C < TA < 70 °C, or 3.15 V to 3.5 V and 0 °C < TA < 70 °C, respectively. Typical
+parameters apply to 5 V and 3.3 V at 25 °C and are for design guidance only.
+Table 7. DC Chip-Level Specifications
+Parameter                     Description                    Min     Typ      Max      Unit                   Notes
+VDD          Supply voltage                                  3.0       –      5.25      V USB hardware is not functional when VDD
+                                                                                            is between 3.5 V to 4.35 V
+IDD5         Supply current                                   –       14        27     mA Conditions are VDD = 5.0 V, TA = 25 °C
+IDD3         Supply current                                   –        8        14     mA Conditions are VDD = 3.3 V, TA = 25 °C
+ISB          Sleep (mode) current                             –        3       6.5     A VDD = 3.3 V, 0 °C < TA < 55 °C
+ISBH         Sleep (mode) current at high temperature.        –        4        25     A VDD = 3.3 V, 55 °C < TA < 70 °C
+Isusp1       USB suspend current                              –      225       285     A For 5 V operating voltage range
+Isusp2       USB suspend current                              –      208       260     A For 3.3 V operating voltage range
+Document Number: 001-76294 Rev. *G                                                                                      Page 15 of 21
+
+
+                                                                                        CY7C64225
+Ordering Information
+            Package                    Ordering Code                Temperature Range
+28-pin SSOP                      CY7C64225-28PVXC                         0 °C to 70 °C
+28-pin SSOP (Tape and Reel)      CY7C64225-28PVXCT                        0 °C to 70 °C
+Ordering Code Definitions
+    CY   7   C   642 25 - 28 PV X     C   X
+                                               X = T or blank
+                                               T = Tape and Reel; blank = Bulk
+                                               Temperature Grade: C = Commercial
+                                               Pb-free
+                                               Package Type:
+                                               PV = SSOP
+                                               Pin Count:
+                                               28 = 28 pins
+                                               Specific Product Identifier
+                                               Base Part Number
+                                               Technology Code: C = CMOS
+                                               Marketing Code
+                                               Company ID: CY = Cypress
+Document Number: 001-76294 Rev. *G                                                        Page 16 of 21
+
+
+                                                                                                                CY7C64225
+Packaging Information
+This section illustrates the package specification for the CY7C64225, along with the thermal impedance for the package.
+Package Diagrams
+                               Figure 10. 28-pin SSOP (210 Mils) O28.21 Package Outline, 51-85079
+                                                                                               51-85079 *F
+Thermal Impedance
+Table 8. Thermal Impedance for the Package
+           Package                         Typical JA
+         28-pin SSOP                         96 °C/W
+Note Assumes 2-layer PCB
+Solder Reflow Peak Temperature
+Following is the minimum solder reflow peak temperature to achieve good solderability.
+Table 9. Solder Reflow Peak Temperature
+           Package                     Maximum Peak Temperature               Time at Maximum Peak Temperature
+         28-pin SSOP                                260 °C                                      20 s
+Document Number: 001-76294 Rev. *G                                                                                  Page 17 of 21
+
+
+                                                                                                                      CY7C64225
+Acronyms                                                               Reference Documents
+The following table lists the acronyms used in this document.          USB 2.0 Specification
+  Acronym                         Description                          Document Conventions
+ DC          Direct Current
+                                                                       Units of Measure
+ GPIO        General Purpose Input/Output
+ I/O         Input/Output                                                 Symbol                      Unit of Measure
+ LED         Light Emitting Diode                                       °C           degree Celsius
+ PC          Personal Computer                                          k           kilohm
+ SSOP        Shrink Small Outline Package                               A           microampere
+ UART        Universal Asynchronous Receiver / Transmitter              mA           milliampere
+ USB         Universal Serial Bus                                                   ohm
+                                                                        %            percent
+                                                                        s            second
+                                                                        V            volt
+                                                                        W            watt
+Glossary
+Asynchronous        A signal whose data is acknowledged or acted upon immediately, irrespective of any clock signal.
+Buffer               1. A storage area for data that is used to compensate for a speed difference, when transferring data from one
+                        device to another. Usually refers to an area reserved for I/O operations, into which data is read, or from which
+                        data is written.
+                     2. A portion of memory set aside to store data, often before it is sent to an external device or as it is received
+                        from an external device.
+                     3. An amplifier used to lower the output impedance of a system.
+Flash               Flash is a type of non-volatile memory used to store small amounts of data that must be saved when power is
+                    removed.
+Reset               No Connect (NC)
+VDD                 A name for a power net meaning “voltage drain” The most positive power supply signal. Usually 5 V or 3.3 V.
+VSS                 A name for a power net meaning “voltage source” The most negative power supply signal.
+Virtual COM Port A USB virtual COM port is a software interface that enables applications to access a USB device as if it were a
+                    built-in serial port. Many USB virtual COM-port devices function as bridges that convert between USB and RS-232
+                    or other asynchronous serial interfaces.
+UART                A UART or universal asynchronous receiver-transmitter translates between parallel bits of data and serial bits.
+Document Number: 001-76294 Rev. *G                                                                                         Page 18 of 21
+
+
+                                                                                                         CY7C64225
+Document History Page
+ Document Title: CY7C64225, USB-to-UART Bridge Controller
+ Document Number: 001-76294
+                      Submission    Orig. of
+   Rev.    ECN No.                                                      Description of Change
+                          Date      Change
+    **     3533464     02/23/2012    HBM     New data sheet.
+    *A     3571321     05/15/2012    AASI    Added Application Circuit Diagrams.
+                                             Minor content edits to add clarity.
+                                             Updated DC Chip Level Specifications and Table 6.
+    *B     3931390     03/13/2013   DTNK /   Updated Features.
+                                     NIKL
+                                             Updated Figure 1 (CY7C64225 Block Diagram).
+                                             Updated Functional Description (Updated Introduction).
+                                             Renamed “Operational Details” as Functional Overview and updated the same
+                                             section, also added sub-sections namely USB Interface, UART Controller,
+                                             Regulator, Oscillator, Flash.
+                                             Updated Configurations (Updated Table 1).
+                                             Renamed “Driver” as Software and Driver Support and updated the same
+                                             section.
+                                             Updated Application Circuits (Updated Bus Powered Design (Updated
+                                             Figure 3), updated Bus Powered Design using External Regulator (Updated
+                                             Figure 4), updated Self Powered Design (Updated description and Figure 5)).
+                                             Updated Application Diagram (Updated USB to RS-232 Converter (Updated
+                                             Figure 6) and added sub-sections namely USB to UART cable with TTL level
+                                             UART signals, Interfacing CY7C64225 with Bus Powered Microcontroller,
+                                             Interfacing CY7C64225 with Self Powered Microcontroller).
+                                             Updated Absolute Maximum Ratings (Updated Table 3).
+                                             Replaced EEPROM with Flash in all instances across the document.
+    *C     3979386     04/23/2013    NIKL    Updated Functional Overview (Updated UART Controller (Updated UART
+                                             Flow Control (Provided cross reference link to Figure 8))).
+    *D     4296242     03/03/2014    MVTA    Updated Configurations (Updated Table 1).
+                                             Updated to new template.
+                                             Completing Sunset Review.
+    *E     4626645     01/16/2015    MVTA    Added More Information.
+                                             Updated Packaging Information:
+                                             Updated Package Diagrams:
+                                             spec 51-85079 – Changed revision from *E to *F.
+                                             Updated to new template.
+                                             Completing Sunset Review.
+Document Number: 001-76294 Rev. *G                                                                         Page 19 of 21
+
+
+                                                                                                   CY7C64225
+Document History Page (continued)
+ Document Title: CY7C64225, USB-to-UART Bridge Controller
+ Document Number: 001-76294
+                      Submission    Orig. of
+   Rev.    ECN No.                                                     Description of Change
+                          Date      Change
+    *F     4952058     10/07/2015    MVTA    Updated Functional Overview:
+                                             Updated Reset:
+                                             Updated description.
+                                             Updated Pin Configuration:
+                                             Updated 28-pin part pinout Description:
+                                             Updated Table 2:
+                                             Updated description of pin 6.
+                                             Updated Application Circuits:
+                                             Updated Bus Powered Design:
+                                             Updated Figure 3.
+                                             Updated Bus Powered Design using External Regulator:
+                                             Updated Figure 4.
+                                             Updated Self Powered Design:
+                                             Updated Figure 5.
+                                             Updated Application Diagram:
+                                             Updated USB to RS-232 Converter:
+                                             Updated Figure 6.
+                                             Updated USB to UART cable with TTL level UART signals:
+                                             Updated Figure 7.
+                                             Updated Interfacing CY7C64225 with Bus Powered Microcontroller:
+                                             Updated Figure 8.
+                                             Updated Interfacing CY7C64225 with Self Powered Microcontroller:
+                                             Updated Figure 9.
+                                             Updated Glossary:
+                                             Updated details corresponding to “Reset”.
+                                             Updated Cypress logo.
+    *G     5687754     05/03/2017    RUPA
+                                             Updated Copyright information.
+Document Number: 001-76294 Rev. *G                                                                      Page 20 of 21
+
+
+                                                                                                                                                                              CY7C64225
+Sales, Solutions, and Legal Information
+Worldwide Sales and Design Support
+Cypress maintains a worldwide network of offices, solution centers, manufacturer’s representatives, and distributors. To find the office
+closest to you, visit us at Cypress Locations.
+Products                                                                                                   PSoC® Solutions
+ARM® Cortex® Microcontrollers                                          cypress.com/arm                     PSoC 1 | PSoC 3 | PSoC 4 | PSoC 5LP | PSoC 6
+Automotive                                                 cypress.com/automotive
+                                                                                                           Cypress Developer Community
+Clocks & Buffers                                                   cypress.com/clocks
+                                                                                                           Forums | WICED IOT Forums | Projects | Video | Blogs |
+Interface                                                      cypress.com/interface                       Training | Components
+Internet of Things                                                       cypress.com/iot
+                                                                                                           Technical Support
+Memory                                                          cypress.com/memory
+                                                                                                           cypress.com/support
+Microcontrollers                                                       cypress.com/mcu
+PSoC                                                                  cypress.com/psoc
+Power Management ICs                                                  cypress.com/pmic
+Touch Sensing                                                        cypress.com/touch
+USB Controllers                                                         cypress.com/usb
+Wireless Connectivity                                           cypress.com/wireless
+© Cypress Semiconductor Corporation, 2012-2017. This document is the property of Cypress Semiconductor Corporation and its subsidiaries, including Spansion LLC ("Cypress"). This document,
+including any software or firmware included or referenced in this document ("Software"), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries
+worldwide. Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or other
+intellectual property rights. If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress
+hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to
+modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users
+(either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress's patents that are infringed by the Software (as
+provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products. Any other use, reproduction, modification, translation, or compilation
+of the Software is prohibited.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE
+OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. To the extent
+permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any liability arising out of the application or use of any
+product or circuit described in this document. Any information provided in this document, including any sample design information or programming code, is provided only for reference purposes. It is
+the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this information and any resulting product. Cypress products
+are not designed, intended, or authorized for use as critical components in systems designed or intended for the operation of weapons, weapons systems, nuclear installations, life-support devices or
+systems, other medical devices or systems (including resuscitation equipment and surgical implants), pollution control or hazardous substances management, or other uses where the failure of the
+device or system could cause personal injury, death, or property damage ("Unintended Uses"). A critical component is any component of a device or system whose failure to perform can be reasonably
+expected to cause the failure of the device or system, or to affect its safety or effectiveness. Cypress is not liable, in whole or in part, and you shall and hereby do release Cypress from any claim,
+damage, or other liability arising from or related to all Unintended Uses of Cypress products. You shall indemnify and hold Cypress harmless from and against all claims, costs, damages, and other
+liabilities, including claims for personal injury or death, arising from or related to any Unintended Uses of Cypress products.
+Cypress, the Cypress logo, Spansion, the Spansion logo, and combinations thereof, WICED, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress in
+the United States and other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be claimed as property of their respective owners.
+Document Number: 001-76294 Rev. *G                                                                Revised May 3, 2017                                                                  Page 21 of 21
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Cypress Semiconductor:
+ CY7C64225-28PVXC CY7C64225-28PVXCT

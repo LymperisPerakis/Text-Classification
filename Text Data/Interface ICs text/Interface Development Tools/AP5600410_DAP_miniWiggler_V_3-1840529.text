@@ -1,0 +1,273 @@
+DAP miniWiggler V3
+AP56004
+A pplication Note
+V1.0 2013-07
+Microcontrollers
+
+
+Edition 2013-07
+Published by
+Infineon Technologies AG
+81726 Munich, Germany
+© 2013 Infineon Technologies AG
+All Rights Reserved.
+LEGAL DISCLAIMER
+THE INFORMATION GIVEN IN THIS APPLICATION NOTE IS GIVEN AS A HINT FOR THE
+IMPLEMENTATION OF THE INFINEON TECHNOLOGIES COMPONENT ONLY AND SHALL NOT BE
+REGARDED AS ANY DESCRIPTION OR WARRANTY OF A CERTAIN FUNCTIONALITY, CONDITION OR
+QUALITY OF THE INFINEON TECHNOLOGIES COMPONENT. THE RECIPIENT OF THIS APPLICATION
+NOTE MUST VERIFY ANY FUNCTION DESCRIBED HEREIN IN THE REAL APPLICATION. INFINEON
+TECHNOLOGIES HEREBY DISCLAIMS ANY AND ALL WARRANTIES AND LIABILITIES OF ANY KIND
+(INCLUDING WITHOUT LIMITATION WARRANTIES OF NON-INFRINGEMENT OF INTELLECTUAL
+PROPERTY RIGHTS OF ANY THIRD PARTY) WITH RESPECT TO ANY AND ALL INFORMATION GIVEN IN
+THIS APPLICATION NOTE.
+Information
+For further information on technology, delivery terms and conditions and prices, please contact the
+nearest Infineon Technologies Office (www.infineon.com).
+Warnings
+Due to technical requirements, components may contain dangerous substances. For information on
+the types in question, please contact the nearest Infineon Technologies Office.
+Infineon Technologies components may be used in life-support devices or systems only with the
+express written approval of Infineon Technologies, if a failure of such components can reasonably be
+expected to cause the failure of that life-support device or system or to affect the safety or
+effectiveness of that device or system. Life support devices or systems are intended to be implanted
+in the human body or to support and/or maintain and sustain and/or protect human life. If they fail, it is
+reasonable to assume that the health of the user or other persons may be endangered.
+
+
+                                                                                  miniWiggler V3
+                                                                                        AP56004
+Document Change History
+Date              Version           Changed By                   Change Description
+Trademarks
+        ®
+Infineon is a registered trademark of Infineon Technologies Ltd.
+ We Listen to Your Comments
+ Is there any information in this document that you feel is wrong, unclear or missing?
+ Your feedback will help us to continuously improve the quality of our documentation.
+ Please send your proposal (including a reference to this document) to:
+ ctdd@infineon.com
+Application Note                                  3                                 V1.0, 2013-07
+
+
+                                                                                                                        miniWiggler V3
+                                                                                                                                    AP56004
+Table of Contents
+1          Preface ............................................................................................................................... 5
+2          Introduction ....................................................................................................................... 6
+2.1        Comparison with DAP miniWiggler V2.0 ............................................................................. 6
+3          Automotive JTAG Connector ........................................................................................... 7
+3.1        Comparison with OCDS L1 Connector................................................................................ 8
+4          Frontend Connector (JTAG + EXT) .................................................................................. 9
+5          Frontend Identifiers......................................................................................................... 10
+6          Target Communication ................................................................................................... 11
+7          References ....................................................................................................................... 12
+Application Note                                                   4                                                        V1.0, 2013-07
+
+
+                                                                                     miniWiggler V3
+                                                                                             AP56004
+1           Preface
+DAP miniWiggler V3.1 is the successor of DAP miniWiggler V2.0.
+Target group for this application note are tool partners and users.
+This application note assumes that the reader knows the tool interfaces of Infineon devices.
+Hints
+•  Never connect the DAP cable to the EXT connector of the miniWiggler. This will destroy the target
+   and/or the miniWiggler.
+•  Never connect both JTAG and DAP cables to targets at the same time
+•  In case of JTAG please make sure that the JPD pin is connected to GND on target side.
+Application Note                                     5                                 V1.0, 2013-07
+
+
+                                                                                   miniWiggler V3
+                                                                                        AP56004
+2           Introduction
+Figure 1 shows the location and orientation of the different connectors.
+                                                                                   JTAG
+                                                                   DAP
+                                                                                   EXT
+Figure 1    DAP miniWiggler V3.1
+2.1         Comparison with DAP miniWiggler V2.0
+•   RESET pin is controlled with pull-down transistor
+•   UART RXD is connected to SWV pin on SWD/DAP connector
+•   Large OCDS L1 connector is replaced by small 20 pin Automotive JTAG connector
+•   Connector for frontend extensions (e.g. for galvanic isolation) added
+•   USER1/DAPEN pin has a strong pull-up. Allows DAP hot attach if device is powered first.
+Application Note                                   6                                      V1.0, 2013-07
+
+
+                                                                                        miniWiggler V3
+                                                                                               AP56004
+3           Automotive JTAG Connector
+This 20 pin connector in two rows with 1.27 mm pitch is a space saving alternative to the OCDS L1
+                                                                                                     [6]
+connector. The pin layout is compatible with Lauterbach's 20 pin Automotive Connector (AUTO-20)
+Table 1     Automotive JTAG Connector on Target Board
+Pin       Name       Dir.  Description
+1         VREF       O     Supply voltage from the target system. It has to be strong enough to supply
+                           the target side of the level shifters within the tool hardware up to about 10
+                           MHz JTAG operating frequency. The required supply current is in the range
+                           of 1 to 5 mA, mainly caused by signal switching. It can be reduced by lower
+                           frequency and capacitance.
+2          TMS       I     JTAG TMS signal.
+3          GND       -
+4          TCK       I     JTAG TCK signal.
+5          GND       -
+6          TDO       O     JTAG TDO signal.
+7          KEY       -     If the connector on the board has no keying shroud, this pin provides
+         (GND in           another option to enforce polarization. For that this pin is removed from the
+          cable)           target connector and the associated jack in the cable connector closed.
+8          TDI       I     JTAG TDI signal.
+9          GND       -
+10       RESET       IO    Low active target reset signal. Open drain active low signal. May be used bi-
+                           directionally to drive or sense the target reset signal. Usually driven by the
+                           tool to reset the target system. The target system is responsible for providing
+                           a pull up to VREF on this signal to establish a logic one. The resistor shall
+                           not have a value less than 1 kOhms.
+11         GND       -
+12    RESETOUT O           Optional low active reset output signal. Left open on tool side if not
+                           supported by tool.
+13         GND       -
+14       USER1       I(O)  Optional user defined IO pin e.g. for WDTDIS or /OCDSE.
+                           Default direction is input and default level is High. Pulled (10kR) to VREF on
+                           tool side if not supported by tool.
+15         GND       -
+16        TRST       I     Low active JTAG reset.
+17         GND       -
+18      TGI_RXD      IO    Low active trigger in (default) or out signal
+                           Or UART RXD input of device.
+19         GND       -     Target presence detection. Connected to GND on target side. Pull-up and
+                           sensing on tool side.
+20    USER0_TXD IO         Optional user defined IO pin.
+                           Or UART TXD output of device.
+Application Note                                     7                                    V1.0, 2013-07
+
+
+                                                                               miniWiggler V3
+                                                                                    AP56004
+3.1        Comparison with OCDS L1 Connector
+                                                     [5]
+The larger OCDS L1 connector is specified in AP24001
+Table 2    Comparison with OCDS L1 Connector
+Automotive   OCDS L1       Comment
+VREF         VDD
+TMS          TMS
+TCK          TCK
+TDO          TDO
+TDI          TDI
+RESET        RESET
+TGI_RXD      BRKIN         New trigger pin naming starting with AURIX devices.
+                           Optional RXD function.
+TGO_TXD      BRKOUT        New trigger pin naming starting with AURIX devices.
+                           Optional TXD function.
+USER0        -             Automotive connector is aligned with DAP connector
+USER1        -             Automotive connector is aligned with DAP connector
+-            RCAP1         Undefined behavior
+-            RCAP2         Undefined behavior
+-            OCDSE         Obsolete
+-            CPU_CLOCK Obsolete
+Application Note                                8                               V1.0, 2013-07
+
+
+                                                                                       miniWiggler V3
+                                                                                             AP56004
+4           Frontend Connector (JTAG + EXT)
+Additional 10 pins (EXT) for a 34 pin cable are used. There is a gap of 4 pins to allow the plugging of
+the 20 pin JTAG connector.
+Table 3     Frontend Connector (JTAG + EXT)
+Pin     Name      DAP        Dir. Comment
+1       VREF                 I
+2       TMS       -          O
+3       GND                  -
+4       TCK       DAP0       O
+5       GND                  -
+6       TDO       DAP1       I/IO Note that this DAP/JTAG signal mapping is not compliant with the
+                                  standard DAP1/TMS mapping on device side.
+7       GND                  -
+8       TDI       DAP1O O         DAP1 output signal in case of DAP and galvanic isolation.
+9       GND                  -
+10      RESET                O
+11      GND                  -
+12      RESETOUT             I    Not supported. Left open.
+13      GND                  -
+14      USER1                IO   Just output direction in case of galvanic isolation.
+15      GND                  -
+16      TRST      USER8 O
+17      GND                  -
+18      TXD                  O    Connects to RXD input of device. Voltage level is VREF.
+19      JPD                  I    JTAG presence detection with internal pull-up. Connect to GND on
+                                  target side if the target uses the JTAG interface.
+20      USER0_RXD            IO   USER0: Default is input. Only input case of galvanic isolation.
+                                  RXD: Connects to TXD output of device. Voltage level is VREF.
+21, 23 GND                   -    Connector gap – not assembled.
+22, 24 VSUP5                 O    Connector gap – not assembled. (5 V supply for frontend)
+25      GND                  -
+26      -         DAPDIR O        DAP1 direction. Low for direction target out to tool in.
+27      GND                  -
+28      DAP1PULL             O    For optional control of DAP1 pull-up/down resistor.
+29      GND                  -
+30      FEI0                 -    Frontend identification 0 with internal pull-up.
+31      VSUP33               O    3.3 V supply for frontend
+32      FEI1                 -    Frontend identification 1 with internal pull-up.
+33      VSUP33               O    3.3 V supply for frontend
+34      FEI2                 -    Frontend identification 2 with internal pull-up.
+Application Note                                    9                                    V1.0, 2013-07
+
+
+                                                                                    miniWiggler V3
+                                                                                            AP56004
+5          Frontend Identifiers
+FEIx pins are connected to FT2232 BCBUSx pins similar to JPD connected to ADBUS5 pins.
+Note: Frontend boards may only pull (5kR) FEIx signals and not hardwire them. Reason is that the
+     FT2232 may come up in a mode where it drives the FEIx signals. It is only needed to pull to
+     GND, since the FT2232 has internal pull-ups active.
+Table 4    Frontend Identifiers (FEIx Pins)
+FEIx 2-1-0    Comment
+H-H-H         No frontend or transparent frontends like connector adaptors
+H-H-L         Galvanic isolation frontend
+              JTAG or DAP/SPD/SWD decided with JPD pin level.
+              Operating frequency is limited to 10 MHz.
+              DAP1O operated as output. DAP1, DAP1O, DAPDIR and DAPPULL are operated as
+              unidirectional signals.
+              Note that DAP1 is still bidirectional in the DAP miniWiggler V3.1 design. For a simple
+              galvanic isolation frontend a resistor can be used to limit the current of frontend and
+              miniWiggler are driving DAP1.
+H-L-H         CAN transceiver for DXCPL (DAP over CAN Physical Layer).
+Other         Reserved
+Application Note                                   10                                 V1.0, 2013-07
+
+
+                                                                                   miniWiggler V3
+                                                                                           AP56004
+6          Target Communication
+              [1]                           [2]
+Supports DAS infrastructure with MCD API as interface.
+                         [3]
+The DAP miniWiggler V3 provides an R/W latency to the target 150 µs for single accesses and up to
+2 MByte/s bandwidth for block data accesses. This bandwidth depends on the frequency, used
+protocol and device type. The highest performance is achieved with a direct connection to a fast high-
+speed USB port of the host computer for DAP and AURIX devices at 30 MHz.
+Application Note                                11                                   V1.0, 2013-07
+
+
+                                                                            miniWiggler V3
+                                                                                   AP56004
+7          References
+[1] DAS (Device Access Server) www.infineon.com/DAS
+[2] MCD API (Multi-Core Debug) link on page www.infineon.com/DAS
+[3] DAP miniWiggler www.infineon.com/miniWiggler
+[4] AP24003 DAP Connector http://www.infineon.com/microcontrollers
+[5] AP24001 OCDS Level 1 JTAG Connector http://www.infineon.com/microcontrollers
+[6] Lauterbach Automotive Debug Connector (AUTO-20) www.lauterbach.com
+Application Note                             12                                V1.0, 2013-07
+
+
+w w w . i n f i n e o n . c o m
+Published by Infineon Technologies AG
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Infineon:
+ KIT_MINIWIGGLER_3_USB DAPMINIWIGGLERUSBTOBO1

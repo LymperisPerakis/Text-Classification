@@ -1,0 +1,1088 @@
+                                                                     FT245BL USB FIFO ( USB - Parallel ) I.C.
+The FT245BL is the lead free version of the 2nd generation of FTDI’s popular USB FIFO I.C. This device not only
+adds extra functionality to its FT8U245AM predecessor and reduces external component count, but also maintains a
+high degree of pin compatibility with the original, making it easy to upgrade or cost reduce existing designs as well as
+increasing the potential for using the device in new application areas.
+1.0    Features
+HARDWARE FEATURES                                               •     USB VID, PID , Serial Number and Product
+•     Single Chip USB  Parallel FIFO bi-directional                  Description strings in external EEPROM
+      Data Transfer                                             •     EEPROM programmable on-board via USB
+•     Transfer Data rate to 1M Byte / Sec - D2XX Drivers        •     Compact Lead free RoHS compliant 32-LD LQFP
+•     Transfer Data rate to 300 Kilobyte / Sec - VCP                  package
+      Drivers                                                   VIRTUAL COM PORT (VCP) DRIVERS for
+•     Simple to interface to MCU / PLD/ FPGA logic with         -     Windows 98 and Windows 98 SE
+      a 4 wire handshake interface                              -     Windows 2000 / ME / Server 2003 / XP
+•     Entire USB protocol handled on-chip… no USB-              -     Windows XP 64 Bit
+      speciﬁc ﬁrmware programming required                      -     Windows XP Embedded
+•     FTDI’s royalty-free VCP and D2XX drivers                  -     Windows CE 4.2
+      eliminate the requirement for USB driver                  -     MAC OS-8 and OS-9
+      development in most cases.                                -     MAC OS-X
+•     384 Byte FIFO Tx buffer / 128 Byte FIFO Rx Buffer         -     Linux 2.40 and greater
+      for high data throughput.                                 D2XX (USB Direct Drivers + DLL S/W Interface)
+•     New Send Immediate support via SI Pin for                 -     Windows 98 and Windows 98 SE
+      optimised data throughput.                                -     Windows 2000 / ME / Server 2003 / XP
+•     Support for USB Suspend / Resume through                  -     Windows XP 64 Bit
+      PWREN# and WAKEUP pins.                                   -     Windows XP Embedded
+•     Support for high power USB Bus powered devices            -     Windows CE 4.2
+      through PWREN# pin                                        -     Linux 2.4 and Greater
+•     Adjustable RX buffer timeout                              APPLICATION AREAS
+•     In-built support for event characters                     -     Easy MCU / PLD / FPGA interface to USB
+•     Integrated level converter on FIFO and control            -     Upgrading Legacy Peripheral Designs to USB
+      signals for interfacing to 5V and 3.3V logic              -     USB Instrumentation
+•     Integrated 3.3V regulator for USB IO                      -     USB Industrial Control
+•     Integrated Power-On-Reset circuit                         -     USB Audio and Low Bandwidth Video data transfer
+•     Integrated 6MHz – 48Mhz clock multiplier PLL              -     PDA  USB data transfer
+•     USB Bulk or Isochronous data transfer modes               -     USB MP3 Player Interface
+•     New Bit-Bang Mode allows the data bus to be used          -     USB FLASH Card Reader / Writers
+      as an 8 bit general purpose IO Port without the           -     Set Top Box (S.T.B.) PC - USB interface
+      need for MCU or other support logic.                      -     USB Digital Camera Interface
+•     4.35V to 5.25V single supply operation                    -     USB Hardware Modems
+•     UHCI / OHCI / EHCI host controller compatible             -     USB Wireless Modems
+•     USB 1.1 and USB 2.0 compatible
+      DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005                   Page 1 of 24
+
+
+                                                                       FT245BL USB FIFO ( USB - Parallel ) I.C.
+1.1 General Description
+The FT245BL provides an easy cost-effective method of transferring data to / from a peripheral and a host P.C. at up
+to 8 Million bits (1 Megabyte) per second. Its simple, FIFO-like design makes it easy to interface to any microcontroller
+or microprocessor via IO ports.
+To send data from the peripheral to the host computer, simply write the byte-wide data into the module when TXE# is
+low. If the (384-byte) transmit buffer ﬁlls up or is busy storing the previously written byte, the device keeps TXE# high
+in order to stop further data from being written until some of the FIFO data has been transferred over USB to the host.
+TXE# goes high after every byte written.
+When the host sends data to the peripheral over USB, the device will take RXF# low to let the peripheral know that at
+least one byte of data is available. The peripheral can read a data byte every time RXF# goes low. RXF# goes high
+after every byte read.
+By using FTDI’s virtual COM port drivers, the peripheral looks like a standard COM port to the application software.
+Commands to set the baud rate are ignored - the device always transfers data at its fastest rate regardless of the
+application’s baud-rate setting. Alternatively, FTDI’s D2XX drivers allow application software to access the device
+“directly” through a published DLL based API. Details of the current VCP and D2XX driver can be found on FTDI’s web
+site ( http://www.ftdichip.com )
+2.0      Enhancements
+This section summarises the enhancements of the 2nd generation device compared to its FT8U245AM predecessor.
+For further details, consult the device pin-out description and functional descriptions.
+•       Integrated Power-On-Reset (POR) Circuit
+        The device now incorporates an internal POR
+        function. The existing RESET# pin is maintained          •      Integrated Level Converter on FIFO interface
+        in order to allow external logic to reset the device            and control signals
+        where required, however for many applications                   The previous devices would drive the FIFO and
+        this pin can now be either left N/C or hard wired               control signals at 5V CMOS logic levels. The
+        to VCC. In addition, a new reset output pin                     new device has a separate VCCIO pin allowing
+        (RSTOUT#) is provided in order to allow the new                 the device to directly interface to 3.3V and other
+        POR circuit to provide a stable reset to external               logic families without the need for external level
+        MCU and other devices. RSTOUT# was the TEST                     converter I.C.’s
+        pin on the previous generation of devices.
+                                                                 •      Power Management control for USB Bus
+•       Integrated RCCLK Circuit                                        Powered, high current devices
+        In the previous devices, an external RC circuit                 A new PWREN# signal is provided which can be
+        was required to ensure that the oscillator and                  used to directly drive a transistor or P-Channel
+        clock multiplier PLL frequency was stable prior                 MOSFET in applications where power switching
+        to enabling the clock internal to the device. This              of external circuitry is required. A new EEPROM
+        circuit is now embedded on-chip – the pin assigned              based option makes the device pull gently down
+        to this function is now designated as the TEST pin              its FIFO interface lines when the power is shut
+        and should be tied to GND for normal operation.                 off (PWREN# is High). In this mode, any residual
+       DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005                      Page 2 of 24
+
+
+                                                            FT245BL USB FIFO ( USB - Parallel ) I.C.
+  voltage on external circuitry is bled to GND when          was ﬁxed at 16ms timeout. This timeout is now
+  power is removed thus ensuring that external               programmable over USB in 1ms increments
+  circuitry controlled by PWREN# resets reliably             from 1ms to 255ms, thus allowing the device to
+  when power is restored. PWREN# can also be                 be better optimised for protocols requiring faster
+  used by external circuitry to determine when USB           response times from short data packets.
+  is in suspend mode (PWREN# goes high).
+                                                        •    Relaxed VCC Decoupling
+• Send Immediate / WakeUp (SI / WU) signal                   The 2nd generation devices now incorporate a level
+  The new Send Immediate / WakeUp signal                     of on-chip VCC decoupling. Though this does
+  combines two functions on a single pin. If USB is          not eliminate the need for external decoupling
+  in suspend mode (and remote wakeup is enabled              capacitors, it signiﬁcantly improves the ease of
+  in the EEPROM), strobing this pin low will cause           PCB design requirements to meet FCC, CE and
+  the device to request a resume from suspend                other EMI related speciﬁcations.
+  (WakeUp) on the USB Bus. Normally, this can
+  be used to wake up the Host PC. During normal         •  Bit Bang Mode
+  operation, if this pin is strobed low any data in the      The 2nd generation device has a new option
+  device RX buffer will be sent out over USB on the          referred to as “Bit Bang” mode. In Bit Bang mode,
+  next Bulk-IN request from the drivers regardless of        the eight FIFO data lines can be switched between
+  the packet size. This can be used to optimise USB          FIFO interface mode and an 8-bit Parallel IO
+  transfer speed for some applications.                      port. Data packets can be sent to the device and
+                                                             they will be sequentially sent to the interface at
+• Lower Suspend Current                                      a rate controlled by an internal timer (equivalent
+  Integration of RCCLK within the device and internal        to the prescaler of the FT232BL device). As well
+  design improvements reduce the suspend current             as allowing the device to be used stand-alone
+  of the FT245BL to under 100uA typical (excluding           as a general purpose IO controller for example
+  the 1.5K pull-up on USBDP) in USB suspend                  controlling lights, relays and switches, some other
+  mode. This allows greater margin for peripherals to        interesting possibilities exist. For instance, it may
+  meet the USB Suspend current limit of 500uA.               be possible to connect the device to an SRAM
+                                                             conﬁgurable FPGA as supplied by vendors such as
+• Support for USB Isochronous Transfers                      Altera and Xilinx. The FPGA device would normally
+  Whilst USB Bulk transfer is usually the best               be un-conﬁgured (i.e. have no deﬁned function) at
+  choice for data transfer, the scheduling time of the       power-up. Application software on the PC could
+  data is not guaranteed. For applications where             use Bit Bang Mode to download conﬁguration
+  scheduling latency takes priority over data integrity      data to the FPGA which would deﬁne its hardware
+  such as transferring audio and low bandwidth               function, then after the FPGA device is conﬁgured
+  video data, the new device now offers an option of         the FT245BL can switch back into FIFO interface
+  USB Isochronous transfer via an option bit in the          mode to allow the programmed FPGA device
+  EEPROM.                                                    to communicate with the PC over USB. This
+• Programmable FIFO TX Buffer Timeout                        approach allows a customer to create a “generic”
+  In the previous device, the TX buffer timeout              USB peripheral who’s hardware function can be
+  used to ﬂush remaining data from the TX buffer             deﬁned under control of the application software.
+  DS245BL Version 1.7             © Future Technology Devices Intl. Ltd. 2005                Page 3 of 24
+
+
+                                                            FT245BL USB FIFO ( USB - Parallel ) I.C.
+    The FPGA based hardware can be easily upgraded       • Multiple Device Support without EEPROM
+    or totally changed simply by changing the FPGA           When no EEPROM (or a blank or invalid
+    conﬁguration data ﬁle. Application notes, software       EEPROM) is attached to the device, the FT245BL
+    and development modules for this application area        no longer gives a serial number as part of its
+    will be available from FTDI and other 3 party
+                                             rd
+                                                             USB descriptor. This allows multiple devices to
+    developers.                                              be simultaneously connected to the same PC.
+                                                             However, we still highly recommend that EEPROM
+• Less External Support Components                           is used, as without serial numbers a device can
+    As well as eliminating the RCCLK RC network, and         only be identiﬁed by which hub port in the USB tree
+    for most applications the need for an external reset     it is connected to which can change if the end user
+    circuit, we have also eliminated the requirement         re-plugs the device into a different USB port.
+    for a 100K pull-up on EECS to select 6MHz
+    operation. When the FT245BL is being used            • EEREQ# / EEGNT#
+    without the conﬁguration EEPROM, EECS, EESK              These (FT8U245AM) pins are no longer supported
+    and EEDATA can now be left n/c. For circuits             on the FT245BL device. They have been replaced
+    requiring a long reset time (where the device is         with the new SI / WU and PWREN# signals
+    reset externally using a reset generator I.C., or        respectively.
+    reset is controlled by the IO port of a MCU, FPGA
+    or ASIC device) an external transistor circuit is
+    no longer required as the 1.5K pull-up resistor on
+    USBDP can be wired to the RSTOUT# pin instead
+    of to 3.3V. Note : RSTOUT# drives out at 3.3V
+    level, not at 5V VCC level. This is the preferred
+    conﬁguration for new designs.
+• Extended EEPROM Support
+    The previous generation of devices only supported
+    EEPROM of type 93C46 (64 x 16 bit). The new
+    devices will also work with EEPROM type 93C56
+    (128 x 16 bit) and 93C66 (256 x 16 bit). The extra
+    space is not used by the device, however it is
+    available for use by other external MCU / logic
+    whilst the FT245BL is being held in reset.
+• USB 2.0 ( full speed option )
+    A new EEPROM based option allows the FT245BL
+    to return a USB 2.0 device descriptor as opposed
+    to USB 1.1. Note : The device would be a USB 2.0
+    Full Speed device (12Mb/s) as opposed to a USB
+    2.0 High Speed device (480Mb/s).
+   DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005              Page 4 of 24
+
+
+                                                                             FT245BL USB FIFO ( USB - Parallel ) I.C.
+3.0    Block Diagram ( simpliﬁed )
+             VCC                                                    Send Immediate / WakeUP
+                                                                    PWREN#
+                         3.3 Volt
+           3V3OUT                                                 FIFO Receive
+                           LDO
+                                                                      Buffer
+                        Regulator
+                                                                    128 Bytes
+                                                                                                                   D0
+                                                                                                                   D1
+                                                                                                                   D2
+                                                                                                                   D3
+                                                                                                                   D4
+          USBDP                                                                                                    D5
+                                         Serial Interface                                            FIFO          D6
+                          USB                                          USB
+                                             Engine                                              Controller        D7
+                      Transceiver                               Protocol Engine
+                                             ( SIE )
+          USBDM
+                                                                                                                   RD#
+                                                                                                                   WR
+                                                                                                                   RXF#
+                                                                                                                   TXE#
+                                                                 FIFO Transmit
+                                                                      Buffer
+                       USB DPLL
+                                                                    384 Bytes
+                                                                                 3V3OUT
+           XTOUT                                                                                                   EECS
+                                                            48MHz                                 EEPROM
+                                                                                                                   EESK
+                          6MHZ           x8 Clock                                                  Interface
+                        Oscillator       Multiplier                                                                EEDATA
+             XTIN                                           12MHz
+                                                                                 RESET
+            GND                                           RESET#                                                 RSTOUT#
+                                                                              GENERATOR
+           TEST
+3.1    Functional Block Descriptions
+•   3.3V LDO Regulator                                                •    USB DPLL
+      The 3.3V LDO Regulator generates the 3.3 volt                           The USB DPLL cell locks on to the incoming NRZI
+      reference voltage for driving the USB transceiver                       USB data and provides separate recovered clock
+      cell output buffers. It requires an external                            and data signals to the SIE block.
+      decoupling capacitor to be attached to the 3V3OUT
+      regulator output pin. It also provides 3.3V power to            •    6MHz Oscillator
+      the RSTOUT# pin. The main function of this block                        The 6MHz Oscillator cell generates a 6MHz
+      is to power the USB Transceiver and the Reset                           reference clock input to the x8 Clock multiplier from
+      Generator Cells rather than to power external logic.                    an external 6MHz crystal or ceramic resonator.
+      However, external circuitry requiring 3.3V nominal
+      at a current of not greater than 5mA could also                 •    x8 Clock Multiplier
+      draw its power from the 3V3OUT pin if required.                         The x8 Clock Multiplier takes the 6MHz input
+                                                                              from the Oscillator cell and generates a 12MHz
+•   USB Transceiver                                                           reference clock for the SIE, USB Protocol Engine
+      The USB Transceiver Cell provides the USB 1.1 /                         and FIFO controller blocks. It also generates a
+      USB 2.0 full-speed physical interface to the USB                        48MHz reference clock for the USB DPLL.
+      cable. The output drivers provide 3.3 volt level slew
+      rate control signalling, whilst a differential receiver
+      and two single ended receivers provide USB data
+      in, SEO and USB Reset condition detection.
+     DS245BL Version 1.7             © Future Technology Devices Intl. Ltd. 2005                             Page 5 of 24
+
+
+                                                            FT245BL USB FIFO ( USB - Parallel ) I.C.
+• Serial Interface Engine (SIE)                              enumeration is required. RSTOUT# will be low for
+    The Serial Interface Engine (SIE) block performs         approximately 5ms after VCC has risen above 3.5V
+    the Parallel to Serial and Serial to Parallel            AND the device oscillator is running AND RESET#
+    conversion of the USB data. In accordance to the         is high. RESET# should be tied to VCC unless it
+    USB 2.0 speciﬁcation, it performs bit stufﬁng / un-      is a requirement to reset the device from external
+    stufﬁng and CRC5 / CRC16 generation / checking           logic or an external reset generator I.C.
+    on the USB data stream.
+                                                        •  EEPROM Interface
+• USB Protocol Engine                                        Though the FT245BL will work without the optional
+    The USB Protocol Engine manages the data                 EEPROM, an external 93C46 (93C56 or 93C66)
+    stream from the device USB control endpoint. It          EEPROM can be used to customise the USB VID,
+    handles the low level USB protocol (Chapter 9)           PID, Serial Number, Product Description Strings
+    requests generated by the USB host controller            and Power Descriptor value of the FT245BL for
+    and the commands for controlling the functional          OEM applications. Other parameters controlled
+    parameters of the FIFO.                                  by the EEPROM include Remote Wake Up,
+                                                             Isochronous Transfer Mode, Soft Pull Down on
+• FIFO Receive Buffer (128 bytes)                            Power-Off and USB 2.0 descriptor modes.
+    Data sent from the USB Host to the FIFO via              The EEPROM should be a 16 bit wide
+    the USB data out endpoint is stored in the FIFO          conﬁguration such as a MicroChip 93LC46B or
+    Receive Buffer and is removed from the buffer by         equivalent capable of a 1Mb/s clock rate at VCC =
+    reading the FIFO contents using RD#.                     4.35V to 5.25V. The EEPROM is programmable-
+                                                             on board over USB using a utility available from
+• FIFO Transmit Buffer (384 bytes)                           FTDI’s web site ( http://www.ftdichip.com ). This
+    Data written into the FIFO using WR# is stored in        allows a blank part to be soldered onto the PCB
+    the FIFO Transmit Buffer. The Host removes Data          and programmed as part of the manufacturing and
+    from the FIFO Transmit Data by sending a USB             test process.
+    request for data from the device data in endpoint.       If no EEPROM is connected (or the EEPROM is
+                                                             blank), the FT245BL will use its built-in default VID,
+• FIFO Controller                                            PID Product Description and Power Descriptor
+    The FIFO Controller handles the transfer of data         Value. In this case, the device will not have a serial
+    between the external FIFO interface pins and the         number as part of the USB descriptor.
+    FIFO Transmit and Receive buffers.
+• RESET Generator
+    The Reset Generator Cell provides a reliable
+    power-on reset to the device internal circuitry
+    on power up. An additional RESET# input and
+    RSTOUT# output are provided to allow other
+    devices to reset the FT245BL, or the FT245BL
+    to reset other devices respectively. During reset,
+    RSTOUT# is driven low, otherwise it drives out
+    at the 3.3V provided by the onboard regulator.
+    RSTOUT# can be used to control the 1.5K
+    pull-up on USBDP directly where delayed USB
+   DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005              Page 6 of 24
+
+
+                                                                                            FT245BL USB FIFO ( USB - Parallel ) I.C.
+4.0     Device Pin-Out
+             Figure 1                                                                                Figure 2
+             Pin-Out                                                                                 Pin-Out
+  (Lead free LQFP-32 Package )                                                                  (Schematic Symbol )
+                     EECS   TEST     AVCC      AGND   XTOUT   XTIN   VCC   D0
+                                                                                                                 30   3   26      13
+                                                                                                              A       V   V    V
+                                                                                                              V       C   C    C
+                                                                                                   6          V       C   C    C              25
+                     32                                                    25
+                                                                                                       3V3OUT C                I         D0
+                                                                                                                               O              24
+       EESK      1                                                               24   D1                                                 D1
+                                                                                                   8                                          23
+                                        FTDI
+  EEDATA                                                                              D2               USBDM                             D2
+                                                                                      D3
+                                                                                                                                              22
+        VCC                                                                                                                              D3
+  RESET#                                                                              D4           7                                          21
+                                                                                                       USBDP                             D4
+      RSTO#
+  3V3OUT
+                          FT245BL                                                     D5
+                                                                                      D6           5
+                                                                                                                                         D5
+                                                                                                                                              20
+                                                                                                                                              19
+                                                                                                       RSTOUT#                           D6
+  USBDP
+  USBDM          8
+                                     XXYY                                        17
+                                                                                      D7
+                                                                                      GND
+                                                                                                   4
+                                                                                                       RESET#                            D7
+                                                                                                                                              18
+                                                                                                  27
+                      9                                                    16                          XTIN                                   16
+                                                                                                                                       RD#
+                                                                                                                                              15
+                                                                                                                                        WR
+                                                                                                  28                                          14
+                                                                                                       XTOUT                           TXE#
+                            PWREN#
+                                                      VCCIO
+                                                                                                  32                                          12
+                                     SI / WU
+                     GND                       RXF#           TXE#   WR    RD#                         EECS                            RXF#
+                                                                                                   1
+                                                                                                       EESK
+                                                                                                   2                                          11
+                                                                                                       EEDATA                       SI / WU
+                                                                                                  31                                          10
+                                                                                                       TEST     A                 PWREN#
+                                                                                                                G     G       G
+                                                                                                                N     N       N
+                                                                                                                D     D       D
+                                                                                                                 29       9    17
+       DS245BL Version 1.7                        © Future Technology Devices Intl. Ltd. 2005                             Page 7 of 24
+
+
+                                                             FT245BL USB FIFO ( USB - Parallel ) I.C.
+4.1   Signal Descriptions
+Table 1 - FT245BL - PINOUT DESCRIPTION
+FIFO DATA BUS GROUP (*** Note 1)
+ Pin#    Signal     Type     Description
+ 25      DO         I/O      FIFO Data Bus Bit 0
+ 24      D1         I/O      FIFO Data Bus Bit 1
+ 23      D2         I/O      FIFO Data Bus Bit 2
+ 22      D3         I/O      FIFO Data Bus Bit 3
+ 21      D4         I/O      FIFO Data Bus Bit 4
+ 20      D5         I/O      FIFO Data Bus Bit 5
+ 19      D6         I/O      FIFO Data Bus Bit 6
+ 18      D7         I/O      FIFO Data Bus Bit 7
+FIFO CONTROL INTERFACE GROUP
+ Pin#    Signal     Type     Description
+ 16      RD#        IN       Enables Current FIFO Data Byte on D0..D7 when low. Fetches the next FIFO
+                             Data Byte (if available) from the Receive FIFO Buffer when RD# goes from low
+                             to high. *** Note 1
+ 15      WR         IN       Writes the Data Byte on the D0..D7 into the Transmit FIFO Buffer when WR goes
+                             from high to low. *** Note 1
+ 14      TXE#       OUT      When high, do not write data into the FIFO. When low, data can be written into
+                             the FIFO by strobing WR high then low. *** Note 2
+ 12      RXF#       OUT      When high, do not read data from the FIFO. When low, there is data available in
+                             the FIFO which can be read by strobing RD# low then high again *** Note 2
+USB INTERFACE GROUP
+ Pin#    Signal     Type     Description
+ 7       USBDP      I/O      USB Data Signal Plus (Requires 1.5K pull-up to 3V3OUT or RSTOUT#)
+ 8       USBDM      I/O      USB Data Signal Minus
+EEPROM INTERFACE GROUP
+ Pin#    Signal     Type     Description
+ 32      EECS       I/O      EEPROM – Chip Select. For 48MHz operation pull EECS to GND using a 10K
+                             resistor. For 6MHz operation no resistor is required. *** Note 3
+ 1       EESK       OUT      Clock signal to EEPROM. Adding a 10K pull down resistor onto EESK will cause
+                             the FT245BL to use USB Product ID 6005 (hex) instead of 6001 (hex). All of the
+                             other USB device descriptors are unchanged. *** Note 3
+ 2       EEDATA     I/O      EEPROM – Data I/O Connect directly to Data-In of the EEPROM and to Data-
+                             Out of the EEPROM via a 2.2K resistor. Also pull Data-Out of the EEPROM to
+                             VCC via a 10K resistor for correct operation. *** Note 3
+     DS245BL Version 1.7    © Future Technology Devices Intl. Ltd. 2005                   Page 8 of 24
+
+
+                                                          FT245BL USB FIFO ( USB - Parallel ) I.C.
+POWER CONTROL GROUP
+ Pin#   Signal      Type  Description
+ 10     PWREN#      OUT   Goes Low after the device is conﬁgured via USB, then high during USB suspend.
+                          Can be used to control power to external logic using a P-Channel Logic Level
+                          MOSFET switch. Enable the Interface Pull-Down Option in EEPROM when using
+                          the PWREN# pin in this way.
+ 11     SI / WU     IN    The Send Immediate / WakeUp signal combines two functions on a single pin. If
+                          USB is in suspend mode (PWREN# = 1) and remote wakeup is enabled in the
+                          EEPROM , strobing this pin low will cause the device to request a resume on the
+                          USB Bus. Normally, this can be used to wake up the Host PC.
+                          During normal operation (PWREN# = 0), if this pin is strobed low any data in the
+                          device TX buffer will be sent out over USB on the next Bulk-IN request from the
+                          drivers regardless of the pending packet size. This can be used to optimise USB
+                          transfer speed for some applications. Tie this pin to VCCIO if not used.
+MISCELLANEOUS SIGNAL GROUP
+ Pin#   Signal      Type  Description
+ 4      RESET#      IN    Can be used by an external device to reset the FT245BL. If not required, tie to
+                          VCC.
+ 5      RSTOUT#     OUT   Output of the internal Reset Generator. Stays high impedance for ~ 5ms after
+                          VCC > 3.5V and the internal clock starts up, then clamps its output to the 3.3V
+                          output of the internal regulator. Taking RESET# low will also force RSTOUT# to
+                          drive low. RSTOUT# is NOT affected by a USB Bus Reset.
+ 27     XTIN        IN    Input to 6MHz Crystal Oscillator Cell. This pin can also be driven by an external
+                          6MHz clock if required. Note : Switching threshold of this pin is VCC/2, so if
+                          driving from an external source, the source must be driving at 5V CMOS level or
+                          a.c. coupled to centre around VCC/2.
+ 28     XTOUT       OUT   Output from 6MHz Crystal Oscillator Cell. XTOUT stops oscillating during USB
+                          suspend, so take care if using this signal to clock external logic.
+ 31     TEST        IN    Puts device in I.C. test mode – must be tied to GND for normal operation.
+     DS245BL Version 1.7 © Future Technology Devices Intl. Ltd. 2005                    Page 9 of 24
+
+
+                                                                    FT245BL USB FIFO ( USB - Parallel ) I.C.
+POWER AND GND GROUP
+ Pin#      Signal        Type       Description
+ 6         3V3OUT        OUT        3.3 volt Output from the integrated L.D.O. regulator This pin should be decoupled
+                                    to GND using a 33nF ceramic capacitor in close proximity to the device pin. Its
+                                    prime purpose is to provide the internal 3.3V supply to the USB transceiver cell
+                                    and the RSTOUT# pin. A small amount of current (<= 5mA) can be drawn from
+                                    this pin to power external 3.3V logic if required.
+ 3,26      VCC           PWR        +4.35 volt to +5.25 volt VCC to the device core, LDO and none-FIFO interface
+                                    pins.
+ 13        VCCIO         PWR        +3.0 volt to +5.25 volt VCC to the FIFO interface pins 10..12, 14..16 and 18..25.
+                                    When interfacing with 3.3V external logic in a bus powered design connect
+                                    VCCIO to a 3.3V supply generated from the USB bus. When interfacing with
+                                    3.3V external logic in a self powered design connect VCCIO to the 3.3V supply
+                                    of the external logic. Otherwise connect to VCC to drive out at 5V CMOS level.
+ 9,17      GND           PWR        Device - Ground Supply Pins
+ 30        AVCC          PWR        Device - Analog Power Supply for the internal x8 clock multiplier
+ 29        AGND          PWR        Device - Analog Ground Supply for the internal x8 clock multiplier
+Note 1 : In Input Mode, these pins are pulled to VCCIO via internal 200K resistors. These can be programmed to
+gently pull low during USB suspend ( PWREN# = “1” ) by setting this option in the EEPROM.
+Note 2: During device reset, these pins are tri-state but pulled up to VCCIO via internal 200K resistors.
+Note 3: During device reset, these pins are tri-state but pulled up to VCC via internal 200K resistors.
+      DS245BL Version 1.7          © Future Technology Devices Intl. Ltd. 2005                   Page 10 of 24
+
+
+                                                                   FT245BL USB FIFO ( USB - Parallel ) I.C.
+FT245BL TIMING DIAGRAM – FIFO READ CYCLE
+                                                                                     T6
+                                                                          T5
+                   RXF#
+                                                        T1                           T2
+                  RD#
+                                             T3                            T4
+                  D0..D7
+                                                         valid data
+ Time     Description                                         Min            Max    Unit
+ T1       RD Active Pulse Width                               50                    ns
+ T2       RD to RD Pre-Charge Time                            50 + T6               ns
+ T3       RD Active to Valid Data *** Note 4                  20             50     ns
+ T4       Valid Data Hold Time from RD Inactive *** Note 4    0                     ns
+ T5       RD Inactive to RXF#                                 0              25     ns
+ T6       RXF inactive after RD cycle                         80                    ns
+*** Note 4 - Load 30 pF
+FT245BL TIMING DIAGRAM – FIFO WRITE CYCLE
+                                                                                        T12
+                                                                             T11
+                    TXE#
+                                                             T7                      T8
+                    WR
+                                                                               T10
+                                                                  T9
+                   D0..D7                                            valid data
+ Time     Description                                 Min           Max        Unit
+ T7       WR Active Pulse Width                       50                       ns
+ T8       WR to WR Pre-Charge Time                    50                       ns
+ T9       Data Setup Time before WR inactive          20                       ns
+ T10      Data Hold Time from WR inactive             0                        ns
+ T11      WR Inactive to TXE#                         5             25         ns
+ T12      TXE inactive after WR cycle                 80                       ns
+      DS245BL Version 1.7          © Future Technology Devices Intl. Ltd. 2005              Page 11 of 24
+
+
+                                                                                    FT245BL USB FIFO ( USB - Parallel ) I.C.
+5.0   Package Outline
+Figure 3 – 32 LD Lead free LQFP Package Dimensions
+                                                                    9
+                                                           3        7
+                                                           2
+                             Pin # 1
+                                                                FTDI
+                                                           FT245BL                                         7 9
+                                                             XXYY
+                                                                        0.8
+                                                                1                                       0.37 +/- 0.07
+                                               1o
+                                                  +/- 1o
+                                               2
+                               1.4 +/- 0.05
+                                                                                             0.09 Min                   0.09 Min
+                      1.60                                                                   0.2 Max                    0.16 Max
+                      MAX
+                                                                                    0.25                0.35 +/- 0.05
+                          0.05 Min
+                                                      0.2 Min
+                          0.15 Max
+                                                                              0.6 +/- 0.15
+The FT245BL is supplied in a 32 pin lead free LQFP package as standard. This package has a 7mm x 7mm body
+( 9mm x 9mm including leads ) with leads on a 0.8mm pitch. The above drawing shows the LQFP-32 package – all
+dimensions are in millimetres. Note that there are two date code formats used - XXYY = Date Code where XX = 1 or 2
+digit year number, YY = 2 digit week number); or XYY-1 where X = 1 digit year number, YY = 2 digit week number.
+The FT245BL is fully compliant with the European Union RoHS directive.
+An alternative 5mm x 5mm leadless QFN is also available for projects where package area is critical. Part number
+for this version is FT245BQ. The FT245BQ is also a lead free package. See the seperate datasheet for package
+dimensions.
+      DS245BL Version 1.7                     © Future Technology Devices Intl. Ltd. 2005                                      Page 12 of 24
+
+
+                                                                    FT245BL USB FIFO ( USB - Parallel ) I.C.
+6.0     Absolute Maximum Ratings
+These are the absolute maximum ratings for the FT245BL device in accordance with the Absolute Maximum Rating System
+(IEC 60134). Exceeding these may cause permanent damage to the device.
+  Parameter                                                                          Value                    Units
+  Storage Temperature                                                       –65 C to + 150 C
+                                                                                  o           o
+                                                                                                            Degrees C
+  Floor Life (Out of Bag) at Factory Ambient                         192 Hours (Level 3 Compliant)
+  (30oC/60% Relative Humidity)                                                     **Note 5
+  Ambient Temperature (Power Applied)                                          0oC to + 70oC                Degrees C
+  M.T.B.F. (at 35 C)
+                  o
+                                                                       247484 Hours ≈ 28 Years
+  VCC Supply Voltage                                                            -0.5 to +6.00                   V
+  D.C. Input Voltage - USBDP and USBDM                                           -0.5 to +3.8                   V
+  D.C. Input Voltage - High Impedance Bidirectionals                       -0.5 to +(Vcc +0.5)                  V
+  D.C. Input Voltage - All other Inputs                                    -0.5 to +(Vcc +0.5)                  V
+  DC Output Current – Outputs                                                          24                      mA
+  DC Output Current – Low Impedance Bidirectionals                                     24                      mA
+  Power Dissipation (VCC = 5.25V)                                                     500                      mW
+  Electrostatic Discharge Voltage (Human Body Model) (I < 1uA)                     +/- 3000                     V
+  Latch Up Current (Vi = +/- 10V maximum, for 10 ms)                                +/-200                     mA
+*** Note 5 - If devices are stored out of the packaging beyond this time limit the devices should be baked before use.
+     The devices should be ramped up to a temperature of 110oC and baked for 8 to 10 hours.
+6.1     D.C. Characteristics
+DC Characteristics ( Ambient Temperature = 0 to 70oC )
+Operating Voltage and Current
+  Parameter      Description                            Min      Typ       Max          Units   Conditions
+  Vcc1           VCC Operating Supply Voltage          4.35      5.0       5.25            V
+  Vcc2           VCCIO Operating Supply Voltage         3.0        -       5.25            V
+  Icc1           Operating Supply Current                -        25          -           mA    Normal Operation
+  Icc2           Operating Supply Current                -       100        200           uA    USB Suspend *** Note 6
+***Note 6 – Supply current excludes the 200uA nominal drawn by the external pull-up resistor on USBDP.
+FIFO Data / Control Bus IO Pin Characteristics ( VCCIO = 5.0V )
+  Parameter      Description                            Min      Typ       Max          Units   Conditions
+  Voh            Output Voltage High                    3.2      4.1        4.9            V    I source = 2mA
+  Vol            Output Voltage Low                     0.3      0.4        0.6            V    I sink = 2 mA
+  Vin            Input Switching Threshold              1.3      1.6        1.9            V    *** Note 7
+  VHys           Input Switching Hysteresis             50        55         60           mV
+       DS245BL Version 1.7           © Future Technology Devices Intl. Ltd. 2005                    Page 13 of 24
+
+
+                                                                  FT245BL USB FIFO ( USB - Parallel ) I.C.
+FIFO Data / Control Bus IO Pin Characteristics ( VCCIO = 3V to 3.6V )
+ Parameter     Description                            Min      Typ       Max        Units   Conditions
+ Voh           Output Voltage High                    2.2       2.7      3.2          V     I source = 2mA
+ Vol           Output Voltage Low                     0.3       0.4      0.5          V     I sink = 4 mA
+ Vin           Input Switching Threshold              1.0       1.2      1.5          V     *** Note 7
+ VHys          Input Switching Hysteresis             20        25        30         mV
+***Note 7 – Inputs or IO Pins in Input Mode have an internal 200K pull-up resistor to VCCIO.
+XTIN / XTOUT Pin Characteristics
+ Parameter     Description                            Min      Typ       Max        Units   Conditions
+ Voh           Output Voltage High                    4.0        -       5.0          V     Fosc = 6MHz
+ Vol           Output Voltage Low                     0.1        -       1.0          V     Fosc = 6MHz
+ Vin           Input Switching Threshold              1.8       2.5      3.2          V
+RESET#, TEST, EECS, EESK, EEDATA, IO Pin Characteristics
+ Parameter     Description                            Min      Typ       Max        Units   Conditions
+ Voh           Output Voltage High                    3.2       4.1      4.9          V     I source = 2mA
+ Vol           Output Voltage Low                     0.3       0.4      0.6          V     I sink = 2 mA
+ Vin           Input Switching Threshold              1.3       1.6      1.9          V     *** Note 8
+ VHys          Input Switching Hysteresis             50        55        60         mV
+***Note 8 – EECS, EESK and EEDATA pins have an internal 200K pull-up resistor to VCC
+RSTOUT Pin Characteristics
+ Parameter     Description                            Min      Typ       Max        Units   Conditions
+ Voh           Output Voltage High                    3.0        -       3.6          V     I source = 2mA
+ Vol           Output Voltage Low                     0.3        -       0.6          V     I sink = 2 mA
+USB IO Pin Characteristics
+ Parameter     Description                            Min      Typ       Max       Units  Conditions
+ UVoh          IO Pins Static Output ( High)          2.8                3.6         V    RI = 1.5K to 3V3Out ( D+ )
+                                                                                          RI = 15K to GND ( D- )
+ UVol          IO Pins Static Output ( Low )           0                 0.3         V    RI = 1.5K to 3V3Out ( D+ )
+                                                                                          RI = 15K to GND ( D- )
+ UVse          Single Ended Rx Threshold              0.8                2.0         V
+ UCom          Differential Common Mode               0.8                2.5         V
+ UVDif         Differential Input Sensitivity         0.2                            V
+ UDrvZ         Driver Output Impedance                29                  44       Ohm    *** Note 9
+Note 9 – Driver Output Impedance includes the external 27R series resistors on USBDP and USBDM pins.
+     DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005                 Page 14 of 24
+
+
+                                                                     FT245BL USB FIFO ( USB - Parallel ) I.C.
+7.0    Device Conﬁguration Examples
+7.1    Oscillator Conﬁgurations
+Figure 4                                                        Figure 5
+3 Pin Ceramic Resonator Conﬁguration                            Crystal or 2-Pin Ceramic Resonator
+                                                                Conﬁguration
+                                            FT245BM                                                        FT245BM
+                                           FT245BL                          27pF                            FT245BL
+                                     27                                                           27    XTIN
+                                         XTIN
+                                                                                                                      FT24
+3-Pin Resonator
+     6MHz
+                                   1M                        2 - Pin Resonator
+                                                                  or Crystal
+                                                                    6MHz
+                                                                            27pF
+                                     28  XTOUT                                                    28    XTOUT
+Figure 4 illustrates how to use the FT245BL with a 3-Pin Ceramic Resonator. A suitable part would be a ceramic
+resonator from Murata’s CERALOCK range. (Murata Part Number CSTCR6M00G15), or equivalent. 3-Pin ceramic
+resonators have the load capacitors built into the resonator so no external loading capacitors are required. This
+makes for an economical conﬁguration. The accuracy of this Murata ceramic resonator is +/- 0.1% and it is speciﬁcally
+designed for USB full speed applications. A 1 MOhm loading resistor across XTIN and XTOUT is recommended in
+order to guarantee this level of accuracy.
+Other ceramic resonators with a lesser degree of accuracy ( typically +/- 0.5% ) are technically outwith the USB
+speciﬁcation, but it has been calculated that using such a device will work satisfactorily in practice with a FT245BL
+design.
+Figure 5 illustrates how to use the FT245BL with a 6MHz Crystal or 2-Pin Ceramic Resonator. In this case, these
+devices do not have in-built loading capacitors so these have to be added between XTIN, XTOUT and GND as
+shown. A value of 27pF is shown as the capacitor in the example – this will be good for many crystals and some
+resonators but do select the value based on the manufacturers recommendations wherever possible. If using a crystal,
+use a parallel cut type. If using a resonator, see the previous note on frequency accuracy.
+      DS245BL Version 1.7             © Future Technology Devices Intl. Ltd. 2005                   Page 15 of 24
+
+
+                                                                      FT245BL USB FIFO ( USB - Parallel ) I.C.
+7.2      EEPROM Conﬁguration
+Figure 6
+EEPROM Conﬁguration
+                                     FT245BM               Figure 6 illustrates how to connect the FT245BL to the 93C46
+                                      FT245BL              (93C56 or 93C66) EEPROM. EECS (pin 32) is directly
+                             32
+                                   EECS                    connected to the chip select (CS) pin of the EEPROM. EESK
+                             1                             (pin 1) is directly connected to the clock (SK) pin of the
+                                   EESK
+                                                           EEPROM. EEDATA (pin 2) is directly connected to the Data
+                             2
+                                   EEDATA                  In (Din) pin of the EEPROM. There is a potential condition
+                                                           whereby both the Data Output (Dout) of the EEPROM
+                                                           can drive out at the same time as the EEDATA pin of the
+                                                           FT245BL. To prevent potential data clash in this situation,
+                                                           the Dout of the EEPROM is connected to EEDATA of the
+                                                       VCC
+                                                           FT245BL via a 2.2 K resistor.
+                            EEPROM - 93C46 / 56 / 66
+                                                           Following a power-on reset or a USB reset, the FT245BL will
+                          1                          8
+                              CS            VCC            scan the EEPROM to ﬁnd out a) if an EEPROM is attached
+                                                     7     to the Device and b) if the data in the device is valid. If both
+                          2
+                              SK             NC
+                                                           of these are the case, then the FT245BL will use the data in
+     2k2
+                          3                          6
+                               DIN           NC            the EEPROM, otherwise it will use its built-in default values.
+                          4                          5     When a valid command is issued to the EEPROM from the
+                              DOUT          GND
+                                                           FT245BL, the EEPROM will acknowledge the command by
+                                                           pulling its Dout pin low. In order to check for this condition,
+                  10k          VCC                         it is necessary to pull Dout high using a 10K resistor. If the
+                                                           command acknowledge doesn’t happen then EEDATA will be
+                                                           pulled high by the 10K resistor during this part of the cycle
+                                                           and the device will detect an invalid command or no EEPROM
+                                                           present.
+There are two varieties of these EEPROM’s on the market – one is conﬁgured as being 16 bits wide, the other is
+conﬁgured as being 8 bits wide. These are available from many sources such as Microchip, ST Micro, ISSI etc. The
+FT245BL requires EEPROM’s with a 16-bit wide conﬁguration such as the Microchip 93LC46B device. The EEPROM
+must be capable of reading data at a 1Mb clock rate at a supply voltage of 4.35V to 5.25V. Most available parts are
+capable of this.
+Check the manufacturers data sheet to ﬁnd out how to connect pins 6 and 7 of the EEPROM. Some devices specify
+these as no-connect, others use them for selecting 8 / 16 bit mode or for test functions. Some other parts have their
+pinout rotated by 90o so please select the required part and its options carefully.
+It is possible to “share” the EEPROM between the FT245BL and another external device such as an MCU. However,
+this can only be done when the FT245BL is in its reset condition as it tri-states its EEPROM interface at that time. A
+typical conﬁguration would use four bits of an MCU IO Port. One bit would be used to hold the FT245BL reset (using
+RESET#) on power-up, the other three would connect to the EECS, EESK and EEDATA pins of the FT245BL in
+order to read / write data to the EEPROM at this time. Once the MCU has read / written the EEPROM, it would take
+RESET# high to allow the FT245BL to conﬁgure itself and enumerate over USB.
+       DS245BL Version 1.7              © Future Technology Devices Intl. Ltd. 2005                  Page 16 of 24
+
+
+                                                                     FT245BL USB FIFO ( USB - Parallel ) I.C.
+7.3     USB Bus Powered and Self Powered Conﬁguration
+Figure 7
+USB Bus Powered Conﬁguration
+                                  Ferrite Bead                                           470R
+      USB "B"                                          VCC
+     Connector
+                  1
+                                     27R
+                  2                                                      3   26   13            30
+                                                                                                               0.1uF
+                  3
+                                      27R                  FT245BM         V    V   V              A
+                  4                                                        C   C    C              V
+                                                                           C   C    C              C
+                                                                      6              I             C
+                               10nF                                     3v3OUT      O
+                                                        33nF
+                                                                      8
+                                                                         USB DM
+                                                                      7                FT245BL
+                                                                         USB DP
+                                          1k5
+                                                                      5
+                                                                         RSTOUT#
+                                                      VCC
+                            VCC                                      4                               A
+                                                                         RESET#
+                                                                                       G    G        G
+                                                                                       N    N        N
+                                                                                       D    D        D
+                                 +
+              0.1uF     0.1uF     10uF                                                   9    17    29
+                             Decoupling Capacitors
+Figure 7 illustrates a typical USB bus powered conﬁguration. A USB Bus Powered device gets its power from the USB
+bus. Basic rules for USB Bus power devices are as follows –
+a) On plug-in, the device must draw no more than 100mA
+b) On USB Suspend the device must draw no more than 500uA.
+c) A Bus Powered High Power Device (one that draws more than 100mA) should use the PWREN# pin to keep the
+    current below 100mA on plug-in and 500uA on USB suspend.
+d) A device that consumes more than 100mA can not be plugged into a USB Bus Powered Hub
+e) No device can draw more that 500mA from the USB Bus.
+The power descriptor in the EEPROM should be programmed to match the current draw of the device.
+A Ferrite Bead is connected in series with USB power to prevent noise from the device and associated circuitry (EMI)
+being radiated down the USB cable to the Host. The value of the Ferrite Bead depends on the total current required by
+the circuit – a suitable range of Ferrite Beads is available from Steward (www.steward.com) for example Steward Part
+# MI0805K400R-00 also available as DigiKey Part # 240-1035-1.
+      DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005                 Page 17 of 24
+
+
+Figure 8                                                            FT245BL USB FIFO ( USB - Parallel ) I.C.
+USB Self Powered Conﬁguration
+                                                                                      470R
+      USB "B"                                                VCC
+     Connector
+                 1                  27R
+                 2                                                    3   26   13            30             0.1uF
+                 3
+                                    27R                  FT245BM        V    V   V              A
+                 4                                                      C   C    C              V
+                                                                        C   C    C              C
+                                                                 6                I             C
+                                                                     3v3OUT      O
+                                                      33nF
+                   4k7
+                                                                  8
+                                                                     USB DM
+                                                                  7
+                                                                                     FT245BL
+                                                                     USB DP
+                   10k
+                                                  1k5
+                                                                  5
+                                                                      RSTOUT#
+                                                                 4
+                                                                      RESET#
+                               VCC                                                                A
+                                                                                    G    G        G
+                                                                                    N    N        N
+                                                                                    D    D        D
+                                    +
+                                                                                      9    17    29
+                 0.1uF     0.1uF    10uF
+                                Decoupling Capacitors
+Figure 8 illustrates a typical USB self powered conﬁguration. A USB Self Powered device gets its power from its own
+POWER SUPPLY and does not draw current from the USB bus. The basic rules for USB Self power devices are as
+follows –
+a) A Self-Powered device should not force current down the USB bus when the USB Host or Hub Controller is
+     powered down.
+b) A Self Powered Device can take as much current as it likes during normal operation and USB suspend as it has its
+     own POWER SUPPLY.
+c) A Self Powered Device can be used with any USB Host and both Bus and Self Powered USB Hubs
+The USB power descriptor option in the EEPROM should be programmed to a value of zero (self powered).
+To meet requirement a) the 1.5K pull-up resistor on USBDP is connected to RSTOUT# as per the bus-power circuit.
+However, the USB Bus Power is used to control the RESET# Pin of the FT245BL device. When the USB Host or Hub
+is powered up RSTOUT# will pull the 1.5K resistor on USB DP to 3.3V, thus identifying the device as a full speed
+device to USB. When the USB Host or Hub power is off, RESET# will go low and the device will be held in reset. As
+RESET# is low, RSTOUT# will also be low, so no current will be forced down USBDP via the 1.5K pull-up resistor
+when the host or hub is powered down. Failure to do this may cause some USB host or hub controllers to power up
+erratically.
+Note : When the FT245BL is in reset, the FIFO interface pins all go tri-state. These pins have internal 200K pull-up
+resistors to VCCIO so they will gently pull high unless driven by some external logic.
+      DS245BL Version 1.7             © Future Technology Devices Intl. Ltd. 2005                  Page 18 of 24
+
+
+                                                                     FT245BL USB FIFO ( USB - Parallel ) I.C.
+Figure 9
+Bus Powered Circuit with 3.3V logic drive / supply voltage
+                                                             3.3v LDO Regulator                  3.3v Power to External
+                                                                                                         Logic
+                                                                 In       Out
+                                                                      Gnd
+                                                                                                         0.1uF
+                                  Ferrite Bead                                               470R
+      USB "B"                                   VCC
+     Connector
+                  1
+                                     27R
+                  2                                                        3   26   13             30               0.1uF
+                  3                                                          V    V   V
+                                      27R                                                             A
+                  4                                                          C    C   C               V
+                                                                             C    C   C               C
+                                                                      6                I              C
+                               10nF                                       3v3OUT      O
+                                                       33nF
+                                                                                     FT245BL
+                                                                                    FT245BM
+                                                                       8
+                                                                          USB DM
+                                                                       7
+                                                                          USB DP
+Figure 9 shows how to conﬁgure the FT245BL to interface with a 3.3V logic device. In this example, a discrete
+3.3V regulator is used to supply the 3.3V logic from the USB supply. VCCIO is connected to the output of the 3.3V
+regulator, which in turn will cause the FIFO interface IO pins to drive out at 3.3V level. For USB bus powered circuits
+some considerations have to be taken into account when selecting the regulator –
+a) The regulator must be capable of sustaining its output voltage with an input voltage of 4.35 volts. A Low Drop Out
+    (LDO) regulator must be selected.
+b) The quiescent current of the regulator must be low in order to meet the USB suspend total current requirement of
+    <= 500uA during USB suspend.
+An example of a regulator family that meets these requirements is the MicroChip (Telcom) TC55 Series. These
+devices can supply up to 250mA current and have a quiescent current of under 1uA.
+In some cases, where only a small amount of current is required (< 5mA) , it may be possible to use the in-built
+regulator of the FT245BL to supply the 3.3V without any other components being required. In this case, connect
+VCCIO to the 3V3OUT pin of the FT245BL.
+Note : It should be emphasised that the 3.3V supply for VCCIO in a bus powered design with a 3.3V logic interface
+should come from an LDO which is supplied by USB bus, or from the 3V3OUT pin of the FT245BL, and not from any
+other source.
+      DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005                    Page 19 of 24
+
+
+                                                                    FT245BL USB FIFO ( USB - Parallel ) I.C.
+Figure 10
+Self Powered Circuit with 3.3 V logic drive / supply voltage
+                                                                                                          VCC3V
+                                                                            470R
+      USB "B"                                                                                             VCC5V
+     Connector
+                  1
+                                   27R                      0.1uF
+                  2                                                   30            3     26           13
+                  3                                                      A            V      V      V
+                  4                27R                                                C      C      C
+                                                                         V
+                                                                         C            C      C      C
+                                                                   6     C                           I
+                                                                     3v3OUT                         O
+                                                       33nF
+                   4K7                                                          FT245BL
+                                                                                FT245BM
+                                                                   8
+                                                                       USB DM
+                                                                   7
+                                                                       USB DP
+                                                                                                              VCC3V
+                   10K
+                                                  1K5
+                                                                                                           11
+                                                                   5                               SI/WU
+                                                                       RSTOUT#
+                                                                   4
+                                                                       RESET#
+                             VCC5V                                                                     A
+                                                                                      G       G        G
+                                                                                      N       N        N
+                                                                                      D       D        D
+                                   +
+                                                                                         9      17     29
+                 0.1uF    0.1uF    10uF
+                               Decoupling Capacitors
+Figure 10 is an example of a USB self powered design with 3.3V interface. In this case VCCIO is supplied by an
+external 3.3V supply in order to make the device IO pins drive out at 3.3V logic level, thus allowing it to be connected
+to a 3.3V MCU or other external logic. A USB self powered design uses its own power supplies, and does not draw
+any of its power from the USB bus. In such cases, no special care need be taken to meet the USB suspend current
+(0.5 mA) as the device does not get its power from the USB port.
+As with bus powered 3.3V interface designs, in some cases, where only a small amount of current is required (<5mA),
+it may be possible to use the in-built regulator of the FT245BL to supply the 3.3V without any other components being
+required. In this case, connect VCCIO to the 3v3OUT pin of the FT245BL.
+Note that if SI/WU is not being used it should be pulled up to VCCIO.
+      DS245BL Version 1.7           © Future Technology Devices Intl. Ltd. 2005                      Page 20 of 24
+
+
+Figure 11                                                             FT245BL USB FIFO ( USB - Parallel ) I.C.
+Bus Powered Circuit with Power Control                  P-Channel Power                           Switched 5v Power to
+                                                             MOSFET                                   External Logic
+                                                           s          d
+                                                                                                           0.1uF
+                                                                  g           0.1uF
+                                                                                  Soft Start
+                                                                             1K     Circuit
+                                  Ferrite Bead                                               470R
+      USB "B"                                   VCC
+     Connector
+                   1
+                                     27R
+                   2                                                        3    26    13           30               0.1uF
+                   3                                                          V     V    V
+                                     27R                                                               A
+                   4                                                          C     C    C             V
+                                                                              C     C    C             C
+                                                                        6                 I            C
+                              10nF                                         3v3OUT        O
+                                                       33nF
+                                                                                      FT245BL
+                                                                                       FT245BM
+                                                                        8                                     15
+                                                                           USB DM               PWREN#
+                                                                        7
+                                                                           USB DP
+USB Bus powered circuits need to be able to power down in USB suspend mode in order to meet the <= 500uA total
+suspend current requirement (including external logic). Some external logic can power itself down into a low current
+state by monitoring the PWREN# pin. For external logic that cannot power itself down in that way, the FT245BL
+provides a simple but effective way of turning off power to external circuitry during USB suspend.
+Figure 11 shows how to use a discrete P-Channel Logic Level MOSFET to control the power to external logic
+circuits. A suitable device could be a Fairchild NDT456P, or International Rectiﬁer IRLML6402, or equivalent. It is
+recommended that a “soft start” circuit consisting of a 1K series resistor and a 0.1 uF capacitor are used to limit the
+current surge when the MOSFET turns on. Without the soft start circuit there is a danger that the transient power
+surge of the MOSFET turning on will reset the FT245BL, or the USB host / hub controller. The values used here
+allow attached circuitry to power up with a slew rate of ~12.5 V per millisecond, in other words the output voltage will
+transition from GND to 5 V in approximately 400 microseconds.
+Alternatively, a dedicated power switch I.C. with inbuilt “soft-start” can be used instead of a MOSFET. A suitable
+power switch i.c. for such an application would be a Micrel (www.micrel.com) MIC2025-2BL or equivalent.
+Please note the following points in connection with power controlled designs –
+a) The logic to be controlled must have its own reset circuitry so that it will automatically reset itself when power is re-
+    applied on coming out of suspend.
+b) Set the Pull-down on Suspend option in the FT245BL’s EEPROM.
+c) For USB high-power bus powered device (one that consumes greater than 100 mA, and up to 500 mA of current
+    from the USB bus), the power consumption of the device should be set in the max power ﬁeld in the EEPROM.
+    A high-power bus powered device must use this descriptor in the EEPROM to inform the system of its power
+    requirements.
+d) For 3.3V power controlled circuits VCCIO must not be powered down with the external circuitry (PWREN# gets
+    its VCC supply from VCCIO). Either connect the power switch between the output of the 3.3V regulator and the
+    external 3.3V logic OR if appropriate power VCCIO from the 3v3OUT pin of the FT245BL.
+       DS245BL Version 1.7           © Future Technology Devices Intl. Ltd. 2005                    Page 21 of 24
+
+
+                                                                    FT245BL USB FIFO ( USB - Parallel ) I.C.
+Figure 12
+Microprocessor Interface Example
+                         FT245BM                                       Microcontroller
+                       FT245BL               25
+                                       D0                                  IO10
+                                             24
+                                       D1                                  IO11
+                                             23
+                                       D2                                  IO12
+                                                                                    IO Port 1
+                                             22
+                                       D3                                  IO13
+                                             21
+                                       D4                                  IO14
+                                             20
+                                       D5                                  IO15
+                                             19
+                                       D6                                  IO16
+                                             18
+                                       D7                                  IO17
+                                             16
+                                     RD#                                   IO20
+                                                                                   IO Port 2
+                                             15
+                                      WR                                   IO21
+                                             14
+                                    TXE#                                   IO22
+                                             12
+                                    RXF#                                   IO23
+                                             11
+                                   SI / WU                                 IO24
+                                                     ( Optional )
+Figure 12 illustrates a typical interface between the FT245BL and a MicroController (MCU). This examples uses two
+IO Ports of the MCU, one port (8 bits) to transfer data and the other port (4 / 5 bits) to monitor the TXE# and RXF#
+status bits and generate the RD# and WR strobes to the FT245BL as required. Optionally, SI / WU can be connected
+to another IO pin if this function is required. If the SI / WU function is not required, tie this pin of the FT245BL to
+VCCIO. If the MCU is handling power management functions, then PWREN# should also be connected to an IO pin of
+the MCU.
+The 8 data bits of Port 1 can be shared with other peripherals when the MCU is not accessing the FT245BL.
+     DS245BL Version 1.7           © Future Technology Devices Intl. Ltd. 2005                  Page 22 of 24
+
+
+                                                                                                          FT245BL USB FIFO ( USB - Parallel ) I.C.
+8.0 Document Revision History
+DS245B Version 1.0 – Initial document created 8th August 2002.
+DS245B Version 1.1 – Updated 23 October 2003
+•   Pin and package naming made consistent throughout data sheet.
+•   Section 1.0 Corrected data transfer rate for VCP drivers.
+•   Section 1.0 Amended to reﬂect availability of Mac OS X drivers.
+•   Section 1.1 Description of behaviour of TXE# and RXF# amended.
+•   Section 3.1 Minor changes to functional block descriptions.
+•   Section 2.0 Compatible EEPROM conﬁgurations corrected.
+•   Section 4.1 SI/WU Pin description amended.
+•   Section 4.1 RSTOUT# Pin description amended.
+•   Section 4.1 EEPROM interface Pin descriptions amended.
+•   Section 4.1 Note 2 should have referred to VCCIO, not VCC.
+•   Section 4.1 FIFO timing diagram amended.
+•   Section 6.1 Minimum Operating supply voltage adjusted.
+•   Section 7.1 Updated recommended ceramic resonator part number and circuit conﬁguration.
+•   Section 7.3 “USB Self Powered Conﬁguration (1)” (original Figure 8) removed. Recommended circuit for USB self powered designs updated.
+•   Section 7.3 Self Powered Circuit with 3.3V logic drive / supply voltage added (new ﬁgure 8).
+•   Section 7.3 Figure 11 Bus powered circuit with power control updated to add soft start circuit on MOSFET. Circuit description amended.
+DS245B Version 1.2 – Updated 20 November 2003.
+•   Section 6.1 FIFO Data control Bus IO pin characteristics amended
+•   Section 6.1 RESET#, TEST, EECS, EESK, and EEDATA pin characteristics amended.
+•   Section 6.1 RSTOUT# pin characteristics amended.
+DS245B Version 1.3 – Updated 10 December 2003
+•   Section 5.0 Package drawing amended.
+•   Section 6.0 Floor Life / Relative Humidity speciﬁcation added. ESD and Latch Up speciﬁcations amended.
+•   Section 7.1 Required accuracy of crystal / resonator corrected.
+DS245B Version 1.4 – Updated 10 February 2004
+•   Grammar Corrections.
+•   Section 10.0 FTDI Address Updated
+•   Section 4.1 VCCIO Pin description ammended.
+DS245B Version 1.5 – Updated March 2004
+•   Section 4.1 FIFO EESK Pin Description amended.
+•   Section 4.1 FIFO WR timings and diagram amended.
+•   Section 7.3 Figure 10 SI/WU Pin number corrected
+•   Section 7.3 Figure 11 PWREN# Pin number corrected
+DS245B Version 1.6 – Updated February 2005
+•   Section 1 - Win CE VCP drivers now available
+•   Section 1 - D2XX drivers for Win CE and Linux now available
+•   Section 5 FT245BL (lead free) and FT245BQ (lead free QFN package) now available
+DS245B Version 1.6 – Updated February 2005
+•   Section 1 - Driver OS availabillity updated
+•   Section 6.1 - USB Data line absolute maximum rating added.
+      DS245BL Version 1.7                                © Future Technology Devices Intl. Ltd. 2005                                       Page 23 of 24
+
+
+                                                                       FT245BL USB FIFO ( USB - Parallel ) I.C.
+9.0 Disclaimer
+© Future Technology Devices International Limited , 2005
+Neither the whole nor any part of the information contained in, or the product described in this manual, may be
+adapted or reproduced in any material or electronic form without the prior written consent of the copyright holder.
+This product and its documentation are supplied on an as-is basis and no warranty as to their suitability for any
+particular purpose is either made or implied.
+Future Technology Devices International Ltd. will not accept any claim for damages howsoever arising as a result of
+use or failure of this product. Your statutory rights are not affected.
+This product or any variant of it is not intended for use in any medical appliance, device or system in which the failure
+of the product might reasonably be expected to result in personal injury.
+This document provides preliminary information that may be subject to change without notice.
+10.0 Contact Information
+Head Ofﬁce -
+Future Technology Devices International Ltd.
+373 Scotland Street,
+Glasgow G5 8QB,
+United Kingdom
+Tel. : +(44) 141 429 2777
+Fax. : +(44) 141 429 2758
+E-Mail (Sales) : sales1@ftdichip.com
+E-Mail (Support) : support1@ftdichip.com
+E-Mail (General Enquiries) : admin1@ftdichip.com
+Regional Sales Ofﬁces -
+Future Technology Devices International Ltd.                     Future Technology Devices International Ltd.
+(Taiwan)                                                         (USA)
+4F, No 16-1,                                                     5285 NE Elam Young
+Sec. 6 Mincyuan East Road,                                       Parkway, Suite B800
+Neihu District,                                                  Hillsboro,
+Taipei 114,                                                      OR 97124-6499
+Taiwan, R.o.C.                                                   USA
+Tel.: +886 2 8791 3570                                           Tel.: +1 (503) 547-0988
+Fax: +886 2 8791 3576                                            Fax: +1 (503) 547-0987
+E-Mail (Sales): tw.sales@ftdichip.com                            E-Mail (Sales): us.sales@ftdichip.com
+E-Mail (Support): tw.support@ftdichip.com                        E-Mail (Support): us.support@ftdichip.com
+E-Mail (General Enquiries): tw.admin@ftdichip.com                E-Mail (General Enquiries): us.admin@ftdichip.com
+Website URL : http://www.ftdichip.com
+Agents and Sales Representatives
+At the time of writing our Sales Network covers over 40 different countries world-wide. Please visit the Sales Network
+page of our Web Site for the contact details our distributor(s) in your country.
+       DS245BL Version 1.7            © Future Technology Devices Intl. Ltd. 2005                  Page 24 of 24
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+FTDI:
+ FT245BL-REEL FT245BL-TRAY

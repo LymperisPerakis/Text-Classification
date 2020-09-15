@@ -100,11 +100,19 @@ class Classifier(object):
         return text_clf
 
     @staticmethod
-    def test_model(text_clf, X_test: List[str], y_test: List[int],
-                   labels: list):
-        predicted = text_clf.predict(X_test)
+    def get_metrics(y_test, predicted, labels):
         accuracy = np.mean(predicted == y_test)
         report = metrics.classification_report(y_test, predicted,
                                                target_names=labels)
         confusion_matrix = metrics.confusion_matrix(y_test, predicted)
+        return accuracy, report, confusion_matrix
+
+    def test_model(self, text_clf, X_test: List[str], y_test: List[int],
+                   labels: list):
+        predicted = text_clf.predict(X_test)
+        accuracy, report, confusion_matrix = self.get_metrics(y_test,
+                                                              predicted,
+                                                              labels)
+        # predicted_prob = text_clf.predict_proba(X_test)
+        # auc = metrics.roc_auc_score(y_test, predicted_prob, multi_class="ovr")
         return accuracy, report, confusion_matrix

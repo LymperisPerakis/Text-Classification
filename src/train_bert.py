@@ -12,6 +12,7 @@ documents_list, label_list, labels, label_dummy, documents = \
 classifier = Classifier(docs=documents, label_dummy=label_dummy)
 X_train, X_test, y_train, y_test = classifier.split_set(test_size=0.2,
                                                         random_state=0)
+# TODO: test with Roberta
 
 (x_train, y_train), (x_test, y_test), preproc = text.texts_from_array(
     x_train=X_train, y_train=y_train,
@@ -21,10 +22,10 @@ X_train, X_test, y_train, y_test = classifier.split_set(test_size=0.2,
     maxlen=512,
     max_features=35000)
 
-with open('train_bert.pickle', 'wb') as f:
+with open('training_data/train_bert.pickle', 'wb') as f:
     pickle.dump([x_train, y_train, x_test, y_test, preproc, label_list], f)
 
-with open('train_bert.pickle', 'rb') as f:
+with open('training_data/train_bert.pickle', 'rb') as f:
     x_train, y_train, x_test, y_test, preproc, label_list = pickle.load(f)
 
 model = text.text_classifier('bert', train_data=(x_train, y_train),

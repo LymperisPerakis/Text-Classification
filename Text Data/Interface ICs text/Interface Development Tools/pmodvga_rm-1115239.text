@@ -1,0 +1,157 @@
+                                                                                                                      1300 Henley Court
+                                                                                                                     Pullman, WA 99163
+                                                                                                                            509.334.6306
+                                                                                                                   www.store. digilent.com
+ Pmod VGA Reference Manual
+ Revised January 22, 2018
+ This manual applies to the Pmod VGA Rev. C
+Overview
+The Pmod VGA (Rev. C) provides a VGA port to any board with Pmod connectivity. The VGA port can be used to
+drive standard displays such as televisions and monitors. The host board must be capable of driving a fast parallel
+data bus in order to properly drive a display with the Pmod VGA.
+                                                               •      Standard VGA port for connecting commonly found
+                                                                      displays
+                                                               •      12-bit RGB444 color depth
+                                                               •      Simple, high-speed R-2R resistor ladder DAC
+                                                               •      High-speed buffers support pixel clocks up to 150 MHz
+                  The Pmod VGA.
+1        Specifications
+                                 Pin               Signal                 Description
+                                 1                 R0                     Red 0
+                                 2                 R1                     Red 1
+                                 3                 R2                     Red 2
+                                 4                 R3                     Red 3
+                                 5                 GND                    Power Supply Ground
+                                 6                 VCC3V3                 Positive Power Supply
+                                 7                 B0                     Blue 0
+                                 8                 B1                     Blue 1
+                                 9                 B2                     Blue 2
+                                 10                B3                     Blue 3
+                                 11                GND                    Power Supply Ground
+                                 12                VCC3V3                 Positive Power Supply
+                                                      Table 1. Pmod header J1.
+                                                  Copyright Digilent, Inc. All rights reserved.
+  DOC#: 410-345            Other product and company names mentioned may be trademarks of their respective owners.         Page 1 of 5
+
+
+ Pmod VGA Reference Manual
+                                               Pin      Signal                 Description
+                                               1        G0                     Green 0
+                                               2        G1                     Green 1
+                                               3        G2                     Green 2
+                                               4        G3                     Green 3
+                                               5        GND                    Power Supply Ground
+                                               6        VCC3V3                 Positive Supply Ground
+                                               7        HS                     Horizontal Sync
+                                               8        VS                     Vertical Sync
+                                               9        NC                     Not Connected
+                                               10       NC                     Not Connected
+                                               11       GND                    Power Supply Ground
+                                               12       VCC3V3                 Positive Power Supply
+                                                           Table 1. Pmod header J2.
+1.1        Physical Dimensions
+The pins on the pin header are spaced 100 mil apart. The PCB is 1.7 inches (4.3 cm) long on the sides parallel to the
+pins on the pin header and 1.7 inches (4.3 cm) long on the sides perpendicular to the pin header.
+2          Functional Description
+The Pmod VGA uses 14 input pins to create an analog VGA output port. This translates to 12-bit color depth and
+two standard sync signals: Horizontal Sync (HS) and Vertical Sync (VS). The digital-to-analog conversion is done
+using a simple R-2R resistor ladder. The ladder works in conjunction with the 75-ohm termination resistance of the
+VGA display to create 16 analog signal levels for the red, blue, and green VGA signals. This circuit produces video
+color signals that proceed in equal increments between 0V (fully off) and 0.7V (fully on). With 4 bits each for red,
+blue, and green, 4096 (16x16x16) different colors can be displayed, one for each unique 12-bit pattern.
+When used with an FPGA host board, a video controller circuit must be created in programmable logic to drive the
+sync and color signals with the correct timing in order to produce a working display system. It may be possible to
+drive the video signals using a very fast microcontroller with a parallel bus controller; however, Digilent does not
+provide examples for this use case.
+2.1        Interfacing with the Pmod
+VGA signal timings are specified, published, copyrighted, and sold by the VESA organization (www.vesa.org). The
+following VGA system timing information is provided as an example of how a VGA monitor might be driven in 640
+by 480 mode.
+NOTE: For more precise information, or for information on other VGA frequencies, refer to documentation
+available at the VESA website. CRT-based VGA displays use amplitude-modulated moving electron beams (or
+cathode rays) to display information on a phosphor-coated screen. LCD displays use an array of switches that can
+impose a voltage across a small amount of liquid crystal, thereby changing light permittivity through the crystal on
+a pixel-by-pixel basis. Although the following description is limited to CRT displays, LCD displays have evolved to
+use the same signal timings as CRT displays (so the “signals” discussion below pertains to both CRTs and LCDs).
+ Copyright Digilent, Inc. All rights reserved.
+ Other product and company names mentioned may be trademarks of their respective owners.                   Page 2 of 5
+
+
+  Pmod VGA Reference Manual
+Color CRT displays use three electron beams (one for red, one for blue, and one for green) to energize the
+phosphor that coats the inner side of the display end of a cathode ray tube (see Fig. 1).
+Electron beams emanate from “electron guns,” which are finely-pointed heated cathodes placed in close proximity
+to a positively charged annular plate called a “grid.” The electrostatic force imposed by the grid pulls rays of
+energized electrons from the cathodes, and those rays are fed by the current that flows into the cathodes. These
+particle rays are initially accelerated towards the grid, but they soon fall under the influence of the much larger
+electrostatic force that results from the entire phosphor-coated display surface of the CRT being charged to 20kV
+(or more). The rays are focused to a fine beam as they pass through the center of the grids, and then they
+accelerate to impact on the phosphor-coated display surface. The phosphor surface glows brightly at the impact
+point, and it continues to glow for several hundred microseconds after the beam is removed. The larger the
+current fed into the cathode, the brighter the phosphor will glow.
+Between the grid and the display surface, the beam passes through the neck of the CRT where two coils of wire
+produce orthogonal electromagnetic fields. Because cathode rays are composed of charged particles (electrons),
+they can be deflected by these magnetic fields. Current waveforms are passed through the coils to produce
+magnetic fields that interact with the cathode rays and cause them to transverse the display surface in a “raster”
+pattern, horizontally from left to right and vertically from top to bottom, as shown in Fig. 2. As the cathode ray
+moves over the surface of the display, the current sent to the electron guns can be increased or decreased to
+change the brightness of the display at the cathode ray impact point.
+Information is only displayed when the beam is moving in the “forward” direction (left to right and top to bottom),
+and not during the time the beam is reset back to the left or top edge of the display. Much of the potential display
+time is therefore lost in “blanking” periods when the beam is reset and stabilized to begin a new horizontal or
+vertical display pass. The size of the beams, the frequency at which the beam can be traced across the display, and
+the frequency at which the electron beam can be modulated determine the display resolution.
+Modern VGA displays can accommodate different resolutions, and a VGA controller circuit dictates the resolution
+by producing timing signals to control the raster patterns. The controller must produce synchronizing pulses at
+3.3V to set the frequency at which current flows through the deflection coils, and it must ensure that video data is
+applied to the electron guns at the correct time. Raster video displays define a number of “rows” that corresponds
+to the number of horizontal passes the cathode makes over the display area, and a number of “columns” that
+corresponds to an area on each row that is assigned to one “picture element”, or pixel. Typical displays use from
+240 to 1200 rows and from 320 to 1600 columns. The overall size of a display and the number of rows and columns
+determines the size of each pixel.
+  Copyright Digilent, Inc. All rights reserved.
+  Other product and company names mentioned may be trademarks of their respective owners.                  Page 3 of 5
+
+
+  Pmod VGA Reference Manual
+Video data typically comes from a video refresh memory with one or more bytes assigned to each pixel location
+(the Pmod VGA uses 12 bits per pixel). The controller must index into video memory as the beams move across the
+display, and retrieve and apply video data to the display at precisely the time the electron beam is moving across a
+given pixel.
+A VGA controller circuit must generate the HS and VS timings signals and coordinate the delivery of video data
+based on the pixel clock. The pixel clock defines the time available to display one pixel of information. The VS signal
+defines the “refresh” frequency of the display, or the frequency at which all information on the display is redrawn.
+The minimum refresh frequency is a function of the display’s phosphor and electron beam intensity, with practical
+refresh frequencies falling in the 50Hz to 120Hz range. The number of lines to be displayed at a given refresh
+frequency defines the horizontal “retrace” frequency. For a 640-pixel by 480-row display using a 25MHz pixel clock
+and 60 +/-1Hz refresh, the signal timings shown in Fig. 3 can be derived. Timings for sync pulse-width and front and
+back porch intervals (porch intervals are the pre- and post-sync pulse times during which information cannot be
+displayed) are based on observations taken from actual VGA displays.
+  Copyright Digilent, Inc. All rights reserved.
+  Other product and company names mentioned may be trademarks of their respective owners.                  Page 4 of 5
+
+
+  Pmod VGA Reference Manual
+A VGA controller circuit, such as the one diagrammed in Fig. 4, decodes the output of a horizontal-sync counter
+driven by the pixel clock to generate HS signal timings. You can use this counter to locate any pixel location on a
+given row. Likewise, the output of a vertical-sync counter that increments with each HS pulse can be used to
+generate VS signal timings, and you can use this counter to locate any given row. These two continually running
+counters can be used to form an address into video RAM. No time relationship between the onset of the HS pulse
+and the onset of the VS pulse is specified, so you can arrange the counters to easily form video RAM addresses, or
+to minimize decoding logic for sync pulse generation.
+3           Additional Information
+The schematics of the Pmod VGA are available here. Additional information about the transceiver used including
+voltage levels and specific timings of the chip can be found by checking out its datasheet here.
+Example code demonstrating how to get information from the Pmod VGA can be found on its Resource
+Center here.
+If you have any questions or comments about the Pmod VGA, feel free to post them under the appropriate section
+(“Add-on Boards”) of the Digilent Forum.
+  Copyright Digilent, Inc. All rights reserved.
+  Other product and company names mentioned may be trademarks of their respective owners.                 Page 5 of 5
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Digilent:
+ 410-345

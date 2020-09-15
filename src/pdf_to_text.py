@@ -1,11 +1,12 @@
 import pdftotext
 import os
 from pathlib import Path
+from src.configs import interface_text_path2
 
 
 class PdfToText(object):
     def __init__(self, pdf_path: str,
-                 text_folder: str = './Data/Interface Ics text'):
+                 text_folder: str = interface_text_path2):
         self.pdf_path = pdf_path
         self.pdf_category = pdf_path.split('/')[-2]
         self.text_name = self.pdf_path.split('/')[-1].split('.pdf')[

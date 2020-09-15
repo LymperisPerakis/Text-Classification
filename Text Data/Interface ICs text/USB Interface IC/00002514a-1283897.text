@@ -1,0 +1,1698 @@
+                                                                                       USB4715
+                              USB 2.0 Hi-Speed Hub Controller
+                                    with FlexConnect on all Ports
+ Highlights                                           Product Features
+• Single-chip USB 2.0 Hi-Speed hub controller with    • FlexConnect
+  FlexConnect                                           - Downstream port able to swap with upstream port,
+  - 1 upstream port for USB Host / OTG connection          allowing USB host capable devices to control other
+  - 4 downstream ports with FlexConnect capability on      devices on the hub
+     all ports                                        • MultiTRAK™
+• USB Battery Charging, revision 1.2, support on        - Dedicated Transaction Translator per port
+  downstream ports (DCP, CDP, SDP)                    • PortMap
+• Battery charging support for China and Apple®         - Configurable port mapping and disable sequencing
+  profiles                                            • PortSwap
+• USB to SMBus, I2S™, SPI, UART, and GPIO               - Configurable differential intra-pair signal swapping
+  - Apple authentication support                      • PHYBoost
+  - I2S for audio support; Asynchronous In, Adaptive
+                                                        - Programmable USB transceiver drive strength for
+     Out, 48KHz, two channels, 16-bits/channel             recovering signal integrity
+  - Flexible I2S capabilities with firmware update
+                                                      • VariSense™
+                                                        - Programmable USB receiver sensitivity
+Target Applications
+                                                      • USB Link Power Management (LPM) support
+• Media hubs                                          • Vendor Specific Messaging (VSM) support
+• Infotainment head units                             • Architected for USB Power Delivery (PD) 3.0 sup-
+• Automotive breakout boxes                             port
+• Docks                                                 - 32-bit embedded microcontroller in the hub exe-
+• Monitors                                                 cutes PD stack and system policy manager
+                                                        - Interfaces to Microchip UPD350 Power Delivery
+• Point of sale                                            Interface device
+• Host switch for diagnostic mode                       - Power delivery stack runs from external SPI Flash
+• Host switch for field firmware upgrades               - SPI Flash provides flexibility for specification 
+                                                           revisions and evolving system needs
+                                                      • Enhanced OEM configuration options available
+                                                        through external straps, OTP configuration or
+                                                        SMBus Slave port
+                                                      • 3.3 V supply voltage
+                                                      • AEC-Q100 compliance
+                                                        - Microchip parts are tested to meet or exceed the
+                                                           requirements of the AEC-Q100 automotive qualifi-
+                                                           cation standards
+                                                      • Packaging
+                                                        - 48-pin VQFN (7 x 7 mm)
+                                                      • Environmental
+                                                        - Commercial temperature range (0°C to +70°C)
+                                                        - Industrial temperature range (-40° to +85°C)
+                                                        - Grade 3 Automotive temperature range
+                                                           (-40° to +85°C)
+ 2017 Microchip Technology Inc.                                                              DS00002514A-page 1
+
+
+USB4715
+                                            TO OUR VALUED CUSTOMERS
+ It is our intention to provide our valued customers with the best documentation possible to ensure successful use of your Microchip
+ products. To this end, we will continue to improve our publications to better suit your needs. Our publications will be refined and
+ enhanced as new volumes and updates are introduced.
+ If you have any questions or comments regarding this publication, please contact the Marketing Communications Department via
+ E-mail at docerrors@microchip.com. We welcome your feedback.
+ Most Current Data Sheet
+ To obtain the most up-to-date version of this data sheet, please register at our Worldwide Web site at:
+        http://www.microchip.com
+ You can determine the version of a data sheet by examining its literature number found on the bottom outside corner of any page.
+ The last character of the literature number is the version number, (e.g., DS30000000A is version A of document DS30000000).
+ Errata
+ An errata sheet, describing minor operational differences from the data sheet and recommended workarounds, may exist for cur-
+ rent devices. As device/documentation issues become known to us, we will publish an errata sheet. The errata will specify the
+ revision of silicon and revision of document to which it applies.
+ To determine if an errata sheet exists for a particular device, please check with one of the following:
+ • Microchip’s Worldwide Web site; http://www.microchip.com
+ • Your local Microchip sales office (see last page)
+ When contacting a sales office, please specify which device, revision of silicon and data sheet (include -literature number) you are
+ using.
+ Customer Notification System
+ Register on our web site at www.microchip.com to receive the most current information on all of our products.
+DS00002514A-page 2                                                                                    2017 Microchip Technology Inc.
+
+
+                                                                                               USB4715
+1.0     PREFACE
+1.1     General Terms
+TABLE 1-1:        GENERAL TERMS
+            Term                                                        Description
+ ADC                             Analog-to-Digital Converter
+ Byte                            8 bits
+ CDC                             Communication Device Class
+ EOP                             End of Packet
+ EP                              Endpoint
+ FIFO                            First In First Out buffer
+ FS                              Full-Speed
+ GPIO                            General Purpose I/O
+ HS                              Hi-Speed
+ Hub Feature Controller          The Hub Feature Controller, sometimes called a Hub Controller for short is the internal
+                                 processor used to enable the unique features of the USB Controller Hub. This is not to
+                                 be confused with the USB Hub Controller that is used to communicate the hub status
+                                 back to the Host during a USB session.
+ I2C                             Inter-Integrated Circuit
+ LS                              Low-Speed
+ lsb                             Least Significant Bit
+ LSB                             Least Significant Byte
+ msb                             Most Significant Bit
+ MSB                             Most Significant Byte
+ N/A                             Not Applicable
+ NC                              No Connect
+ OTP                             One Time Programmable
+ PCB                             Printed Circuit Board
+ PHY                             Physical Layer
+ PLL                             Phase Lock Loop
+ RESERVED                        Refers to a reserved bit field or address. Unless otherwise noted, reserved bits must
+                                 always be zero for write operations. Unless otherwise noted, values are not guaran-
+                                 teed when reading reserved bits. Unless otherwise noted, do not read or write to
+                                 reserved addresses.
+ SDK                             Software Development Kit
+ SMBus                           System Management Bus
+ UUID                            Universally Unique IDentifier
+ WORD                            16 bits
+ 2017 Microchip Technology Inc.                                                                     DS00002514A-page 3
+
+
+USB4715
+1.2       Buffer Types
+TABLE 1-2:         BUFFER TYPE DESCRIPTIONS
+           Buffer                                                     Description
+ I                            Input.
+ IS                           Input with Schmitt trigger.
+ O4                           Output buffer with 4mA sink and 4mA source.
+ O12                          Output buffer with 12mA sink and 12mA source.
+ OD12                         Open-drain output with 12mA sink.
+ PU                           Internal pull-up. Unless otherwise noted in the pin description, internal pull-ups are
+                              always enabled.
+                              Internal pull-up resistors prevent unconnected inputs from floating. Do not rely on
+                              internal resistors to drive signals external to the device. When connected to a load that
+                              must be pulled high, an external resistor must be added.
+ PD                           Internal pull-down. Unless otherwise noted in the pin description, internal pull-downs
+                              are always enabled.
+                              Internal pull-down resistors prevent unconnected inputs from floating. Do not rely on
+                              internal resistors to drive signals external to the device. When connected to a load that
+                              must be pulled low, an external resistor must be added.
+ ICLK                         Crystal oscillator input pin.
+ OCLK                         Crystal oscillator output pin.
+ I/O-U                        Analog input/output defined in USB specification.
+ I-R                          RBIAS.
+ A                            Analog.
+ P                            Power pin.
+1.3       Pin Reset States
+The pin reset state definitions are detailed in Table 1-3. Refer to Section 3.0, "Pin Descriptions and Configuration" for
+details on individual pin reset states.
+                     TABLE 1-3:         PIN RESET STATE LEGEND
+                       Symbol                                 Description
+                          A/P      Analog/Power Input
+                           Z       Hardware disables output driver (high impedance)
+                        PD-15k     Hardware enables internal 15kΩ pull-down
+                        PD-67k     Hardware enables internal 67kΩ pull-down
+                        PU-67k     Hardware enables internal 67kΩ pull-up
+                         USB       USB line
+DS00002514A-page 4                                                                          2017 Microchip Technology Inc.
+
+
+                                                                                     USB4715
+1.4     Reference Documents
+1.  Universal Serial Bus Revision 2.0 Specification, http://www.usb.org
+2.  AN2341 - USB4715 FlexConnect Operation, http://www.microchip.com
+3.  AN2439 - Configuration of the USB491x/USB492x/USB4715, http://www.microchip.com
+4.  AN2437 - USB to GPIO Bridging with USB4715 and USB49xx, http://www.microchip.com
+5.  AN2438 - USB to I2C Bridging with USB4715 and USB49xx, http://www.microchip.com
+6.  AN2430 - USB to SPI Bridging with USB4715 and USB49xx, http://www.microchip.com
+7.  AN2426 - USB to UART Bridging with Microchip USB4715, USB4916, and USB4927, http://www.microchip.com
+8.  Battery Charging Specification, Revision 1.2, Dec. 07, 2010, http://www.usb.org
+9.  I2C-Bus Specification, Version 1.1, http://www.nxp.com/documents/user_manual/UM10204.pdf
+10. I2S-Bus Specification, http://www.nxp.com/acrobat_download/various/I2SBUS.pdf
+11. System Management Bus Specification, Version 1.0, http://smbus.org/specs
+ 2017 Microchip Technology Inc.                                                           DS00002514A-page 5
+
+
+USB4715
+2.0      INTRODUCTION
+2.1      General Description
+The Microchip USB4715 USB 2.0 Hi-Speed hub controller is a single-chip device targeted for automotive, industrial, and
+commercial applications. Primary functions of the device include: multiple downstream USB ports supporting USB 2.0
+Low Speed/Full Speed/Hi-Speed, single USB 2.0 Hi-Speed upstream connection to a USB host / OTG port, battery
+charging support for BC1.2, Apple and China charging profiles, USB I/O bridging, and an on-chip microcontroller.
+The USB4715 employs unique FlexConnect USB functionality, whereby one of the downstream ports can be reconfig-
+ured to become an upstream port, allowing the host or master capability to be switched to equipment on any of the other
+ports. This port/host becomes the master of the new USB bus, while the other ports can connect as USB devices, or
+become dedicated charging ports.
+The USB4715 is available in commercial (0°C to +70°C), industrial and Automotive Grade 3 (-40°C to +85°C) tempera-
+ture ranges. An internal block diagram of the USB4715 is shown in Figure 2-1.
+FIGURE 2-1:            INTERNAL BLOCK DIAGRAM
+                                                     USB Host / OTG Port 0
+                    3.3V
+                                              Flex USB 2.0                         USB4715
+                                     FlexHub Controller
+                                                                                   Hub Feature
+                                                                                    Controller
+                                                                                         OTP
+                 25 MHz
+                                                                                       2   2
+                                                                                      I C/I S/SPI/
+                                                                                      UART/GPIO
+                               Flex        Flex       Flex        Flex
+                              Port 1      Port 2     Port 3     Port 4              I/O Multiplexer
+                                  USB         USB        USB         USB                     I/O
+DS00002514A-page 6                                                                        2017 Microchip Technology Inc.
+
+
+                                                                                                                                                                                                                                                                                                                                         USB4715
+3.0       PIN DESCRIPTIONS AND CONFIGURATION
+The pin assignments for the USB4715 are detailed in Section 3.1, "USB4715 Pin Assignments". Pin descriptions are
+provided in Section 3.2, "Pin Descriptions".
+3.1       USB4715 Pin Assignments
+The device pin diagram for the USB4715 can be seen in Figure 3-1. Table 3-1 provides a USB4715 pin assignments
+table. Pin descriptions are provided in Section 3.2, "Pin Descriptions".
+FIGURE 3-1:             USB4715 PIN ASSIGNMENTS
+                                                          VBUS_DET                               PROG_FUNC2                   PROG_FUNC3                                               PROG_FUNC4                    PROG_FUNC5                    PROG_FUNC6
+                                        VDDIO33                               RESET_N                                                                      VDDIO33                                                                                                              SQI_D3           SQI_D2         VDDIO33
+                                        36                35                  34                 33                           32                           31                          30                            29                            28                           27               26             25
+                    PROG_FUNC1     37
+                                                                                                                                                                                                                                                                                                                            24   SPI_CE_N/SQI_CE_N/CFG_NON_REM
+                    PROG_FUNC8     38                                                                                                                                                                                                                                                                                       23   SPI_DI/SQI_D1/CFG_BC_EN
+                        VDDIO33    39                                                                                                                                                                                                                                                                                       22   SPI_DO/SQI_D0
+       FLEX_USB_DP3/PRT_DIS_P3     40                                                                                                                                                                                                                                                                                       21   SPI_CLK/SQI_CLK
+      FLEX_USB_DM3/PRT_DIS_M3      41                                                                                                                                                                                                                                                                                       20   VDDIO33
+                       USBH_DP0    42                                                                                         Microchip                                                                                                                                                                                     19   VDDCR12
+                      USBH_DM0     43                                                                                         USB4715                                                                                                                                                                                       18   PRT_CTL1/OCS1
+                                                                                                        (Top View 48-VQFN)
+                  TESTEN/ATEST     44                                                                                                                                                                                                                                                                                       17   PRT_CTL2/OCS2
+                         XTALO     45                                                                                                                                                                                                                                                                                       16   PRT_CTL3/OCS3
+                   XTALI/CLK_IN    46                                                                                                                                                                                                                                                                                       15   TEST3
+                                                                                       Ground Pad
+                   VDDPLLREF33     47                                                                                                                                                                                                                                                                                       14   TEST2
+                                                                                (must be connected to VSS)
+                          RBIAS    48
+                                                                                                                                                                                                                                                                                                                            13   TEST1
+                                          1                 2                  3                   4                             5                           6                            7                            8                             9                           10                11            12
+                                                             CONFIG_STRAP_1     CONFIG_STRAP_2
+                                                                                                    FLEX_USB_DP1/PRT_DIS_P1      FLEX_USB_DM1/PRT_DIS_M1     FLEX_USB_DP2/PRT_DIS_P2       FLEX_USB_DM2/PRT_DIS_M2       FLEX_USB_DP4/PRT_DIS_P4
+                                                                                                                                                                                                                                                                                 PRT_CTL4/OCS4
+                                                                                                                                                                                                                                                      FLEX_USB_DM4/PRT_DIS_M4
+                                                                                                                                                                                                                                                                                                   PROG_FUNC7
+                                                                                                                                                                                                                                                                                                                  VDDIO33
+                                          PORT_CTL_GANG
+                                                          Indicates pins on the bottom of the device
+                                                                                                   .
+  Note:     Configuration straps are identified by an underlined symbol name. Signals that function as configuration
+            straps must be augmented with an external resistor when connected to a load.
+ 2017 Microchip Technology Inc.                                                                                                                                                                                                                                                                                                             DS00002514A-page 7
+
+
+USB4715
+TABLE 3-1:      USB4715 PIN ASSIGNMENTS
+   Pin                 Pin Name              Reset     Pin                  Pin Name                  Reset
+    1              PORT_CTL_GANG             PD-67k     25                  VDDIO33                    A/P
+    2              CONFIG_STRAP_1              Z        26                   SQI_D2                     Z
+    3              CONFIG_STRAP_2              Z        27                   SQI_D3                     Z
+    4        FLEX_USB_DP1/PRT_DIS_P1         PD-15k     28                PROG_FUNC6                    Z
+    5       FLEX_USB_DM1/PRT_DIS_M1          PD-15k     29                PROG_FUNC5                    Z
+    6        FLEX_USB_DP2/PRT_DIS_P2         PD-15k     30                PROG_FUNC4                    Z
+    7       FLEX_USB_DM2/PRT_DIS_M2          PD-15k     31                  VDDIO33                    A/P
+    8        FLEX_USB_DP4/PRT_DIS_P4         PD-15k     32                PROG_FUNC3                    Z
+    9       FLEX_USB_DM4/PRT_DIS_M4          PD-15k     33                PROG_FUNC2                    Z
+   10               PRT_CTL4/OCS4            PD-67k     34                  RESET_N                   PD-67k
+   11                PROG_FUNC7              PD-67k     35                 VBUS_DET                     Z
+   12                  VDDIO33                A/P       36                  VDDIO33                    A/P
+   13                   TEST1                  Z        37                PROG_FUNC1                    Z
+   14                   TEST2                  Z        38                PROG_FUNC8                    Z
+   15                   TEST3                  Z        39                  VDDIO33                    A/P
+   16               PRT_CTL3/OCS3            PD-67k     40        FLEX_USB_DP3/PRT_DIS_P3             PD-15k
+   17               PRT_CTL2/OCS2            PD-67k     41       FLEX_USB_DM3/PRT_DIS_M3              PD-15k
+   18               PRT_CTL1/OCS1            PD-67k     42                 USBH_DP0                    USB
+   19                  VDDCR12                A/P       43                 USBH_DM0                    USB
+   20                  VDDIO33                A/P       44               TESTEN/ATEST                  A/P
+   21             SPI_CLK/SQI_CLK              Z        45                   XTALO                     A/P
+   22               SPI_DO/SQI_D0            PD-67k     46               XTALI/CLK_IN                  A/P
+   23        SPI_DI/SQI_D1/CFG_BC_EN           Z        47               VDDPLLREF33                   A/P
+   24            SPI_CE_N/SQI_CE_N/          PU-67k     48                   RBIAS                     A/P
+                    CFG_NON_REM
+                              Exposed Pad (VSS) must be connected to ground.
+DS00002514A-page 8                                                              2017 Microchip Technology Inc.
+
+
+                                                                                        USB4715
+3.2      Pin Descriptions
+TABLE 3-2:        PIN DESCRIPTIONS
+                                         Buffer
+      Name                    Symbol                                          Description
+                                          Type
+                                             USB Interface
+  USB Upstream              USBH_DP0      I/O-U      Upstream USB 2.0 Data Plus (D+)
+        D+
+  USB Upstream             USBH_DM0       I/O-U      Upstream USB 2.0 Data Minus (D-)
+         D-
+       USB             FLEX_USB_DP[4:1]   I/O-U      Downstream USB 2.0 Ports 4-1 Data Plus (D+)
+   Downstream
+   Ports 4-1 D+
+       USB            FLEX_USB_DM[4:1]    I/O-U      Downstream USB 2.0 Ports 4-1 Data Minus (D-)
+   Downstream
+    Ports 4-1 D-
+                                        USB Port Control Pins
+  USB Ports 4-1           PRT_CTL[4:1]    I/O12      When the downstream port is enabled, this pin is set as
+   Power Enable                                      an input with an internal pull-up resistor applied. The
+                                                     internal pull-up enables power to the downstream port
+                                                     while the pin monitors for an active low overcurrent sig-
+                                                     nal assertion from an external current monitor on USB
+                                                     port 4. This pin will change to an output and be driven
+                                                     low when the port is disabled by configuration or by the
+                                                     host control.
+  USB Ports 4-1              OCS[4:1]     I/O12      Overcurrent sense for ports 4-1.
+    Overcurrent
+      Sense
+    Gang Power          PRT_CTL_GANG      I/O12      This pin becomes the port control pin for all downstream
+                                                     ports when the hub is configured for ganged port power
+                                                     control mode. All port power controllers are controlled
+                                                     from this pin when the hub is configured for ganged port
+                                                     power mode.
+                                          SPI Interface Pins
+     SPI Clock               SPI_CLK       I/O4      SPI clock.
+   SPI Data Out               SPI_DO       I/O4      SPI output data. If the SPI interface is enabled, this sig-
+                                                     nal is the data out for the SPI port.
+    SPI Data In               SPI_DI       I/O4      SPI input data. If the SPI interface is enabled, this signal
+                                                     must have a weak pull-down applied at all times to pre-
+                                                     vent floating.
+                                                        Note:     If SPI interface is not utilized, this pin cannot
+                                                                  be left floating. It must be connected per the
+                                                                  CFG_BC_EN pin description.
+ 2017 Microchip Technology Inc.                                                                DS00002514A-page 9
+
+
+USB4715
+TABLE 3-2:       PIN DESCRIPTIONS (CONTINUED)
+                                      Buffer
+      Name                Symbol                                          Description
+                                       Type
+     SPI Chip           SPI_CE_EN       I/O4     Active low SPI chip enable input. If the SPI interface is
+      Enable                                     enabled, this pin must be driven high in powerdown
+                                                 states.
+                                                    Note:      If SPI interface is not utilized, this pin cannot
+                                                              be left floating. It must be connected per the
+                                                              CFG_NON_REM pin description.
+                                      SQI Interface Pins
+    SQI Clock            SQI_CLK        I/O4     SQI clock.
+   SQI Data 0-3          SQI_D[0:3]     I/O4     SQI Data 0-3. If the SQI interface is enabled, these sig-
+                                                 nals function as Data 0 through 3.
+     SQI Chip           SQI_CE_EN       I/O4     Active low SQI chip enable input. If the SQI interface is
+      Enable                                     enabled, this pin requires an external pull-up resistor.
+                                                    Note:     If SQI interface is not utilized, this pin cannot
+                                                              be left floating. It must be connected per the
+                                                              CFG_NON_REM pin description.
+                                         Miscellaneous
+  Programmable        PROG_FUNC[8:1]   I/O12     These selectable function pins can be assigned a role
+  Functions 8-1                                  via the CONFIG_STRAP_[2:1] pins, OTP configuration,
+                                                 or SMBus configuration. Refer to Section 3.3.4,
+                                                 "PROG_FUNC[8:1] Configuration (CON-
+                                                 FIG_STRAP_[2:1])" for additional information.
+      VBUS              VBUS_DET           I     This signal detects the state of the upstream bus power.
+     Detection                                   When designing a detachable hub, this pin must be con-
+                                                 nected to the VBUS power pin of the upstream USB port
+                                                 through a resistor divider (50 kΩ by 100 kΩ) to provide
+                                                 3.3 V.
+                                                 For self-powered applications with a permanently
+                                                 attached host, this pin must be connected to either 3.3 V
+                                                 or 5.0 V through a resistor divider to provide 3.3 V.
+                                                 In embedded applications, VBUS_DET may be con-
+                                                 trolled (toggled) when the host desires to renegotiate a
+                                                 connection without requiring a full reset of the device.
+    Reset Input          RESET_N           I     This active low signal is used by the system to reset the
+                                                 device. The active low pulse should be at least 1 s
+                                                 wide.
+   Bias Resistor          RBIAS          I-R     A 12.0 k 1.0% resistor is attached from ground to this
+                                                 pin to set the transceiver’s internal bias settings. Place
+                                                 the resistor as close to the device as possible with a
+                                                 dedicated, low impedance connection to the GND plane.
+ External 25 MHz          XTALI        ICLK      External 25 MHz crystal input.
+   Crystal Input
+DS00002514A-page 10                                                             2017 Microchip Technology Inc.
+
+
+                                                                                      USB4715
+TABLE 3-2:        PIN DESCRIPTIONS (CONTINUED)
+                                          Buffer
+      Name                    Symbol                                         Description
+                                           Type
+ External 25 MHz              CLK_IN       ICLK      External reference clock input.
+ Reference Clock
+       Input                                         The device may alternatively be driven by a single-
+                                                     ended clock oscillator. When this method is used,
+                                                     XTALO should be left unconnected.
+ External 25 MHz              XTALO       OCLK       External 25 MHz crystal output.
+  Crystal Output
+        Test                  TESTEN         A       Test pin.
+                                                     This signal is used for test purposes and must always
+                                                     be connected to ground.
+    Analog Test                ATEST         A       Analog test pin.
+                                                     This signal is used for test purposes and must always
+                                                     be connected to ground.
+      Test 1                   TEST1         A       Test 1 pin.
+                                                     This signal is used for test purposes and must always
+                                                     be pulled-up to 3.3V via a 4.7 kΩ resistor.
+      Test 2                   TEST2         A       Test 2 pin.
+                                                     This signal is used for test purposes and must always
+                                                     be pulled-down to ground via a 4.7 kΩ resistor.
+      Test 3                   TEST3         A       Test 3 pin.
+                                                     This signal is used for test purposes and must always
+                                                     be pulled-down to ground via a 4.7 kΩ resistor.
+                                         Configuration Straps
+   Device Mode        CONFIG_STRAP_[2:1]     I       Device mode configuration straps 2-1.
+   Configuration
+    Straps 2-1                                       These configuration straps are used to select the
+                                                     device’s mode of operation. See Note 3-1.
+                                                     Refer to Section 3.3.4, "PROG_FUNC[8:1] Configura-
+                                                     tion (CONFIG_STRAP_[2:1])" for additional information.
+    Port 4-1 D+          PRT_DIS_P[4:1]      I       Port 4-1 D+ Disable configuration strap.
+     Disable
+   Configuration                                     These configuration straps are used in conjunction with
+       Strap                                         the corresponding PRT_DIS_M[4:1] straps to disable
+                                                     the related port (5-1). See Note 3-1.
+                                                     Both USB data pins for the corresponding port must be
+                                                     tied to 3.3V to disable the associated downstream port.
+ 2017 Microchip Technology Inc.                                                           DS00002514A-page 11
+
+
+USB4715
+TABLE 3-2:         PIN DESCRIPTIONS (CONTINUED)
+                                                    Buffer
+       Name                   Symbol                                                   Description
+                                                     Type
+    Port 4-1 D-           PRT_DIS_M[4:1]                I       Port 4-1 D- Disable configuration strap.
+      Disable
+   Configuration                                                These configuration straps are used in conjunction with
+       Strap                                                    the corresponding PRT_DIS_P[4:1] straps to disable the
+                                                                related port (5-1). See Note 3-1.
+                                                                Both USB data pins for the corresponding port must be
+                                                                tied to 3.3V to disable the associated downstream port.
+  Non-Removable           CFG_NON_REM                   I       Non-Removable Ports Configuration Strap.
+       Ports
+   Configuration                                                This configuration strap controls the number of reported
+       Strap                                                    non-removable ports. See Note 3-1.
+ Battery Charging           CFG_BC_EN                   I       Battery Charging Configuration Strap.
+   Configuration
+       Strap                                                    This configuration strap controls the number of BC 1.2
+                                                                enabled downstream ports. See Note 3-1.
+                                                      Power/Ground
+ +3.3V I/O Power              VDDIO33                  P        +3.3V I/O power supply input.
+   Supply Input
+   +3.3V Analog           VDDPLLREF33                  P        +3.3V master bias / PLL regulator supply input.
+   Power Supply
+        Input
+    +1.2V Core               VDDCR12                   P        +1.2V digital core power supply output.
+   Power Supply                                                    Note:     This signal requires connection of a 1uF low-
+       Output                                                                ESR capacitor to ground.
+      Ground                     VSS                   P        Ground pins.
+  Note 3-1       Configuration strap values are latched on Power-On Reset (POR) and the rising edge of RESET_N
+                 (external chip reset). Configuration straps are identified by an underlined symbol name. Signals that
+                 function as configuration straps must be augmented with an external resistor when connected to a
+                 load. For additional information, refer to Section 3.3, "Configuration Straps and Programmable
+                 Functions".
+3.3       Configuration Straps and Programmable Functions
+Configuration straps are multi-function pins that are used during Power-On Reset (POR) or external chip reset
+(RESET_N) to determine the default configuration of a particular feature. The state of the signal is latched following de-
+assertion of the reset. Configuration straps are identified by an underlined symbol name. This section details the various
+device configuration straps and associated programmable pin functions.
+  Note:     The system designer must guarantee that configuration straps meet the timing requirements specified in
+            Section 9.6.2, "Power-On and Configuration Strap Timing" and Section 9.6.3, "Reset and Configuration
+            Strap Timing". If configuration straps are not at the correct voltage level prior to being latched, the device
+            may capture incorrect strap values.
+3.3.1       PORT DISABLE CONFIGURATION (PRT_DIS_P[4:1] / PRT_DIS_M[4:1])
+The PRT_DIS_P[4:1] / PRT_DIS_M[4:1] configuration straps are used in conjunction to disable the related port (4-1).
+For PRT_DIS_Px (where x is the corresponding port 4-1):
+DS00002514A-page 12                                                                          2017 Microchip Technology Inc.
+
+
+                                                                                            USB4715
+     0 = Port x D+ Enabled
+     1 = Port x D+ Disabled
+For PRT_DIS_Mx (where x is the corresponding port 4-1):
+     0 = Port x D- Enabled
+     1 = Port x D- Disabled
+   Note:     Both PRT_DIS_Px and PRT_DIS_Mx (where x is the corresponding port) must be tied to 3.3 V to disable
+             the associated downstream port.
+3.3.2        NON-REMOVABLE PORT CONFIGURATION (CFG_NON_REM)
+The CFG_NON_REM configuration strap is used to configure the non-removable port settings of the device to one of
+five settings. These modes are selected by the configuration of an external resistor on the CFG_NON_REM pin. The
+resistor options are a 200 kΩ pull-down, 200 kΩ pull-up, 10 kΩ pull-down, 10 kΩ pull-up, and 10 Ω pull-down, as shown
+in Table 3-3.
+TABLE 3-3:         CFG_NON_REM RESISTOR ENCODING
+   CFG_NON_REM Resistor Value                                           Setting
+ 200 kΩ Pull-Down                      Port 1- removable
+ 200 kΩ Pull-Up                        Port 1 non-removable
+ 10 kΩ Pull-Down                       Port 1, 2 non-removable
+ 10 kΩ Pull-Up                         Port 1, 2, 3 non-removable
+ 10 Ω Pull-Down                        Port 1, 2, 3, 4 non-removable
+3.3.3        BATTERY CHARGING CONFIGURATION (CFG_BC_EN)
+The CFG_BC_EN configuration strap is used to configure the battery charging port settings of the device to one of five
+settings. These modes are selected by the configuration of an external resistor on the CFG_BC_EN pin. The resistor
+options are a 200 kΩ pull-down, 200 kΩ pull-up, 10 kΩ pull-down, 10 kΩ pull-up, and 10 Ω pull-down, as shown in
+Table 3-4.
+TABLE 3-4:         CFG_BC_EN RESISTOR ENCODING
+   CFG_NON_REM Resistor Value                                           Setting
+ 200 kΩ Pull-Down                      No battery charging
+ 200 kΩ Pull-Up                        Port 1 battery charging
+ 10 kΩ Pull-Down                       Port 1, 2 battery charging
+ 10 kΩ Pull-Up                         Port 1, 2, 3 battery charging
+ 10 Ω Pull-Down                        Port 1, 2, 3, 4 battery charging
+3.3.4        PROG_FUNC[8:1] CONFIGURATION (CONFIG_STRAP_[2:1])
+The USB4715 provides 8 programmable function pins (PROG_FUNC[8:1]). These pins can be configured to 6 pre-
+defined configurations via the CONFIG_STRAP_[2:1] pins. These configurations are selected via external resistors on
+the CONFIG_STRAP_[2:1] pins, as detailed in Table 3-5. Resistor values and combinations not detailed in Table 3-5
+are reserved and should not be used.
+ 2017 Microchip Technology Inc.                                                                 DS00002514A-page 13
+
+
+USB4715
+TABLE 3-5:        CONFIG_STRAP_[2:1] RESISTOR ENCODING
+                                      CONFIG_STRAP_2                CONFIG_STRAP_1
+             Mode
+                                        Resistor Value                Resistor Value
+        Configuration 1                200 kΩ Pull-Down              200 kΩ Pull-Down
+        Configuration 2                200 kΩ Pull-Down               200 kΩ Pull-Up
+        Configuration 3                200 kΩ Pull-Down              10 kΩ Pull-Down
+        Configuration 4                200 kΩ Pull-Down                10 kΩ Pull-Up
+        Configuration 5                200 kΩ Pull-Down               10 Ω Pull-Down
+        Configuration 6                200 kΩ Pull-Down                10 Ω Pull-Up
+A summary of the configuration pin assignments for each of the 6 configurations is provided in Table 3-6. For details on
+behavior of each programmable function, refer to Table 3-7.
+TABLE 3-6:        PROG_FUNC[8:1] FUNCTION ASSIGNMENT
+                    Configuration Configuration Configuration Configuration Configuration Configuration
+       Pin
+                            1                2               3               4                5                 6
+ PROG_FUNC_1           SMB1_DAT         SMB1_DAT         SMB1_DAT        SMB1_DAT        SMB1_DAT          SMB1_DAT
+ PROG_FUNC_2           I2S_LRCK          UART_TX       CONNECT_IND1       UART_TX         UART_TX          I2S_LRCK
+ PROG_FUNC_3          I2S_SDOUT         UART_RX        CONNECT_IND2      UART_RX          UART_RX         I2S_SDOUT
+ PROG_FUNC_4            I2S_SDIN           GPIO6       CONNECT_IND3        GPIO6           GPIO6            I2S_SDIN
+ PROG_FUNC_5           I2S_MCLK            GPIO8           GPIO8           GPIO8         SMB2_DAT          I2S_MCLK
+ PROG_FUNC_6             I2S_SCK          GPIO10          GPIO10           GPIO10        SMB2_CLK            I2S_SCK
+ PROG_FUNC_7            MIC_DET           GPIO11       CONNECT_IND4        GPIO11          GPIO11             GPIO11
+ PROG_FUNC_8           SMB1_CLK         SMB1_CLK         SMB1_CLK        SMB1_CLK        SMB1_CLK          SMB1_CLK
+TABLE 3-7:        PROGRAMMABLE FUNCTIONS DESCRIPTIONS
+                               Buffer
+        Function                                                         Description
+                                Type
+                                                    UART Interface
+        UART_TX                 O12       UART Transmit
+       UART_RX                    I       UART Receive
+                                                SMBus Master Interface
+       SMB1_CLK               I/OD12      SMBus Master Clock
+       SMB1_DAT               I/OD12      SMBus Master Data
+                                                 SMBus Slave Interface
+       SMB2_CLK               I/OD12      SMBus Slave Clock
+                                          For proper SMBus slave operation, an external 10 kΩ resistor is required on
+                                          this signal.
+DS00002514A-page 14                                                                      2017 Microchip Technology Inc.
+
+
+                                                                                        USB4715
+TABLE 3-7:        PROGRAMMABLE FUNCTIONS DESCRIPTIONS (CONTINUED)
+                               Buffer
+         Function                                                     Description
+                                 Type
+        SMB2_DAT               I/OD12 SMBus Slave Data
+                                      For proper SMBus slave operation, an external 10 kΩ resistor is required on
+                                      this signal.
+                                                   I2S Interface
+          I2S_SCK                O12  I2S Continuous Serial Clock
+        I2S_LRCK                 O12  I2S Word Select / Left-Right Clock
+        I2S_MCLK                 O12  I2S Master Clock
+       I2S_SDOUT                 O12  I2S Serial Data Out
+         I2S_SDIN                  I  I2S Serial Data In
+         MIC_DET                   I  I2S MIC Plug Detect
+                                      0 = No microphone plugged into the audio jack
+                                      1 = Microphone plugged into the audio jack
+                                                 Miscellaneous
+           GPIOx                I/O12 General Purpose Inputs/Outputs
+                                      (x = 6, 8, 10-11)
+   CONNECT_IND[4:1]              O12  Downstream Port 4-1 Connect Indicator
+                                      1 = USB 2.0 or USB 1.1 connection to port
+                                      0 = Nothing connected to port
+ 2017 Microchip Technology Inc.                                                            DS00002514A-page 15
+
+
+USB4715
+4.0      DEVICE CONNECTIONS
+4.1      Power Connections
+Figure 4-1 illustrates the device power connections.
+FIGURE 4-1:           POWER CONNECTIONS
+      +3.3V
+      Supply
+                      VDDIO33
+                                                                                                   VDDCR12
+                                        3.3V Internal Logic             1.2V Internal Logic
+                      VDDPLLREF33
+                                                                                                                      1uF
+                      USB4715                                 VSS
+4.2      SPI Flash Connections
+Figure 4-2 illustrates the device SPI Flash connections.
+FIGURE 4-2:           SPI FLASH CONNECTIONS
+                                                                  +3.3V
+                                                           10K    10K    10K
+                                 SPI_CE_N/SQI_CE_N                                  CE#
+                                    SPI_CLK/SQI_CLK                                 CLK
+                                       SPI_DO/SQI_D0                                SIO0
+                                       SPI_DI/SQI_D1                                SIO1
+                                               SQI_D2                               SIO2/WPn
+                                               SQI_D3                               SIO3/HOLDn
+                                USB4715                    100K                           SPI Flash
+DS00002514A-page 16                                                                               2017 Microchip Technology Inc.
+
+
+                                                                                       USB4715
+4.3      SMBus Connections
+Figure 4-3 illustrates the device SMBus Connections.
+FIGURE 4-3:            SMBUS CONNECTIONS
+                                                               +3.3V
+                                                               10K
+                                           SMBx_CLK                    Clock
+                                                               +3.3V
+                                   USB4715                                     SMBus
+                                                               10K
+                                           SMBx_DAT                    Data
+4.4      I2S Connections
+Figure 4-4 illustrates the device I2S connections.
+FIGURE 4-4:            I2S CONNECTIONS
+                                                              +3.3V
+                                   USB4715              10K   10K              CODEC
+                                            I2S_MCLK
+                                              I2S_SCK
+                                            I2S_LRCK                   I 2S
+                                           I2S_SDOUT
+                                             I2S_SDIN
+                                           SMB1_CLK
+                                                                       I2C
+                                           SMB1_DAT
+                                             MIC_DET    Audio Jack
+4.5      UART Connections
+Figure 4-5 illustrates the device UART connections.
+FIGURE 4-5:            UART CONNECTIONS
+                                                                 UART             UART
+                                                              Transceiver       Connector
+                               USB4715
+                                           UART_TX
+                                           UART_RX
+ 2017 Microchip Technology Inc.                                                            DS00002514A-page 17
+
+
+USB4715
+5.0      MODES OF OPERATION
+The device provides two main modes of operation: Standby Mode and Hub Mode. These modes are controlled via the
+RESET_N pin, as shown in Table 5-1.
+TABLE 5-1:         MODES OF OPERATION
+  RESET_N Input                                                  Summary
+         0            Standby Mode: This is the lowest power mode of the device. No functions are active
+                      other than monitoring the RESET_N input. All port interfaces are high impedance and
+                      the PLL is halted. Refer to Section 8.9, "Resets" for additional information on
+                      RESET_N.
+         1            Hub (Normal) Mode: The device operates as a configurable USB hub. This mode has
+                      various sub-modes of operation, as detailed in Figure 5-1. Power consumption is based
+                      on the number of active ports, their speed, and amount of data received.
+The flowchart in Figure 5-1 details the modes of operation and details how the device traverses through the Hub Mode
+stages (shown in bold). The remaining sub-sections provide more detail on each stage of operation.
+FIGURE 5-1:            HUB MODE FLOWCHART
+                                                  RESET_N deasserted
+                                              (SPI_INIT)                      (CFG_ROM)
+                                                        In SPI Mode &    NO          Load Config from
+                                                        Ext. SPI ROM
+                                                           present?                     Internal ROM
+                                                                 YES
+                                                                              (CFG_STRAP)
+                                                                                        Modify Config
+                                                           Run From
+                                                                                      Based on Config
+                                                      External SPI ROM
+                                                                                            Straps
+                                                                              YES
+                                                                                      Configuration 5?
+                                                                                                NO
+                      Perform SMBus/I2C        YES
+                                                      SMBus2 Pull-ups?
+                          Initialization
+                                                                 NO
+                                              (SMBUS _CHECK)
+                  NO
+                        SOC Done?
+                (CFG_SOC)          YES
+                                                         Combine OTP
+                                                          Config Data
+                                              (CFG_OTP)
+                                                          Hub Connect
+                                                       (USB_ATTACH )
+                                                      Normal Operation
+                                                     (NORMAL_MODE)
+DS00002514A-page 18                                                                          2017 Microchip Technology Inc.
+
+
+                                                                                                     USB4715
+5.1        Boot Sequence
+5.1.1        STANDBY MODE
+If the RESET_N pin is asserted, the hub will be in Standby Mode. This mode provides a very low power state for maxi-
+mum power efficiency when no signaling is required. This is the lowest power state. In Standby Mode all downstream
+ports are disabled, the USB data pins are held in a high-impedance state, all transactions immediately terminate (no
+states saved), all internal registers return to their default state, the PLL is halted, and core logic is powered down in order
+to minimize power consumption. Because core logic is powered off, no configuration settings are retained in this mode
+and must be re-initialized after RESET_N is negated high.
+5.1.2        SPI INITIALIZATION STAGE (SPI_INIT)
+The first stage, the initialization stage, occurs on the deassertion of RESET_N. In this stage, the internal logic is reset,
+the PLL locks if a valid clock is supplied, and the configuration registers are initialized to their default state. The internal
+firmware then checks for an external SPI ROM. The firmware looks for an external SPI flash device that contains a valid
+signature of “2DFU” (device firmware upgrade) beginning at address 0xFFFA. If a valid signature is found, then the SPI
+Firmware/external SPI ROM is enabled and the code execution begins at address 0x0000 in the external SPI device. If
+a valid signature is not found, then execution continues from internal ROM (CFG_ROM stage).
+When using an external SPI ROM, a minimum of 2.2 Mbit is required, and 60 MHz or faster SPI ROM must be used.
+Both 1- and 2-bit SPI ROM are supported. For optimum throughput, a 2-bit SPI ROM is recommended. Both mode 0
+and mode 3 SPI flashes are supported.
+If the system is not strapped for SPI Mode, code execution will continue from internal ROM (CFG_ROM stage).
+5.1.3        CONFIGURATION FROM INTERNAL ROM STAGE (CFG_ROM)
+In this stage, the internal firmware loads the default values from the internal ROM. Most of the hub configuration regis-
+ters, USB descriptors, electrical settings, etc. will be initialized in this state even when running from SPI.
+5.1.4        CONFIGURATION STRAP READ STAGE (CFG_STRAP)
+In this stage, the firmware reads the following configuration straps to override the default values:
+•   CONFIG_STRAP_[2:1]
+•   PRT_DIS_P[4:1]
+•   PRT_DIS_M[4:1]
+•   CFG_NON_REM
+•   CFG_BC_EN
+If the CONFIG_STRAP_[2:1] pins are set to Configuration 5, the device will move to the SMBUS_CHECK stage, other-
+wise it move to the CFG_OTP stage. Refer to Section 3.3, "Configuration Straps and Programmable Functions" for infor-
+mation on usage of the various device configuration straps.
+5.1.5        SMBUS CHECK STAGE (SMBUS_CHECK)
+Based on the PROG_FUNC[8:1] configuration selected (refer to Section 3.3.4, "PROG_FUNC[8:1] Configuration (CON-
+FIG_STRAP_[2:1])"), the firmware will check for the presence of external pull up resistors on the SMBus slave program-
+mable function pins. If 10K pull-ups are detected on both pins, the device will be configured as an SMBus slave, and
+the next state will be CFG_SOC. If a pull-up is not detected in either of the pins, the next state is CFG_OTP.
+5.1.6        SOC CONFIGURATION STAGE (CFG_SOC)
+In this stage, the SOC can modify any of the default configuration settings specified in the integrated ROM, such as USB
+device descriptors, port electrical settings, and control features such as downstream battery charging.
+In this stage the firmware will wait indefinitely for the SMBus/I2C configuration there is no time limit on this stage. The
+external SMBus master writes to register 0xFF, to end the configuration in legacy mode. In non-legacy mode, the SMBus
+command USB_ATTACH (opcode 0xAA55) or USB_ATTACH_WITH_SMBUS (opcode 0xAA56) will finish the configu-
+ration.
+5.1.7        OTP CONFIGURATION STAGE (CFG_OTP)
+Once the SOC has indicated that it is done with configuration, all configuration data is combined in this stage. The
+default data, the SOC configuration data, and the OTP data are all combined in the firmware and the device is pro-
+grammed.
+ 2017 Microchip Technology Inc.                                                                           DS00002514A-page 19
+
+
+USB4715
+   Note:      Changes to hub registers made in OTP memory space are not visible via SMBus during CFG_SOC stage.
+             Any register which is modified via SMBus during SOC_CFG and also modified in the OTP memory will exit
+             the configuration stages with the value as programmed in the OTP memory.
+5.1.8        HUB CONNECT STAGE (USB_ATTACH)
+Once the hub registers are updated through default values, SMBus master, and OTP, the device firmware will enable
+attaching the USB host by setting the USB_ATTACH bit in the HUB_CMD_STAT register. The device will remain in the
+Hub Connect stage indefinitely until the VBUS function is deasserted/assertion of external RESET_N pin.
+5.1.9        NORMAL MODE (NORMAL_MODE)
+Lastly, the hub enters Normal Mode of operation. In this stage full USB operation is supported under control of the USB
+Host on the upstream port. The device will remain in the normal mode until the operating mode is changed by the USB
+Host.
+If RESET_N is asserted low, then Standby Mode is entered. The device may then be placed into any of the designated
+hub stages. Asserting a soft disconnect on the upstream port will cause the hub to return to the Hub Connect stage until
+the soft disconnect is negated.
+DS00002514A-page 20                                                                       2017 Microchip Technology Inc.
+
+
+                                                                                               USB4715
+6.0       DEVICE CONFIGURATION
+The device supports a large number of features (some mutually exclusive), and must be configured in order to correctly
+function when attached to a USB host controller. The hub can be configured either internally or externally depending on
+the implemented interface.
+Microchip provides a comprehensive software programming tool, MPLAB Connect (formerly ProTouch2), for OTP con-
+figuration of various USB4715 functions and registers. All configuration is to be performed via the MPLAB Connect Con-
+figurator programming tool. For additional information on this tool, refer to th MPLAB Connect Configurator
+programming tool product page at http://www.microchip.com/design-centers/usb/mplab-connect-configurator.
+Additional information on configuring the USB4715 via SMBus is provided in the AN2439 - Configuration of the
+USB491x/USB492x/USB4715” application note, which contains details on the hub operational mode, SOC configuration
+stage, OTP configuration, USB configuration, and configuration register definitions. This application note, along with
+other USB4715 resources, can be found on the Microchip USB4715 product page at www.microchip.com/USB4715.
+   Note:     Device configuration straps and programmable pins are detailed in Section 3.3, "Configuration Straps and
+             Programmable Functions," on page 12.
+             Refer to Section 7.0, "Device Interfaces" for detailed information on each device interface.
+ 2017 Microchip Technology Inc.                                                                    DS00002514A-page 21
+
+
+USB4715
+7.0       DEVICE INTERFACES
+The USB4715 provides multiple interfaces for configuration, external memory access, etc.. This section details the var-
+ious device interfaces and their usage:
+• SPI/SQI Master Interface
+• SMBus/I2C Master/Slave Interfaces
+• I2S Interface
+• UART Interface
+  Note:     For details on how to enable each interface, refer to Section 3.3, "Configuration Straps and Programmable
+            Functions".
+            
+            For information on device connections, refer to Section 4.0, "Device Connections". For information on
+            device configuration, refer to Section 6.0, "Device Configuration".
+            
+            Microchip provides a comprehensive software programming tool, MPLAB Connect (formerly ProTouch2),
+            for configuring the USB4715 functions, registers and OTP memory. All configuration is to be performed via
+            the MPLAB Connect Configurator programming tool. For additional information on this tool, refer to th
+            MPLAB Connect Configurator programming tool product page at http://www.microchip.com/design-cen-
+            ters/usb/mplab-connect-configurator.
+7.1       SPI/SQI Master Interface
+The SPI/SQI controller has two basic modes of operation: execution of an external hub firmware image, or the USB to
+SPI bridge. On power up, the firmware looks for an external SPI flash device that contains a valid signature of 2DFU
+(device firmware upgrade) beginning at address 0xFFFA. If a valid signature is found, then the external ROM mode is
+enabled and the code execution begins at address 0x0000 in the external SPI device. If a valid signature is not found,
+then execution continues from internal ROM and the SPI interface can be used as a USB to SPI bridge.
+The second mode of operation is the USB to SPI bridge operation. Additional details on this feature can be found in
+Section 8.5, "USB to SPI Bridging" as well as the AN2430 - USB to SPI Bridging with USB4715 and USB49xx application
+note.
+Table 7-1 details how the associated pins are mapped in SPI vs. SQI mode
+           TABLE 7-1:         SPI/SQI PIN USAGE
+                 SPI Mode                SQI Mode                              Description
+                 SPI_CE_N                SQI_CE_N                  SPI/SQI Chip Enable (Active Low)
+                  SPI_CLK                SQI_CLK                             SPI/SQI Clock
+                   SPI_DO                  SQI_D0                    SPI Data Out; SQI Data I/O 0
+                   SPI_DI                  SQI_D1                     SPI Data In; SQI Data I/O 1
+                      -                    SQI_D2                            SQI Data I/O 2
+                      -                    SQI_D3                            SQI Data I/O 3
+  Note:     For SPI timing information, refer to Section 9.6.8, "SPI/SQI Timing".
+DS00002514A-page 22                                                                         2017 Microchip Technology Inc.
+
+
+                                                                                                USB4715
+7.2        SMBus/I2C Master/Slave Interfaces
+The USB4715 provides two independent SMBus/I2C controllers SMBus 1 and SMBus 2, which can be used to access
+internal device run time registers or program the internal OTP memory. SMBus 1 is used as the USB to SMBus/I2C
+bridge, and SMBus 2 is used as the slave interface. The device contains two 128 byte buffers to enable simultaneous
+master/slave operation and to minimize firmware overhead in processed SMBus/I2C packets.
+The SMBus 1 and SMBus 2 interfaces are assigned to programmable pins (PROG_FUNC_x) and therefore the device
+must be programmed into specific configurations to enable both interfaces. SMBus 1 is available in all CON-
+FIG_STRAP[1:2] settings. SMBus 2 is available only with specific CONFIG_STRAP[1:2] settings. Refer to Section
+3.3.4, "PROG_FUNC[8:1] Configuration (CONFIG_STRAP_[2:1])" for additional information.
+   Note:     For SMBus/I2C timing information, refer to Section 9.6.5, "SMBus Timing" and Section 9.6.6, "I2C Timing".
+7.3        I2S Interface
+The USB4715 provides an integrated I2S interface to facilitate the connection of digital audio devices. The I2S interface
+conforms to the voltage, power, and timing characteristics/specifications as set forth in the I2S-Bus Specification, and
+consists of the following signals:
+•  I2S_SDIN: Serial Data Input
+•  I2S_SDOUT: Serial Data Output
+•  I2S_SCK: Serial Clock
+•  I2S_LRCK: Left/Right Clock (SS/FSYNC)
+•  I2S_MCLK: Master Clock
+Each audio connection is half-duplex, so I2S_SDOUT exists only on the transmit side and I2S_SDIN exists only on the
+receive side of the interface. Some codecs refer to the Serial Clock (I2S_SCK) as Baud/Bit Clock (BCLK). Also, the Left/
+Right Clock is commonly referred to as LRC or LRCK. The I2S and other audio protocols refer to LRC as Word Select
+(WS).
+The following codec is supported by default:
+• Analog Devices ADAU1961 (24-bit 96KHz)
+   Note:     For I2S timing information, refer to Section 9.6.7, "I2S Timing".
+7.3.1        MODES OF OPERATION
+The USB audio class operates in three ways: Asynchronous, Synchronous and Adaptive. There are also multiple oper-
+ating modes, such as hi-res, streaming, etc.. Typically for USB devices, inputs such as microphones are Asynchronous,
+and output devices such as speakers are Adaptive. The hardware is set up to handle all three modes of operation. It is
+recommended that the following configuration be used: Asynchronous IN; Adaptive OUT; 48Khz streaming mode; Two
+channels: 16 bits per channel.
+7.3.1.1        Asynchronous IN 48KHz Streaming
+In this mode, the codec sampling clock is set to 48Khz based on the local oscillator. This clock is never changed. The
+data from the codec is fed into the input FIFO. Since the sampling clock is asynchronous to the host clock, the amount
+of data captured in every USB frame will vary. This issue is left for the host to handle. The input FIFO has two markers,
+a low water mark (THRESHOLD_LOW_VAL), and a high water mark (THRESHOLD_HIGH_VAL). There are three reg-
+isters to determine how much data to send back in each frame. If the amount of data in the FIFO exceeds the high water
+mark, then HI_PKT_SIZE worth of data is sent. If the data is between the high and low water mark, the normal MID_P-
+KT_SIZE amount of data is sent. If the data is below the low water mark, LO_PKT_SIZE worth of data is sent.
+ 2017 Microchip Technology Inc.                                                                      DS00002514A-page 23
+
+
+USB4715
+7.3.1.2         Adaptive OUT 48KHz Streaming
+In this mode, the codec sampling clock is initially set to 48Khz based on the local oscillator. The host data is fed into the
+OUT FIFO. The host will send the same amount of data on every frame, i.e. 48KHz of data based on the host clock. The
+codec sampling clock is asynchronous to the host clock. This will cause the amount of data in the OUT FIFO to vary. If
+the amount of data in the FIFO exceeds the high water mark, then the sampling clock is increased. If the data is between
+the high and low water mark, the sampling clock does not change. If the data is below the low water mark, the sampling
+clock is decreased.
+7.3.1.3         Synchronous Operation
+For synchronous operation, the internal clock must be synchronized with the host SOF. The Frame SOF is nominally
+1mS. Since there is significant jitter in the SOFs, there is circuitry provided to measure the SOFs over a long period of
+time to get a more accurate reading. The calculated host frequency is used to calculate the codec sampling clock.
+7.4         UART Interface
+The device incorporates a configurable universal asynchronous receiver/transmitter (UART) that is functionally compat-
+ible with the NS 16550AF, 16450, 16450 ACE registers and the 16C550A. The UART performs serial-to-parallel con-
+version on received characters and parallel-to-serial conversion on transmit characters. Two sets of baud rates are
+provided: 24 Mhz and 16 MHz. When the 24 Mhz source clock is selected, standard baud rates from 50 to 115.2 K are
+available. When the source clock is 16 MHz, baud rates from 125 K to 1,000 K are available. The character options are
+programmable for the transmission of data in word lengths of from five to eight, 1 start bit; 1, 1.5 or 2 stop bits; even,
+odd, sticky or no parity; and prioritized interrupts. The UART contains a programmable baud rate generator that is capa-
+ble of dividing the input clock or crystal by a number from 1 to 65535. The UART is also capable of supporting the MIDI
+data rate.
+7.4.1          TRANSMIT OPERATION
+Transmission is initiated by writing the data to be sent to the TX Holding Register or TX FIFO (if enabled). The data is
+then transferred to the TX Shift Register together with a start bit and parity and stop bits as determined by settings in
+the Line Control Register. The bits to be transmitted are then shifted out of the TX Shift Register in the order Start bit,
+Data bits (LSB first), Parity bit, Stop bit, using the output from the Baud Rate Generator (divided by 16) as the clock.
+If enabled, a TX Holding Register Empty interrupt will be generated when the TX Holding Register or the TX FIFO (if
+enabled) becomes empty.
+When FIFOs are enabled (i.e. bit 0 of the FIFO Control Register is set), the UART can store up to 16 bytes of data for
+transmission at a time. Transmission will continue until the TX FIFO is empty. The FIFO’s readiness to accept more data
+is indicated by interrupt.
+7.4.2          RECEIVE OPERATION
+Data is sampled into the RX Shift Register using the Receive clock, divided by 16. The Receive clock is provided by the
+Baud Rate Generator. A filter is used to remove spurious inputs that last for less than two periods of the Receive clock.
+When the complete word has been clocked into the receiver, the data bits are transferred to the RX Buffer Register or
+to the RX FIFO (if enabled) to be read by the CPU. (The first bit of the data to be received is placed in bit 0 of this reg-
+ister.) The receiver also checks that the parity bit and stop bits are as specified by the Line Control Register.
+If enabled, an RX Data Received interrupt will be generated when the data has been transferred to the RX Buffer Reg-
+ister or, if FIFOs are enabled, when the RX Trigger Level has been reached. Interrupts can also be generated to signal
+RX FIFO Character Timeout, incorrect parity, a missing stop bit (frame error) or other Line Status errors.
+When FIFOs are enabled (i.e. bit 0 of the FIFO Control Register is set), the UART can store up to 16 bytes of received
+data at a time. Depending on the selected RX Trigger Level, interrupt will go active to indicate that data is available when
+the RX FIFO contains 1, 4, 8 or 14 bytes of data.
+DS00002514A-page 24                                                                          2017 Microchip Technology Inc.
+
+
+                                                                                               USB4715
+8.0         FUNCTIONAL DESCRIPTIONS
+This section details various USB4715 functions, including:
+•   Downstream Battery Charging
+•   FlexConnect
+•   USB to GPIO Bridging
+•   USB to SMBus/I2C Bridging
+•   USB to SPI Bridging
+•   USB to UART Bridging
+•   Link Power Management (LPM)
+•   Port Power Control
+•   Resets
+8.1         Downstream Battery Charging
+The device can be configured by an OEM to have any of the downstream ports support battery charging. The hub’s role
+in battery charging is to provide acknowledgment to a device’s query as to whether the hub system supports USB battery
+charging. The hub silicon does not provide any current or power FETs or any additional circuitry to actually charge the
+device. Those components must be provided externally by the OEM.
+FIGURE 8-1:              BATTERY CHARGING EXTERNAL POWER SUPPLY
+                                                                            DC Power
+                                INT
+                                SCL
+                                  Microchip
+                                SDA     SOC
+                                     Hub          PRT_CTL[n]
+                                                                                VBUS[n]
+If the OEM provides an external supply capable of supplying current per the battery charging specification, the hub can
+be configured to indicate the presence of such a supply from the device. This indication, via a handshake on the D+ and
+D- at the start of the connection with the device, is on a per port basis. For example, the OEM can configure two ports
+to support battery charging through high current power FETs and leave the other two ports as standard USB ports.
+For detailed information on utilizing the USB4715 battery charging feature, refer to the application note “USB Battery
+Charging with Microchip USB4715 and USB49xx Hubs”, which can be found on the Microchip USB4715 product page
+at www.microchip.com/USB4715.
+8.2         FlexConnect
+The USB4715 allows any of the 4 FlexConnect capable USB ports to assume the role of USB host at any time during
+hub operation. This host role exchange feature is called FlexConnect.
+This functionality can be used in two primary ways:
+1.    Host Swapping: This functionality can be achieved through a hub wherein a host and device can agree to swap
+      the host/device relationship; The host becomes a device, and the device becomes a host.
+2.    Host Sharing: A USB ecosystem can be shared between multiple hosts. Note that only 1 host may access to
+      the USB tree at a time.
+FlexConnect can be enabled through any of the following three methods:
+• SMBus Control: An embedded SMBus master can control the state of the FlexConnect feature through basic
+    write/read operations.
+• USB Command: FlexConnect can be initiated via a special USB command directed to the hub’s internal Hub
+ 2017 Microchip Technology Inc.                                                                    DS00002514A-page 25
+
+
+USB4715
+   Feature Controller device.
+• Direct Pin Control: Any available GPIO pin on the hub can be assigned the role of a FlexConnect control pin.
+For detailed information on utilizing the USB4715 FlexConnect feature, refer to the application note “AN2341 - USB4715
+FlexConnect Operation”, which can be found on the Microchip USB4715 product page at www.microchip.com/
+USB4715.
+8.3       USB to GPIO Bridging
+The USB to GPIO bridging feature of the USB4715 provides system designers expanded system control and potential
+BOM reduction. General Purpose Input/Outputs (GPIOs) may be used for any general 3.3V level digital control and input
+functions.
+Commands may be sent from the USB Host to the internal Hub Feature Controller device in the Microchip hub to per-
+form the following functions:
+•  Set the direction of the GPIO (input or output)
+•  Enable a pull-up resistor
+•  Enable a pull-down resistor
+•  Read the state
+•  Set the state
+For detailed information on utilizing the USB4715 USB to GPIO bridging feature, refer to the application note “AN2437
+- USB to GPIO Bridging with Microchip USB4715 and USB49xx Hubs”, which can be found on the Microchip USB4715
+product page at www.microchip.com/USB4715.
+8.4       USB to SMBus/I2C Bridging
+The USB to SMBus/I2C bridging feature of the USB4715 provides system designers expanded system control and
+potential BOM reduction. The use of a separate USB to SMBus/I2C device is no longer required and a downstream USB
+port is not lost, as occurs when a standalone USB to SMBus/I2C device is implemented.
+Commands may be sent from the USB Host to the internal Hub Feature Controller device in the Microchip hub to per-
+form the following functions:
+• Configure SMBus/I2C Pass-Through Interface
+• SMBus/I2C Write
+• SMBus/I2C Read
+For detailed information on utilizing the USB4715 USB to SMBus/I2C bridging feature, refer to the application note
+“AN2438 - USB to I2C Bridging with Microchip USB4715 and USB49xx Hubs”, which can be found on the Microchip
+USB4715 product page at www.microchip.com/USB4715.
+8.5       USB to SPI Bridging
+The USB to SPI bridging feature of the USB4715 provides system designers expanded system control and potential
+BOM reduction. The use of a separate USB to SPI device is no longer required and a downstream USB port is not lost,
+as occurs when a standalone USB to SPI device is implemented.
+Commands may be sent from the USB Host to the internal Hub Feature Controller device in the Microchip hub to per-
+form the following functions:
+• Enable SPI Pass-Through Interface
+• SPI Write/Read
+• Disable SPI Pass-Through Interface
+For detailed information on utilizing the USB4715 USB to SPI bridging feature, refer to the application note “AN2430 -
+USB to SPI Bridging with Microchip USB4715 and USB49xx Hubs”, which can be found on the Microchip USB4715
+product page at www.microchip.com/USB4715.
+DS00002514A-page 26                                                                        2017 Microchip Technology Inc.
+
+
+                                                                                                   USB4715
+8.6        USB to UART Bridging
+The USB to UART bridging feature of the USB4715 provides system designers with expanded system control and
+potential BOM reduction. When using Microchip’s USB hubs, a separate USB to UART device is no longer required and
+a downstream USB port is not lost, as occurs when a standalone USB to UART device is implemented.
+Commands may be sent from the USB Host to the internal Hub Feature Controller device in the Microchip hub to per-
+form the following functions:
+•  Enable/Disable UART Interface
+•  Set UART Interface Baud Rate
+•  UART Write
+•  UART Read
+For detailed information on utilizing the USB4715 USB to UART bridging feature, refer to the application note “AN2426
+- USB to UART Bridging with Microchip USB4715, USB4916, and USB4927 Hubs”, which can be found on the Microchip
+USB4715 product page at www.microchip.com/USB4715.
+8.7        Link Power Management (LPM)
+The device supports the L0 (On), L1 (Sleep), and L2 (Suspend) link power management states. These supported LPM
+states offer low transitional latencies in the tens of microseconds versus the much longer latencies of the traditional USB
+suspend/resume in the tens of milliseconds. The supported LPM states are detailed in Table 8-1.
+TABLE 8-1:          LPM STATE DEFINITIONS
+        State                           Description                                    Entry/Exit Time to L0
+          L2           Suspend                                           Entry: ~3 ms
+                                                                         Exit: ~2 ms (from start of RESUME)
+          L1           Sleep                                             Entry: <10 us
+                                                                         Exit: <50 us
+          L0           Fully Enabled (On)                                -
+8.8        Port Power Control
+Port power and over-current sense share the same pin (PRT_CTLx) for each port. These functions can be controlled
+directly from the USB hub, or via the processor.
+The device can be configured into the following port control modes:
+• Ganged Mode
+• Combined Mode
+8.8.1         PORT CONNECTION IN GANGED MODE
+In this mode, one pin (PRT_CTL_GANG) is used to control port power and over-current sensing.
+8.8.2         PORT CONNECTION IN COMBINED MODE
+8.8.2.1        Port Power Control using USB Power Switch
+When operating in combined mode, the device will have one port power control and over-current sense pin for each
+downstream port. When disabling port power, the driver will actively drive a '0'. To avoid unnecessary power dissipation,
+the pull-up resistor will be disabled at that time. When port power is enabled, it will disable the output driver and enable
+the pull-up resistor, making it an open drain output. If there is an over-current situation, the USB Power Switch will assert
+the open drain OCS signal. The Schmidt trigger input will recognize that as a low. The open drain output does not inter-
+fere. The over-current sense filter handles the transient conditions such as low voltage while the device is powering up.
+ 2017 Microchip Technology Inc.                                                                       DS00002514A-page 27
+
+
+USB4715
+FIGURE 8-2:              PORT POWER CONTROL WITH USB POWER SWITCH
+                                                           Pull‐Up Enable
+                                                                                               5V
+                                                                      50k
+                                                                           PRT_CTLx
+                                                                                         OCS
+                                                                                           USB Power
+                                                                                             Switch
+                                                                                        EN
+                      PRTPWR
+                                                                                               USB
+                                                                                              Device
+                                                        FILTER
+                             OCS
+8.8.2.2         Port Power Control using Poly Fuse
+When using the device with a poly fuse, there is no need for an output power control. To maintain consistency, the same
+circuit will be used. A single port power control and over-current sense for each downstream port is still used from the
+Hub's perspective. When disabling port power, the driver will actively drive a '0'. This will have no effect as the external
+diode will isolate pin from the load. When port power is enabled, it will disable the output driver and enable the pull-up
+resistor. This means that the pull-up resistor is providing 3.3 volts to the anode of the diode. If there is an over-current
+situation, the poly fuse will open. This will cause the cathode of the diode to go to 0 volts. The anode of the diode will
+be at 0.7 volts, and the Schmidt trigger input will register this as a low resulting in an over-current detection. The open
+drain output does not interfere.
+FIGURE 8-3:              PORT POWER CONTROL USING A POLY FUSE
+                                                                                                   5V
+                                                         Pull-Up Enable
+                                                                                                      Poly Fuse
+                                                                    50k
+                                                                          PRT_CTLx
+                                                                                                 USB
+                                                                                                Device
+                    PRTPWR
+                                                        FILTER
+                           OCS
+DS00002514A-page 28                                                                            2017 Microchip Technology Inc.
+
+
+                                                                                                   USB4715
+8.8.2.3              Port Power Control with Single Poly Fuse and Multiple Loads
+Many customers use a single poly fuse to power all their devices. For the ganged situation, all power control pins must
+be tied together.
+FIGURE 8-4:                       PORT POWER CONTROL WITH GANGED CONTROL WITH POLY FUSE
+                                                                                              5V
+                                                    Pull-Up Enable
+                                                                    50k
+                                                                        PRT_CTLz                 Poly Fuse
+                                        Pull-Up Enable
+                                                         50k
+                                                                        PRT_CTLy
+                         Pull-Up Enable
+                                        50k
+                                                              PRT_CTLx
+                                                                                             USB         USB       USB
+   PRTPWR
+                                                                                            Device      Device    Device
+        OCS
+8.9            Resets
+The device includes the following chip-level reset sources:
+• Power-On Reset (POR)
+• External Chip Reset (RESET_N)
+• USB Bus Reset
+8.9.1             POWER-ON RESET (POR)
+A power-on reset occurs whenever power is initially supplied to the device, or if power is removed and reapplied to the
+device. A timer within the device will assert the internal reset per the specifications listed in Section 9.6.2, "Power-On
+and Configuration Strap Timing," on page 34.
+8.9.2             EXTERNAL CHIP RESET (RESET_N)
+A valid hardware reset is defined as assertion of RESET_N, after all power supplies are within operating range, per the
+specifications in Section 9.6.3, "Reset and Configuration Strap Timing," on page 35. While reset is asserted, the device
+(and its associated external circuitry) enters Standby Mode and consumes minimal current.
+Assertion of RESET_N causes the following:
+1.       The PHY is disabled and the differential pairs will be in a high-impedance state.
+2.       All transactions immediately terminate; no states are saved.
+3.       All internal registers return to the default state.
+4.       The external crystal oscillator is halted.
+5.       The PLL is halted.
+   Note:          All power supplies must have reached the operating levels mandated in Section 9.2, "Operating Condi-
+                  tions**," on page 31, prior to (or coincident with) the assertion of RESET_N.
+ 2017 Microchip Technology Inc.                                                                        DS00002514A-page 29
+
+
+USB4715
+8.9.3       USB BUS RESET
+In response to the upstream port signaling a reset to the device, the device performs the following:
+1.   Sets default address to 0.
+2.   Sets configuration to Unconfigured.
+3.   Moves device from suspended to active (if suspended).
+4.   Complies with the USB Specification for behavior after completion of a reset sequence.
+The host then configures the device in accordance with the USB Specification.
+   Note:    The device does not propagate the upstream USB reset to downstream devices.
+DS00002514A-page 30                                                                      2017 Microchip Technology Inc.
+
+
+                                                                                                                                   USB4715
+9.0      OPERATIONAL CHARACTERISTICS
+9.1      Absolute Maximum Ratings*
++3.3 V Supply Voltage (VDDIO33, VDDPLLREF33) (Note 9-1). . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -0.5 V to +4.6 V
+Positive voltage on input signal pins, with respect to ground (Note 9-2). . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . +4.6 V
+Negative voltage on input signal pins, with respect to ground . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -0.5 V
+Positive voltage on XTALI/CLK_IN, with respect to ground . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .+2.1 V
+Positive voltage on USB DP/DM signal pins, with respect to ground . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .+6.0 V
+Storage Temperature . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .-55oC to +150oC
+Junction Temperature . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . +125oC
+Lead Temperature Range . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Refer to JEDEC Spec. J-STD-020
+HBM ESD Performance . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5 kV
+  Note 9-1       When powering this device from laboratory or system power supplies, it is important that the absolute
+                 maximum ratings not be exceeded or device failure can result. Some power supplies exhibit voltage
+                 spikes on their outputs when AC power is switched on or off. In addition, voltage transients on the
+                 AC power line may appear on the DC output. If this possibility exists, it is suggested to use a clamp
+                 circuit.
+  Note 9-2       This rating does not apply to the following pins: All USB DM/DP pins, XTAL1/CLK_IN, and XTALO
+*Stresses exceeding those listed in this section could cause permanent damage to the device. This is a stress rating
+only. Exposure to absolute maximum rating conditions for extended periods may affect device reliability. Functional
+operation of the device at any condition exceeding those indicated in Section 9.2, "Operating Conditions**", Section 9.5,
+"DC Specifications", or any other applicable section of this specification is not implied.
+9.2      Operating Conditions**
++3.3 V Supply Voltage (VDDIO33, VDDPLLREF33) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . +3.0 V to +3.6 V
+Input Signal Pins Voltage (Note 9-2) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -0.3 V to +3.6 V
+XTALI/CLK_IN Voltage . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -0.3 V to +1.5 V
+USB 2.0 DP/DM Signal Pins Voltage . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -0.3 V to +5.5 V
+Ambient Operating Temperature in Still Air (TA) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Note 9-3
++3.3 V Supply Voltage Rise Time (TRT in Figure 9-1) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 400 µs
+  Note 9-3       0oC to +70oC for commercial version, -40oC to +85oC for industrial and Grade 3 Automotive versions.
+**Proper operation of the device is guaranteed only within the ranges specified in this section.
+  Note:      Do not drive input signals without power supplied to the device.
+FIGURE 9-1:               POWER SUPPLY RISE TIME MODEL
+                                       Voltage
+                                                                              TRT
+                                    VDDIO33/                                                                  3.3 V       100%
+                               VDDPLLREF33
+                                                                                                       90%
+                                                   10%
+                                         VSS
+                                                          t10%                                      t90%          Time
+ 2017 Microchip Technology Inc.                                                                                                           DS00002514A-page 31
+
+
+USB4715
+   Note:     The rise time for the 3.3V supply can be extended to 100ms max if RESET_N is actively driven low, typi-
+             cally by another IC, until 1 μs after all supplies are within operating range.
+9.3       Package Thermal Specifications
+TABLE 9-1:          PACKAGE THERMAL PARAMETERS
+               Symbol                                     °C/W                              Velocity (Meters/s)
+                                                            28                                       0
+                  JA
+                                                            25                                       1
+                  JB                                       15                                       0
+                  JT                                      0.2                                       0
+                  JC                                      2.4                                       0
+   Note:     Thermal parameters are measured or estimated for devices in a multi-layer 2S2P PCB per JESDN51.
+9.4       Power Consumption
+This section details the power consumption of the device as measured during various modes of operation. Power dis-
+sipation is determined by temperature, supply voltage, and external source/sink requirements.
+TABLE 9-2:          DEVICE POWER CONSUMPTION
+                                                                     Typical Current       Maximum
+                           Description
+                                                                            (mA)         Current (mA)
+ Reset Current (mA)                                                         0.40             3.60
+ Suspend Current (mA)                                                       0.40             3.60
+ Idle                                                                         56              67
+ Active Operation (4 Hi-Speed Devices)                                       148             167
+ Active Operation (1 Hi-Speed, 1 Full-Speed Device)                           73              74
+ Active Operation (2 Hi-Speed, 2 Full-Speed Devices)                          97              98
+ Active Operation (2 Hi-Speed, 1 Full-Speed Device)                           96              97
+ Active Operation (1 Full-Speed Device)                                       57              58
+ Active Operation (4 Full-Speed Devices)                                      64              65
+ Active Operation (1 Hi-Speed Device)                                         73              74
+ Active Operation (2 Hi-Speed Devices)                                       102             103
+ Active Operation (3 Hi-Speed Devices)                                       122             123
+ Active Operation (FlexConnect enabled on 1 port, Hi-Speed                   149             150
+ data transfer on 4 ports)
+DS00002514A-page 32                                                                          2017 Microchip Technology Inc.
+
+
+                                                                                           USB4715
+9.5       DC Specifications
+TABLE 9-3:        I/O DC ELECTRICAL CHARACTERISTICS
+          Parameter              Symbol           Min            Typical          Max          Units      Notes
+ I Type Input Buffer
+ Low Input Level                   VIL            -0.3                          Note 9-4         V
+ High Input Level                  VIH            1.25                        VDDIO33+0.3        V
+ IS Type Input Buffer
+ Low Input Level                   VIL            -0.3                          Note 9-4         V
+ High Input Level                  VIH            1.25                        VDDIO33+0.3        V
+ Schmitt Trigger Hysteresis       VHYS            100              160             240          mV
+ (VIHT - VILT)
+ O4 Type Output Buffer
+ Low Output Level                  VOL                                             0.4           V      IOL = 4 mA
+ High Output Level                 VOH         VDD33-0.4                                         V     IOH = -4 mA
+ O12 Type Output Buffer
+ Low Output Level                  VOL                                             0.4           V     IOL = 12 mA
+ High Output Level                 VOH         VDD33-0.4                                         V    IOH = -12 mA
+ OD12 Type Output Buffer
+ Low Output Level                  VOL                                             0.4           V     IOL = 12 mA
+ ICLK Type Input Buffer                                                                                 Note 9-5
+ (XTALI/CLK_IN Input)
+ Low Input Level                   VIL            -0.2                            0.35           V
+ High Input Level                  VIH             0.9                             1.2           V
+ Input Capacitance                 CIN                                              2           pF
+ I/O-U Type Buffer                                                                                       Note 9-6
+ (See Note 9-6)
+   Note 9-4     0.42V for interfaces using open drain with pull-ups to voltages up to 2.1V, 
+                0.34V for interfaces using open drain with pull-ups to voltages greater than 2.1V
+   Note 9-5     XTALI can optionally be driven from a 25 MHz singled-ended clock oscillator.
+   Note 9-6     Refer to the Universal Serial Bus Revision 2.0 Specification for USB DC electrical characteristics.
+ 2017 Microchip Technology Inc.                                                                DS00002514A-page 33
+
+
+USB4715
+9.6        AC Specifications
+This section details the various AC timing specifications of the device.
+9.6.1        POWER SUPPLY AND RESET_N SEQUENCE TIMING
+Figure 9-2 illustrates the recommended power supply sequencing and timing for the device. RESET_N and/or VBUS_-
+DET should rise after or at the same rate as VDDIO33/VDDPLLREF33. VBUS_DET and RESET_N do not have any
+other timing dependencies.
+FIGURE 9-2:              POWER SUPPLY AND RESET_N SEQUENCE TIMING
+               VDDIO33/
+         VDDPLLREF33
+                                                               treset
+               RESET_N/
+              VBUS_DET
+TABLE 9-4:          POWER SUPPLY AND RESET_N SEQUENCE TIMING
+   Symbol                                 Description                               Min       Typ       Max      Units
+     treset     VDDIO33/VDDPLLREF33 to RESET_N/VBUS_DET rise time                     0                            ms
+9.6.2        POWER-ON AND CONFIGURATION STRAP TIMING
+Figure 9-3 illustrates the configuration strap valid timing requirements in relation to power-on, for applications where
+RESET_N is not used at power-on. In order for valid configuration strap values to be read at power-on, the following
+timing requirements must be met. The operational levels (Vopp) for the external power supplies are detailed in Section
+9.2, "Operating Conditions**," on page 31.
+FIGURE 9-3:              POWER-ON CONFIGURATION STRAP VALID TIMING
+              All External        Vopp
+          Power Supplies
+                                                  tcsh
+            Configuration
+                    Straps
+TABLE 9-5:          POWER-ON CONFIGURATION STRAP LATCHING TIMING
+   Symbol                                 Description                               Min       Typ       Max      Units
+      tcsh      Configuration strap hold after external power supplies at opera-      1                            ms
+                tional levels
+Device configuration straps are also latched as a result of RESET_N assertion. Refer to Section 9.6.3, "Reset and Con-
+figuration Strap Timing" for additional details.
+DS00002514A-page 34                                                                        2017 Microchip Technology Inc.
+
+
+                                                                                                 USB4715
+9.6.3         RESET AND CONFIGURATION STRAP TIMING
+Figure 9-4 illustrates the RESET_N pin timing requirements and its relation to the configuration strap pins. Assertion of
+RESET_N is not a requirement. However, if used, it must be asserted for the minimum period specified. Refer to Section
+8.9, "Resets" for additional information on resets. Refer to Section 3.3, "Configuration Straps and Programmable Func-
+tions" for additional information on configuration straps.
+FIGURE 9-4:               RESET_N CONFIGURATION STRAP TIMING
+                                                   trstia
+                RESET_N
+                                                                        tcsh
+             Configuration
+                     Straps
+TABLE 9-6:            RESET_N CONFIGURATION STRAP TIMING
+   Symbol                                   Description                               Min       Typ        Max      Units
+      trstia      RESET_N input assertion time                                         5                              s
+      tcsh        Configuration strap pins hold after RESET_N deassertion              1                              ms
+   Note:      The clock input must be stable prior to RESET_N deassertion.
+              
+              Configuration strap latching and output drive timings shown assume that the Power-On reset has finished
+              first otherwise the timings in Section 9.6.2, "Power-On and Configuration Strap Timing" apply.
+9.6.4         USB TIMING
+All device USB signals conform to the voltage, power, and timing characteristics/specifications as set forth in the Uni-
+versal Serial Bus 2.0 Specification. Please refer to the Universal Serial Bus Revision 2.0 Specification, available at http:/
+/www.usb.org/developers/docs/usb20_docs/.
+9.6.5         SMBUS TIMING
+All device SMBus signals conform to the voltage, power, and timing characteristics/specifications as set forth in the Sys-
+tem Management Bus Specification. Please refer to the System Management Bus Specification, Version 1.0, available
+at http://smbus.org/specs.
+9.6.6         I2C TIMING
+All device I2C signals conform to the 400KHz Fast Mode (Fm) voltage, power, and timing characteristics/specifications
+as set forth in the I2C-Bus Specification. Please refer to the I2C-Bus Specification, available at http://www.nxp.com/doc-
+uments/user_manual/UM10204.pdf.
+9.6.7         I2S TIMING
+All device I2S signals conform to the voltage, power, and timing characteristics/specifications as set forth in the I2S-Bus
+Specification. Please refer to the I2S-Bus Specification, available at http://www.nxp.com/acrobat_download/various/
+I2SBUS.pdf.
+ 2017 Microchip Technology Inc.                                                                       DS00002514A-page 35
+
+
+USB4715
+9.6.8       SPI/SQI TIMING
+This section specifies the SPI/SQI timing requirements for the device.
+FIGURE 9-5:             SPI/SQI TIMING
+                                                                                     tceh          tceh
+                          SPI_CE_N/
+                           SQI_CE_N
+                                                      tcel                    tfc
+                            SPI_CLK/
+                            SQI_CLK
+                                                                         tclq                 tdh
+                              SPI_DI/                                                Input
+                                                                                   data valid
+                     SQI_D[3:0] (in)
+                                                           tos toh
+                                                                       tov        toh
+                             SPI_DO/                        Output            Output
+                                                           data valid       data valid
+                    SQI_D[3:0] (out)
+TABLE 9-7:        SPI/SQI TIMING (30 MHZ OPERATION)
+  Symbol                                Description                                    Min         Typ      Max       Units
+      tfc     Clock frequency                                                                                 30       MHz
+     tceh     Chip enable (SPI_CE_N/SQI_CE_N) high time                                100                              ns
+     tclq     Clock to input data                                                                             13        ns
+      tdh     Input data hold time                                                       0                              ns
+      tos     Output setup time                                                          5                              ns
+      toh     Output hold time                                                           5                              ns
+      tov     Clock to output valid                                                      4                              ns
+     tcel     Chip enable (SPI_CE_N/SQI_CE_N) low to first clock                        12                              ns
+     tceh     Last clock to chip enable (SPI_CE_N/SQI_CE_N) high                        12                              ns
+TABLE 9-8:        SPI/SQI TIMING (60 MHZ OPERATION)
+  Symbol                                Description                                    Min         Typ      Max       Units
+      tfc     Clock frequency                                                                                 60       MHz
+     tceh     Chip enable (SPI_CE_N/SQI_CE_N) high time                                 50                              ns
+     tclq     Clock to input data                                                                             9         ns
+      tdh     Input data hold time                                                       0                              ns
+      tos     Output setup time                                                          5                              ns
+      toh     Output hold time                                                           5                              ns
+      tov     Clock to output valid                                                      4                              ns
+     tcel     Chip enable (SPI_CE_N/SQI_CE_N) low to first clock                        12                              ns
+     tceh     Last clock to chip enable (SPI_CE_N/SQI_CE_N) high                        12                              ns
+DS00002514A-page 36                                                                             2017 Microchip Technology Inc.
+
+
+                                                                                              USB4715
+9.7        Clock Specifications
+The device can accept either a 25MHz crystal or a 25MHz single-ended clock oscillator input. If the single-ended clock
+oscillator method is implemented, XTALO should be left unconnected and XTALI/CLK_IN should be driven with a
+nominal 0-3.3V clock signal. The input clock duty cycle is 40% minimum, 50% typical and 60% maximum.
+It is recommended that a crystal utilizing matching parallel load capacitors be used for the crystal input/output signals
+(XTALI/XTALO). The following circuit design (Figure 9-6) and specifications (Table 9-9) are required to ensure proper
+operation.
+FIGURE 9-6:            25MHZ CRYSTAL CIRCUIT
+                            USB4715
+                                                  XTALO
+                                                                               Y1
+                                                  XTALI
+                                                                                      C1              C2
+9.7.1        CRYSTAL SPECIFICATIONS
+It is recommended that a crystal utilizing matching parallel load capacitors be used for the crystal input/output signals
+(XTALI/XTALO). Refer to Table 9-9 for the recommended crystal specifications.
+TABLE 9-9:          CRYSTAL SPECIFICATIONS
+             Parameter                   Symbol         Min            Nom           Max          Units       Notes
+  Crystal Cut                                                       AT, typ
+  Crystal Oscillation Mode                                    Fundamental Mode
+  Crystal Calibration Mode                                 Parallel Resonant Mode
+  Frequency                               Ffund           -           25.000           -          MHz
+                              oC
+  Frequency Tolerance @ 25                 Ftol           -               -           ±50         PPM
+  Frequency Stability Over Temp           Ftemp           -               -           ±50         PPM
+  Frequency Deviation Over Time            Fage           -           ±3 to 5          -          PPM        Note 9-7
+  Total Allowable PPM Budget                              -               -          ±100         PPM
+  Shunt Capacitance                        CO             -            7 typ           -           pF
+  Load Capacitance                          CL            -           20 typ           -           pF
+  Drive Level                              PW            100              -            -           uW
+  Equivalent Series Resistance              R1            -               -           50            Ω
+                                                                                                   oC
+  Operating Temperature Range                         Note 9-8            -        Note 9-9
+  XTALI/CLK_IN Pin Capacitance                            -            3 typ           -           pF       Note 9-10
+  XTALO Pin Capacitance                                   -            3 typ           -           pF       Note 9-10
+ 2017 Microchip Technology Inc.                                                                   DS00002514A-page 37
+
+
+USB4715
+  Note 9-7      Frequency Deviation Over Time is also referred to as Aging.
+  Note 9-8      0 °C for commercial version, -40 °C for industrial and Grade 3 Automotive.
+  Note 9-9      +70 °C for commercial version, +85 °C for industrial and Grade 3 Automotive.
+  Note 9-10     This number includes the pad, the bond wire and the lead frame. PCB capacitance is not included
+                in this value. The XTALI/CLK_IN pin, XTALO pin and PCB capacitance values are required to
+                accurately calculate the value of the two external load capacitors. These two external load capacitors
+                determine the accuracy of the 25.000 MHz frequency.
+9.7.2        EXTERNAL REFERENCE CLOCK (CLK_IN)
+When using an external reference clock, the following input clock specifications are suggested:
+• 25 MHz
+• 50% duty cycle ±10%, ±100 ppm
+• Jitter < 100 ps RMS
+DS00002514A-page 38                                                                      2017 Microchip Technology Inc.
+
+
+                                                                                              USB4715
+10.0    PACKAGE INFORMATION
+  Note:     Package offerings are currently under review and are subject to change.
+                                                   48-VQFN (7x7 mm)
+                                      PIN 1
+                                                         USB4715i
+                                                         VRnnn e3          e3
+                                                             VCOO
+                                                       YYWWNNN
+                Legend:     i       Temperature range designator (Blank = commercial, i = industrial or
+                                    Grade 3 Automotive)
+                            V       Automotive (Blank for non-automotive versions)
+                            R       Product revision
+                            nnn     Internal code
+                            e3      Pb-free JEDEC® designator for Matte Tin (Sn)
+                            V       Plant of assembly
+                            COO Country of origin
+                            YY      Year code (last two digits of calendar year)
+                            WW Week code (week of January 1 is week ‘01’)
+                  Note:      In the event the full Microchip part number cannot be marked on one line, it
+                             will be carried over to the next line, thus limiting the number of available
+                             characters for customer-specific information.
+    * Standard device marking consists of Microchip part number, year code, week code and traceability code.
+      For device marking beyond this, certain price adders apply. Please check with your Microchip Sales Office.
+      For QTP devices, any special marking adders are included in QTP price.
+ 2017 Microchip Technology Inc.                                                                   DS00002514A-page 39
+
+
+USB4715
+10.1    48-VQFN
+FIGURE 10-1:        48-VQFN PACKAGE (DRAWING)
+DS00002514A-page 40                            2017 Microchip Technology Inc.
+
+
+                                                             USB4715
+FIGURE 10-1:           48-VQFN PACKAGE (DRAWING) (CONTINUED)
+ 2017 Microchip Technology Inc.                              DS00002514A-page 41
+
+
+USB4715
+FIGURE 10-2:        48-VQFN PACKAGE (LAND PATTERN)
+DS00002514A-page 42                                 2017 Microchip Technology Inc.
+
+
+                                                                           USB4715
+APPENDIX A:            DATA SHEET REVISION HISTORY
+TABLE A-1:        REVISION HISTORY
+      Revision Level & Date          Section/Figure/Entry                Correction
+     DS00002514A (09-07-17)      All                      Initial Release.
+ 2017 Microchip Technology Inc.                                             DS00002514A-page 43
+
+
+USB4715
+PRODUCT IDENTIFICATION SYSTEM
+To order or obtain information, e.g., on pricing or delivery, refer to the factory or the listed sales office.
+     PART NO.          [X](1)       -        X         /     XXX            XXX         Examples:
+                 Tape and Reel Temperature                Package Automotive            a)     USB4715/Y9X
+      Device
+                                                                                               Tray, commercial 0C to+70C, 48-pin VQFN
+                     Option              Range                              Code
+                                                                                        b)     USB4715-I/Y9X
+                                                                                               Tray, -40C to+85C, 48-pin VQFN
+  Device:              USB4715= 4 Downstream Ports, 1 Upstream Port
+                                                                                        c)     USB4715T-I/Y9XVxx
+                                                                                               Tape & reel, -40C to+85C, 48-pin VQFN,
+  Tape and Reel        Blank    = Standard packaging (tray)
+                                                                                               automotive
+  Option:              T        = Tape and Reel (Note 1)
+  Temperature          Blank =        0C to   +70C   (Commercial)
+  Range:               I        = -40C to     +85C   (Industrial or Grade 3 Auto-
+                       motive))
+  Package:             Y9X    =     48-pin VQFN
+                                                                                           Note 1: Tape and Reel identifier only appears in the
+                                                                                                      catalog part number description. This identi-
+                                                                                                      fier is used for ordering purposes and is not
+  Automotive Code:     Vxx    =    3 character code with “V” prefix,                                 printed on the device package. Check with
+                                   specifying automotive product.                                     your Microchip Sales Office for package
+                                                                                                      availability with the Tape and Reel option.
+DS00002514A-page 44                                                                                             2017 Microchip Technology Inc.
+
+
+                                                                                                 USB4715
+THE MICROCHIP WEB SITE
+Microchip provides online support via our WWW site at www.microchip.com. This web site is used as a means to make
+files and information easily available to customers. Accessible by using your favorite Internet browser, the web site con-
+tains the following information:
+• Product Support – Data sheets and errata, application notes and sample programs, design resources, user’s
+    guides and hardware support documents, latest software releases and archived software
+• General Technical Support – Frequently Asked Questions (FAQ), technical support requests, online discussion
+    groups, Microchip consultant program member listing
+• Business of Microchip – Product selector and ordering guides, latest Microchip press releases, listing of semi-
+    nars and events, listings of Microchip sales offices, distributors and factory representatives
+CUSTOMER CHANGE NOTIFICATION SERVICE
+Microchip’s customer notification service helps keep customers current on Microchip products. Subscribers will receive
+e-mail notification whenever there are changes, updates, revisions or errata related to a specified product family or
+development tool of interest.
+To register, access the Microchip web site at www.microchip.com. Under “Support”, click on “Customer Change Notifi-
+cation” and follow the registration instructions.
+CUSTOMER SUPPORT
+Users of Microchip products can receive assistance through several channels:
+•   Distributor or Representative
+•   Local Sales Office
+•   Field Application Engineer (FAE)
+•   Technical Support
+Customers should contact their distributor, representative or field application engineer (FAE) for support. Local sales
+offices are also available to help customers. A listing of sales offices and locations is included in the back of this docu-
+ment.
+Technical support is available through the web site at: http://microchip.com/support
+ 2017 Microchip Technology Inc.                                                                       DS00002514A-page 45
+
+
+USB4715
+    Note the following details of the code protection feature on Microchip devices:
+    •     Microchip products meet the specification contained in their particular Microchip Data Sheet.
+    •     Microchip believes that its family of products is one of the most secure families of its kind on the market today, when used in the
+          intended manner and under normal conditions.
+    •     There are dishonest and possibly illegal methods used to breach the code protection feature. All of these methods, to our
+          knowledge, require using the Microchip products in a manner outside the operating specifications contained in Microchip’s Data
+          Sheets. Most likely, the person doing so is engaged in theft of intellectual property.
+    •     Microchip is willing to work with the customer who is concerned about the integrity of their code.
+    •     Neither Microchip nor any other semiconductor manufacturer can guarantee the security of their code. Code protection does not
+          mean that we are guaranteeing the product as “unbreakable.”
+    Code protection is constantly evolving. We at Microchip are committed to continuously improving the code protection features of our
+    products. Attempts to break Microchip’s code protection feature may be a violation of the Digital Millennium Copyright Act. If such acts
+    allow unauthorized access to your software or other copyrighted work, you may have a right to sue for relief under that Act.
+    Information contained in this publication regarding device applications and the like is provided only for your convenience and may be
+    superseded by updates. It is your responsibility to ensure that your application meets with your specifications. MICROCHIP MAKES NO
+    REPRESENTATIONS OR WARRANTIES OF ANY KIND WHETHER EXPRESS OR IMPLIED, WRITTEN OR ORAL, STATUTORY OR
+    OTHERWISE, RELATED TO THE INFORMATION, INCLUDING BUT NOT LIMITED TO ITS CONDITION, QUALITY, PERFORMANCE,
+    MERCHANTABILITY OR FITNESS FOR PURPOSE. Microchip disclaims all liability arising from this information and its use. Use of Micro-
+    chip devices in life support and/or safety applications is entirely at the buyer’s risk, and the buyer agrees to defend, indemnify and hold
+    harmless Microchip from any and all damages, claims, suits, or expenses resulting from such use. No licenses are conveyed, implicitly or
+    otherwise, under any Microchip intellectual property rights unless otherwise stated.
+   Trademarks
+   The Microchip name and logo, the Microchip logo, AnyRate, AVR, AVR logo, AVR Freaks, BeaconThings, BitCloud, CryptoMemory, CryptoRF,
+   dsPIC, FlashFlex, flexPWR, Heldo, JukeBlox, KEELOQ, KEELOQ logo, Kleer, LANCheck, LINK MD, maXStylus, maXTouch, MediaLB, megaAVR,
+   MOST, MOST logo, MPLAB, OptoLyzer, PIC, picoPower, PICSTART, PIC32 logo, Prochip Designer, QTouch, RightTouch, SAM-BA, SpyNIC,
+   SST, SST Logo, SuperFlash, tinyAVR, UNI/O, and XMEGA are registered trademarks of Microchip Technology Incorporated in the U.S.A. and
+   other countries.
+   ClockWorks, The Embedded Control Solutions Company, EtherSynch, Hyper Speed Control, HyperLight Load, IntelliMOS, mTouch, Precision
+   Edge, and Quiet-Wire are registered trademarks of Microchip Technology Incorporated in the U.S.A.
+   Adjacent Key Suppression, AKS, Analog-for-the-Digital Age, Any Capacitor, AnyIn, AnyOut, BodyCom, chipKIT, chipKIT logo, CodeGuard,
+   CryptoAuthentication, CryptoCompanion, CryptoController, dsPICDEM, dsPICDEM.net, Dynamic Average Matching, DAM, ECAN,
+   EtherGREEN, In-Circuit Serial Programming, ICSP, Inter-Chip Connectivity, JitterBlocker, KleerNet, KleerNet logo, Mindi, MiWi, motorBench,
+   MPASM, MPF, MPLAB Certified logo, MPLIB, MPLINK, MultiTRAK, NetDetach, Omniscient Code Generation, PICDEM, PICDEM.net, PICkit,
+   PICtail, PureSilicon, QMatrix, RightTouch logo, REAL ICE, Ripple Blocker, SAM-ICE, Serial Quad I/O, SMART-I.S., SQI, SuperSwitcher,
+   SuperSwitcher II, Total Endurance, TSHARC, USBCheck, VariSense, ViewSpan, WiperLock, Wireless DNA, and ZENA are trademarks of
+   Microchip Technology Incorporated in the U.S.A. and other countries.
+   SQTP is a service mark of Microchip Technology Incorporated in the U.S.A.
+   Silicon Storage Technology is a registered trademark of Microchip Technology Inc. in other countries.
+   GestIC is a registered trademark of Microchip Technology Germany II GmbH & Co. KG, a subsidiary of Microchip Technology Inc., in other
+   countries.
+   All other trademarks mentioned herein are property of their respective companies.
+   © 2017, Microchip Technology Incorporated, All Rights Reserved.
+   ISBN: 9781522419723
+     QUALITY MANAGEMENT SYSTEM                                                  Microchip received ISO/TS-16949:2009 certification for its worldwide
+                                                                                headquarters, design and wafer fabrication facilities in Chandler and
+                   CERTIFIED BY DNV                                             Tempe, Arizona; Gresham, Oregon and design centers in California
+                                                                                and India. The Company’s quality system processes and procedures
+              == ISO/TS 16949 ==
+                                                                                are for its PIC® MCUs and dsPIC® DSCs, KEELOQ® code hopping
+                                                                                devices, Serial EEPROMs, microperipherals, nonvolatile memory and
+                                                                                analog products. In addition, Microchip’s quality system for the design
+                                                                                and manufacture of development systems is ISO 9001:2000 certified.
+DS00002514A-page 46                                                                                        2017 Microchip Technology Inc.
+
+
+                                 Worldwide Sales and Service
+AMERICAS                        ASIA/PACIFIC               ASIA/PACIFIC            EUROPE
+Corporate Office                Asia Pacific Office        China - Xiamen          Austria - Wels
+2355 West Chandler Blvd.        Suites 3707-14, 37th Floor Tel: 86-592-2388138     Tel: 43-7242-2244-39
+Chandler, AZ 85224-6199         Tower 6, The Gateway       Fax: 86-592-2388130     Fax: 43-7242-2244-393
+Tel: 480-792-7200               Harbour City, Kowloon      China - Zhuhai          Denmark - Copenhagen
+Fax: 480-792-7277               Hong Kong                  Tel: 86-756-3210040     Tel: 45-4450-2828
+Technical Support:              Tel: 852-2943-5100         Fax: 86-756-3210049     Fax: 45-4485-2829
+http://www.microchip.com/       Fax: 852-2401-3431         India - Bangalore       Finland - Espoo
+support
+                                Australia - Sydney         Tel: 91-80-3090-4444    Tel: 358-9-4520-820
+Web Address:
+                                Tel: 61-2-9868-6733        Fax: 91-80-3090-4123    France - Paris
+www.microchip.com               Fax: 61-2-9868-6755        India - New Delhi       Tel: 33-1-69-53-63-20
+Atlanta                                                    Tel: 91-11-4160-8631    Fax: 33-1-69-30-90-79
+                                China - Beijing
+Duluth, GA
+                                Tel: 86-10-8569-7000       Fax: 91-11-4160-8632    France - Saint Cloud
+Tel: 678-957-9614
+                                Fax: 86-10-8528-2104       India - Pune            Tel: 33-1-30-60-70-00
+Fax: 678-957-1455
+                                China - Chengdu            Tel: 91-20-3019-1500    Germany - Garching
+Austin, TX                      Tel: 86-28-8665-5511
+Tel: 512-257-3370                                          Japan - Osaka           Tel: 49-8931-9700
+                                Fax: 86-28-8665-7889       Tel: 81-6-6152-7160     Germany - Haan
+Boston                                                     Fax: 81-6-6152-9310     Tel: 49-2129-3766400
+                                China - Chongqing
+Westborough, MA
+                                Tel: 86-23-8980-9588       Japan - Tokyo           Germany - Heilbronn
+Tel: 774-760-0087               Fax: 86-23-8980-9500
+Fax: 774-760-0088                                          Tel: 81-3-6880- 3770    Tel: 49-7131-67-3636
+                                China - Dongguan           Fax: 81-3-6880-3771     Germany - Karlsruhe
+Chicago                         Tel: 86-769-8702-9880      Korea - Daegu           Tel: 49-721-625370
+Itasca, IL
+                                China - Guangzhou          Tel: 82-53-744-4301
+Tel: 630-285-0071                                                                  Germany - Munich
+Fax: 630-285-0075               Tel: 86-20-8755-8029       Fax: 82-53-744-4302     Tel: 49-89-627-144-0
+                                China - Hangzhou           Korea - Seoul           Fax: 49-89-627-144-44
+Dallas
+                                Tel: 86-571-8792-8115      Tel: 82-2-554-7200
+Addison, TX                                                                        Germany - Rosenheim
+                                Fax: 86-571-8792-8116      Fax: 82-2-558-5932 or   Tel: 49-8031-354-560
+Tel: 972-818-7423
+Fax: 972-818-2924               China - Hong Kong SAR      82-2-558-5934
+                                                                                   Israel - Ra’anana
+                                Tel: 852-2943-5100         Malaysia - Kuala Lumpur Tel: 972-9-744-7705
+Detroit
+                                Fax: 852-2401-3431         Tel: 60-3-6201-9857
+Novi, MI                                                                           Italy - Milan
+                                                           Fax: 60-3-6201-9859
+Tel: 248-848-4000               China - Nanjing                                    Tel: 39-0331-742611
+                                Tel: 86-25-8473-2460       Malaysia - Penang       Fax: 39-0331-466781
+Houston, TX
+Tel: 281-894-5983               Fax: 86-25-8473-2470       Tel: 60-4-227-8870
+                                                                                   Italy - Padova
+                                                           Fax: 60-4-227-4068
+Indianapolis
+                                China - Qingdao                                    Tel: 39-049-7625286
+                                Tel: 86-532-8502-7355      Philippines - Manila
+Noblesville, IN                                                                    Netherlands - Drunen
+                                Fax: 86-532-8502-7205      Tel: 63-2-634-9065
+Tel: 317-773-8323                                                                  Tel: 31-416-690399
+Fax: 317-773-5453               China - Shanghai           Fax: 63-2-634-9069      Fax: 31-416-690340
+Tel: 317-536-2380               Tel: 86-21-3326-8000       Singapore
+                                                                                   Norway - Trondheim
+                                Fax: 86-21-3326-8021       Tel: 65-6334-8870
+Los Angeles                                                                        Tel: 47-7289-7561
+                                                           Fax: 65-6334-8850
+Mission Viejo, CA               China - Shenyang
+                                                                                   Poland - Warsaw
+Tel: 949-462-9523               Tel: 86-24-2334-2829       Taiwan - Hsin Chu
+                                                                                   Tel: 48-22-3325737
+Fax: 949-462-9608               Fax: 86-24-2334-2393       Tel: 886-3-5778-366
+                                                           Fax: 886-3-5770-955     Romania - Bucharest
+Tel: 951-273-7800               China - Shenzhen
+                                                                                   Tel: 40-21-407-87-50
+Raleigh, NC                     Tel: 86-755-8864-2200      Taiwan - Kaohsiung
+Tel: 919-844-7510               Fax: 86-755-8203-1760      Tel: 886-7-213-7830     Spain - Madrid
+                                                                                   Tel: 34-91-708-08-90
+New York, NY                    China - Wuhan              Taiwan - Taipei
+                                                                                   Fax: 34-91-708-08-91
+Tel: 631-435-6000               Tel: 86-27-5980-5300       Tel: 886-2-2508-8600
+                                Fax: 86-27-5980-5118       Fax: 886-2-2508-0102    Sweden - Gothenberg
+San Jose, CA                                                                       Tel: 46-31-704-60-40
+Tel: 408-735-9110               China - Xian               Thailand - Bangkok
+Tel: 408-436-4270               Tel: 86-29-8833-7252       Tel: 66-2-694-1351      Sweden - Stockholm
+                                Fax: 86-29-8833-7256       Fax: 66-2-694-1350      Tel: 46-8-5090-4654
+Canada - Toronto
+Tel: 905-695-1980                                                                  UK - Wokingham
+Fax: 905-695-2078                                                                  Tel: 44-118-921-5800
+                                                                                   Fax: 44-118-921-5820
+       2017 Microchip Technology Inc.                                                         DS00002514A-page 47
+                                                                                                        11/07/16
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ USB4715/Y9X USB4715-I/Y9X USB4715T/Y9X USB4715T-I/Y9X

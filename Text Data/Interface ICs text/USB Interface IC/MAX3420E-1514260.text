@@ -1,0 +1,1108 @@
+                                                                                             EVALUATION KIT AVAILABLE
+MAX3420E                                              USB Peripheral Controller with SPI Interface
+General Description                                          Benefits and Features
+The MAX3420E contains the digital logic and                  ●● Simplifies Adding USB to Any System
+analog circuitry necessary to implement a full-speed USB        • Microprocessor-Independent USB Solution
+peripheral compliant to USB specification rev 2.0. A built-     • Complies with USB Specification Revision 2.0
+in full-speed transceiver features ±15kV ESD protection            (Full-Speed Operation)
+and programmable USB connect and disconnect. An                 • Integrated Full-Speed USB Transceiver
+internal serial-interface engine (SIE) handles low-level USB    • Firmware/Hardware Control of an Internal D+
+protocol details such as error checking and bus retries.           Pullup Resistor
+The MAX3420E operates using a register set accessed             • Programmable 3 or 4-Wire 26MHz SPI Interface
+by an SPI interface that operates up to 26MHz. Any SPI          • Intelligent USB Serial-Interface Engine (SIE)
+master (microprocessor, ASIC, DSP, etc.) can add USB            • Automatically Handles USB Flow Control and
+functionality using the simple 3- or 4-wire SPI interface.         Double Buffering
+Internal level translators allow the SPI interface to run at    • Handles Low-Level USB Signaling Details
+a system voltage between 1.71V and 3.6V. USB timed              • Includes Timers for USB Time-Sensitive Operations,
+operations are done inside the MAX3420E with interrupts            So SPI Master Does Not Need to Time Events
+provided at completion so an SPI master does not need           • Four General-Purpose Inputs and Four General-
+timers to meet USB timing requirements. The MAX3420E               Purpose Outputs
+includes four general-purpose inputs and outputs so any      ●● Internal Comparator Detects VBUS for Self-Powered
+microprocessor that uses I/O pins to implement the SPI          Applications
+interface can reclaim the I/O pins and gain additional ones. ●● Interrupt Output Pin (Level or Programmable Edge)
+The MAX3420E operates over the extended -40°C to                Allows Polled or Interrupt-Driven SPI Interface
++85°C temperature range and is available in a 32-pin         ●● Double-Buffered Data Endpoints Increase
+LQFP package (7mm x 7mm) and a space-saving 24-pin              Throughput by Allowing the SPI Master to Transfer
+TQFN package (4mm x 4mm).                                       Data Concurrently with USB Transfers Over the
+                                                                Same Endpoint
+Applications                                                    • Built-In Endpoint FIFOs
+●●  Cell Phones                                                 • EP0: CONTROL (64 Bytes)
+●●  PC Peripherals                                              • EP1: OUT, Bulk or Interrupt, 2 x 64 Bytes
+●●  Microprocessors and DSPs                                       (Double-Buffered)
+●●  Custom USB Devices                                          • EP2: IN, Bulk or Interrupt, 2 x 64 Bytes
+●●  Cameras                                                        (Double-Buffered)
+●●  Desktop Routers                                             • EP3: IN, Bulk or Interrupt (64 Bytes)
+●●  PLCs                                                     ●● SETUP Data Has Its Own 8-Byte FIFO, Simplifying
+●●  Set-Top Boxes                                               Firmware
+●●  PDAs
+●●  MP3 Players                                              ●● ESD Protection on D+, D-, and VBCOMP Improves
+●●  Instrumentation                                             System Reliability
+19-3781; Rev 6; 3/16
+
+
+MAX3420E                                  USB Peripheral Controller with SPI Interface
+Functional Diagram
+                                       VL                   RES                         XI             XO
+          VCC
+                                                                         INTERNAL
+                                                                            POR
+                                                              RESET
+                                                              LOGIC                            OSC
+                         1.5kΩ                                                                 AND
+                                                                                              PLL 4x
+                                                                                           POWER          48MHz
+                                                                                           DOWN
+          D+
+                     ESD             FULL-SPEED                                          USB SIE
+                  PROTECTION             USB                                   (SERIAL-INTERFACE ENGINE)
+           D-                       TRANSCEIVER
+                                                                                                                       SCLK
+                                                                                                                       MOSI
+                                                                                       SPI SLAVE
+                                                                                      INTERFACE                        MISO
+                                                   ENDPOINT
+                                                    BUFFERS
+                                                                                                                       SS
+                     ESD
+       VBCOMP
+                  PROTECTION                                      VBUS_DET
+                                                                                                                       INT
+                                                  VBUS
+                                                  COMP
+                                1V TO 3V
+                                                                   RGPIN
+                                     VBUS_DET
+                               OPERATE       BUSACT SOF
+                     MAX3420E    0       1      2     3
+                                           MUX
+                     GND
+                                            GPX                     GPIN3 GPIN2 GPIN1 GPIN0 GPOUT3       GPOUT1
+                                                                                                     GPOUT2 GPOUT0
+www.maximintegrated.com                                                                                         Maxim Integrated │ 2
+
+
+MAX3420E                                                                                 USB Peripheral Controller with SPI Interface
+Absolute Maximum Ratings
+(All voltages referenced to GND, unless otherwise noted.)                                             Continuous Power Dissipation (TA = +70°C)
+VCC ........................................................................ -0.3V to +4V                 24-Pin TQFN (derate 20.8mW/°C above +70°C).......1667mW
+VL ............................................................................-0.3V to +4V               32-Pin LQFP (derate 20.7mW/°C above +70°C).......1653mW
+VBCOMP .................................................................-0.3V to +6V                  Operating Temperature Range............................ -40°C to +85°C
+D+, D-, XI, XO .......................................... -0.3V to (VCC + 0.3V)                       Junction Temperature.......................................................+150°C
+SCLK, MOSI, MISO, SS, RES, GPOUT3–GPOUT0,                                                             Storage Temperature Range............................. -65°C to +150°C
+    GPIN3–GPIN0, GPX, INT......................... -0.3V to (VL + 0.3V)                               Lead Temperature (soldering, 10s).................................. +300°C
+                                                                                                      Soldering Temperature (reflow)........................................+260°C
+Stresses beyond those listed under “Absolute Maximum Ratings” may cause permanent damage to the device. These are stress ratings only, and functional operation of the device at these
+or any other conditions beyond those indicated in the operational sections of the specifications is not implied. Exposure to absolute maximum rating conditions for extended periods may affect
+device reliability.
+Electrical Characteristics
+(VCC = +3V to +3.6V, VL = +1.71V to +3.6V, TA = TMIN to TMAX, unless otherwise noted. Typical values are at VCC = +3.3V,
+VL = +2.5V, TA = +25°C.) (Note 1)
+                  PARAMETER                                SYMBOL                             CONDITIONS                                    MIN          TYP            MAX        UNITS
+ DC CHARACTERISTICS
+ Supply Voltage VCC                                            VCC                                                                           3.0          3.3            3.6           V
+ Logic-Core Supply and Logic-
+                                                                 VL                                                                         1.71                        3.60           V
+ Interface Voltage VL
+                                                                              Continuously transmitting on D+ and D- at
+ VCC Supply Current                                             ICC           12Mbps, CL = 50pF on D+ and D- to GND,                                       15            30           mA
+                                                                              CONNECT = 0
+                                                                              SCLK toggling at 20MHz, SS = low,
+ VL Supply Current                                               IL                                                                                         6            20           mA
+                                                                              GPIN3–GPIN0 = 0
+ VCC Supply Current During Idle                               ICCID           D+ = high, D- = low                                                         1.5             5           mA
+ VCC Suspend Supply Current                                 ICCSUS            CONNECT = 0, PWRDOWN = 1                                                     33           100           µA
+ VL Suspend Supply Current                                    ILSUS           CONNECT = 0, PWRDOWN = 1                                                     15            50           µA
+ LOGIC-SIDE I/O
+ MISO, GPOUT3–GPOUT0, GPX,                                                    ILOAD = +5mA, VL < 2.5V                                    VL - 0.45
+                                                               VOH                                                                                                                     V
+ INT Output High Voltage                                                      ILOAD = +10mA, VL ≥ 2.5V                                    VL - 0.4
+ MISO, GPOUT3–GPOUT0, GPX,                                                    ILOAD = -20mA, VL < 2.5V                                                                   0.6
+                                                               VOL                                                                                                                     V
+ INT Output Low Voltage                                                       ILOAD = -20mA, VL ≥ 2.5V                                                                   0.4
+ SCLK, MOSI, GPIN3–GPIN0, SS,
+                                                                VIH                                                                       2/3 x VL                                     V
+ RES Input High Voltage
+ SCLK, MOSI, GPIN3–GPIN0, SS,
+                                                                VIL                                                                                                      0.4           V
+ RES Input Low Voltage
+ SCLK, MOSI, SS, RES Input
+                                                                 IIL                                                                                                      1           µA
+ Leakage Current
+ GPIN3–GPIN0 Pullup Resistor to VL                           RGPIN                                                                           10            20            30           kW
+ TRANSCEIVER SPECIFICATIONS
+ Differential-Receiver Input
+                                                                              |VD+ - VD-|                                                    0.2                                       V
+ Sensitivity
+ Differential-Receiver Common-
+                                                                                                                                             0.8                         2.5           V
+ Mode Voltage
+www.maximintegrated.com                                                                                                                                           Maxim Integrated │ 3
+
+
+MAX3420E                                              USB Peripheral Controller with SPI Interface
+Electrical Characteristics (continued)
+(VCC = +3V to +3.6V, VL = +1.71V to +3.6V, TA = TMIN to TMAX, unless otherwise noted. Typical values are at VCC = +3.3V,
+VL = +2.5V, TA = +25°C.) (Note 1)
+            PARAMETER             SYMBOL                  CONDITIONS                   MIN      TYP      MAX     UNITS
+ Single-Ended Receiver Input Low
+                                    VIL                                                                   0.8        V
+ Voltage
+ Single-Ended Receiver Input High
+                                    VIH                                                2.0                           V
+ Voltage
+ Single-Ended Receiver Hysteresis
+                                                                                                 0.2                 V
+ Voltage
+ D+, D- Input Impedance                                                                300                         kW
+ D+, D- Output Low Voltage          VOL     RL = 1.5kW from D+ to 3.6V                                    0.3        V
+ D+, D- Output High Voltage         VOH     RL = 15kW from D+ and D- to GND            2.8                3.6        V
+ Driver Output Impedance
+                                            (Note 2)                                     2        7        11       W
+ Excluding External Resistor
+ D+ Pullup Resistor                         REXT = 33W                                1.425      1.5     1.575     kW
+ ESD PROTECTION (D+, D-, VBCOMP)
+                                            1µF ceramic capacitors from VBCOMP and
+ Human Body Model                                                                                ±15                kV
+                                            VCC to GND
+                                            1µF ceramic capacitors from VBCOMP and
+ IEC61000-4-2 Air-Gap Discharge                                                                  ±12                kV
+                                            VCC to GND
+                                            1µF ceramic capacitors from VBCOMP and
+ IEC61000-4-2 Contact Discharge                                                                   ±8                kV
+                                            VCC to GND
+ THERMAL SHUTDOWN
+ Thermal-Shutdown Low-to-High                                                                   +160                °C
+ Thermal-Shutdown High-to-Low                                                                   +140                °C
+ CRYSTAL OSCILLATOR SPECIFICATIONS (XI, XO)
+ XI Input High Voltage                                                              2/3 x VCC             VCC        V
+ XI Input Low Voltage                                                                                     0.4        V
+ XI Input Current                                                                                          10       µA
+ XI, XO Input Capacitance                                                                         3                 pF
+ VBCOMP COMPARATOR SPECIFICATIONS
+ VBCOMP Comparator Threshold        VTH                                                1.0       2.0      3.0        V
+ VBCOMP Comparator Hysteresis      VHYS                                                          375               mV
+ VBCOMP Comparator Input
+                                    RIN                                                100                         kW
+ Impedance
+www.maximintegrated.com                                                                              Maxim Integrated │ 4
+
+
+MAX3420E                                                       USB Peripheral Controller with SPI Interface
+Timing Characteristics
+(VCC = +3V to +3.6V, VL = +1.71V to +3.6V, TA = TMIN to TMAX, unless otherwise noted. Typical values are at VCC = +3.3V,
+VL = +2.5V, TA = +25°C.) (Note 1)
+            PARAMETER                 SYMBOL                       CONDITIONS                        MIN     TYP    MAX      UNITS
+ USB TRANSMITTER TIMING CHARACTERISTICS
+ D+, D- Rise Time                        tRISE      CL = 50pF, Figures 6 and 7                         4              20        ns
+ D+, D- Fall Time                        tFALL      CL = 50pF, Figures 6 and 7                         4              20        ns
+ Rise/Fall-Time Matching                            CL = 50pF, Figures 6 and 7 (Note 2)               90             110        %
+ Output-Signal Crossover Voltage                    CL = 50pF, Figures 6 and 7 (Note 2)               1.3            2.0        V
+ SPI BUS TIMING CHARACTERISTICS (VL = 2.5V) (Figures 8 and 9) (Note 3)
+                                                    VL = 1.71V                                       77.0
+ Serial Clock (SCLK) Period (Note 4)       tCP                                                                                  ns
+                                                    VL = 2.5V                                        38.4
+ SCLK Pulse-Width High                     tCH                                                        17                        ns
+ SCLK Pulse-Width Low                      tCL                                                        17                        ns
+ SS Fall to MISO Valid                    tCSS                                                        20                        ns
+ SS Leading Time Before the First
+                                             tL                                                       30                        ns
+ SCLK Edge
+ SS Trailing Time After the Last
+                                             tT                                                       30                        ns
+ SCLK Edge
+ Data-In Setup Time                        tDS                                                         5                        ns
+ Data-In Hold Time                         tDH                                                        10                        ns
+ SS Pulse High                           tCSW                                                        200                        ns
+ SCLK Fall to MISO Propagation
+                                           tDO                                                                      14.2        ns
+ Delay
+ SCLK Fall to MOSI Propagation
+                                            tDI                                                                     14.2        ns
+ Delay
+ SCLK Fall to MOSI Drive                   tON                                                        3.5                       ns
+ SS High to MOSI High Impedance           tOFF                                                                        20        ns
+ SUSPEND TIMING CHARACTERISTICS
+ Time-to-Enter Suspend                              PWRDOWN = 1 to oscillator stop                                     5        µs
+ Time-to-Exit Suspend                               PWRDOWN = 1 to 0 to OSCOKIRQ (Note 5)                     3                ms
+Note  1:  Parameters are 100% production tested at TA = +25°C, and guaranteed by correlation over temperature.
+Note  2:  Design guaranteed by bench testing. Limits are not production tested.
+Note  3:  At VL = 1.71V to 2.5V, derate all of the SPI timing characteristics by 50%. Not production tested.
+Note  4:  The minimum period is derived from SPI timing parameters.
+Note  5:  Time-to-exit suspend is dependent on the crystal used.
+www.maximintegrated.com                                                                                          Maxim Integrated │ 5
+
+
+MAX3420E                                                      USB Peripheral Controller with SPI Interface
+The MAX3420E connects to any microprocessor using 3                  the SPI interface can be clocked up to 26MHz. Second,
+or 4 interface pins (Figure 1). On a simple microprocessor           a VL pin and internal level translators allow running the
+without SPI hardware, these can be bit-banged general-               system interface at a lower voltage than the 3.3V required
+purpose I/O pins. Four GPIN and four GPOUT pins on                   for VCC.
+the MAX3420E more than replace the µP pins necessary                 The MAX3420E provides an ideal method for electrically
+to implement the interface. Although the MAX3420E SPI                isolating a USB interface (Figure 3). USB employs flow
+hardware includes separate data-in (MOSI, (master-out,               control in which the device automatically answers host
+slave-in)) and data-out (MISO, (master-in, slave-out))               requests with a NAK handshake, until the microprocessor
+pins, the SPI interface can also be configured for the               completes its data-transfer operations over the SPI port.
+MOSI pin to carry bidirectional data, saving an interface            This means that the SPI interface can run at any frequen-
+pin. This is referred to as half-duplex mode.                        cy up to 26MHz. Therefore, the designer is free to choose
+Two MAX3420E features make it easy to connect to large,              the interface operating frequency and to make opto-
+fast chips such as ASICs and DSPs (see Figure 2). First,             isolator choices optimized for cost or performance.
+Typical Application Circuits
+                                                     3.3V
+                                                  REGULATOR
+                                                                                            SPI
+                                                                                            3, 4
+                                           USB                MAX3420E                                    µP
+                                                                                            INT
+Figure 1. The MAX3420E Connects to Any Microprocessor Using 3 or 4 Interface Pins
+                                             3.3V
+                                                                                                                POWER RAIL
+                                          REGULATOR
+                                                                         SPI
+                                                                         3, 4
+                                   USB                 MAX3420E
+                                                                         INT
+                                                                                                          ASIC,
+                                                                                                          DSP,
+                                                                                                          ETC.
+Figure 2. The MAX3420E Connected to a Large Chip
+                                              3.3V                                                                     LOCAL
+                                           REGULATOR                                                                   POWER
+                                                                                ISOLATORS
+                                                                                                   MISO
+                                                                                                   INT
+                                                                                                               MICRO
+                                  USB                   MAX3420E                                                ASIC
+                                                                                                                DSP
+                                                                                                   SCLK
+                                                                                                   MOSI
+                                                                                                    SS
+                                                                                                                       LOCAL
+                                                                                                                       GND
+Figure 3. Optical Isolation of USB Using the MAX3420E
+www.maximintegrated.com                                                                                                        Maxim Integrated │ 6
+
+
+MAX3420E                                                                                       USB Peripheral Controller with SPI Interface
+Pin Configurations
+                 TOP VIEW                                                                                TOP VIEW
+                                                                                                                      VBCOMP   VCC      VCC               GND   GND      INT
+                                     VBCOMP
+                                                                                                                                              D+    D-
+                                              VCC      D+   D-    GND      INT                                         24       23      22    21    20    19     18       17
+                                      18       17      16   15     14       13                            N.C.                                                                    16
+                                                                                                                 25                                                                     N.C.
+                         XI 19                                                      12 GPX                  XI   26                                                               15    GPX
+                        XO 20                                                       11 MOSI                XO    27                                                               14    MOSI
+                    GPIN0 21                                                        10 MISO               N.C.   28                                                               13    MISO
+                                                    MAX3420E                                                                                  MAX3420E
+                    GPIN1 22                                                        9   SS               GPIN0   29                                                               12    SS
+                    GPIN2 23                                                        8   SCLK             GPIN1   30                                                               11    SCLK
+                                              *EP
+                    GPIN3 24                                                        7   RES              GPIN2   31                                                               10    RES
+                                 +
+                                      1         2      3     4      5        6                           GPIN3   32                                                               9     N.C.
+                                                                                                                      +
+                                     GPOUT0   GPOUT1
+                                                            GND
+                                                                  GPOUT2   GPOUT3
+                                                       VL
+                                                                                                                          1      2       3     4     5     6      7        8
+                                                                                                                      GPOUT0   GPOUT1
+                                                                                                                                        VL    VL
+                                                                                                                                                    GND   GND
+                                                                                                                                                                GPOUT2   GPOUT3
+                                                       TQFN
+                 *CONNECT EXPOSED PAD TO GND.                                                                                                      LQFP
+Pin Description
+           PIN                                                INPUT/
+                                     NAME                                                                                            FUNCTION
+ TQFN-EP         LQFP                                        OUTPUT
+     1              1            GPOUT0                                             General-Purpose Push-Pull Outputs. GPOUT3–GPOUT0 logic levels are
+                                                                  Output            referenced to the voltage on VL. The SPI master controls the GPOUT3–GPOUT0
+     2              2            GPOUT1                                             states by writing to bit 3 through bit 0 of the IOPINS (R20) register.
+                                                                                    Level-Translator Reference Voltage. Connect VL to the system’s 1.71V to 3.6V
+     3            3, 4                     VL                     Input             logic-level power supply. Bypass VL to ground with a 0.1µF capacitor as close to
+                                                                                    the VL pin as possible.
+   4, 14    5, 6, 18, 19               GND                        Input             Ground
+     5              7            GPOUT2                                             General-Purpose Push-Pull Outputs. GPOUT3–GPOUT0 logic levels are
+                                                                  Output            referenced to the voltage on VL. The SPI master controls the GPOUT3–GPOUT0
+     6              8            GPOUT3                                             states by writing to bit 3 through bit 0 of the IOPINS (R20) register.
+                                                                                    Device Reset. Drive RES low to clear all of the internal registers except for
+                                                                                    PINCTL (R17), USBCTL (R15), and SPI logic. See the Device Reset section for a
+     7             10                   RES                       Input             description of resets available on the MAX3420E. Note: The MAX3420E is
+                                                                                    internally reset if either VCC of VL is not present. The register file is not
+                                                                                    accessible under these conditions.
+                                                                                    SPI Serial-Clock Input. An external SPI master supplies this clock with
+                                                                                    frequencies up to 26MHz. The logic level is referenced to the voltage on VL.
+     8             11                 SCLK                        Input
+                                                                                    Data is clocked into the SPI slave interface on the positive edge of SCLK. Data
+                                                                                    Is clocked out of the SPI slave interface on the falling edge of SCLK.
+                                                                                    SPI Slave-Select Input. The SS logic level is referenced to the voltage on VL.
+                                                                                    When SS is driven high, the SPI slave interface is not selected and SCLK
+     9             12                      SS                     Input
+                                                                                    transitions are ignored. An SPI transfer begins with a high-to-low SS transition
+                                                                                    and ends with a low-to-high SS transition.
+www.maximintegrated.com                                                                                                                                                                Maxim Integrated │ 7
+
+
+MAX3420E                                           USB Peripheral Controller with SPI Interface
+Pin Description (continued)
+         PIN                    INPUT/
+                         NAME                                                 FUNCTION
+ TQFN-EP TQFN-EP               OUTPUT
+                                        SPI Serial-Data Output (Master-In, Slave-Out). MISO is a push-pull output. MISO
+    10           13      MISO   Output  is three-stated in half-duplex mode or when SS = 1. The MISO logic level is
+                                        referenced to the voltage on VL.
+                               Input or SPI Serial-Data Input (Master-Out, Slave-In). The logic level on MOSI is
+    11           14      MOSI    Input/ referenced to the voltage on VL. MOSI can also be configured as a bidirectional
+                                Output  MOSI/MISO input and output.
+                                        General-Purpose Multiplexed Output. The internal MAX3420E signal that
+                                        Appears on GPX is programmable by writing to the GPXB and GPXA bits of the
+    12           15       GPX   Output
+                                        PINCTL (R17) register. GPX indicates one of four signals: OPERATE (00,
+                                        default), VBUS_DET (01), BUSACT (10), and SOF (11).
+                                        Interrupt Output. In edge mode, the logic level on INT is referenced to the voltage
+                                        on VL. In edge mode, INT is a push-pull output with programmable polarity. In
+    13           17       INT   Output
+                                        level mode, INT is open-drain and active low. Set the IE bit in the CPUCTL
+                                        (R16) register to enable INT.
+                                 Input/ USB D- Signal. Connect D- to a USB “B” connector through a 33W ±1% series
+    15           20        D-
+                                Output  resistor.
+                                 Input/ USB D+ Signal. Connect D+ to a USB “B” connector through a 33W ±1% series
+    16           21        D+
+                                Output  resistor. The 1.5kW D+ pullup resistor is internal to the device.
+                                        USB Transceiver Power-Supply Input. Connect VCC to a positive 3.3V power
+    17        22, 23      VCC    Input  supply. Bypass VCC to ground with a 1.0µF ceramic capacitor as close to the
+                                        VCC pin as possible.
+                                        VBUS Comparator Input. VBCOMP is internally connected to a voltage
+                                        comparator to allow the SPI master to detect (through an interrupt or checking a
+    18           24     VBCOMP   Input
+                                        register bit) the presence or loss of power on VBUS. Bypass VBCOMP to ground
+                                        with a 1.0µF ceramic capacitor.
+                                        Crystal Oscillator Input. Connect XI to one side of a parallel resonant 12MHz
+    19           26        XI    Input  ±0.25% crystal and a capacitor to GND. XI can also be driven by an external
+                                        Clock referenced to VCC.
+                                        Crystal Oscillator Output. Connect XO to the other side of a parallel resonant
+    20           27       XO    Output  12MHz ±0.25% crystal and a capacitor to GND. Leave XO unconnected if XI is
+                                        driven with an external source.
+    21           29      GPIN0          General-Purpose Inputs. GPIN3–GPIN0 are connected to VL with internal pullup
+    22           30      GPIN1          resistors. GPIN3–GPIN0 logic levels are referenced to the voltage on VL. The
+                                 Input
+    23           31      GPIN2          SPI master samples GPIN3–GPIN0 states by reading bit 7 through bit 4 of the
+    24           32      GPIN3          IOPINS (R20) register. Writing to these bits has no effect.
+             9, 16, 25,
+    —                     N.C.     —    No Internal Connection
+                 28
+    —            —        EP     Input  Exposed Paddle (TQFN only). Connect EP to GND.
+www.maximintegrated.com                                                                                   Maxim Integrated │ 8
+
+
+MAX3420E                                                    USB Peripheral Controller with SPI Interface
+Register Description                                                 Reg0 bits would be as follows: Reg4 = 1, Reg3 = 0,
+The SPI master controls the MAX3420E by reading and                  Reg2 = 1, Reg1 = 0, Reg0 = 0. The DIR (direction) bit
+writing 21 registers (Table 1). For a complete description           determines the direction for the data transfer. DIR = 1
+of register contents, please refer to the “MAX3420E                  means the data byte(s) will be written to the register,
+Programming Guide.” A register access consists of the                and DIR = 0 means the data byte(s) will be read from
+SPI master first writing an SPI command byte, followed               the register. The ACKSTAT bit sets the ACKSTAT bit in
+by reading or writing the contents of the addressed                  the EPSTALLS (R9) register. The SPI master sets this
+register. All SPI transfers are MSB first. The command               bit to indicate that it has finished servicing a CONTROL
+byte contains the register address, a direction bit (read            transfer. Since the bit is frequently used, having it in the
+= 0, write = 1), and the ACKSTAT bit (Figure 4). The                 SPI command byte improves firmware efficiency. In SPI
+SPI master addresses the MAX3420E registers by writing               full-duplex mode, the MAX3420E clocks out eight USB
+the binary value of the register number in the Reg4                  status bits as the command byte is clocked in (Figure 5).
+through Reg0 bits of the command byte. For example,                  In half-duplex mode, these status bits are accessed
+to access the IOPINS (R20) register, the Reg4 through                in the normal way, as register bits.
+       b7              b6              b5               b4                b3             b2              b1              b0
+      Reg4            Reg3           Reg2              Reg1             Reg0              0              DIR         ACKSTAT
+Figure 4. SPI Command Byte
+       b7              b6              b5               b4                b3             b2              b1              b0
+    SUSPIRQ        URESIRQ        SUDAVIRQ         IN3BAVIRQ        IN2BAVIRQ       OUT1DAVIRQ OUT0DAVIRQ           IN0BAVIRQ
+Figure 5. USB Status Bits Clocked Out as First Byte of Every Transfer (Full-Duplex Mode Only)
+The first five registers (R0–R4) access endpoint FIFOs.              incrementing operation continues until R20 is accessed.
+To access a FIFO, an initial command byte sets the regis-            Subsequent byte reads or writes continue to access R20.
+ter address and then consecutive reads or writes keep the            Note that this autoincrementing action stops with the next
+same register address to access subsequent FIFO bytes.               SPI cycle, which establishes a new register address.
+The remaining registers (R5–R20) control the operation               Addressing beyond R20 is ignored.
+of the MAX3420E. Once a register address above R4                    The MAX3420E register map is depicted in Table 1. For a
+is set in the command byte, successive byte reads or                 complete description of all register contents, please refer
+writes in the same SPI access cycle (SS low) increment               to the MAX3420E Programming Guide.
+the register address after every byte read or written. This
+www.maximintegrated.com                                                                                       Maxim Integrated │ 9
+
+
+MAX3420E                                                       USB Peripheral Controller with SPI Interface
+Table 1. MAX3420E Register Map
+ REG      NAME             b7          b6           b5            b4      b3         b2       b1          b0        acc
+  R0  EP0FIFO              b7          b6           b5            b4      b3         b2       b1          b0       RSC
+  R1  EP1OUTFIFO           b7          b6           b5            b4      b3         b2       b1          b0       RSC
+  R2  EP2INFIFO            b7          b6           b5            b4      b3         b2       b1          b0       RSC
+  R3  EP3INFIFO            b7          b6           b5            b4      b3         b2       b1          b0       RSC
+  R4  SUDFIFO              b7          b6           b5            b4      b3         b2       b1          b0       RSC
+  R5  EP0BC                 0          b6           b5            b4      b3         b2       b1          b0       RSC
+  R6  EP1OUTBC              0          b6           b5            b4      b3         b2       b1          b0       RSC
+  R7  EP2INBC               0          b6           b5            b4      b3         b2       b1          b0       RSC
+  R8  EP3INBC               0          b6           b5            b4      b3         b2       b1          b0       RSC
+  R9  EPSTALLS              0       ACKSTAT      STLSTAT     STLEP3IN  STLEP2IN STLEP1OUT STLEP0OUT    STLEP0IN    RSC
+ R10  CLRTOGS          EP3DISAB EP2DISAB EP1DISAB            CTGEP3IN CTGEP2IN CTGEP1OUT       0            0      RSC
+ R11  EPIRQ                 0           0      SUDAVIRQ IN3BAVIRQ IN2BAVIRQ OUT1DAVIRQ OUT0DAVIRQ     IN0BAVIRQ     RC
+ R12  EPIEN                 0           0        SUDAVIE      IN3BAVIE IN2BAVIE OUT1DAVIE OUT0DAVIE    IN0BAVIE    RSC
+ R13  USBIRQ          URESDNIRQ VBUSIRQ NOVBUSIRQ SUSPIRQ              URESIRQ  BUSACTIRQ RWUDNIRQ    OSCOKIRQ      RC
+ R14  USBIEN           URESDNIE      VBUSIE     NOVBUSIE       SUSPIE   URESIE   BUSACTIE  RWUDNIE     OSCOKIE     RSC
+ R15  USBCTL           HOSCSTEN      VBGATE      CHIPRES    PWRDOWN CONNECT       SIGRWU       0            0      RSC
+ R16  CPUCTL                0           0            0             0       0          0        0           IE      RSC
+ R17  PINCTL            EP3INAK     EP2INAK      EP0INAK      FDUPSPI  INTLEVEL   POSINT    GPXB         GPXA      RSC
+ R18  REVISION              0           0            0             0       0          1        0            0        R
+ R19  FNADDR                0          b6           b5            b4      b3         b2       b1          b0         R
+ R20  IOPINS             GPIN3        GPIN2       GPIN1          GPIN0  GPOUT3    GPOUT2   GPOUT1       GPOUT0     RSC
+Note:  The acc (access) column indicates how the SPI master can access the register.
+        R = read, RC = read or clear, RSC = read, set, or clear.
+        Writing to an R register (read only) has no effect.
+        Writing a 1 to an RC bit (read or clear) clears the bit.
+        Writing a zero to an RC bit has no effect.
+www.maximintegrated.com                                                                            Maxim Integrated │ 10
+
+
+MAX3420E                                                                        USB Peripheral Controller with SPI Interface
+Test Circuits and Timing Diagrams
+                            tRISE                         tFALL                                                                                            TEST
+                                                                                                                                                          POINT
+                                                                                                                   MAX3420E
+                                                                                                                                          33Ω
+        VOH                                                                                                                 D+ OR D-
+                                                                      90%
+                                                                                                                                                         CL       15kΩ
+                                                                      10%
+        VOL
+Figure 6. Rise and Fall Times                                                               Figure 7. Load for D+/D- AC Measurements
+                                        tL
+                      SS            tCSS
+                                                                                                                                                           tCSW
+                                                                                                               tCL      tCH                   tT
+                                                1                   2                 8               9                  10                 16
+                   SCLK
+                                                           tDS                                                      tCP
+                   MOSI
+                                                                tDH                                         tDO
+                           HIGH                                                                                                                         HIGH
+                           IMPEDANCE                                                                                                                    IMPEDANCE
+                   MISO
+Figure 8. SPI Bus Timing Diagram (Full-Duplex Mode, SPI Mode (0,0))
+                                 tL
+             SS                                                                                                                                  tCSW
+                                                                                                      tCL       tCH                    tT
+                                           1               2                  8               9                 10                   16
+         SCLK
+                                                  tDS                                                     tCP
+                                                                                                                                                      HI-Z
+         MOSI
+                                                       tDH                         tON             tDI                                        tOFF
+                   HIGH IMPEDANCE                                                                                                         HIGH IMPEDANCE
+          MISO
+          NOTES:
+          1) DURING THE FIRST 8 CLOCKS CYCLES, THE MOSI PIN IS HIGH IMPEDANCE AND THE SPI MASTER DRIVES DATA ONTO THE MOSI PIN. SETUP AND HOLD TIMES ARE THE SAME AS
+             FOR FULL-DUPLEX MODE.
+          2) FOR SPI WRITE CYCLES, THE MOSI PIN CONTINUES TO BE HIGH IMPEDANCE AND THE EXTERNAL MASTER CONTINUES TO DRIVE MOSI.
+          3) FOR SPI READ CYCLES, AFTER THE 8TH CLOCK-RISING EDGE, THE MAX3420E STARTS DRIVING THE MOSI PIN AFTER TIME tON. THE EXTERNAL MASTER MUST TURN
+             OFF ITS DRIVER TO THE MOSI PIN BEFORE tON TO AVOID CONTENTION. PROPAGATION DELAYS ARE THE SAME AS FOR THE MOSI PIN IN FULL-DUPLEX MODE.
+Figure 9. SPI Bus Timing Diagram (Half-Duplex Mode, SPI Mode (0,0))
+www.maximintegrated.com                                                                                                                                   Maxim Integrated │ 11
+
+
+MAX3420E                                                                  USB Peripheral Controller with SPI Interface
+Typical Operating Characteristics
+(VCC = +3.3V, VL = +3.3V, TA = +25°C.)
+                                                                               EYE DIAGRAM
+                                                                                                             MAX3420E toc01
+                                                            4
+                                                            3
+                                            D+ AND D- (V)
+                                                            2
+                                                            1
+                                                            0
+                                                            -1
+                                                                 0   10   20   30   40   50   60   70   80
+                                                                                TIME (ns)
+Detailed Description                                                                The MAX3420E register set and SPI interface is optimized
+This device contains the digital logic and analog circuitry                         to reduce SPI traffic. An interrupt output pin, INT, notifies
+necessary to implement a full-speed USB peripheral that                             the SPI master when USB service is required: when a
+complies with the USB specification rev 2.0. ESD protec-                            packet arrives, a packet is sent, or the host suspends
+tion of ±15kV is provided on D+, D-, and VBCOMP. The                                or resumes bus activity. Double-buffered endpoints help
+MAX3420E features an internal USB transceiver and an                                sustain bandwidth by allowing data to move concurrently
+internal 1.5kΩ resistor that connects between D+ and                                over USB and the SPI interface.
+VCC under the control of a register bit (CONNECT). This                             VCC
+allows a USB peripheral to control the logical connection
+                                                                                    Power the USB transceiver by applying a positive 3.3V
+to the USB host. Any SPI master can communicate with
+                                                                                    supply to VCC. Bypass VCC to GND with a 1.0µF ceramic
+the device through the SPI slave interface that operates
+                                                                                    capacitor as close to the VCC pin as possible.
+in SPI mode (0,0) or (1,1). An SPI master accesses the
+MAX3420E by reading and writing to internal registers.                              VL
+A typical data transfer consists of writing a first byte that                       The MAX3420E digital core is powered though the VL pin.
+sets a register address and direction with additional bytes                         VL also acts as a reference level for the SPI interface and
+reading or writing data to the register or internal FIFO.                           all other inputs and outputs. Connect VL to the system’s
+The MAX3420E contains 384 bytes of endpoint buffer                                  logic-level power supply. Internal level translators and VL
+memory, implementing the following endpoints:                                       allow the SPI interface and all general-purpose inputs and
+  ●● EP0: 64-byte bidirectional CONTROL endpoint                                    outputs to operate at a system voltage between 1.71V
+                                                                                    and 3.6V.
+  ●● EP1: 2 x 64-byte double-buffered BULK/INT
+     OUT endpoint                                                                   VBCOMP
+  ●● EP2: 2 x 64-byte double-buffered BULK/INT IN                                   The MAX3420E features a USB VBUS detector input,
+     endpoint                                                                       VBCOMP. The VBCOMP pin can withstand input voltag-
+                                                                                    es up to 6V. Bypass VBCOMP to GND with a 1.0µF
+  ●● EP3: 64-byte BULK/INT IN endpoint
+                                                                                    ceramic capacitor. According to USB specification rev
+The choice to use EP1, EP2, EP3 as BULK or INTERRUPT                                2.0, a self-powered USB device must not power the
+endpoints is strictly a function of the endpoint descriptors                        1.5kΩ pullup resistor on D+ if the USB host turns off
+that the SPI master returns to the USB host during enu-                             VBUS. VBCOMP is internally connected to a voltage
+meration.                                                                           comparator so that the SPI master can detect the loss
+                                                                                    of VBUS (through an interrupt (INT) or checking a bit
+www.maximintegrated.com                                                                                                       Maxim Integrated │ 12
+
+
+MAX3420E                                                     USB Peripheral Controller with SPI Interface
+Table 2. Internal Pullup Resistor Control                                                                             CLEAR
+                                                                                                                    FIRST IRQ, CLEAR
+  CONNECT       VBGATE       VBUS_DET            PULLUP                                                      SECOND  SECOND ,   LAST
+                                                                                 SINGLE   CLEAR FIRST IRQ      IRQ  IRQ STILL PENDING
+      0             X              X         Not Connected                          IRQ     IRQ  ACTIVE      ACTIVE  ACTIVE     IRQ
+      1             0              X            Connected
+                                                                        INTLEVEL = 1                                                  INT
+      1             1               0        Not Connected                POSINT = X
+      1             1               1           Connected               INTLEVEL = 0                                                  INT
+                                                                          POSINT = 0
+                                                                        INTLEVEL = 0
+                                                                          POSINT = 1                                                  INT
+                                                                                                         (2)
+                                                                                        (1)
+                                                                         (1) WIDTH DETERMINED BY TIME TAKEN TO CLEAR THE IRQ
+(NOVBUSIRQ)) and disconnect the internal 1.5kΩ pullup                    (2) 10.6µs
+resistor. If the device using the MAX3420E is bus
+                                                                 Figure 10. Behavior of the INT Pin for Different INTLEVEL and
+powered (through a +3.3V regulator connected to VCC),            POSINT Bit Settings
+the MAX3420E VBCOMP input can be used as a
+general-purpose input. Using VBCOMP as a general-                RES
+purpose input requires a 10kΩ pullup resistor from
+                                                                 Drive RES low to put the MAX3420E into a chip reset.
+VBCOMP to VL. See the Applications Information section
+                                                                 A chip reset sets all registers to their default states,
+for more details about this connection.
+                                                                 except for PINCTL (R17), USBCTL (R15), and SPI logic.
+D+ and D-                                                        All FIFO contents are unknown during chip reset. Bring
+The internal USB full-speed transceiver is brought out           the MAX3420E out of chip reset by driving RES high.
+to the bidirectional data pins D+ and D-. These pins are         The RES pulse width can be as short as 200ns. See
+±15kV ESD protected. Connect D+ and D- to a USB                  the Device Reset section for a description of the resets
+“B”connector through 33Ω ±1% series resistors. A switch-         available on the MAX3420E.
+able 1.5kΩ pullup resistor is internally connected to D+.        INT
+According to the USB rev 2.0 specification, a self-pow-
+                                                                 The MAX3420E INT output pin signals when a USB event
+ered peripheral must disconnect its 1.5kΩ pullup resistor
+                                                                 occurs that requires the attention of the SPI master. The
+to D+ in the event that the host turns off bus power. The
+                                                                 SPI master must set the IE bit in the CPUCTL (R16)
+VBGATE bit in the USBCTL (R15) register provides the
+                                                                 register to activate INT. When the IE bit is cleared, INT is
+option for the MAX3420E internal logic to automatically
+                                                                 inactive (open for level mode, high for negative edge, low
+disconnect the 1.5kΩ resistor on D+. The VBGATE and
+                                                                 for positive edge). INT is inactive upon power-up or after
+CONNECT bits of USBCTL (R15), along with the VBCOMP
+                                                                 a chip reset.
+comparator output (VBUS_DET), control the pullup resistor
+between VCC and D+, as shown in Table 2. Note that if            The INT pin can be a push-pull or open-drain output.
+VBGATE = 1 and VBUS_DET = 0, the pullup resistor is              Set the INTLEVEL bit of the PINCTL (R17) register high
+disconnected regardless of the CONNECT bit setting.              to program the INT output pin to be an active-low level
+                                                                 (open-drain output). An external pullup resistor to VL is
+XI and XO                                                        required for this setting. In level mode, the MAX3420E
+XI and XO connect an external 12MHz crystal to the               drives INT low when any of the interrupt flags are set. If
+internal oscillator circuit. XI is the crystal oscillator input, multiple interrupts are pending, INT goes inactive only
+and XO is the crystal oscillator output. Connect one side        when the SPI master clears the last active interrupt
+of an external 12MHz ±0.25% parallel resonant crystal            request bit (Figure 10). The POSINT bit of the PINCTL
+to XI, and connect XO to the other side. Connect load            (R17) register has no effect on INT in level mode.
+capacitors (20pF max) to ground on both XI and XO.               Clear the INTLEVEL bit to program INT to be an edge
+XI can also be driven with an external 12MHz ±0.25%              (push-pull output). The active edge is programmable using
+clock. If driving XI with an external clock, leave XO            the POSINT bit of the PINCTL (R17) register. In edge
+unconnected. The external clock must meet the voltage            mode, the device produces an edge referenced to VL any
+characteristics depicted in the Electrical Characteristics       time an interrupt request is activated, or when an interrupt
+table. Internal logic is single-edge triggered. The external     request is cleared and others are pending (Figure 10). Set
+clock should have a nominal 50% duty cycle.                      the POSINT bit in the PINCTL (R17) register to make INT
+                                                                 active high, and clear the POSINT bit to make INT active low.
+www.maximintegrated.com                                                                                                Maxim Integrated │ 13
+
+
+MAX3420E                                                   USB Peripheral Controller with SPI Interface
+GPIN3–GPIN0, GPOUT3–GPOUT0 and GPX
+The MAX3420E has four general-purpose inputs                          GPOUT        REGISTER BIT                     GPOUT
+                                                                      WRITE                                          PIN
+(GPIN3–GPIN0), four general-purpose outputs (GPOUT3–
+POUT0), and a multiplexed output pin (GPX). GPIN3
+through GPIN0 all have weak internal pullup resistors to              GPOUT
+                                                                       READ
+VL. These inputs can be read by sampling bits 7 through
+4 of the IOPINS (R20) register. Writing to GPIN3 through
+                                                               Figure 11. Behavior of Read and Write Operations on
+GPIN0 has no effect. GPOUT3 through GPOUT0 are                 GPOUT3–GPOUT0
+the general-purpose outputs. Update these outputs by
+writing to bits 3 through 0 of the IOPINS (R20) register.
+                                                                                   FULL-SPEED        FULL-SPEED
+GPOUT3–GPOUT0 logic levels are referenced to the                                   TIME FRAME        TIME FRAME
+voltage on VL. As shown in Figure 11, reading the state                                1ms               1ms
+of a GPOUT3–GPOUT0 bit returns the state of the inter-                   USB
+                                                                             SOF                SOF                   SOF
+nal register bit, not the actual pin state. This is useful for       PACKETS
+doing read-modify-write operations to an output pin (such
+                                                                         GPX    ~50%
+as blinking an LED), since the load on the output pin does
+not affect the register logic state.
+                                                               Figure 12. GPX Output in SOF Mode
+GPX is a push-pull output with a 4-way multiplexer that
+selects its output signal. The logic level on GPX is ref-
+erenced to VL. The SPI master writes to the GPXB and
+GPXA bits of PINCTL (R17) register to select one of four
+                                                                                                                MOSI
+internal signals as depicted in Table 3.
+●● OPERATE: This signal goes high when the                                    FDUPSPI = 1
+                                                                                                                MISO
+    MAX3420E is able to operate after a power-up or
+    RES reset. OPERATE is the default GPX output.
+                                                                                                     MAX3420E
+●● VBUS_DET: VBUS_DET is the VBCOMP comparator
+    output. This allows the user to directly monitor the
+    VBUS status.                                                                                                MOSI
+●● BUSACT: USB BUS activity signal (active-high).
+                                                                              FDUPSPI = 0
+    This signal is active whenever there is traffic on                         (DEFAULT)                        MISO
+    the USB bus. The BUSACT signal is set whenever
+    a SYNC field is detected. BUSACT goes low during
+    bus reset or after 32-bit times of J-state.                                                      MAX3420E
+●● SOF: A square wave with a positive edge that
+    indicates the USB start-of-frame (Figure 12).
+                                                               Figure 13. MAX3420E SPI Data Pins for Full-Duplex (Top) and
+                                                               Half-Duplex (Bottom) Operation
+Table 3. GPX Output State
+    GPXB          GPXA      GPX PIN OUTPUT                     MOSI (Master-Out, Slave-In) and
+      0             0       OPERATE (Default State)            MISO (Master-In, Slave-Out)
+      0             1       VBUS_DET                           The SPI data pins MOSI and MISO operate differently
+                                                               depending on the setting of a register bit called FDUPSPI
+      1             0       BUSACT
+                                                               (full-duplex SPI). Figure 13 shows the two configurations
+      1             1       SOF                                according to the FDUPSPI bit setting.
+www.maximintegrated.com                                                                                 Maxim Integrated │ 14
+
+
+MAX3420E                                                    USB Peripheral Controller with SPI Interface
+                       SS                                     SPI MODE 0,0 OR 1,1
+                     MISO            Q7     Q6     Q5          Q4           Q3         Q2          Q1 Q0   *
+                     SCLK
+                  MODE 0,0
+                     SCLK
+                  MODE 1,1
+                     MOSI           D7     D6     D5          D4           D3          D2         D1  D0     *
+                                                  *MSB OF NEXT BYTE IN BURST MODE (SS REMAINS LOW)
+Figure 14. SPI Clocking Modes
+In full-duplex mode (FDUPSPI = 1), the MOSI and MISO                    If SS goes high before a complete byte is clocked in, the
+pins are separate, and the MISO pin drives only when SS                 byte-in-progress is discarded. The SPI master can ter-
+is low. In this mode, the first eight SCLK edges (after SS =            minate an SPI cycle after clocking in the first 8 bits (the
+0) clock the command byte into the MAX3420E on MOSI,                    command byte). This feature can be used in a full-duplex
+and eight USB status bits are clocked out of the MAX3420E               system to retrieve the USB status bits (Figure 5) without
+on MISO. For an SPI write cycle, any bytes following the                sending or receiving SPI data.
+command byte are clocked into the MAX3420E on MOSI,
+and zeros are clocked out on MISO. For an SPI read cycle,               Applications Information
+any bytes following the command byte are clocked out of the
+                                                                        SPI Interface
+MAX3420E on MISO and the data on MOSI is ignored. At
+the conclusion of the SPI cycle (SS = 1), the MISO output               The MAX3420E operates as an SPI slave device. A
+three-states.                                                           register access consists of the SPI master first writing
+                                                                        an SPI command byte, followed by reading or writing
+In half-duplex mode, the MOSI pin is a bidirectional pin                the contents of the addressed register (see the Register
+and the MISO pin is three-stated. This saves a pin in the               Description section for more details). All SPI transfers are
+SPI interface. Because of the shared data pin, this mode                MSB first. The external SPI master provides a clock signal
+does not offer the eight USB status bits (Figure 5) as the              to the MAX3420E SCLK input. This clock frequency can
+command byte is clocked into the MAX3420E. The MISO                     be between DC and 26MHz. Bit transfers occur on the
+pin can be left unconnected in half-duplex mode.                        positive edge of SCLK. The MAX3420E counts bits and
+SCLK (Serial Clock)                                                     divides them into bytes. If fewer than 8 bits are clocked
+                                                                        into the MAX3420E when SS goes high, the MAX3420E
+The SPI master provides the MAX3420E SCLK signal to
+                                                                        discards the partial byte.
+clock the SPI interface. SCLK has no low-frequency limit,
+and can be as high as 26MHz. The MAX3420E changes                       The MAX3420E SPI interface operates without adjust-
+its output data (MISO) on the falling edge of SCLK and                  ment in either SPI mode (CPOL = 0, CPHA = 0) or
+samples input data (MOSI) on the rising edge of SCLK.                   (CPOL = 1, CPHA = 1). No mode bit is required to
+The MAX3420E ignores SCLK transitions when SS is                        select between the two modes since the interface uses
+high. The inactive level of SCLK may be low or high,                    the rising edge of the clock in both modes. The two
+depending on the SPI operating mode (Figure 14).                        clocking modes are illustrated in Figure 14. Note that
+                                                                        the inactive SCLK value is different for the two modes.
+SS (Slave Select)                                                       Figure 14 illustrates the full-duplex mode, where data is
+The MAX3420E SPI interface is active only when SS is                    simultaneously clocked into and out of the MAX3420E.
+low. When SS is high, the MAX3420E three-states the SPI
+output pin and resets the internal MAX3420E SPI logic.
+www.maximintegrated.com                                                                                        Maxim Integrated │ 15
+
+
+MAX3420E                                                 USB Peripheral Controller with SPI Interface
+SPI Half- and Full-Duplex Operation                          (1) The SPI master sets the clock to its inactive state.
+The MAX3420E can be programmed to operate in                     While SS is high, the master can drive the MOSI pin.
+half-duplex (a bidirectional data pin) or full-duplex (one   (2) The SPI master selects the MAX3420E by driving
+data-in and one data-out pin) mode. The SPI master sets          SS low and placing the first data bit to write on the
+a register bit called FDUPSPI (full-duplex SPI) to 1 for         MOSI input.
+full-duplex, and 0 for half-duplex operation. Half-duplex is (3) The SPI master simultaneously clocks the command
+the power-on default.                                            byte into the MAX3420E and USB status bits out of the
+Full-Duplex Operation                                            MAX3420E MISO pin on the rising edges of the SCLK
+When the SPI master sets FDUPSPI = 1, the SPI inter-             it supplies. The SPI master changes its MOSI input
+face uses separate data pins, MOSI and MISO to transfer          data on the falling edges of SCLK.
+data. Because of the separate data pins, bits can be         (4) After eight clock cycles, the master can drive SS high
+simultaneously clocked into and out of the MAX3420E.             to deselect the MAX3420E.
+The MAX3420E makes use of this feature by clocking out       (5) By keeping SS low, the master clocks data bytes into
+8 USB status bits as the command byte is clocked in, as          the MAX3420E by continuing to supply SCLK pulses
+illustrated in Figure 15.                                        (burst mode). The master terminates the transfer by
+Reading from the SPI Slave Interface (MISO)                      driving SS high. The master must ensure that SCLK
+in Full-Duplex Mode                                              is inactive at the beginning of the next access (when
+In full-duplex mode the SPI master reads data from the           it drives SS low). In full-duplex mode, the MAX3420E
+MAX3420E slave interface using the following steps:              outputs USB status bits on MISO during the first 8 bits
+                                                                 (the command byte), and subsequently outputs zeroes
+(1) When SS is high, the MAX3420E is unselected and              on MISO as the SPI master clocks bytes into MOSI.
+    three-states the MISO output.
+(2) After driving SCLK to its inactive state, the SPI mas-
+                                                             Half-Duplex Operation
+    ter selects the MAX3420E by driving SS low. The          The MAX3420E is put into half-duplex mode at power-
+    MAX3420E turns on its MISO output buffer and places      on, or when the SPI master clears the FDUPSPI bit. In
+    the first data bit (Q7) on the MISO output (Figure 14).  half-duplex mode, the MAX3420E three-states its MISO
+                                                             pin and makes the MOSI pin bidirectional, saving a pin in
+(3) The SPI master simultaneously clocks the command
+                                                             the SPI interface. The MISO pin can be left unconnected in
+    byte into the MAX3420E MOSI pin, and USB status
+                                                             half-duplex operation.
+    bits out of the MAX3420E MISO pin on the rising
+    edges of the SCLK it supplies. The MAX3420E changes      Because of the single data pin, the USB status bits
+    its MISO output data on the falling-edges of SCLK.       available in full-duplex mode are not available as the
+                                                             SPI master clocks in the command byte. In half-duplex
+(4) After eight clock cycles, the master can drive SS high
+                                                             mode these status bits are accessed in the normal way,
+    to deselect the MAX3420E, causing it to three-state
+                                                             as register bits.
+    its MISO output. The falling edge of the clock puts
+    the MSB of the next data byte in the sequence on the     The SPI master must operate the MOSI pin as bidirectional.
+    MISO output (Figure 14).                                 It accesses a MAX3420E register as follows:
+(5) By keeping SS low, the master clocks register data       (1) The SPI master sets the clock to its inactive state.
+    bytes out of the MAX3420E by continuing to supply            While SS is high, the master can drive the MOSI pin to
+    SCLK pulses (burst mode). The master terminates the          any value.
+    transfer by driving SS high. The master must ensure      (2) The SPI master selects the MAX3420E by driving
+    that SCLK is in its inactive state at the beginning of       SS low and placing the first data bit (MSB) to write
+    the next access (when it drives SS low). In full-duplex      on the MOSI input.
+    mode, the MAX3420E ignores data on MOSI while            (3) The SPI master turns on its output driver and clocks
+    clocking data out on MISO.                                   the command byte into the MAX3420E on the rising
+Writing to the SPI Slave Interface (MOSI)                        edges of the SCLK it supplies. The SPI master changes
+in Full-Duplex Mode                                              its MOSI data on the falling edges of SCLK.
+In full-duplex mode, the SPI master writes data to the       (4) After eight clock cycles, the master can drive SS
+MAX3420E slave interface through the following steps:            high to deselect the MAX3420E.
+www.maximintegrated.com                                                                             Maxim Integrated │ 16
+
+
+MAX3420E                                                       USB Peripheral Controller with SPI Interface
+                       SS                          SPI MODE 0,0 (CPOL = 0, CPHA = 0)
+                     MISO        SUSPIRQ URESIRQ SUDAVIRQ   IN3BAVIRQ      IN2BAVIRQ OUT1DAVIRQ OUT0DAVIRQ IN0BAVIRQ   X
+                     SCLK
+                     MOSI         REG4    REG3    REG2        REG1           REG0        0         DIR         ACKSTAT
+Figure 15. SPI Port in Full-Duplex Mode
+(5) To write SPI data, the SPI master keeps its output                        Power Management
+    driver on and clocks subsequent bytes into the MOSI                       According to USB rev. 2.0 specification, when a USB host
+    pin. To read SPI data, after the eighth clock cycle the                   stops sending traffic for at least 3 milliseconds to a peripher-
+    SPI master three-states its output driver and begins                      al, the peripheral must enter a power-down state called
+    clocking in data bytes from the MOSI pin.                                 SUSPEND. Once suspended, the peripheral must have
+(6) The SPI master terminates the SPI cycle by returning                      enough of its internal logic active to recognize when the
+    SS high.                                                                  host resumes signaling, or if enabled for remote wakeup,
+Figure 8 and Figure 9 show timing diagrams for full and                       that the SPI master wishes to signal a resume event. The
+half-duplex operation.                                                        following sections titled Suspend and Wakeup and USB
+                                                                              Resume describe how the SPI master coordinates with
+USB Serial-Interface Engine                                                   the MAX3420E to accomplish this power management.
+The serial-interface engine (SIE) does most of the                            Suspend
+detailed work required by USB protocol:
+                                                                              After three milliseconds of USB bus inactivity, a USB
+    ●● USB packet PID detection and checking                                  peripheral is required to enter the USB suspend state and
+    ●● CRC check and generation                                               draw no more than 500µA of supply current. To accom-
+    ●● Automatic retries in case of errors                                    plish this, after three milliseconds of USB bus inactivity,
+                                                                              the MAX3420E sets the SUSPIRQ bit in the USBIRQ
+    ●● USB packet generation                                                  (R13) register and asserts the INT output, if SUSPIE =
+    ●● NRZI data encoding and decoding                                        1 and IE = 1. The SPI master must do any necessary
+    ●● Bit stuffing and unstuffing                                            power-saving housekeeping and then set the PWRDOWN
+                                                                              bit in the USBCTL (R15) register. This instructs the
+    ●● Various USB error condition detection                                  MAX3420E to enter a power-down state, in which it does
+    ●● USB bus reset, suspend, and wake-up detection                          the following:
+    ●● USB resume signaling                                                       ●● Stops the 12MHz oscillator
+    ●● Automatic flow control (NAK)                                               ●● Keeps the INT output active (according to the
+                                                                                      mode set in the PINCTL (R17) register)
+PLL
+An internal PLL multiplies the 12MHz oscillator signal by                         ●● Monitors the USB D+ line for bus activity
+four to produce an internal 48MHz clock. When the chip                            ●● Monitors the SPI port for any traffic
+is powered down, the oscillator is turned off to conserve                     Note that the MAX3420E does not automatically enter
+power. When repowered, the oscillator and PLL require                         a power-down state after three milliseconds of bus
+time to stabilize and lock. The OSCOKIRQ interrupt bit                        inactivity. This allows the SPI master to perform any
+is used to indicate to the SPI master that the clocking                       preshutdown tasks before it requests the MAX3420E to
+system is stable and ready for operation.                                     enter the power-down state by setting PWRDOWN = 1.
+www.maximintegrated.com                                                                                                   Maxim Integrated │ 17
+
+
+MAX3420E                                                   USB Peripheral Controller with SPI Interface
+Wakeup and USB Resume                                          Chip Reset
+The MAX3420E may wake up in three ways while it is in          Pulling the RES pin low or setting CHIPRES = 1 clears
+the power-down state:                                          most of the bits that control USB operation, but keeps
+(1) The SPI master clears the PWRDOWN bit in the               the SPI and pin-control bits unchanged so the interface
+    USBCTL (R15) register (this is also achieved by a chip     between the SPI master and the MAX3420E is not
+    reset).                                                    disturbed. Specifically:
+(2) The SPI master signals a USB remote wakeup by                  ●● CHIPRES is unchanged. If the SPI master asserted
+    setting the SIGRWU bit in the USBCTL (R15) register.              this reset by setting CHIPRES = 1, it removes the
+    When SIGRWU = 1, the MAX3420E restarts the oscillator             reset by writing CHIPRES = 0.
+    and waits for it to stabilize. After the oscillator            ●● CONNECT is unchanged, keeping the device
+    stabilizes, the MAX3420E drives RESUME signaling                  connected if CONNECT = 1.
+    (a 10ms K-state) on the bus. The MAX3420E times
+                                                                   ●● The general-purpose outputs GPOUT3–GPOUT0
+    this interval to relieve the SPI master of having to
+                                                                      are unchanged, preventing output glitches.
+    keep accurate time. The MAX3420E also ensures
+    that the RESUME signal begins only after at least              ●● The GPX output selector (GPXB, GPXA) is
+    5ms of the bus idle state. When the MAX3420E                      unchanged.
+    finishes its RESUME signaling, it sets the RWUDNIRQ            ●● The bits that control the SPI interface are
+    (remote-wakeup-done interrupt request) interrupt flag             unchanged: FDUPSPI, INTLEVEL, and POSINT.
+    in the USBIRQ (R13) register. At this time the SPI
+                                                                   ●● The bits that control power-down and wakeup
+    master should clear the SIGRWU bit.
+                                                                      behavior are unchanged: HOSCSTEN, PWRDOWN,
+(3) The host resumes bus activity. To enable the                      and SIGRWU.
+    MAX3420E to wake up from host signaling, the SPI
+    master sets the HOSCSTEN (host oscillator start            All other bits except the three noted in the Power-On
+    enable) bit of the USBCTL (R15) register. While in this    Reset section are cleared.
+    mode, if the MAX3420E detects a 1 to 0 transition on       Note: The IRQ and IE bits are cleared using this reset.
+    D+, the MAX3420E restarts the oscillator and waits for     This means that firmware routines that enable interrupts
+    it to stabilize.                                           should be called after a reset of this type.
+Device Reset                                                   USB Bus Reset
+The MAX3420E has three reset mechanisms:                       When the MAX3420E detects 21.33µs of SE0, it asserts
+    ●● Power-On Reset. This is the most inclusive reset        the URESIRQ bit and clears certain bits. This reset is
+        sets all internal register bits to a known state).     the least inclusive of the three resets. It maintains the
+                                                               bit states listed in the Power-On Reset and Chip Reset
+    ●● Chip Reset. The SPI master can assert a chip
+        reset by setting the bit CHIPRES = 1, which has        sections, plus it leaves the following bits in their previous
+        the same effect as pulling the RES pin low. This       states:
+        reset clears only some register bits and leaves            ●● Registers R0–R4 are unchanged. The actual data
+        others alone.                                                 in the FIFOs is never cleared.
+    ●● USB Bus Reset. A USB bus reset is the least                 ●● The IE bit is unchanged.
+        inclusive (clears the smallest number of bits).            ●● URESIE, URESIRQ, URESDNIE, and
+Power-On Reset                                                        URESDNIRQ are unchanged, allowing the SPI
+                                                                      master to check the state of USB bus resets.
+At power-on, all register bits except three are cleared.
+The following three bits are set to 1 to indicate that the     As with the chip reset, most of the interrupt request
+IN FIFOs are available for loading by the SPI master           and interrupt enable bits are cleared, meaning that the
+(BAV = buffer available):                                      device firmware must reenable individual interrupts after
+                                                               a bus reset. The exceptions are the interrupts associated
+    ●● IN3BAVIRQ
+                                                               with the actual bus reset, allowing the SPI master to
+    ●● IN2BAVIRQ                                               detect the beginning and end of the host signaling USB
+    ●● IN0BAVIRQ                                               bus reset.
+www.maximintegrated.com                                                                                 Maxim Integrated │ 18
+
+
+MAX3420E                                                     USB Peripheral Controller with SPI Interface
+                                             3.3V
+                                          REGULATOR
+                                          MAX6349TL                                      12MHz
+                                                      1.0µF
+                                                                   0.1µF            CXI         CXO
+                                                     CERAMIC
+                                                10kΩ
+                                    4.7µF
+                                                            VCC VL                      XI   XO
+                                                       RES
+                                VBUS                                                            INT
+                                              33Ω
+                                                                                               MOSI
+                                     D+                D+                                                  µP
+                            USB                                                                MISO
+                  "B" CONNECTOR               33Ω                        MAX3420E
+                                                                                               SCLK
+                                     D-                D-
+                                                                                                 SS
+                                GND
+                                                       VBCOMP
+                                                                GND               GPIN GPOUT
+                                             GPI
+                                                                                  4        4
+Figure 16. MAX3420E in a Bus-Powered Application
+MAX3420E in a Bus-Powered Application                                  The configuration in Figure 16 shows the SPI
+Figure 16 depicts the MAX3420E in a peripheral                         interface using the maximum number of SPI interface
+device that is powered by VBUS. This configuration is                  pins. The data pins, MOSI and MISO, are separate, and
+advantageous because it requires no external power                     the MAX3420E supplies an interrupt signal through the
+supply. VBUS is specified from 4.75V to 5.25V, so a 3.3V               INT output pin to the µP to notify the µP when its attention
+regulator is required to power the MAX3420E. This                      is required.
+diagram assumes that the microprocessor is powered by                  MAX3420E in a Self-Powered Application
+3.3V as well, so the VL pin (logic-level reference voltage)
+                                                                       Figure 17 shows a self-powered design in which the µP
+is connected to VCC. Therefore, the GPIO (general-
+                                                                       has its own power source. This is a common configuration
+purpose inputs/outputs) are referenced to 3.3V.
+                                                                       in battery-powered handheld devices. Figure 17 also
+USB is a hot-plug system (VBUS is hot when the device                  illustrates the SPI interfacing with the minimum number
+is plugged in), so it is good design practice to use a                 of pins. This is achieved by using a single bidirectional
+power-on reset circuit to provide a clean reset to the                 data line and no interrupt pin connection. The MAX3420E
+system when the device is plugged in. The MAX6349TL                    register bit, FDUPSPI, configures the SPI interface for
+serves as an excellent USB regulator, since it has very                bidirectional operation.
+low quiescent current and a POR circuit built in.
+                                                                       Although Figure 17 shows VL = VCC, if the microcontroller
+Because this design is bus powered, it is not necessary                uses a different interface voltage (1.71V to 3.6V) this
+to test for the presence of VBUS. In this case, the bus                reference voltage can be connected to VL. Figure 17
+voltage-detection input (VBCOMP) makes an excel-                       shows a connection from the MAX3420E GPX output to
+lent general-purpose input when pulled up to VL. The                   the microcontroller. GPX can be programmed (see Table
+VBCOMP input has two interrupts associated with it,                    3) to connect the output of the internal VBUS comparator
+VBUSIRQ and NOVBUSIRQ. These interrupts can detect                     to the GPX output. This enables the microprocessor to
+both edges of any transitions on the VBCOMP input.                     detect a USB plug-in event even if the MAX3420E is put
+                                                                       into its power-down state.
+www.maximintegrated.com                                                                                        Maxim Integrated │ 19
+
+
+MAX3420E                                                    USB Peripheral Controller with SPI Interface
+                                                                                                            +3.3V
+                                                                                         12MHz
+                                                     1.0µF
+                                                    CERAMIC       0.1µF             CXI         CXO
+                                                           VCC VL                       XI   XO
+                                                      RES                                       GPX
+                                 VBUS
+                                            33Ω                                                  INT  N.C.
+                                      D+              D+                                       MOSI          µP
+                             USB
+                   "B" CONNECTOR            33Ω                         MAX3420E               MISO   N.C.
+                                      D-              D-                                       SCLK
+                                 GND                                                              SS
+                                                      VBCOMP
+                                            1.0µF
+                                         CERAMIC               GND               GPIN GPOUT
+                                                                                  4        4
+                                                                                     GPIO
+Figure 17. MAX3420E in a Self-Powered Application
+The VBUS detect input, VBCOMP, is an important                        Crystal Selection
+MAX3420E feature. Because the µP is powered whether                   The MAX3420E requires a crystal with the following
+the USB device is plugged in or not, it needs some way to             specifications:
+detect a plug-in event. A comparator inside the MAX3420E
+checks for a valid VBUS connection on VBCOMP and                      Frequency: 12MHz ±0.25%
+provides a connect status bit to the µP. Once connected,              CLOAD: 18pF
+the µP can delay the logical connection to the USB bus                CO: 7pF max
+to perform any required initialization, and then connect by
+                                                                      Drive level: 200µW
+setting the CONNECT bit to 1 in the MAX3420E register
+USBCTL (R15). This connects the internal 1.5kΩ resistor               Series resonance resistance: 60Ω max
+from D+ to VCC, to signal the host that a device has been             Note: Series resonance resistance is the resistance
+plugged in.                                                           observed when the resonator is in the series resonant
+If a host turns off VBUS while the device is connected,               condition. This is a parameter often stated by quartz
+the USB rev. 2.0 specification requires that the device               crystal vendors and is called R1. When a resonator is used
+must not power its 1.5kΩ pullup resistor connected to                 in the parallel resonant mode with an external load capac-
+D+. The MAX3420E has two features to help service                     itance, as is the case with the MAX3420E oscillator circuit,
+this event. First, the NOVBUSIRQ bit indicates the loss               the effective resistance is sometimes stated. This effective
+of VBUS. Second, the µP can set a bit called VBGATE                   resistance at the loaded frequency of oscillation is:
+(VBUS gate) to instruct the MAX3420E to disconnect the                                     R1 x ( 1 + (CO / CLOAD))2
+pullup resistor anytime VBUS goes away, regardless of
+                                                                      For typical CO and CLOAD values, the effective resis-
+the CONNECT bit setting.
+                                                                      tance can be greater than R1 by a factor of 2.
+www.maximintegrated.com                                                                                           Maxim Integrated │ 20
+
+
+MAX3420E                                                USB Peripheral Controller with SPI Interface
+ESD Protection
+D+, D-, and VBCOMP possess extra protection against                                    RC          RD
+                                                                                     1MΩ         1.5kΩ
+static electricity to protect the devices up to ±15kV. The
+ESD structures withstand high ESD in all operating                          CHARGE-CURRENT-     DISCHARGE
+                                                                              LIMIT RESISTOR   RESISTANCE
+modes: normal operation, suspend mode, and powered
+down. VBCOMP and VCC require 1µF ceramic capacitors                 HIGH-                                                DEVICE
+                                                                   VOLTAGE                 Cs STORAGE
+connected to ground as close to the pins as possible. D+,            DC                 100pF CAPACITOR
+                                                                                                                         UNDER
+                                                                                                                          TEST
+D-, and VBCOMP provide protection to the following limits:         SOURCE
+●● ±15kV using the Human Body Model
+●● ±8kV using the Contact Discharge method specified
+    in IEC 61000-4-2
+●● ±12kV using the IEC 61000-4-2 Air Gap Method             Figure 18. Human Body ESD Test Models
+ESD Test Conditions
+ESD performance depends on a variety of conditions.
+Contact Maxim for a reliability report that documents test
+setup, test methodology, and test results.                              IP 100%
+                                                                            90%
+                                                                                                         Ir PEAK-TO-PEAK RINGING
+                                                                                                            (NOT DRAWN TO SCALE)
+Human Body Model                                                  AMPERES
+Figure 18 shows the Human Body Model, and Figure                          36.8%
+19 shows the current waveform generated when
+discharged into a low impedance. This model consists                        10%
+                                                                               0
+of a 100pF capacitor charged to the ESD voltage of                               0    tRL
+                                                                                                TIME
+interest, which then discharges into the test device                                                 tDL
+                                                                                              CURRENT WAVEFORM
+through a 1.5kΩ resistor.
+IEC 61000-4-2                                               Figure 19. Human Body Model Current Waveform
+The IEC 61000-4-2 standard covers ESD testing and
+performance of finished equipment. It does not specif-
+ically refer to integrated circuits. The major difference
+between tests done using the Human Body Model and                                     RC          RD
+IEC 61000-4-2 is a higher peak current in IEC 61000-                            50MΩ to 100MΩ    330Ω
+4-2, due to lower series resistance. Hence, the ESD                         CHARGE-CURRENT-     DISCHARGE
+withstand voltage measured to IEC 61000-4-2 generally is                      LIMIT RESISTOR    RESISTANCE
+lower than that measured using the Human Body Model.
+                                                                    HIGH-                                                DEVICE
+Figure 20 shows the IEC 61000-4-2 model. The Contact               VOLTAGE                 Cs  STORAGE                   UNDER
+                                                                                        150pF
+Discharge method connects the probe to the device                    DC                        CAPACITOR                  TEST
+                                                                   SOURCE
+before the probe is charged. The Air-Gap Discharge test
+involves approaching the device with a charged probe.
+Short-Circuit Protection
+The MAX3420E withstands VBUS shorts to D+ and D- on
+the USB connector side of the 33Ω series resistors.         Figure 20. IEC 61000-4-2 ESD Test Model
+www.maximintegrated.com                                                                                      Maxim Integrated │ 21
+
+
+MAX3420E                                               USB Peripheral Controller with SPI Interface
+Ordering Information                                       Package Information
+       PART            TEMP RANGE         PIN-PACKAGE      For the latest package outline information and land patterns
+                                                           (footprints), go to www.maximintegrated.com/packages. Note
+ MAX3420EETG+          -40°C to +85°C      24 TQFN-EP*
+                                                           that a “+”, “#”, or “-” in the package code indicates RoHS status
+ MAX3420EECJ+          -40°C to +85°C        32 LQFP       only. Package drawings may show a different suffix character, but
+ MAX3420EECJ/V+        -40°C to +85°C        32 LQFP       the drawing pertains to the package regardless of RoHS status.
++Denotes a lead(Pb)-free/RoHS-compliant package.              PACKAGE           PACKAGE        OUTLINE           LAND
+*EP = Exposed pad.                                               TYPE               CODE          NO.       PATTERN NO.
+/V denotes an automotive qualified part.
+                                                             24 TQFN-EP*          T2444+4       21-0139         90-0022
+                                                               32 LQFP              C32+1       21-0054         90-0111
+Chip Information                                           *EP = Exposed pad.
+PROCESS: BiCMOS
+www.maximintegrated.com                                                                                Maxim Integrated │ 22
+
+
+MAX3420E                                                                   USB Peripheral Controller with SPI Interface
+Revision History
+ REVISION          REVISION                                                                                                                            PAGES
+                                                                               DESCRIPTION
+  NUMBER              DATE                                                                                                                          CHANGED
+                                                                                                                                                 4, 5, 19, 20, 22,
+        2               6/07       Various changes
+                                                                                                                                                     23, 24, 25
+        3              12/10       Added the MAX3420EECJ/V+ part number to the Ordering Information                                                         1
+        4               2/15       Added the Benefits and Features section                                                                                  1
+                                   SCLK Fall to MISO Propagation Delay and SCLK Fall to MOSI Propagation Delay
+        5              11/15                                                                                                                               10
+                                   specifications updated in Electrical Characteristics table
+        6               3/16       Updated package types and package codes in Ordering Information table                                                   21
+For pricing, delivery, and ordering information, please contact Maxim Direct at 1-888-629-4642, or visit Maxim Integrated’s website at www.maximintegrated.com.
+Maxim Integrated cannot assume responsibility for use of any circuitry other than circuitry entirely embodied in a Maxim Integrated product. No circuit patent licenses
+are implied. Maxim Integrated reserves the right to change the circuitry and specifications without notice at any time. The parametric values (min and max limits)
+shown in the Electrical Characteristics table are guaranteed. Other parametric values quoted in this data sheet are provided for guidance.
+Maxim Integrated and the Maxim Integrated logo are trademarks of Maxim Integrated Products, Inc.                 © 2016 Maxim Integrated Products, Inc. │ 23
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Maxim Integrated:
+ MAX3420EECJ+ MAX3420EETG+ MAX3420EECJ+T MAX3420EETG+T

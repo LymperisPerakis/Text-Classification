@@ -1,0 +1,1263 @@
+                   CML Microcircuits
+                                                                                   CMX860
+                                                           Telephone Signalling
+ COMMUNICATION SEMICONDUCTORS
+                                                                                Transceiver
+D/860/7 April 2008
+Features                                                     Applications
+•   V.23 & Bell 202 FSK Tx and Rx                            •   Least Cost Routers
+•   DTMF/Tones Transmit and Receive                          •   Vending Machines
+•   Line and Phone Complementary Drivers                     •   Internet Appliances
+•   Call Progress Decoder                                    •   Home Management Systems
+•   Dual Tone Detection and Generation                       •   Remote Meter Reading
+•   Simple 'C-BUS' Serial Interface                          •   Alarm Systems
+•   Low Power Operation                                      •   Cable TV Set-Top Boxes
+•   ‘Powersave’ Standby Mode                                 •   Advanced Feature Phones
+1.1      Brief Description
+The CMX860 is a flexible, low-power Telephone Signalling Transceiver IC, designed for use in a wide
+range of line-powered telephone equipment. The IC combines the functions of a DTMF encoder and
+decoder, V.23 / Bell 202 modulator and demodulator plus call progression circuitry with analogue
+switching between line and phone interfaces. Ring detection, local phone off-hook detection and a relay
+driver for line hook-switch operation are also provided under the control of 'C-BUS'. The ring and hook
+detectors operate whilst the remainder of the IC is powersaved, generating an interrupt to wake-up the
+host µC when further processing or signalling is required.
+All on-chip functions and switching arrangements are controlled via a serial bus ('C-BUS'). The CMX860
+is designed to operate at 2.7V and utilises CML’s low power DTMF decoder and V.23 / Bell 202 modem
+technology. It is available in 28-pin SOIC (D1), TSSOP (E1) and SSOP (D6) packages.
+© 2008 CML Microsystems Plc
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                                              CMX860
+                                                             CONTENTS
+       Section                                                                                                               Page
+         1.0       Features and Applications ..................................................................... 3
+         1.1       Brief Description ..................................................................................... 3
+         1.2       Block Diagram ......................................................................................... 5
+         1.3       Signal List ................................................................................................ 6
+         1.4       External Components............................................................................. 8
+                   1.4.1 Ring Detector Interface ........................................................... 10
+                   1.4.2 Hook Detector Interface .......................................................... 11
+                   1.4.5 RESETN pin .............................................................................. 11
+         1.5       General Description.............................................................................. 12
+                   1.5.1 Tx USART.................................................................................. 13
+                   1.5.2 FSK Modulator ......................................................................... 14
+                   1.5.3 Tx Filter and Equaliser ............................................................ 14
+                   1.5.4 DTMF/Tones Generator ........................................................... 14
+                   1.5.5 Tx Level Control and Output Drivers ..................................... 14
+                   1.5.6 DTMF Decoder and Tone Detectors....................................... 15
+                   1.5.7 Rx Modem Filter and Equaliser .............................................. 16
+                   1.5.8 FSK Demodulator..................................................................... 16
+                   1.5.9 Rx Data Register and USART ................................................. 16
+                   1.5.10 Rx Modem Pattern Detectors.................................................. 18
+                   1.5.11 Analogue Signal Routing ........................................................ 18
+                   1.5.12 'C-BUS' Interface ...................................................................... 19
+                             1.5.12.1             General Reset Command ............................... 19
+                             1.5.12.2             General Control Register ............................... 21
+                             1.5.12.3             Transmit Mode Register ................................. 23
+                             1.5.12.4             Receive Mode Register................................... 26
+                             1.5.12.5             Tx Data Register.............................................. 28
+                             1.5.12.6             Rx Data Register ............................................. 28
+                             1.5.12.7             Analogue Signal Path Register ..................... 29
+                             1.5.12.8             Status Register................................................ 30
+                             1.5.12.9             Programming Register ................................... 33
+                             1.5.12.10            Other Registers ............................................... 35
+         1.6       Application Notes ................................................................................. 36
+         1.7       Performance Specification................................................................... 37
+                   1.7.1 Electrical Performance ............................................................ 37
+                             1.7.1.1 Absolute Maximum Ratings....................................... 37
+                             1.7.1.2 Operating Limits ......................................................... 37
+                             1.7.1.3 Operating Characteristics.......................................... 38
+        It is always recommended that you check for the latest product datasheet version from the
+         Datasheets page of the CML website: [www.cmlmicro.com].
+© 2008 CML Microsystems Plc                                           4                                                           D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                   CMX860
+1.2      Block Diagram
+                                                Figure 1 Block Diagram
+© 2008 CML Microsystems Plc                                5           D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                      CMX860
+1.3      Signal List
+       CMX860
+                                      Signal                               Description
+      D6, D1, E1
+        Pin No.                Name             Type
+            1                  XTALN             O/P  The output of the on-chip Xtal oscillator inverter.
+            2             XTAL/CLOCK              I/P The input to the oscillator inverter from the Xtal
+                                                      circuit or external clock source.
+            3                 RDRVN              O/P  Relay drive output, low resistance pull down to
+                                                      DVSS when active and medium resistance pull up
+                                                      to DVDD when inactive.
+            4                   DVSS            Power The digital negative supply rail (ground).
+            5                     RD              I/P Schmitt trigger input to the Ring signal detector.
+                                                      Connect to DVSS if Ring Detector not used.
+            6                     RT               BI Open drain output and Schmitt trigger input
+                                                      forming part of the Ring signal detector. Connect
+                                                      to DVDD if Ring Detector not used.
+            7                 RESETN              I/P An active-low reset pin.
+            8                LINERXF             O/P  The output of the Line Rx Input Amplifier.
+            9                LINERXN              I/P The inverting input to the Line Rx Input Amplifier.
+           10                LINERXP              I/P The non-inverting input to the Line Rx Input
+                                                      Amplifier.
+           11              PHONERXF              O/P  The output of the Phone Rx Input Amplifier.
+           12              PHONERXN               I/P The inverting input to the Phone Rx Input
+                                                      Amplifier.
+           13              PHONERXP               I/P The non-inverting input to the Phone Rx Input
+                                                      Amplifier.
+           14                   AVSS            Power The analogue negative supply rail (ground).
+           15                   VBIAS            O/P  Internally generated bias voltage of approximately
+                                                      AVDD /2, except when the device is in ‘Powersave’
+                                                      mode when VBIAS will discharge to AVSS. Should
+                                                      be decoupled to AVSS by a capacitor mounted
+                                                      close to the device pins.
+           16              PHONETXN              O/P  The inverted output of the Phone Tx Output
+                                                      Driver.
+           17              PHONETXP              O/P  The non-inverted output of the Phone Tx Output
+                                                      Driver.
+           18                LINETXN             O/P  The inverted output of the Line Tx Output Driver.
+           19                LINETXP             O/P  The non-inverted output of the Line Tx Output
+                                                      Driver.
+           20                   AVDD            Power The analogue positive supply rail. Levels and
+                                                      thresholds within the device are proportional to
+                                                      this voltage.
+           21                     HT               BI Open drain output and Schmitt trigger input
+                                                      forming part of the Hook signal detector. Connect
+                                                      to DVDD if Hook Detector not used.
+© 2008 CML Microsystems Plc                               6                                               D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                     CMX860
+        CMX860
+                                      Signal                               Description
+      D6, D1, E1
+         Pin No.               Name             Type
+           22                     HD              I/P Schmitt trigger input to the Hook signal detector.
+                                                      Connect to DVSS if Hook Detector not used.
+           23                    CSN              I/P The 'C-BUS' chip select input from the μC.
+           24               COMMAND               I/P The 'C-BUS' serial data input from the μC.
+                               DATA
+           25                 SERIAL              I/P The 'C-BUS' serial clock input from the μC.
+                              CLOCK
+           26             REPLY DATA             T/S  A 3-state 'C-BUS' serial data output to the μC.
+                                                      This output is high impedance when not sending
+                                                      data to the μC.
+           27                   IRQN             O/P  A ‘wire-ORable’ output for connection to a μC
+                                                      Interrupt Request input. This output is pulled
+                                                      down to DVSS when active and is high impedance
+                                                      when inactive. An external pullup resistor is
+                                                      required i.e. R1 of Figure 2.
+           28                   DVDD            Power The digital positive supply rail. Levels and
+                                                      thresholds within the device are proportional to
+                                                      this voltage.
+       I/P = Input O/P = Output BI = Bidirectional T/S = 3-state Output NC = No Connection
+© 2008 CML Microsystems Plc                               7                                              D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                              CMX860
+1.4      External Components
+                      C1, C2          22pF                       C3, C4, C6      100nF
+                      R1              100kΩ                      C5, C7          10uF
+                      X1              11.0592MHz                 L1, L2          100nH
+                                      or 12.288MHz                               (optional)
+                     Resistors ±5%, capacitors and inductors ±20% unless otherwise stated.
+               Figure 2a Recommended External Components for a Typical Application
+This device is capable of detecting and decoding small amplitude signals. To achieve this DVDD, AVDD
+and VBIAS should be decoupled and the receive path protected from extraneous in-band signals. It is
+recommended that the printed circuit board is laid out with both AVSS and DVSS ground planes in the
+CMX860 area, as shown in Figure 2b, with provision to make a link between them close to the CMX860.
+To provide a low impedance connection to ground, the decoupling capacitors (C3 – C7) must be mounted
+as close to the CMX860 as possible and connected directly to their respective ground plane. This will be
+achieved more easily by using surface mounted capacitors.
+VBIAS is used as an internal reference for detecting and generating the various analogue signals. It must
+be carefully decoupled, to ensure its integrity. Apart from the decoupling capacitor shown (C3), no other
+loads are allowed. If VBIAS needs to be used to set external analogue levels, it must be buffered with a
+high input impedance buffer.
+The DVSS connections to the Xtal oscillator capacitors C1 and C2 should also be of low impedance and
+preferably be part of the DVSS ground plane to ensure reliable start up of the oscillator.
+© 2008 CML Microsystems Plc                            8                                          D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                           CMX860
+                  Figure 2b Recommended Power Supply Connections and De-coupling
+                                   ANALOGUE                                      DIGITAL
+           C3, C6            100nF                           C4           100nF
+           C7                10uF                            C5           10uF
+           L2                100nH                           L1           100nH
+                             (optional, see note)                         (optional, see note)
+     Note:    The inductors L1 and L2 can be omitted but this may degrade system performance.
+© 2008 CML Microsystems Plc                          9                                         D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                 CMX860
+1.4.1    Ring Detector Interface
+Figure 3 shows how the CMX860 may be used to detect the large amplitude ringing signal voltage
+present on the 2-wire line at the start of an incoming telephone call.
+The ring signal is usually applied at the subscriber's exchange as an ac voltage inserted in series with one
+of the telephone wires and will pass through either C20 and R20 or C21 and R21 to appear at the top end
+of R22 (point X in Figure 3) in a rectified and attenuated form.
+The signal at point X is further attenuated by the potential divider formed by R22 and R23 before being
+applied to the CMX860 RD input. If the amplitude of the signal appearing at RD is greater than the input
+threshold (Vthi) of Schmitt trigger 'A' then the N transistor connected to RT will be turned on, pulling the
+voltage at RT to DVSS by discharging the external capacitor C22. The output of the Schmitt trigger 'B' will
+then go high, setting bit 14 (Ring Detect) of the Status Register.
+The minimum amplitude ringing signal that is certain to be detected is:
+                              ( 0.7 + Vthi x [R20 + R22 + R23] / R23 ) x 0.707 Vrms
+where Vthi is the high-going threshold voltage of the Schmitt trigger A (see section 1.7.1).
+With R20 - R22 all 470kΩ as Figure 3, then setting R23 to 68kΩ will guarantee detection of ringing signals
+of 40Vrms and above for DVDD over the range 3V to 5V.
+                       R20, 21, 22        470kΩ                     C20, 21   0.1μF
+                       R23                See text                  C22       0.33μF
+                       R24                470kΩ                     D1-4      1N4004
+                                             Resistors ±5%, capacitors ±20%
+                                  Figure 3 Ring Signal Detector Interface Circuit
+© 2008 CML Microsystems Plc                                10                                        D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                CMX860
+If the time constant of R24 and C22 is large enough then the voltage on RT will remain below the
+threshold of the 'B' Schmitt trigger for the duration of a ring cycle.
+The time for the voltage on RT to charge from DVSS towards DVDD can be derived from the formula:
+VRT = DVDD x [1 - exp(-t/(R24 x C22)) ]
+As the Schmitt trigger high-going input threshold voltage (Vthi) has a minimum value of 0.56 x DVDD, then
+the Schmitt trigger B output will remain high for a time of at least 0.821 x R24 x C22 following a pulse at
+RD.
+The values of R24 and C22 given in Figure 3 (470kΩ and 0.33μF) give a minimum RT charge time of 100
+msec, which is adequate for ring frequencies of 10Hz or above.
+Note that the circuit will also respond to a telephone line voltage reversal. If necessary the μC can
+distinguish between a Ring signal and a line voltage reversal by measuring the time that bit 14 of the
+Status Register (Ring Detect) is high.
+If the Ring detect function is not used then pin RD should be connected to DVSS and RT to DVDD.
+1.4.2    Hook Detector Interface
+This is identical internally to the Ring Detector interface circuit and similar components could be used
+externally, with appropriate values, if hook detection is to be performed by detecting a voltage change
+across the tip and ring lines to the local phone.
+1.4.3    RESETN pin
+When this pin is taken low, it performs the same operation as a C-BUS General Reset command. As a
+consequence the device will enter the powersaved state. Refer to section 1.5.12.1 (General Reset
+Command) and 1.5.12.2 (General Control Register, Powerup bit) for further information.
+© 2008 CML Microsystems Plc                            11                                           D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                             CMX860
+1.5      General Description
+The CMX860 transmit and receive operating modes are independently programmable.
+The transmit mode can be set to any one of the following:
+         V.23 modem. 1200 or 75 bps FSK.
+         Bell 202 modem. 1200 or 150 bps FSK.
+         DTMF transmit.
+         Single tone transmit (from a range of modem calling, answer and other tone frequencies)
+         User programmed tone or tone pair transmit (programmable frequencies and levels)
+         Disabled.
+The receive mode can be set to any one of the following:
+         V.23 modem. 1200 or 75 bps FSK.
+         Bell 202 modem. 1200 or 150 bps FSK.
+         DTMF decode.
+         2100Hz and 2225Hz answer tone detect.
+         Call progress signal detect.
+         User programmed tone or tone pair detect.
+         Disabled.
+The CMX860 may also be set into a Powersave mode which disables all circuitry except for the 'C-BUS'
+interface, the Ring Detector and the Hook Detector.
+© 2008 CML Microsystems Plc                          12                                          D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                    CMX860
+1.5.1    Tx USART
+A flexible Tx USART is provided. It can be programmed to transmit continuous patterns, Start-Stop
+characters or Synchronous Data.
+In both Synchronous Data and Start-stop modes the data to be transmitted is written by the µC into the 8-
+bit 'C-BUS' Tx Data Register from which it is transferred to the Tx Data Buffer.
+If Synchronous Data mode has been selected the 8 data bits in the Tx Data Buffer are transmitted serially,
+b0 being sent first.
+In Start-stop mode a single Start bit is transmitted, followed by 5, 6, 7 or 8 data bits from the Tx Data
+Buffer - b0 first - followed by an optional Parity bit then - normally - one or two Stop bits. The Start, Parity
+and Stop bits are generated by the USART as determined by the Tx Mode Register settings and are not
+taken from the Tx Data Register.
+                                                   Figure 4a Tx USART
+Every time the contents of the 'C-BUS' Tx Data Register are transferred to the Tx Data Buffer the Tx Data
+Ready flag bit of the Status Register is set to 1 to indicate that a new value should be loaded into the 'C-
+BUS' Tx Data Register. This flag bit is cleared to 0 when a new value is loaded into the Tx Data Register.
+                   Figure 4b Tx USART Function (Start-Stop mode, 8 Data Bits + Parity)
+If a new value is not loaded into the Tx Data Register in time for the next Tx Data Register to Tx Data
+Buffer transfer then the Status Register Tx Data Underflow bit will be set to 1. In this event the contents
+of the Tx Data Buffer will be re-transmitted if Synchronous Data mode has been selected, or if the Tx
+modem is in Start-stop mode then a continuous Stop signal (1) will be transmitted until a new value is
+loaded into the Tx Data Register.
+The transmitted bit rates are determined by the XTAL frequency.
+© 2008 CML Microsystems Plc                                 13                                          D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                            CMX860
+1.5.2    FSK Modulator
+Serial data from the USART is fed to the FSK modulator. One of two frequencies is generated according
+to the current transmit data bit.
+1.5.3    Tx Filter and Equaliser
+The FSK modulator output signal is fed through the Transmit Filter and Equaliser block which limits the
+out-of-band signal energy to acceptable limits. When transmitting 1200bps FSK, this block includes a
+fixed compromise line equaliser which may be enabled or disabled by bit 10 of the General Control
+Register. The amount of Tx equalisation provided compensates for one quarter of the relative amplitude
+and delay distortion of ETS Test Line 1 over the frequency band used.
+1.5.4    DTMF/Tones Generator
+In DTMF/Tones mode this block generates DTMF signals or single or dual frequency tones.
+1.5.5   Tx Level Control and Output Drivers
+The CMX860 generated signal (if present) from the FSK/DTMF/Tones Generator is passed through the
+programmable Tx Level Control before being passed to the switched paths controlled by the Analogue
+Signal Path Register. The Tx Output Drivers have symmetrical outputs to provide sufficient line voltage
+swing at low values of AVDD and to reduce harmonic distortion of the signal. The Drivers can also
+transmit the signal from the other port (e.g. Phone Input to Line Driver) or can be independently set to
+Bias or Powersaved – see Analogue Signal Path Register.
+© 2008 CML Microsystems Plc                          14                                         D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                  CMX860
+1.5.6     DTMF Decoder and Tone Detectors
+In Rx Tones Detect mode the received signal, after passing through the Rx Gain Control block, is fed to
+the DTMF decoder and Dual Tone/Call Progress/Answer Tone detector. The user may select one of four
+separate operations:
+The DTMF decoder detects standard DTMF signals. A valid DTMF signal will set bit 5 of the Status
+Register to 1 for as long as the signal is detected. The DTMF signal is then decoded and output in bits 0
+to 3 of the Status Register.
+The programmable tone pair detector includes two separate tone detectors (see Figure 9a). The first
+detector will set bit 6 of the Status Register for as long as a valid signal is detected, the second detector
+sets bit 7, and bit 10 of the Status Register will be set when both tones are detected. The frequency and
+bandwidth of each detector can be set in the Programming Register. Without programming, the default
+values in the Programming Register are set for 2130 and 2750 Hz detection.
+The Call Progress detector measures the amplitude of the signal at the output of a 275 Hz - 665 Hz
+bandpass filter and sets bit 10 of the Status Register to 1 when the signal level exceeds the measurement
+threshold.
+                                        10
+                                         0
+                                       -10
+                                       -20
+                                    dB
+                                       -30
+                                       -40
+                                       -50
+                                       -60
+                                           0   0.5   1 1.5     2  2.5 3   3.5    4
+                                                              kHz
+                                  Figure 5a Response of the Call Progress Filter
+The Answer Tone detector measures both amplitude and frequency of the received signal and sets bit 6
+or bit 7 respectively of the Status Register when a valid 2225Hz or 2100Hz signal is received.
+© 2008 CML Microsystems Plc                                15                                         D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                   CMX860
+1.5.7     Rx Modem Filter and Equaliser
+When the receive part of the CMX860 is operating as a modem, the received signal is fed to a bandpass
+filter to attenuate unwanted signals and to provide fixed compromise line equalisation. The line equaliser
+may be enabled or disabled by bit 10 of the General Control Register and compensates for one quarter of
+the relative amplitude and delay distortion of ETS Test Line 1.
+A typical response of this filter, including the line equaliser, is shown in Figure 5b. The effect of external
+components should also be considered in determining the overall response:
+                                      10
+                                       0
+                                     -10
+                                     -20
+                                     -30
+                                  dB
+                                     -40
+                                     -50
+                                     -60
+                                         0    0.5    1  1.5     2  2.5   3    3.5   4
+                                                            kHz
+                                               Figure 5b V.23 / Bell 202 Rx Filters
+The signal level at the output of the Receive Modem Filter and Equaliser is measured in the Modem
+Energy Detector block, compared to a threshold value, and the result controls bit 10 of the Status
+Register.
+The output of the Receive Modem Filter and Equaliser is also fed to the FSK demodulator.
+1.5.8     FSK Demodulator
+The FSK demodulator recognises individual frequencies as representing received ‘1’ or ‘0’ data bits:
+The FSK demodulator produces a serial data bit stream which is fed to the Rx USART block, see
+Figure 6a. This bit stream is also monitored for continuous ‘1010’s and for continuous 1’s. The outputs of
+these pattern detectors control bits 9 and 7 respectively of the Status Register.
+1.5.9     Rx Data Register and USART
+The Rx USART can be programmed to treat the received data bit stream as Synchronous data or as
+Start-Stop characters.
+In Synchronous mode the received data bits are all fed into the Rx Data Buffer which is copied into the
+'C-BUS' Rx Data Register after every 8 bits.
+In Start-stop mode the USART Control logic looks for the start of each character, then feeds only the
+required number of data bits (not parity) into the Rx Data Buffer. The parity bit (if used) and the presence
+© 2008 CML Microsystems Plc                                  16                                        D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                   CMX860
+of a Stop bit are then checked and the data bits in the Rx Data Buffer copied to the 'C-BUS' Rx Data
+Register.
+                                           Figure 6a Rx Modem Data Paths
+Whenever a new character is copied into the 'C-BUS' Rx Data Register, the Rx Data Ready flag bit of the
+Status Register is set to 1 to prompt the µC to read the new data, and, in Start-stop mode, the Even Rx
+Parity flag bit of the Status Register is updated.
+In Start-stop mode, if the Stop bit is missing (received as a ‘0’ instead of a ‘1’) the received character will
+still be placed into the Rx Data Register and the Rx Data Ready flag bit set, but the Status Register Rx
+Framing Error bit will also be set to ‘1’ and the USART will re-synchronise onto the next ‘1’ – ‘0’ (Stop –
+Start) transition. The Rx Framing Error bit will remain set until the next character has been received.
+                   Figure 6b Rx USART Function (Start-stop mode, 8 Data Bits + Parity)
+If the µC has not read the previous data from the Rx Data Register by the time that new data is copied to
+it from the Rx Data Buffer then the Rx Data Overflow flag bit of the Status Register will be set to 1.
+The Rx Data Ready flag and Rx Data Overflow bits are cleared to 0 when the Rx Data Register is read by
+the µC.
+© 2008 CML Microsystems Plc                              17                                            D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                   CMX860
+1.5.10 Rx Modem Pattern Detectors
+The '1010' pattern detector will set bit 9 of the Status Register when 32 bits of alternating 1's and 0's have
+been received. The continuous 1's detector will set bit 7 of the Status Register when 32 consecutive 1's
+have been received. Both pattern detectors will hold their 'detect' output for 12 bit times after the end of
+the detected pattern unless the received bit rate or operating mode is changed, in which case the
+detectors are reset within 2ms.
+1.5.11 Analogue Signal Routing
+The routing of signals to and from the Line and Phone interfaces is performed by bits 0 to 4 of the
+Analogue Signal Path Register. Please note that bits 5 to 7 of this register are reserved for future use and
+should be set to zero.
+© 2008 CML Microsystems Plc                            18                                              D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                 CMX860
+1.5.12 'C-BUS' Interface
+This block provides for the transfer of data and control or status information between the CMX860’s
+internal registers and the µC over the 'C-BUS' serial bus. Each transaction consists of a single Register
+Address byte sent from the µC which may be followed by one or more data byte(s) sent from the µC to be
+written into one of the CMX860’s Write Only Registers, or one or more byte(s) of data read out from one
+of the CMX860’s Read Only Registers, as illustrated in Figure 7.
+Data sent from the µC on the Command Data line is clocked into the CMX860 on the rising edge of the
+Serial Clock input. Reply Data sent from the CMX860 to the µC is valid when the Serial Clock is high.
+The CSN line must be held low during a data transfer and kept high between transfers. The 'C-BUS'
+interface is compatible with most common µC serial interfaces and may also be easily implemented with
+general purpose µC I/O pins controlled by a simple software routine. Figure 13 gives detailed 'C-BUS'
+timing requirements.
+The following 'C-BUS' addresses and registers are used by the CMX860:
+         General Reset Command (address only, no data).            Address $01
+         General Control Register, 16-bit write only.              Address $E0
+         Transmit Mode Register, 16-bit write-only.                Address $E1
+         Receive Mode Register, 16-bit write-only.                 Address $E2
+         Transmit Data Register, 8-bit write only.                 Address $E3
+         Receive Data Register, 8-bit read-only.                   Address $E5
+         Status Register, 16-bit read-only.                        Address $E6
+         Programming Register, 16-bit write-only.                  Address $E8
+         Analogue Signal Path Register, 8-bit write-only.          Address $EC
+Notes: 1. The 'C-BUS' addresses $E9, $EA and $EB are allocated for production testing and should not
+             be accessed in normal operation.
+         2. The 'C-BUS' address $E4 is allocated for internal use and should not be accessed in normal
+             operation.
+         3. In several registers there are bit patterns whose function is not specified. These modes
+             should not be accessed in normal operation and no guarantee is given that any use of these
+             bits will be supported in the future.
+1.5.12.1           General Reset Command
+General Reset Command                   (no data)    'C-BUS' address $01
+This command resets the device and clears all bits of the General Control, Analogue Signal Path,
+Programming, Transmit Mode and Receive Mode Registers and all bits of the Status Register except b14
+and b8.
+The clearing of the General Control Register will put the device into Powersave. See the description of
+General Control Register b8 for the procedure on how to power-up the device.
+Whenever power is applied to the CMX860, a General Reset command should be sent to the device or
+the RESETN pin should be pulsed low. Either action will cause the device to enter a powersave state
+(General Control Register bit 8 will be cleared to '0'). Note that the CMX860 does not automatically
+perform a power-on reset when power is first applied.
+To bring the device out of powersave, please refer to the description of bits 7 and 8 in the General Control
+Register, section 1.5.12.2.
+© 2008 CML Microsystems Plc                             19                                           D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                      CMX860
+                                            Figure 7 'C-BUS' Transactions
+© 2008 CML Microsystems Plc                              20               D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                   CMX860
+1.5.12.2              General Control Register
+General Control Register: 16-bit write-only.             'C-BUS' address $E0
+This register controls general features of the CMX860 such as the Powersave mode, the IRQ mask bits
+and the Relay Drive output. It also allows the fixed compromise equalisers in the Tx and Rx signal paths
+to be disabled if desired, and sets the internal clock dividers to use either a 11.0592 or a 12.288 MHz
+XTAL frequency.
+All bits of this register are cleared to 0 by a General Reset command.
+   Bit:    15      14     13    12      11      10    9      8    7     6  5     4     3    2     1    0
+            0       0      0   Xtal    Hook    Equ   Rly   Pwr   Rst  Irqn          IRQ Mask Bits
+                               freq    IRQ           drv               en
+                                      Mask
+          General Control Register b15-13: Reserved, set to 000
+          General Control Register b12: Xtal frequency
+          This bit should be set according to the Xtal frequency.
+                     b12 = 1             11.0592MHz
+                    b12 = 0              12.2880MHz
+          General Control Register b11: Hook Detect IRQ Mask bit
+          This bit affects the operation of the IRQ bit of the Status Register as described in section
+          1.5.12.8
+          General Control Register b10: Tx and Rx Fixed Compromise Equaliser
+          This bit allows the Tx and Rx fixed compromise equaliser in the modem transmit and receive
+          filter blocks to be disabled.
+                     b10 = 1             Disable equaliser
+                    b10 = 0              Enable equaliser (1200bps modem mode)
+          General Control Register b9: Relay Drive
+          This bit directly controls the RDRVN output pin.
+                      b9 = 1             RDRVN output pin pulled to DVSS
+                      b9 = 0             RDRVN output pin pulled to DVDD
+© 2008 CML Microsystems Plc                                 21                                          D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                        CMX860
+         General Control Register b8: Powerup
+         This bit controls the internal power supply to most of the internal circuits, including the Xtal
+         oscillator and VBIAS supply. Note that the General Reset command clears this bit, putting the
+         device into Powersave mode.
+                    b8 = 1               Device powered up normally
+                    b8 = 0               Powersave mode (all circuits except Ring Detect, Hook Detect, RDRVN
+                                         and 'C-BUS' interface disabled)
+         When power is first applied to the device, the following powerup procedure should be
+         followed to ensure correct operation.
+         i.         (Power is applied to the device)
+         ii.        Issue a General Reset command or momentarily set the RESETN pin low.
+         iii.      Write to the General Control Register (address $E0) setting both the Powerup bit (b8)
+                   and the Reset bit (b7) to 1 – leave in this state for a minimum of about 20ms – it is
+                   required that the crystal initially runs for this time in order to clock the internal logic into
+                   a defined state. The device is now powered up, with the crystal and VBIAS supply
+                   operating, but is otherwise not running any transmit or receive functions.
+         iv.        The device is now ready to be programmed as and when required. Examples:
+                    • A General Reset command could be issued to clear all the registers and therefore
+                        powersave the device.
+                    • The Reset bit in the General Control Register could be set to 0 as part of a routine
+                        to program all the relevant registers for setting up a particular operating mode.
+         When the device is switched from Powersave mode to normal operation by setting the
+         Powerup bit to 1, the Reset bit should also be set to 1 and should be held at 1 for about 20ms
+         while the internal circuits, Xtal oscillator and VBIAS stabilise before starting to use the transmitter
+         or receiver.
+         General Control Register b7: Reset
+         Setting this bit to 1 resets the CMX860’s internal circuitry, clearing all bits of the Analogue
+         Signal Path, Programming, Transmit and Receive Mode Registers and b13-0 of the Status
+         Register.
+                    b7 = 1               Internal circuitry in a reset condition.
+                    b7 = 0               Normal operation
+         General Control Register b6: IRQNEN (IRQN O/P Enable)
+         Setting this bit to 1 enables the IRQN output pin.
+                    b6 = 1               IRQN pin driven low (to DVSS) if the IRQ bit of the Status Register = 1
+                    b6 = 0               IRQN pin disabled (high impedance)
+         General Control Register b5-0: IRQ Mask bits
+         These bits affect the operation of the IRQ bit of the Status Register as described in section
+         1.5.12.8
+© 2008 CML Microsystems Plc                                   22                                             D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                              CMX860
+1.5.12.3            Transmit Mode Register
+Transmit Mode Register: 16-bit write-only.              'C-BUS' address $E1
+This register controls the CMX860 transmit signal type and level. All bits of this register are cleared to 0
+by a General Reset command, or when b7 (Reset) of the General Control Register is 1.
+   Bit:   15      14     13    12      11     10     9   8       7      6       5  4       3    2      1        0
+             Tx mode = modem               Tx level      set to 00      set to 00 Start-stop /    # data bits /
+                                                                                  synch data   synch data source
+          Tx mode = DTMF/Tones             Tx level        Unused, set to 0000          DTMF or Tone select
+            Tx mode = Disabled                           Set to 0000 0000 0000
+         Tx Mode Register b15-12: Tx mode
+         These 4 bits select the transmit operating mode.
+         b15     b14     b13    b12
+           0       1       0       1     V.23 FSK                      1200 bps
+           0       1       0       0     V.23 FSK                      75 bps
+           0       0       1       1     Bell 202 FSK                  1200 bps
+           0       0       1       0     Bell 202 FSK                  150 bps
+           0       0       0       1     DTMF / Tones
+           0       0       0       0     Transmitter disabled
+         Tx Mode Register b11-9: Tx level
+         These 3 bits set the gain of the Tx Level Control block.
+          b11        b10        b9
+            1          1         1        0dB
+            1          1         0       -1.5dB
+            1          0         1       -3.0dB
+            1          0         0       -4.5dB
+            0          1         1       -6.0dB
+            0          1         0       -7.5dB
+            0          0         1       -9.0dB
+            0          0         0       -10.5dB
+© 2008 CML Microsystems Plc                                 23                                                    D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                CMX860
+         Tx Mode Register b8-5: Reserved, set to 0000
+         Tx Mode Register b4-3: Tx Data Format (both FSK modes)
+         These two bits select Synchronous or Start-stop mode and the addition of a parity bit to
+         transmitted characters in Start-stop mode.
+              b4             b3
+              1               1          Synchronous mode
+              1               0          Start-stop mode, no parity
+              0               1          Start-stop mode, even parity bit added to data bits
+              0               0          Start-stop mode, odd parity bit added to data bits
+         Tx Mode Register b2-0: Tx Data and Stop bits (FSK Start-stop mode)
+         In Start-stop mode these three bits select the number of Tx data and stop bits.
+           b2         b1        b0
+            1          1         1       8 data bits, 2 stop bits
+            1          1         0       8 data bits, 1 stop bit
+            1          0         1       7 data bits, 2 stop bits
+            1          0         0       7 data bits, 1 stop bit
+            0          1         1       6 data bits, 2 stop bits
+            0          1         0       6 data bits, 1 stop bit
+            0          0         1       5 data bits, 2 stop bits
+            0          0         0       5 data bits, 1 stop bit
+         Tx Mode Register b2-0: Tx Data source (FSK Synchronous mode)
+         In Synchronous mode (b4-3 = 11) these three bits select the source of the data fed to the Tx
+         FSK modulator.
+           b2         b1        b0
+            1          x         x       Data bytes from Tx Data Buffer
+            0          1         1       Continuous 1s
+            0          1         0       Continuous 0s
+            0          0         x       Continuous alternating 1s and 0s
+© 2008 CML Microsystems Plc                                  24                                     D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                 CMX860
+         Tx Mode Register b8-0: DTMF/Tones mode
+         If DTMF/Tones transmit mode has been selected (Tx Mode Register b15-12 = 0001) then b8-5
+         should be set to 0000 and b4-0 will select a DTMF signal or a fixed tone or one of four
+         programmed tones or tone pairs for transmission.
+         b4 = 0: Tx fixed tone or programmed tone pair
+          b3      b2     b1       b0     Tone frequency (Hz)
+           0       0      0        0             No tone
+           0       0      0        1                697
+           0       0      1        0                770
+           0       0      1        1                852
+           0       1      0        0                941
+           0       1      0        1               1209
+           0       1      1        0               1336
+           0       1      1        1               1477
+           1       0      0        0               1633
+           1       0      0        1               1300       (Calling tone)
+           1       0      1        0               2100       (Answer tone)
+           1       0      1        1               2225       (Answer tone)
+           1       1      0        0          Tone pair TA    Programmed Tx tone / tone pair, see 1.5.12.9
+           1       1      0        1          Tone pair TB                           “
+           1       1      1        0          Tone pair TC                           “
+           1       1      1        1      2130 and 2750 Hz by   Tx tone / tone pair TD when TD programmed
+                                                   default
+         b4 = 1: Tx DTMF
+          b3      b2     b1       b0      Low frequency (Hz)   High frequency (Hz)        Keypad symbol
+           0       0      0        0                941                 1633                    D
+           0       0      0        1                697                 1209                    1
+           0       0      1        0                697                 1336                    2
+           0       0      1        1                697                 1477                    3
+           0       1      0        0                770                 1209                    4
+           0       1      0        1                770                 1336                    5
+           0       1      1        0                770                 1477                    6
+           0       1      1        1                852                 1209                    7
+           1       0      0        0                852                 1336                    8
+           1       0      0        1                852                 1477                    9
+           1       0      1        0                941                 1336                    0
+           1       0      1        1                941                 1209                    *
+           1       1      0        0                941                 1477                    #
+           1       1      0        1                697                 1633                    A
+           1       1      1        0                770                 1633                    B
+           1       1      1        1                852                 1633                    C
+© 2008 CML Microsystems Plc                                25                                        D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                                CMX860
+1.5.12.4            Receive Mode Register
+Receive Mode Register: 16-bit write-only.               'C-BUS' address $E2
+This register controls the CMX860 receive signal type and level.
+All bits of this register are cleared to 0 by a General Reset command, or when b7 (Reset) of the General
+Control Register is 1.
+   Bit:    15     14     13    12      11     10     9    8       7      6       5       4      3   2      1      0
+              Rx mode = modem              Rx level           Set to 00          Start-stop/Synch   No. of bits and
+                                                                                                        parity
+          Rx mode = Tones detect           Rx level                     DTMF/Tones/Call Progress select
+             Rx mode = Disabled                         Set to 0000 0000 0000
+                                                        (bit 8 should be set to ‘0’)
+          Rx Mode Register b15-12: Rx mode
+          These 4 bits select the receive operating mode.
+          b15     b14    b13    b12
+            0      1       0       1     V.23 FSK           1200 bps
+            0      1       0       0     V.23 FSK           75 bps
+            0      0       1       1     Bell 202 FSK       1200 bps
+            0      0       1       0     Bell 202 FSK       150 bps
+            0      0       0       1     DTMF, Programmed tone pair, Answer Tone, Call Progress detect
+            0      0       0       0     Receiver disabled
+          Rx Mode Register b11-9: Rx level
+          These three bits set the gain of the Rx Gain Control block.
+           b11       b10        b9
+             1         1         1        0dB
+             1         1         0       -1.5dB
+             1         0         1       -3.0dB
+             1         0         0       -4.5dB
+             0         1         1       -6.0dB
+             0         1         0       -7.5dB
+             0         0         1       -9.0dB
+             0         0         0       -10.5dB
+© 2008 CML Microsystems Plc                                  26                                                     D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                   CMX860
+         Rx Mode Register b8-6: Reserved, set to 000
+         Rx Mode Register b5-3: Rx USART Setting (both FSK modes)
+         These three bits select the Rx USART operating mode.
+           b5         b4        b3
+            1          1         1       Rx Synchronous mode
+            1          1         0       Rx Start-stop mode
+            0          x         x       Rx USART function disabled
+         Rx Mode Register b2-0: Rx Data bits and parity (FSK Start-stop mode)
+         In Start-stop mode these three bits select the number of data bits (plus any parity bit) in each
+         received character.
+           b2         b1        b0
+            1          1         1       8 data bits + parity
+            1          1         0       8 data bits
+            1          0         1       7 data bits + parity
+            1          0         0       7 data bits
+            0          1         1       6 data bits + parity
+            0          1         0       6 data bits
+            0          0         1       5 data bits + parity
+            0          0         0       5 data bits
+         Rx Mode Register b2-0: Rx Data bits and parity (FSK Synchronous mode)
+         These bits are ignored in Synchronous mode.
+         Rx Mode Register b2-0: Tones Detect mode
+         In Tones Detect Mode (Rx Mode Register b15-12 = 0001) b8-3 should be set to 000000
+         Bits 2-0 select the detector type.
+           b2         b1        b0
+            1          0         0       Programmable Tone Pair Detect
+            0          1         1       Call Progress Detect
+            0          1         0       2100, 2225Hz Answer Tone Detect
+            0          0         1       DTMF Decode
+            0          0         0       Disabled
+© 2008 CML Microsystems Plc                                   27                                       D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                               CMX860
+1.5.12.5            Tx Data Register
+Tx Data Register: 8-bit write-only.                'C-BUS' address $E3
+   Bit:    7      6      5       4       3      2     1    0
+                        Data bits to be transmitted
+In Synchronous Tx data mode this register contains the next 8 data bits to be transmitted. Bit 0 is
+transmitted first.
+In Tx Start-stop mode the specified number of data bits will be transmitted from this register (b0 first). A
+Start bit, a Parity bit (if required) and Stop bit(s) will be added automatically.
+This register should only be written to when the Tx Data Ready bit of the Status Register is 1.
+1.5.12.6            Rx Data Register
+Rx Data Register: 8-bit read-only.                 'C-BUS' address $E5
+   Bit:    7      6      5       4       3      2     1    0
+                            Received data bits
+In unformatted Rx data mode this register contains 8 received data bits, b0 of the register holding the
+earliest received bit, b7 the latest.
+In Rx Start-stop data mode this register contains the specified number of data bits from a received
+character, b0 holding the first received bit.
+© 2008 CML Microsystems Plc                                  28                                    D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                  CMX860
+1.5.12.7           Analogue Signal Path Register
+Analogue Signal Path Register: 8-bit write-only.                'C-BUS' address $EC
+This register controls the routing of the analogue signal paths and controls the output drivers.
+   Bit:   7       6      5             4                 3            2               1             0
+          0       0      0                 Line Driver                   Phone Driver             Input
+                                              Mode                          Mode                 Selector
+                                                                                                 Control
+Bits 7-5 of the Analogue Signal Path Register are reserved for future use and should be set to 0.
+Analogue Signal Path Register b4-3: Line Driver Mode
+These bits control the complementary Line Driver and select the signal to be transmitted.
+           b4        b3                        Line Driver Mode
+            0         0                      Off / High Impedance
+            0         1                Transmit Phone-derived Signal
+            1         0             Transmit CMX860 Generated Signal
+            1         1                       Transmit Bias Level
+Analogue Signal Path Register b2-1: Phone Driver Mode
+These bits control the complementary Phone Driver and select the signal to be transmitted.
+           b2        b1                       Phone Driver Mode
+            0         0                      Off / High Impedance
+            0         1                  Transmit Line-derived Signal
+            1         0             Transmit CMX860 Generated Signal
+            1         1                       Transmit Bias Level
+Analogue Signal Path Register b0: Input Selector Control
+This bit selects between the Line and Phone as inputs to the CMX860’s decoders/detectors. Note: both
+op-amps remain powered up even when not selected (unless device is powersaved).
+              b0 = 1         Line-derived signal to decoders/detectors
+              b0 = 0         Phone-derived signal to decoders/detectors
+Notes:
+         1.        ‘Line-derived signal’ means the signal at the output of the Line input op-amp. ‘Phone-
+                   derived signal’ means the signal at the output of the Phone input op-amp. The ‘CMX860
+                   Generated Signal’ means the signal from the DTMF/Tones or FSK generators.
+         2.        When the device is put into Powersave by setting Bit 8 of the General Control Register to
+                   1, the transmit drivers and receive op-amps are powersaved and their outputs go high
+                   impedance. The settings of the Analogue Signal Path Register are unaffected, however.
+© 2008 CML Microsystems Plc                                 29                                        D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                         CMX860
+1.5.12.8            Status Register
+Status Register: 16-bit read-only.               'C-BUS' address $E6
+Bits 13-9 and 7-0 of this register are cleared to 0 by a General Reset command, or when b7 (Reset) of the
+General Control Register is 1.
+   Bit:   15      14     13    12      11     10      9     8      7       6     5      4   3   2     1  0
+         IRQ     RD      PF                                See below for uses of these bits
+The meanings of the Status Register bits 12-9 and 7-0 depend on whether the receive circuitry is in
+Modem or Tones Detect mode.
+         Status Register bits:
+                                 Rx Modem modes                              Rx Tones Detect modes       ** IRQ
+                                                                                                         Mask bit
+            b15                                                  IRQ
+            b14                                       Set to 1 on Ring Detect                                b5
+            b13                                Programming Flag bit. See 1.5.12.9                            b4
+            b12                                      Set to 1 on Tx data ready.                              b3
+                                              Cleared by write to Tx Data Register
+            b11                                   Set to 1 on Tx data underflow.                             b3
+                                              Cleared by write to Tx Data Register
+            b10        1 when energy is detected in Rx               1 when energy is detected in Call       b2
+                       modem signal band                             Progress band or when both
+                                                                     programmable tones are detected
+             b9        1 when ‘1010..’ pattern is detected           0                                       b1
+                       in FSK modes
+             b8                                       Set to 1 on Hook Detect                               b11
+             b7        1 when continuous 1’s pattern                 1 when 2100Hz answer tone or the        b1
+                       detected in FSK modes                         second programmable tone is
+                                                                     detected
+             b6        Set to 1 on Rx data ready.                    1 when 2225Hz answer tone or the        b0
+                       Cleared by read from Rx Data                  first programmable tone is detected
+                       Register
+             b5        Set to 1 on Rx data overflow.                 1 when DTMF code is detected            b0
+                       Cleared by read from Rx Data
+                       Register
+             b4        Set to 1 on Rx framing error                  0                                        -
+             b3        Set to 1 on even Rx parity                    Rx DTMF code b3, see table               -
+             b2        0                                             Rx DTMF code b2                          -
+             b1        0                                             Rx DTMF code b1                          -
+             b0        FSK frequency demodulator output Rx DTMF code b0                                       -
+Note:    ** This column shows the corresponding IRQ Mask bits in the General Control Register.
+© 2008 CML Microsystems Plc                                   30                                             D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                              CMX860
+Certain events of the Status Register bits 14-5 will cause the IRQ bit b15 to be set to 1 if the
+corresponding IRQ Mask bit is 1. These events are:
+          for Status Register Bit 14 (Ring Detect), Bit 10 (Energy or Call Progress / Programmable Tones
+          Detect) and Bit 8 (Hook Detect), both positive-going (0 to 1) and negative-going (1 to 0)
+          transitions,
+          for the remaining Status Register bits, only positive-going (0 to 1) transitions.
+The IRQ bit is cleared by a read of the Status Register or a General Reset command or by setting b7 or
+b8 of the General Control Register to 1.
+The operation of the data demodulator and pattern detector circuits within the CMX860 does not depend
+on the state of the Rx energy detect function.
+         Rx Signal
+        or Hook/Ring Detect                                                                      Hold time
+                                              Detect time
+       Status Register bit 5,6,7,8,9 or 10                                                Note 3
+        Status Register bit 15 (IRQ)                       Note 1                                          Note 4
+        IRQN output                                        Note 2
+            Notes: 1. IRQ will go high only if appropriate IRQ Mask bit in General Control Register is set.
+                       The IRQ bit is cleared by a read of the Status Register.
+                    2. IRQN o/p will go low when IRQ bit high if IRQNEN bit of General Control Register is set.
+                    3. In Rx Modem modes Status Register bits 5 and 6 are set by a Rx Data Ready or
+                       Rx Data Underflow event and cleared by a read of the Rx Data Register.
+                    4. Status Bits 14,10 and 8 will also set the IRQ bit to 1 on a negative-going transition.
+                                  Figure 8a Operation of Status Register bits 5-10
+The IRQN output pin will be pulled low (to DVSS) when the IRQ bit of the Status Register and the IRQNEN
+bit (b6) of the General Control Register are both 1.
+Changes to Status Register bits caused by a change of Tx or Rx operating mode can take up to 150μs to
+take effect.
+In Powersave mode or when the Reset bit (b7) of the General Control Register is 1, the Ring Detect bit
+(b14) and the Hook Detect bit (b8) continue to operate.
+© 2008 CML Microsystems Plc                                      31                                               D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                           CMX860
+Rx Modem Mode:
+In Rx Modem mode b0 will show the output of the frequency demodulator, updated at 8 times the nominal
+data rate.
+Rx Tones Detect Mode:
+                              Figure 8b Operation of Status Register for DTMF Rx
+          b3     b2     b1    b0     Low frequency (Hz)  High frequency (Hz)   Keypad symbol
+           0      0     0      0               941               1633               D
+           0      0     0      1               697               1209                1
+           0      0     1      0               697               1336                2
+           0      0     1      1               697               1477                3
+           0      1     0      0               770               1209                4
+           0      1     0      1               770               1336                5
+           0      1     1      0               770               1477                6
+           0      1     1      1               852               1209                7
+           1      0     0      0               852               1336                8
+           1      0     0      1               852               1477                9
+           1      0     1      0               941               1336                0
+           1      0     1      1               941               1209                *
+           1      1     0      0               941               1477                #
+           1      1     0      1               697               1633               A
+           1      1     1      0               770               1633               B
+           1      1     1      1               852               1633               C
+                                   Received DTMF Code: b3-0 of Status Register
+© 2008 CML Microsystems Plc                             32                                     D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                 CMX860
+1.5.12.9           Programming Register (includes generation & detection of 2130 and 2750 Hz)
+Programming Register : 16-bit write-only.            'C-BUS' address $E8
+This register is used to program the transmit and receive programmed tone pairs by writing appropriate
+values to RAM locations within the CMX860. Note that these RAM locations are cleared by Powersave or
+Reset.
+The Programming Register should only be written to when the Programming Flag bit (b13) of the Status
+Register is 1. The act of writing to the Programming Register clears the Programming Flag bit. When the
+programming action has been completed (normally within 150μs) the CMX860 will set the bit back to 1.
+When programming Transmit or Receive Tone Pairs, do not change the Transmit or Receive Mode
+Registers until programming is complete and the Programming Flag bit has returned to 1.
+Transmit Tone Pair Programming
+4 transmit tone pairs (TA to TD) can be programmed.
+The frequency (max 3.4kHz) and level must be entered for each tone to be used.
+Single tones are programmed by setting both level and frequency values to zero for one of the pair.
+Programming is done by writing a sequence of up to seventeen 16-bit words to the Programming
+Register.
+The first word should be 32768 (8000 hex), the following 16-bit words set the frequencies and levels and
+are in the range 0 to 16383 (0-3FFF hex). Each word is written as a 2 x data-byte CBUS transfer, see
+Figure 7c.
+        Word       Tone       Value written              Default
+                    Pair                                 Setting
+           1                  32768
+          2          TA       Tone 1 frequency
+          3          TA       Tone 1 level
+           4         TA       Tone 2 frequency
+           5         TA       Tone 2 level
+           6         TB       Tone 1 frequency
+           7         TB       Tone 1 level
+         ---        ---       ----------
+         ---        ---       ----------
+          14         TD       Tone 1 frequency           2130 Hz       NB. Tone Pair TD is configured as
+          15         TD       Tone 1 level               -20 dBm       2130 and 2750 Hz by default, but
+          16         TD       Tone 2 frequency           2750 Hz       can be re-programmed if required.
+          17         TD       Tone 2 level               -20 dBm
+The Frequency values to be entered are calculated from the formula:
+                             Value to be entered = desired frequency (Hz) * 3.414
+i.e. for 1kHz the value to be entered is 3414 (or 0D56 in Hex).
+The Level values to be entered are calculated from the formula:
+                             Value to be entered = desired Vrms * 93780 / AVDD
+i.e. for 0.5Vrms at AVDD = 3.0V, the value to be entered is 15630 (3D0E in Hex)
+© 2008 CML Microsystems Plc                             33                                           D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                             CMX860
+Note that allowance should be made for the transmit signal filtering in the CMX860 which attenuates the
+output signal for frequencies above 2kHz by 0.25dB at 2.5kHz, by 1dB at 3kHz and by 2.2dB at 3.4kHz.
+Receive Tone Pair Programming
+The programmable tone pair detector is implemented as shown in Figure 9a. The filters are 4th order IIR
+sections. The frequency detectors measure the time taken for a programmable number of complete input
+signal cycles and compare this time against programmable upper and lower limits.
+NB. If this register is not programmed, the detector will be configured to operate in its default mode,
+          which
+is for the detection of 2130 Hz ± 20 Hz and 2750 Hz ± 30 Hz.
+                                      Figure 9a Programmable Tone Detectors
+                                           Figure 9b Filter Implementation
+© 2008 CML Microsystems Plc                               34                                     D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                       CMX860
+Programming is done by writing a sequence of twenty-seven 16-bit words to the Programming Register.
+The first word should be 32769 (8001 hex), the following twenty-six 16-bit words set the frequencies and
+levels and are in the range 0 to 32767 (0000-7FFF hex). Each word is written as a 2 x data-byte CBUS
+transfer, see Figure 7c.
+       Word        Value written                                        Word     Value written
+          1        32769
+          2        Filter #1 coefficient b21                             15      Filter #2 coefficient b21
+          3        Filter #1 coefficient b11                             16      Filter #2 coefficient b11
+          4        Filter #1 coefficient b01                             17      Filter #2 coefficient b01
+          5        Filter #1 coefficient a21                             18      Filter #2 coefficient a21
+          6        Filter #1 coefficient a11                             19      Filter #2 coefficient a11
+          7        Filter #1 coefficient b22                             20      Filter #2 coefficient b22
+          8        Filter #1 coefficient b12                             21      Filter #2 coefficient b12
+          9        Filter #1 coefficient b02                             22      Filter #2 coefficient b02
+         10        Filter #1 coefficient a22                             23      Filter #2 coefficient a22
+         11        Filter #1 coefficient a12                             24      Filter #2 coefficient a12
+         12        Freq measurement #1 ncycles                           25      Freq measurement #2 ncycles
+         13        Freq measurement #1 mintime                           26      Freq measurement #2 mintime
+         14        Freq measurement #1 maxtime                           27      Freq measurement #2 maxtime
+The coefficients are entered as 15-bit signed (two’s complement) integer values (the most significant bit of
+the 16-bit word entered should be zero) calculated as 8192 * coefficient value from the user’s filter design
+program (i.e. this allows for filter design values of -1.9999 to +1.9999).
+The design of the IIR filters should make allowance for the fixed receive signal filtering in the CMX860
+which has a low pass characteristic above 1.5kHz of 0.4dB at 2kHz, 1.2dB at 2.5kHz, 2.6dB at 3kHz and
+4.1dB at 3.4kHz.
+‘ncycles’ is the number of signal cycles for the frequency measurement.
+‘mintime’ is the smallest acceptable time for ncycles of the input signal expressed as the number of
+9.6kHz timer clocks. i.e. ‘mintime’ = 9600 * ncycles / high frequency limit
+‘maxtime’ is the highest acceptable time for ncycles of the input signal expressed as the number of
+9.6kHz timer clocks. i.e. ‘maxtime’ = 9600 * ncycles / low frequency limit
+The level detectors include hysteresis. The threshold levels - measured at a 2-wire line interface with
+unity gain filters, using typical line interface circuits, 1.0 dB line coupling loss and with the Rx Gain Control
+block set to 0dB - are nominally:
+                    ‘Off’ to ‘On’       -44.5dBm
+                    ‘On’ to ‘Off’       -47.0dBm
+Note that if any changes are made to the programmed values while the CMX860 is running in
+Programmed Tone Detect mode they will not take effect until the CMX860 is next switched into
+Programmed Tone Detect mode.
+1.5.12.10           Other Registers
+'C-BUS' addresses $E4, $E9, $EA and $EB are reserved and should not be accessed.
+© 2008 CML Microsystems Plc                                35                                              D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                   CMX860
+1.6      Application Notes
+                   Figure 10 Typical Block Diagram for a Least Cost Router Application
+© 2008 CML Microsystems Plc                          36                                D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                   CMX860
+1.7      Performance Specification
+1.7.1    Electrical Performance
+1.7.1.1 Absolute Maximum Ratings
+Exceeding these maximum ratings can result in damage to the device.
+                                                                   Min. Max.      Units
+ Supply (AVDD - AVSS) or (DVDD - DVSS)                             -0.3 7.0       V
+ Voltage on any pin to AVSS or DVSS                                -0.3 VDD + 0.3 V
+ Voltage between AVSS and DVSS                                          ±50       mV
+ Voltage between AVDD and DVDD                                          ±300      mV
+ Current into or out of AVSS, DVSS, AVDD or DVDD pins              -50  +50       mA
+ Current into RDRVN pin (RDRVN pin low)                                 +50       mA
+ Current into or out of any other pin                             -20   +20       mA
+D6 Package                                                         Min. Max.      Units
+ Total Allowable Power Dissipation at Tamb = 25°C                       1490      mW
+         ... Derating                                                   14.9      mW/°C
+ Storage Temperature                                               -55  +125      °C
+ Operating Temperature                                             -40  +85       °C
+D1 Package                                                         Min. Max.      Units
+ Total Allowable Power Dissipation at Tamb = 25°C                       740       mW
+         ... Derating                                                   7.4       mW/°C
+ Storage Temperature                                               -55  +125      °C
+ Operating Temperature                                             -40  +85       °C
+E1 Package                                                         Min. Max.      Units
+ Total Allowable Power Dissipation at Tamb = 25°C                       1110      mW
+         ... Derating                                                   11.1      mW/°C
+ Storage Temperature                                               -55  +125      °C
+ Operating Temperature                                             -40  +85       °C
+1.7.1.2 Operating Limits
+Correct operation of the device outside these limits is not implied.
+                                                     Notes         Min. Max.      Units
+ Supply (AVDD - AVSS) or (DVDD - DVSS)                             2.7  5.5       V
+ Operating Temperature                                             -40  +85       °C
+© 2008 CML Microsystems Plc                           37                               D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                               CMX860
+1.7.1.3 Operating Characteristics
+For the following conditions unless otherwise specified:
+VDD = AVDD = DVDD = 2.7V to 5.5V at Tamb = -40 to +85°C, VSS = AVSS = DVSS
+Xtal Frequency = 11.0592 or 12.288MHz ± 0.01% (100ppm), 0dBm corresponds to 775mVrms.
+ DC Parameters                                              Notes   Min.       Typ.         Max.    Units
+   IDD (Powersave mode, VDD = 3.0V)                          1, 2     -         2.0                  μA
+        (Reset but not powersave, VDD = 3.0V)                1, 3     -         1.0          2.0     mA
+        (Reset but not powersave, VDD = 5.0V)                1, 3     -         2.5          4.5     mA
+        (Running, VDD = 3.0V)                                 1       -         3.0          5.0     mA
+        (Running, VDD = 5.0V)                                 1       -         5.0          9.0     mA
+   Logic '1' Input Level                                      4     70%          -            -     DVDD
+   Logic '0' Input Level                                      4       -          -          30%     DVDD
+   Logic Input Leakage Current (Vin = 0 to DVDD),                   -1.0         -          +1.0     μA
+     (excluding XTAL/CLOCK input)
+   Output Logic '1' Level (lOH = 2 mA)                              80%          -            -     DVDD
+   Output Logic '0' Level (lOL = -3 mA)                               -          -           0.4      V
+   IRQN O/P 'Off' State Current (Vout = DVDD)                         -          -           1.0     μA
+   Schmitt triggers input high-going                              0.56DVDD       -      0.56DVDD      V
+     threshold (Vthi) (see Figure 11)                                                     + 0.6V
+   Schmitt triggers input low-going                               0.44DVDD       -      0.44DVDD      V
+     threshold (Vtlo) (see Figure 11)                               - 0.6V
+   RDRVN ‘ON’ resistance to DVSS (DVDD= 3.0V)                         -         50           70       Ω
+   RDRVN ‘OFF’ resistance to DVDD (DVDD= 3.0V)                        -        1300         3000      Ω
+Notes:        1. At 25°C, not including any current drawn from the CMX860 pins by external circuitry other
+                   than X1, C1 and C2.
+              2. All logic inputs at DVSS except for RT and CSN inputs which are at DVDD.
+              3. General Mode Register b8 and b7 both set to 1.
+              4. Excluding RD, RT, HD and HT pins.
+                                 4
+                              3.5
+                                 3
+                              2.5
+                          Vin 2
+                              1.5
+                                 1                                        Vthi
+                              0.5                                         Vtlo
+                                 0
+                                    2.5        3     3.5     4    4.5        5      5.5
+                                                            DVdd
+                   Figure 11 Typical Schmitt Trigger Input Voltage Thresholds vs. DVDD
+ XTAL/CLOCK Input                                           Notes   Min.       Typ.         Max.    Units
+ (timings for an external clock input)
+   'High' Pulse Width                                                30          -            -      ns
+   'Low' Pulse Width                                                 30          -            -      ns
+© 2008 CML Microsystems Plc                              38                                        D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                        CMX860
+ Transmit V.23 FSK Mode                                    Notes     Min.          Typ.            Max.      Units
+   Baud rate                                                  5         -       1200/75              -       Baud
+   Mark (logical 1) frequency, 1200 baud                            1298          1300             1302       Hz
+   Space (logical 0) frequency, 1200 baud                           2097          2100             2103       Hz
+   Mark (logical 1) frequency, 75 baud                                389          390              391       Hz
+   Space (logical 0) frequency, 75 baud                               449          450              451       Hz
+ Transmit Bell 202 FSK Mode                                Notes     Min.          Typ.            Max.      Units
+   Baud rate                                                  5         -      1200/150              -       Baud
+   Mark (logical 1) frequency, 1200 baud                            1198          1200             1202       Hz
+   Space (logical 0) frequency, 1200 baud                           2197          2200             2203       Hz
+   Mark (logical 1) frequency, 150 baud                               386          387              388       Hz
+   Space (logical 0) frequency, 150 baud                              486          487              488       Hz
+ DTMF/Single Tone Transmit                                 Notes     Min.          Typ.            Max.      Units
+   Tone frequency accuracy                                            -0.2           -             +0.2        %
+   Distortion                                                 6         -           1.0             2.0        %
+ Transmit Output Level                                     Notes     Min.        Typ.            Max.       Units
+   Modem and Single Tone modes                                6       -4.0        -3.0            -2.0       dBm
+   DTMF mode, Low Group tones                                 6       -2.0        -1.0             0.0       dBm
+   DTMF: level of High Group tones wrt Low Group              6      +1.0         +2.0            +3.0        dB
+   Tx output driver gain control accuracy                     6     -0.25           -            +0.25        dB
+Notes:        5. Tx signal % baud or bit rate accuracy is the same as XTAL/CLOCK % frequency
+                    accuracy.
+              6. Measured between LINETXP and LINETXN or PHONETXP and PHONETXN pins with
+                    Tx Level Control gain set to 0dB, 1k2Ω load between the 'TXP and 'TXN pins,
+                    at AVDD = 3.0V (levels are proportional to AVDD).
+                    Level measurements for all modem modes are performed with random transmitted data
+                    and without any guard tone. 0dBm = 775mVrms.
+               0
+                                                                                       Note 7
+             -10
+                                                                                       Measured on the 2-wire
+                                Bell 202                                               line with the Tx line signal
+             -20                                                                       level set to -10dBm for
+                                                                                       FSK or single tones, -
+             -30                                                                       6dBm and -8dBm for
+        dBm                                                                            DTMF tones. Excludes
+             -40                                                                       any distortion due to
+                                                                                       external components
+             -50                                                                       required for line coupling.
+             -60
+             -70
+                 10                100             1000      10000         100000
+                                                     Hz
+                    Figure 12 Maximum Out of Band Tx Line Energy Limits (see note 7)
+© 2008 CML Microsystems Plc                             39                                                  D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                           CMX860
+ Receive V.23 FSK Mode                                  Notes  Min. Typ. Max.  Units
+   1200 baud
+     Acceptable baud rate                                     1188  1200 1212   Baud
+     Mark (logical 1) frequency                               1280  1300 1320    Hz
+     Space (logical 0) frequency                              2080  2100 2120    Hz
+   75 baud
+     Acceptable baud rate                                       74    75   76   Baud
+     Mark (logical 1) frequency                                382   390  398    Hz
+     Space (logical 0) frequency                               442   450  458    Hz
+ Receive Bell 202 FSK Mode                              Notes Min.  Typ. Max.  Units
+   1200 baud
+     Acceptable baud rate                                     1188  1200 1212   Baud
+     Mark (logical 1) frequency                               1180  1200 1220    Hz
+     Space (logical 0) frequency                              2180  2200 2220    Hz
+   150 baud
+     Acceptable baud rate                                      148   150  152   Baud
+     Mark (logical 1) frequency                                377   387  397    Hz
+     Space (logical 0) frequency                               477   487  497    Hz
+ Rx Modem Signal                                        Notes  Min. Typ. Max.  Units
+   Signal level                                           10  -45.0    -  -9.0  dBm
+   Signal to Noise Ratio (noise flat 300-3400Hz)              20.0     -    -    dB
+ Rx Modem Continuous 1s and 1010.. Pattern              Notes  Min. Typ. Max.  Units
+ Detectors
+   Turn on time                                                 32     -   40    bit-
+                                                                               times
+   Turn off time                                                12     -   20    bit-
+                                                                               times
+ Rx Modem Energy Detector                               Notes Min.  Typ. Max.  Units
+   Detect threshold (‘Off’ to ‘On)                      10,11    -     - -43.0  dBm
+   Undetect threshold (‘On’ to ‘Off’)                   10,11 -48.0    -    -   dBm
+   Hysteresis                                           10,11  2.0     -    -    dB
+  Detect (‘Off’ to ‘On’) response time
+     1200 baud FSK mode                                 10,11  8.0     -  30.0   ms
+     150 and 75 baud FSK modes                          10,11 16.0     -  60.0   ms
+   Undetect (‘On’ to ‘Off’) response time
+     1200 baud FSK mode                                 10,11 10.0     - 40.0    ms
+     150 and 75 baud FSK modes                          10,11 20.0     - 80.0    ms
+ Rx Answer Tone Detectors                               Notes Min.  Typ. Max.  Units
+   Detect threshold (‘Off’ to ‘On)                       10,8    -     - -43.0  dBm
+   Undetect threshold (‘On’ to ‘Off’)                    10,8 -48.0    -    -   dBm
+   Hysteresis                                            10,8  2.0     -    -    dB
+   Detect (‘Off’ to ‘On’) response time                  10,8 30.0  33.0 45.0    ms
+   Undetect (‘On’ to ‘Off’) response time                10,8  7.0  18.0  25.0   ms
+   2100Hz detector
+     ‘Will detect’ frequency                                  2050     - 2160    Hz
+     ‘Will not detect’ frequency                                 -     - 2000    Hz
+   2225Hz detector
+     ‘Will detect’ frequency                                  2160     - 2285    Hz
+     ‘Will not detect’ frequency                              2335     -    -    Hz
+© 2008 CML Microsystems Plc                          40                        D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                              CMX860
+ Rx Call Progress Energy Detector                        Notes      Min.        Typ.      Max.    Units
+   Bandwidth (-3dB points) See Figure 5a                            275            -       665      Hz
+   Detect threshold (‘Off’ to ‘On)                         10,9       -            -      -37.0    dBm
+   Undetect threshold (‘On’ to ‘Off’)                      10,9    -42.0           -          -    dBm
+   Detect (‘Off’ to ‘On’) response time                   10,9      30.0        36.0       45.0     ms
+   Undetect (‘On’ to ‘Off’) response time                 10,9       6.0         8.0       50.0     ms
+Notes:        8. ‘Typical’ value refers to 2100Hz or 2225Hz signal switched between off and -33dBm.
+                   Times measured with respect to the received line signal.
+              9. ‘Typical’ values refers to 400Hz signal switched between off and -33dBm
+              10. Rx 2-wire line signal level assuming 1dB loss in line coupling components with Rx Gain
+                   Control block set to 0dB.
+              11. Thresholds and times measured with continuous binary ‘1’ for all FSK modes. Fixed
+                   compromise line equaliser enabled. Signal switched between off and -33dBm
+ DTMF Decoder                                            Notes       Min.      Typ.       Max.     Unit
+ Valid input signal levels
+ (each tone of composite signal)                            10      -30.0         -         0      dBm
+ Not decode level
+ (either tone of composite signal)                          10         -          -      -36.0     dBm
+ Twist = High Tone/Low Tone                                         -10.0         -        6.0      dB
+ Frequency Detect Bandwidth                                         ±1.8          -       ±3.5       %
+ Max level of low frequency noise (i.e dial tone)
+     Interfering signal frequency <= 550Hz                  12         -          -         0       dB
+     Interfering signal frequency <= 450Hz                  12         -          -       10.0      dB
+     Interfering signal frequency <= 200Hz                  12         -          -       20.0      dB
+ Max. noise level with respect to the signal              12,13        -          -      -10.0      dB
+ DTMF detect response time                                             -          -       40.0      ms
+ DTMF de-response time                                                 -          -       30.0      ms
+ Status Register b5 high time                                        14.0         -         -       ms
+ ‘Will Detect’ DTMF signal duration                                  40.0         -         -       ms
+ ‘Will Not Detect’ DTMF signal duration                                -       25.0         -       ms
+ Pause length detected                                               30.0         -         -       ms
+ Pause length ignored                                                  -          -       15.0      ms
+Notes:        12. Referenced to DTMF tone of lower amplitude.
+              13 Flat Gaussian Noise in 300-3400Hz band.
+ Receive Input Amplifier                                 Notes      Min.        Typ.      Max.    Units
+   Input impedance (at 100Hz)                                       10.0                           MΩ
+   Open loop gain (at 100Hz)                                                   10000               V/V
+   Rx Gain Control Block accuracy                                  -0.25                  +0.25     dB
+© 2008 CML Microsystems Plc                          41                                           D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                               CMX860
+  'C-BUS' Timings (See Figure 13)                            Notes     Min.    Typ.        Max.     Units
+   tCSE        CSN-Enable to Clock-High time                            100      -           -        ns
+   tCSH        Last Clock-High to CSN-High time                         100      -           -       ns
+   tLOZ        Clock-Low to Reply Output enable                         0.0      -           -        ns
+              time
+   tHIZ        CSN-High to Reply Output 3-state time                     -       -         1.0       µs
+   tCSOFF      CSN-High Time between transactions                       1.0      -           -       µs
+   tNXT        Inter-Byte Time                                          200      -           -        ns
+   tCK         Clock-Cycle time                                         200      -           -        ns
+   tCH         Serial Clock-High time                                   100      -           -        ns
+   tCL         Serial Clock-Low time                                    100      -           -       ns
+   tCDS        Command Data Set-Up time                                75.0      -           -        ns
+   tCDH        Command Data Hold time                                  25.0      -           -        ns
+   tRDS        Reply Data Set-Up time                                  50.0      -           -        ns
+   tRDH        Reply Data Hold time                                     0.0      -           -        ns
+Maximum 30pF load on each 'C-BUS' interface line.
+Note: These timings are for the latest version of the 'C-BUS' as embodied in the CMX860, and allow
+faster transfers than the original 'C-BUS' timings given in CML Publication D/800/Sys/3 July 1994.
+                                               Figure 13 'C-BUS' Timing
+© 2008 CML Microsystems Plc                               42                                       D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                   CMX860
+             Figure 14 28-pin SSOP (D6) Mechanical Outline: Order as part no. CMX860D6
+             Figure 15 28-pin SOIC (D1) Mechanical Outline: Order as part no. CMX860D1
+© 2008 CML Microsystems Plc                          43                                D/860/7
+
+
+Telephone Signalling Transceiver / Least Cost Router                                                                    CMX860
+              Figure 16 28-pin TSSOP (E1) Mechanical Outline: Order as part no. CMX860E1
+  Handling precautions: This product includes input protection, however, precautions should be taken to prevent device damage
+  from electro-static discharge. CML does not assume any responsibility for the use of any circuitry described. No IPR or circuit
+  patent licences are implied. CML reserves the right at any time without notice to change the said circuitry and this product
+  specification. CML has a policy of testing every product shipped using calibrated test equipment to ensure compliance with this
+  product specification. Specific testing of all circuit parameters is not necessarily performed.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+CML Microcircuits:
+ CMX860E1 CMX860D1 CMX860D6 CMX860D1-REEL CMX860D6-REEL CMX860E1-REEL

@@ -1,0 +1,1287 @@
+                                                                                                                                                                                                                                                                                                                                             CYUSB202X
+                                                                                                                                                              SD2™ USB and Mass Storage
+                                                                                                                                                                     Peripheral Controller
+SD2™ USB and Mass Storage Peripheral Controller
+Features                                                                                                                                                               ❐        19.2-MHz crystal input support
+                                                                                                                                                          ■            Independent power domains for core and I/O
+■      Latest-generation storage support
+       ❐ SD2.0/SDXC – UHS1 SDR50 / DDR50 Master                                                                                                           ■            10 × 10 mm, 0.8-mm pitch ball grid array (BGA) package
+       ❐ eMMC 4.4 Master
+       ❐ SDIO 3.0 Master
+                                                                                                                                                          Applications
+■      USB integration                                                                                                                                    ■            USB thumb drives
+       ❐ Certified USB 2.0 peripheral: Hi-Speed (HS) and Full-Speed
+                                                                                                                                                          ■            Card readers
+         (FS) only
+       ❐ Thirty-two physical endpoints                                                                                                                    ■            Laptop with SD slots
+       ❐ Integrated transceiver
+                                                                                                                                                          ■            SD slot in TV/STB
+■      Ultra low-power in core power-down mode
+                                                                                                                                                          ■            WiFi Dongles
+       ❐ Less than 60 µA with VBATT on and 20 µA with VBATT off
+                                                                                                                                                          ■            USB SDIO Bridge
+■      I2C master controller at 1 MHz
+■      Selectable input clock frequencies
+       ❐ 19.2, 26, 38.4, and 52 MHz
+ Logic Block Diagram
+                                                                                                    TDI               TRST#           TMS             TCK                 TDO
+                                                                                                                                   JTAG
+                                                                                                                                                                                                            Embedded
+                                                                                                                                                                                                              SRAm
+                                                                                                                    ARM926EJ-S                                                                               (512 kB/
+                                                                                                                                                                                                             256 KB)
+                                                                                                                                                                                                                                                                                                                                               USB INTERFACE
+                                                                                                                                                                                                                                                                                                                                                               D+
+                                                                                                                                                                                                                                         USB                                                                         HS/FS
+                                                                       GPIOs
+                                                                                                                                                                                                                                         EPs                                                                         Peripheral
+                                                                                                                                                                                                                                                                                                                                                               D-
+                                                   FSLC[0]
+                                                   FSLC[1]
+                                                   FSLC[2]
+                                                                                       UART
+                                                   CLKIN                                                                                                         SDIO/SD/MMC Controller
+                                                  CLKIN_32
+                                                  XTALIN                                SPI
+                                                  XTALOUT
+                                                                       I2C              I2 S                                            S0-PORT                                                                                                                 S1-PORT
+                                                                                                                                                                                                            MMC0_RST_OUT                                                                                                      MMC1_RST_OUT
+                                                             I2C_SCL     I2C_SDA               S0_SD0   S0_SD1   S0_SD2   S0_SD3   S0_SD4   S0_SD5   S0_SD6   S0_SD7   S0_CMD   S0_CLK   S0_WP   S0S1_INS                  S1_SD0   S1_SD1   S1_SD2   S1_SD3   S1_SD4   S1_SD5   S1_SD6   S1_SD7   S1_CMD   S1_CLK    S1_WP
+Cypress Semiconductor Corporation                                                  •   198 Champion Court                                                                                 •                                San Jose, CA 95134-1709    •    408-943-2600
+Document Number: 001-87710 Rev. *D                                                                                                                                                                                                               Revised August 21, 2018
+
+
+                                                                                                                                                          CYUSB202X
+Contents
+Functional Overview ........................................................ 3              Absolute Maximum Ratings .......................................... 21
+    USB Interface (U-Port) ................................................ 3               Operating Conditions ..................................................... 21
+    Mass-Storage Support (S-Port) ................................... 3                     DC Specifications ........................................................... 21
+    I2C Interface ................................................................ 3        Thermal Characteristics ................................................. 22
+    UART Interface ............................................................ 3           Reset Sequence .............................................................. 23
+    I2S Interface ................................................................ 3        Package Diagram ............................................................ 24
+    SPI Interface ................................................................ 3        Ordering Information ...................................................... 25
+Boot Options ..................................................................... 4            Ordering Code Definitions ......................................... 25
+Reset .................................................................................. 4  Acronyms ........................................................................ 26
+Clocking ............................................................................ 4     Document Conventions ................................................. 26
+    32-kHz Watchdog Timer Clock Input ........................... 4                             Units of Measure ....................................................... 26
+Power ................................................................................. 5   Errata ............................................................................... 27
+    Power Modes .............................................................. 5                Qualification Status ................................................... 27
+Configuration Fuse ........................................................... 8                Errata Summary ........................................................ 27
+Digital I/Os ......................................................................... 8    Document History Page ................................................. 29
+EMI ..................................................................................... 8 Sales, Solutions, and Legal Information ...................... 30
+System Level ESD ............................................................ 8                 Worldwide Sales and Design Support ....................... 30
+Pinouts .............................................................................. 8        Products .................................................................... 30
+Pin Descriptions ............................................................... 9              PSoC® Solutions ...................................................... 30
+AC Timing Parameters ................................................... 13                     Cypress Developer Community ................................. 30
+    Storage Port Timing .................................................. 13                   Technical Support ..................................................... 30
+    I2C Interface Timing .................................................. 16
+Document Number: 001-87710 Rev. *D                                                                                                                                     Page 2 of 30
+
+
+                                                                                                                CYUSB202X
+Functional Overview                                                I2C Interface
+SD2™ is a USB 2.0 High Speed mass-storage controller               SD2 has an I2C interface compatible with the I2C Bus
+providing the latest SD/MMC support. SD2 complies with the SD      Specification Revision 3. Because SD2’s I2C interface is capable
+Specification, Version 3.0, and the MMC Specification, Version     of operating only as an I2C master, it may be used to
+4.41.                                                              communicate with other I2C slave devices. For example, SD2
+                                                                   may boot from an EEPROM connected to the I2C interface, as a
+SD2 offers the following access paths among USB and mass           selectable boot option.
+storage ports:
+                                                                   SD2’s I2C master controller also supports multi-master mode
+■   A USB-port (U-Port) supporting USB 2.0 peripheral              functionality.
+■ Two mass-storage ports (S0-Port and S1-Port) supporting          The power supply for the I2C interface is VIO5, which is a
+  mass-storage devices. Following are the possible configura-      separate power domain from the other serial peripherals. This is
+  tions for the two mass-storage ports:                            to allow the I2C interface the flexibility to operate at a different
+  ❐ SD and MMC                                                     voltage than the other serial interfaces.
+  ❐ SD and SD                                                      The I2C controller supports bus frequencies of 100 kHz,
+  ❐ MMC and MMC                                                    400 kHz, and 1 MHz. When VIO5 is 1.2 V, the maximum
+  ❐ SD and SDIO                                                    operating frequency supported is 100 kHz. When VIO5 is 1.8 V,
+  ❐ MMC and SDIO                                                   2.5 V, or 3.3 V, the operating frequencies supported are 400 kHz
+  ❐ SDIO and SDIO                                                  and 1 MHz. The I2C controller supports the clock stretching
+                                                                   feature to enable slower devices to exercise flow control.
+Combinations of these accesses can happen independently or
+in an interleaved manner.                                          Both SCL and SDA signals of the I2C interface require external
+                                                                   pull-up resistors. These resistors must be connected to VIO5.
+The SD2 complies with the USB 2.0 specification.
+                                                                   UART Interface
+USB Interface (U-Port)
+                                                                   The UART interface of SD2 supports full-duplex communication.
+SD2 offers the following features:                                 It includes the signals noted in Table 1.
+■   Supports USB peripheral functionality compliant with the USB
+    2.0 Specification                                              Table 1. UART Interface Signals
+■   Supports up to 16 IN and 16 OUT endpoints.                              Signal                         Description
+                                                                              TX                          Output signal
+■   Supports the USB 2.0 Streams feature. It also supports USB
+    Attached SCSI (UAS) device class to optimize mass-storage                 RX                           Input signal
+    access performance.                                                      CTS                           Flow control
+■   As a USB peripheral, SD2 supports UAS and Mass Storage                   RTS                           Flow control
+    Class (MSC) peripheral classes.
+■   When the USB port is not in use, the PHY and transceiver may   The UART is capable of generating a range of baud rates, from
+    be disabled for power savings.                                 300 bps to 4608 Kbps, selectable by the firmware. If flow control
+                                                                   is enabled, then SD2’s UART only transmits data when the CTS
+Figure 1. USB Interface Signals                                    input is asserted. In addition to this, SD2’s UART asserts the
+                                                                   RTS output signal, when it is ready to receive data.
+                               SD2
+       VBATT                                                       I2S Interface
+       VBUS
+                                                                   SD2 has an I2S port to support external audio codec devices.
+               USB Interface
+                                                                   SD2 functions as I2S Master as transmitter only. The I2S
+                                                                   interface consists of four signals: clock line (I2S_CLK), serial
+                                                                   data line (I2S_SD), word select line (I2S_WS), and master
+        D-
+        D+
+                                                                   system clock (I2S_MCLK). SD2 can generate the system clock
+                                                                   as an output on I2S_MCLK or accept an external system clock
+                                                                   input on I2S_MCLK.
+Mass-Storage Support (S-Port)                                      The sampling frequencies supported by the I2S interface are
+The SD2 storage interface port supports the following              8 kHz, 16 kHz, 32 kHz, 44.1 kHz, 48 kHz, 96 kHz and 192 kHz.
+specifications:
+                                                                   SPI Interface
+■   SD Specification, Version 3.0
+                                                                   SD2 supports an SPI Master interface on the Serial Peripherals
+■   Multimedia Card-System Specification, MMCA Technical           port. The maximum operation frequency is 33 MHz.
+    Committee, Version 4.4                                         The SPI controller supports four modes of SPI communication
+■   SDIO Host controller compliant with SDIO Specification         (see SPI Timing Specification on page 19 for details on the
+    Version 3.00                                                   modes) with the Start-Stop clock. This controller is a
+Document Number: 001-87710 Rev. *D                                                                                        Page 3 of 30
+
+
+                                                                                                              CYUSB202X
+single-master controller with a single automated SSN control. It   The input clock frequency is independent of the clock/data rate
+supports transaction sizes ranging from 4 bits to 32 bits.         of SD2 core or any of the device interfaces. The internal PLL
+                                                                   applies the appropriate clock multiply option depending on the
+Boot Options                                                       input frequency.
+SD2 can load boot images from various sources, selected by the     Table 3. Crystal/Clock Frequency Selection
+configuration of the PMODE pins. The boot options for the SD2
+                                                                                                               Crystal/Clock
+are as follows:                                                       FSLC[2]        FSLC[1]   FSLC[0]          Frequency
+■  Boot from USB                                                          0             0          0         19.2-MHz crystal
+                 2                                                        1             0          0       19.2-MHz input CLK
+■  Boot from I C
+■  Boot from eMMC on S0-Port                                              1             0          1        26-MHz input CLK
+■  Boot from SPI                                                          1             1          0       38.4-MHz input CLK
+   ❐ Cypress SPI Flash parts supported are                                1             1          1        52-MHz input CLK
+     S25FS064S (64-Mbit), S25FS128S (128-Mbit) and
+     S25LFL064L (64-Mbit).
+   ❐ Winbond W25Q32FW (32-Mbit) is also supported.                 Table 4. Input Clock Specifications for SD2
+Table 2. Booting Options for SD2                                                                           Specification
+                                                                        Parameter          Description                       Units
+      PMODE[2:0][1]                      Boot From                                                         Min      Max
+             FF0           S0-Port: eMMC                            Phase noise           100-Hz offset      –       –75       dB
+                           On failure, USB boot enabled                                   1-kHz offset       –      –104       dB
+             FF1           USB Boot                                                       10-kHz offset      –      –120       dB
+             FFF           I2C                                                            100-kHz offset     –      –128       dB
+                           On Failure, USB Boot is enabled
+                                                                                          1-MHz offset       –      –130       dB
+             0FF           I2C only
+                                                                    Maximum frequency                        –       150      ppm
+             0F1           SPI                                      deviation
+                           On Failure, USB Boot is enabled
+                                                                    Duty cycle                              30        70       %
+                                                                    Overshoot                                –         3       %
+Reset
+                                                                    Undershoot                               –        –3       %
+A reset is initiated by asserting the Reset# pin on SD2. The        Rise time/fall time                      –        3        ns
+specific reset sequence and timing requirements are detailed in
+Figure 3 on page 16 and Table 14 on page 23. All I/Os are
+tristated during a hard reset.                                     32-kHz Watchdog Timer Clock Input
+                                                                   SD2 includes a watchdog timer that can be used to interrupt the
+Clocking                                                           core, automatically wake up SD2 in Standby mode, and reset the
+                                                                   core. The watchdog timer runs off a 32-kHz clock, which may
+SD2 allows either a crystal to be connected between the XTALIN     optionally be supplied from an external source on a dedicated
+and XTALOUT pins or an external clock to be connected at the       pin of SD2.
+CLKIN pin. The XTALIN, XTALOUT, CLKIN, and CLKIN_32 pins
+can be left unconnected if not used.                               The watchdog timer can be disabled by firmware.
+Crystal frequency supported is 19.2 MHz, while the external        Requirements for the optional 32-kHZ clock input are listed in
+clock frequencies supported are 19.2, 26, 38.4, and 52 MHz.        Table 4.
+SD2 has an on-chip oscillator circuit that uses an external        Table 5. 32-kHz Clock Input Requirements
+19.2 MHz (±100 ppm) crystal (when the crystal option is used).
+An appropriate load capacitance is required with a crystal. Refer            Parameter              Min       Max        Units
+to the specification of the crystal used to determine the appro-    Duty cycle                       40        60         %
+priate load capacitance. The FSLC[2:0] pins must be configured      Frequency deviation              –       ±200        ppm
+appropriately to select the crystal option/clock frequency option.
+The configuration options are shown in Table 3.                     Rise Time/fall Time               –       200         ns
+Clock inputs to SD2 must meet the phase noise and jitter require-
+ments specified in Table 4.
+ Note
+  1. F indicates Floating.
+Document Number: 001-87710 Rev. *D                                                                                    Page 4 of 30
+
+
+                                                                                                                    CYUSB202X
+Power                                                                  Note: No specific power-up sequence for SD2 power domains.
+                                                                       Minimum power on reset time of 1msec should be met and the
+SD2 has the following main groups of power supply domains:             power domains must be stable for SD2 operation.
+■ IO_VDDQ: This refers to a group of independent supply                Power Modes
+  domains for digital I/Os. The voltage level on these supplies
+  are 1.8 V to 3.3 V. SD2 provides six independent supply              SD2 supports the following power modes:
+  domains for digital I/Os listed as follows:                          ■ Normal mode: This is the full-functional operating mode. In this
+  ❐ VIO2: S0-Port (for SD/MMC) I/O Power Supply Domain                   mode the internal CPU clock and the internal PLLs are enabled.
+  ❐ VIO3: S1-Port (for SD/MMC) I/O Power Supply Domain                 Normal operating power consumption does not exceed the sum
+  ❐ VIO1: S2-Port (GPIO) Power Supply Domain                           of ICC_CORE max and ICC_USB max (see Table 12 on page 21
+  ❐ VIO4: S1-Port GPIO[53:57]/O Power Supply Domain (these             for current consumption specifications).
+     pins support MMC’s high nibble data line - D[7:4] on S1-Port)
+                                                                       The I/O power supplies (VIO2, VIO3, VIO4, and VIO5) may be
+  ❐ VIO5: I2C Power Supply Domain (supports 1.2 V to 3.3 V)
+                                                                       turned off when the corresponding interface is not in use.
+  ❐ CVDDQ: Clock Power Supply Domain
+                                                                       S2VDDQ cannot be turned off at any time if the S2-Port is used
+■ VDD: This is the supply voltage for the logic core. The nominal      in the application.
+  supply voltage level is 1.2 V. This supplies the core logic
+                                                                       ■ SD2 supports four low-power modes (see Table 6 on page 5):
+  circuits. The same supply must also be used for the following:
+                                                                         ❐ Suspend mode with USB 2.0 PHY enabled (L1 mode)
+  ❐ AVDD: This is the 1.2-V supply for the PLL, crystal oscillator
+     and other core analog circuits                                      ❐ Suspend mode with USB 2.0 PHY disabled (L2 mode)
+                                                                         ❐ Standby mode (L3 mode)
+■ VBATT/VBUS: This is the 3.2-V to 6-V battery power supply              ❐ Core power-down mode (L4 mode)
+  for the USB I/O and analog circuits. This supply powers the
+  USB transceiver through SD2’s internal voltage regulator.
+  VBATT is internally regulated to 3.3 V.
+Table 6. Entry and Exit Methods for Low-Power Modes
+  Low Power Mode                  Characteristics                     Methods of Entry                        Methods of Exit
+Suspend mode with       ■ The power consumption in this      ■ Firmware executing on the core can  ■  D+ transitioning to low or high
+USB 2.0 PHY               mode does not exceed ISB1            put SD2 into suspend mode. For
+Enabled (L1 mode)                                              example, on USB suspend             ■  D– transitioning to low or high
+                        ■ USB 2.0 PHY is enabled and is in     condition, firmware may decide to
+                          U3 mode (one of the suspend                                              ■  Detection of VBUS
+                                                               put SD2 into suspend mode
+                          modes defined by the USB 3.0                                             ■  Assertion of GPIO[17]
+                          specification). This one block
+                          alone operates with its internal                                         ■  Assertion of RESET#
+                          clock while all other clocks are
+                          shut down
+                        ■ All I/Os maintain their previous
+                          state
+                        ■ Power supply for the wakeup
+                          source and core power must be
+                          retained. All other power domains
+                          can be turned on/off individually
+                        ■ The states of the configuration
+                          registers, buffer memory and all
+                          internal RAM are maintained
+                        ■ All transactions must be
+                          completed before SD2 enters
+                          Suspend mode (state of
+                          outstanding transactions are not
+                          preserved)
+                        ■ The firmware resumes operation
+                          from where it was suspended
+                          (except when woken up by
+                          RESET# assertion) because the
+                          program counter does not reset
+Document Number: 001-87710 Rev. *D                                                                                          Page 5 of 30
+
+
+                                                                                                             CYUSB202X
+Table 6. Entry and Exit Methods for Low-Power Modes (continued)
+ Low Power Mode                Characteristics                    Methods of Entry                     Methods of Exit
+Suspend mode with   ■  The power consumption in this     ■ Firmware executing on the core can ■ D+ transitioning to low or high
+USB 2.0 PHY            mode does not exceed ISB2           put SD2 into suspend mode. For
+disabled (L2 mode)                                         example, on USB suspend            ■ D– transitioning to low or high
+                    ■  USB 2.0 PHY is disabled and the     condition, firmware may decide to
+                       USB interface is in suspend mode                                       ■ Detection of VBUS
+                                                           put SD2 into suspend mode
+                    ■  The clocks are shut off. The PLLs                                      ■ Assertion of GPIO[17]
+                       are disabled                                                           ■ Assertion of RESET#
+                    ■  All I/Os maintain their previous
+                       state
+                    ■  USB interface maintains the
+                       previous state
+                    ■  Power supply for the wakeup
+                       source and core power must be
+                       retained. All other power domains
+                       can be turned on/off individually
+                    ■  The states of the configuration
+                       registers, buffer memory, and all
+                       internal RAM are maintained
+                    ■  All transactions must be
+                       completed before SD2 enters
+                       Suspend mode (state of
+                       outstanding transactions are not
+                       preserved)
+                    ■  The firmware resumes operation
+                       from where it was suspended
+                       (except when woken up by
+                       RESET# assertion) because the
+                       program counter does not reset
+Document Number: 001-87710 Rev. *D                                                                                    Page 6 of 30
+
+
+                                                                                                              CYUSB202X
+Table 6. Entry and Exit Methods for Low-Power Modes (continued)
+ Low Power Mode                Characteristics                      Methods of Entry                    Methods of Exit
+Standby Mode (L3    ■  The power consumption in this       ■ Firmware executing on the core or ■ Detection of VBUS
+mode)                  mode does not exceed ISB3             external processor configures the
+                                                             appropriate register              ■ Assertion of GPIO[17]
+                    ■  All configuration register settings
+                       and program/data RAM contents                                           ■ Assertion of RESET#
+                       are preserved. However, data in
+                       the buffers or other parts of the
+                       data path, if any, is not
+                       guaranteed. Therefore, the
+                       external processor should take
+                       care that needed data is read
+                       before putting SD2 into this
+                       Standby Mode
+                    ■  The program counter is reset
+                       after waking up from Standby
+                    ■  GPIO pins maintain their
+                       configuration
+                    ■  Crystal oscillator is turned off
+                    ■  Internal PLL is turned off
+                    ■  USB transceiver is turned off
+                    ■  Core is powered down. Upon
+                       wakeup, the core re-starts and
+                       runs the program stored in the
+                       program/data RAM
+                    ■  Power supply for the wakeup
+                       source and core power must be
+                       retained. All other power domains
+                       can be turned on/off individually
+Core Power Down     ■  The power consumption in this       ■ Turn off VDD                      ■ Reapply VDD
+Mode (L4 mode)         mode does not exceed ISB4
+                                                                                               ■ Assertion of RESET#
+                    ■  Core power is turned off
+                    ■  All buffer memory, configuration
+                       registers and the program RAM
+                       do not maintain state. It is
+                       necessary to reload the firmware
+                       on exiting from this mode
+                    ■  In this mode, all other power
+                       domains can be turned on/off
+                       individually
+Document Number: 001-87710 Rev. *D                                                                                  Page 7 of 30
+
+
+                                                                                                                     CYUSB202X
+Configuration Fuse                                                     EMI
+Fuse options are available for specific usage models. Contact          SD2 meets EMI requirements outlined by FCC 15B (USA) and
+Cypress Applications/Marketing for details.                            EN55022 (Europe) for consumer electronics. SD2 can tolerate
+                                                                       reasonable EMI, conducted by aggressor, outlined by these
+Digital I/Os                                                           specifications and continue to function as expected.
+SD2 provides firmware controlled pull-up or pull-down resistors        System Level ESD
+internally on all digital I/O pins. The pins can be pulled high
+through an internal 50-k resistor or can be pulled low through        SD2 has built-in ESD protection on the D+, D–, GND pins on the
+an internal 10-k resistor to prevent the pins from floating. The      USB interface. The ESD protection levels provided on these
+I/O pins may have the following states:                                ports are:
+■ Tristated (High-Z)                                                   ■ ±2.2-KV human body model (HBM) based on JESD22-A114
+                                                                         Specification
+■ Weak pull-up (through internal 50 k)
+                                                                       ■ ±6-KV contact discharge and ±8-KV air gap discharge based
+■ Pull down (through internal 10 k)                                     on IEC61000-4-2 level 3A
+■ Hold (I/O hold its value) when in low power modes                    ■ ±8-KV contact discharge and ±15-KV air gap discharge based
+All unused I/Os should be pulled high by using the internal              on IEC61000-4-2 level 4C.
+pull-up resistors. All unused outputs should be left floating. All     This protection ensures the device continues to function after
+I/Os can be driven at full-strength, three-quarter strength,           ESD events up to the levels stated.
+half-strength, or quarter-strength. These drive strengths are
+configured based on each interface.                                    The S0/S1_INS have up to ±2.2 KV HBM internal ESD
+                                                                       protection.
+Pinouts
+                                              Figure 2. SD2 BGA Ball Map (Top View)
+               1            2            3         4         5         6           7        8           9            10          11
+     A      U3VSSQ         VDD          NC        NC        NC        NC        AV DD      VSS         DP           DM          NC
+     B       VIO4        FSLC[0]        NC      FSLC[1]    VDD      CVDDQ       AV S S    VSS         VSS          V DD       TRST#
+     C      GPIO[54]     GPIO[55]      VDD     GPIO[57]   RESET#    XTALIN     XTALOUT   R_USB2      OTG_ID         TDO        VIO5
+     D      GPIO[50]     GPIO[51]    GPIO[52]  GPIO[53]   GPIO[56] CLKIN_32      CLKIN     VSS    I2C_GPIO[58] I2C_GPIO[59]     NC
+     E      GPIO[47]       VSS       S1VDDQ    GPIO[49]   GPIO[48]  FSLC[2]       TDI      TMS        VDD         V BATT      V BUS
+     F      S0VDDQ       GPIO[45]    GPIO[44]  GPIO[41]   GPIO[46]   TCK        GPIO[2]  GPIO[5]     GPIO[1]      GPIO[0]      VDD
+     G        VSS        GPIO[42]    GPIO[43]  GPIO[30]   GPIO[25] GPIO[22]    GPIO[21]  GPIO[15]    GPIO[4]      GPIO[3]      VSS
+     H        VDD        GPIO[39]    GPIO[40]  GPIO[31]   GPIO[29] GPIO[26]    GPIO[20]  GPIO[24]    GPIO[7]      GPIO[6]    S2VDDQ
+     J      GPIO[38]     GPIO[36]    GPIO[37]  GPIO[34]   GPIO[28] GPIO[16]    GPIO[19]  GPIO[14]    GPIO[9]      GPIO[8]      VDD
+     K      GPIO[35]     GPIO[33]      VSS       VSS      GPIO[27] GPIO[23]    GPIO[18]  GPIO[17]   GPIO[13]     GPIO[12]    GPIO[10]
+     L        VSS          VSS         VSS     GPIO[32]    VDD       VSS          VDD      NC       S2VDDQ        GPIO[11]     VSS
+Document Number: 001-87710 Rev. *D                                                                                          Page 8 of 30
+
+
+                                                                                     CYUSB202X
+Pin Descriptions
+Table 7. Pin List
+ Pin Power I/O         Name                                   Description
+ No. Domain
+                                            S2-PORT (GPIO)
+ F10    VI01     I/O  GPIO[0]                                    GPIO
+ F9     VI01     I/O  GPIO[1]                                    GPIO
+ F7     VI01     I/O  GPIO[2]                                    GPIO
+ G10    VI01     I/O  GPIO[3]                                    GPIO
+ G9     VI01     I/O  GPIO[4]                                    GPIO
+ F8     VI01     I/O  GPIO[5]                                    GPIO
+ H10    VI01     I/O  GPIO[6]                                    GPIO
+ H9     VI01     I/O  GPIO[7]                                    GPIO
+ J10    VI01     I/O  GPIO[8]                                    GPIO
+  J9    VI01     I/O  GPIO[9]                                    GPIO
+ K11    VI01     I/O  GPIO[10]                                   GPIO
+ L10    VI01     I/O  GPIO[11]                                   GPIO
+ K10    VI01     I/O  GPIO[12]                                   GPIO
+ K9     VI01     I/O  GPIO[13]                                   GPIO
+  J8    VI01     I/O  GPIO[14]                                   GPIO
+ G8     VI01     I/O  GPIO[15]                                   GPIO
+  J6    VI01     I/O  GPIO[16]                                   GPIO
+ K8     VI01     I/O  GPIO[17]                                   GPIO
+ K7     VI01     I/O  GPIO[18]                                   GPIO
+  J7    VI01     I/O  GPIO[19]                                   GPIO
+ H7     VI01     I/O  GPIO[20]                                   GPIO
+ G7     VI01     I/O  GPIO[21]                                   GPIO
+ G6     VI01     I/O  GPIO[22]                                   GPIO
+ K6     VI01     I/O  GPIO[23]                                   GPIO
+ H8     VI01     I/O  GPIO[24]                                   GPIO
+ G5     VI01     I/O  GPIO[25]                                   GPIO
+ H6     VI01     I/O  GPIO[26]                                   GPIO
+ K5     VI01     I/O  GPIO[27]                                   GPIO
+  J5    VI01     I/O  GPIO[28]                                   GPIO
+ H5     VI01     I/O  GPIO[29]                                   GPIO
+ G4     VI01     I/O  GPIO[30]                                 PMODE[0]
+ H4     VI01     I/O  GPIO[31]                                 PMODE[1]
+  L4    VI01     I/O  GPIO[32]                                 PMODE[2]
+  L8                    NC                                     No Connect
+ C5   CVDDQ        I  RESET#                          Active Low. Hardware Reset.
+                                     8b MMC                  SD+GPIO                 GPIO
+                                   Configuration           Configuration          Configuration
+ K2     VI02     I/O  GPIO[33]       S0_SD0                   S0_SD0                 GPIO
+  J4    VI02     I/O  GPIO[34]       S0_SD1                   S0_SD1                 GPIO
+ K1     VI02     I/O  GPIO[35]       S0_SD2                   S0_SD2                 GPIO
+Document Number: 001-87710 Rev. *D                                                           Page 9 of 30
+
+
+                                                                                           CYUSB202X
+Table 7. Pin List (continued)
+ Pin Power
+ No. Domain I/O            Name                                  Description
+  J2     VI02    I/O     GPIO[36]         S0_SD3                S0_SD3                     GPIO
+  J3     VI02    I/O     GPIO[37]         S0_SD4                  GPIO                     GPIO
+  J1     VI02    I/O     GPIO[38]         S0_SD5                  GPIO                     GPIO
+ H2      VI02    I/O     GPIO[39]         S0_SD6                  GPIO                     GPIO
+ H3      VI02    I/O     GPIO[40]         S0_SD7                  GPIO                     GPIO
+ F4      VI02    I/O     GPIO[41]        S0_CMD                 S0_CMD                     GPIO
+ G2      VI02    I/O     GPIO[42]         S0_CLK                S0_CLK                     GPIO
+ G3      VI02    I/O     GPIO[43]         S0_WP                 S0_WP                      GPIO
+ F3      VI02    I/O     GPIO[44]        S0S1_INS              S0S1_INS                    GPIO
+ F2      VI02    I/O     GPIO[45]     MMC0_RST_OUT                GPIO                     GPIO
+                                                                    SD+             GPIO+             UART+
+                                    8b MMC     SD+UART  SD+SPI             GPIO UART+I2S  SD+I2S
+                                                                    GPIO                             SPI+I2S
+ F5      VI03    I/O     GPIO[46]   S1_SD0       S1_SD0 S1_SD0 S1_SD0 GPIO           GPIO S1_SD0      UART_
+                                                                                                       RTS
+ E1      VI03    I/O     GPIO[47]   S1_SD1       S1_SD1 S1_SD1 S1_SD1 GPIO           GPIO S1_SD1      UART_
+                                                                                                       CTS
+ E5      VI03    I/O     GPIO[48]   S1_SD2       S1_SD2 S1_SD2 S1_SD2 GPIO           GPIO S1_SD2 UART_TX
+ E4      VI03    I/O     GPIO[49]   S1_SD3       S1_SD3 S1_SD3 S1_SD3 GPIO           GPIO S1_SD3 UART_RX
+ D1      VI03    I/O     GPIO[50]   S1_CMD      S1_CMD  S1_CMD      S1_    GPIO   I2S_CLK S1_CMD I2S_CLK
+                                                                    CMD
+ D2      VI03    I/O     GPIO[51]   S1_CLK       S1_CLK S1_CLK S1_CLK GPIO         I2S_SD S1_CLK     I2S_SD
+ D3      VI03    I/O     GPIO[52]    S1_WP       S1_WP   S1_WP    S1_WP GPIO       I2S_WS S1_WP      I2S_WS
+ D4     VIO4     I/O     GPIO[53]   S1_SD4     UART_RTS SPI_SCK     GPIO   GPIO     UART_  GPIO     SPI_SCK
+                                                                                     RTS
+ C1     VIO4     I/O     GPIO[54]   S1_SD5     UART_CTS SPI_SSN     GPIO   GPIO UART_CT I2S_CLK SPI_SSN
+                                                                                      S
+ C2     VIO4     I/O     GPIO[55]   S1_SD6      UART_TX   SPI_      GPIO   GPIO UART_TX   I2S_SD SPI_MISO
+                                                          MISO
+ D5     VIO4     I/O     GPIO[56]   S1_SD7     UART_RX    SPI_      GPIO   GPIO UART_RX I2S_WS SPI_MOSI
+                                                          MOSI
+ C4     VIO4     I/O     GPIO[57]  MMC1_RST_      GPIO    GPIO      GPIO   GPIO I2S_MCLK    I2S_   I2S_MCLK
+                                      OUT                                                  MCLK
+ C9                         NC                                   No Connect
+ A3                         NC                                   No Connect
+ A4                         NC                                   No Connect
+ A6                         NC                                   No Connect
+ A5                         NC                                   No Connect
+ A9    VBATT/    I/O        D+                             USB (HS/FS) Data Plus
+        VBUS
+ A10 VBATT/      I/O        D-                             USB (HS/FS) Data Minus
+        VBUS
+ A11                        NC                                   No Connect
+ B2   CVDDQ        I      FSLC[0]                                  FSLC[0]
+ C6     AVDD     I/O      XTALIN                                   XTALIN
+Document Number: 001-87710 Rev. *D                                                               Page 10 of 30
+
+
+                                                                              CYUSB202X
+Table 7. Pin List (continued)
+ Pin Power
+ No. Domain I/O             Name                  Description
+ C7     AVDD     I/O      XTALOUT                  XTALOUT
+ B4   CVDDQ        I       FSLC[1]                  FSLC[1]
+ E6   CVDDQ        I       FSLC[2]                  FSLC[2]
+ D7   CVDDQ        I        CLKIN                    CLKIN
+ D6   CVDDQ        I      CLKIN_32                 CLKIN_32
+ D9     VIO5     I/O   I2C_GPIO[58]  SCL (Serial Clock) for I2C Bus Interface
+ D10    VIO5     I/O   I2 C_GPIO[59] SDA (Serial Data) for I2C Bus Interface
+ E7     VIO5       I         TDI                      TDI
+ C10    VIO5      O          TDO                      TDO
+ B11    VIO5       I       TRST#                     TRST#
+ E8     VIO5       I         TMS                      TMS
+ F6     VIO5       I         TCK                      TCK
+ D11                          NC                  No Connect
+ E10           PWR         VBATT
+ B10           PWR           VDD
+ A1            PWR           VSS
+ E11           PWR          VBUS
+ D8            PWR           VSS
+ H11           PWR          VIO1
+ E2            PWR           VSS
+  L9           PWR          VIO1
+ G1            PWR           VSS
+ F1            PWR          VIO2
+ G11           PWR           VSS
+ E3            PWR          VIO3
+  L1           PWR           VSS
+ B1            PWR          VIO4
+  L6           PWR           VSS
+ B6            PWR         CVDDQ
+ B5                           NC
+ A2                           NC
+ C11           PWR          VIO5
+ L11           PWR           VSS
+ A7            PWR          AVDD
+ B7            PWR          AVSS
+ C3            PWR           VDD
+ B8            PWR           VSS
+ E9            PWR           VDD
+ B9            PWR           VSS
+ F11           PWR           VDD
+ H1            PWR           VDD
+  L7           PWR           VDD
+Document Number: 001-87710 Rev. *D                                               Page 11 of 30
+
+
+                                                                                                        CYUSB202X
+Table 7. Pin List (continued)
+ Pin Power
+ No. Domain I/O            Name                                          Description
+ J11           PWR         VDD
+  L5           PWR         VDD
+ K4            PWR          VSS
+  L3           PWR          VSS
+ K3            PWR          VSS
+  L2           PWR          VSS
+ A8            PWR          VSS
+                                                                     Precision Resistors
+ C8    VBUS/     I/O      R_usb2  Precision resistor for USB 2.0 (Connect a 6.04 k+/-1% resistor between this pin and GND)
+       VBATT
+ B3                         NC                                            No Connect
+Document Number: 001-87710 Rev. *D                                                                             Page 12 of 30
+
+
+                                                                                                      CYUSB202X
+AC Timing Parameters
+Storage Port Timing
+The S0-Port and S1-Port support the MMC Specification Version 4.4 and SD Specification Version 2.0. Table 8 lists the timing
+parameters for S0-Port and S1-Port of SD2.
+Table 8. S-Port Timing Parameters[2]
+         Parameter                                        Description               Min        Max               Units
+                                                                             MMC-20
+tSDIS CMD                       Host input setup time for CMD                       4.8          –                 ns
+tSDIS DAT                       Host input setup time for DAT                       4.8          –                 ns
+tSDIH CMD                       Host input hold time for CMD                        4.4          –                 ns
+tSDIH DAT                       Host input hold time for DAT                        4.4          –                 ns
+tSDOS CMD                       Host output setup time for CMD                        5          –                 ns
+tSDOS DAT                       Host output setup time for DAT                        5          –                 ns
+tSDOH CMD                       Host output hold time for CMD                         5          –                 ns
+tSDOH DAT                       Host output hold time for DAT                         5          –                 ns
+tSCLKR                          Clock rise time                                       –          2                 ns
+tSCLKF                          Clock fall time                                       –          2                 ns
+tSDCK                           Clock cycle time                                     50          –                 ns
+SDFREQ                          Clock frequency                                                 20               MHz
+tSDCLKOD                        Clock duty cycle                                     40         60                 %
+                                                                             MMC-26
+tSDIS CMD                       Host input setup time for CMD                        10          –                 ns
+tSDIS DAT                       Host input setup time for DAT                        10          –                 ns
+tSDIH CMD                       Host input hold time for CMD                          9          –                 ns
+tSDIH DAT                       Host input hold time for DAT                          9          –                 ns
+tSDOS CMD                       Host output setup time for CMD                        3          –                 ns
+tSDOS DAT                       Host output setup time for DAT                        3          –                 ns
+tSDOH CMD                       Host output hold time for CMD                         3          –                 ns
+tSDOH DAT                       Host output hold time for DAT                         3          –                 ns
+tSCLKR                          Clock rise time                                       –          2                 ns
+tSCLKF                          Clock fall time                                       –          2                 ns
+tSDCK                           Clock cycle time                                    38.5         –                 ns
+SDFREQ                          Clock frequency                                                 26               MHz
+tSDCLKOD                        Clock duty cycle                                     40         60                 %
+Note
+ 2. All parameters guaranteed by design and validated through characterization.
+Document Number: 001-87710 Rev. *D                                                                            Page 13 of 30
+
+
+                                                                                    CYUSB202X
+Table 8. S-Port Timing Parameters[2] (continued)
+      Parameter                               Description                  Min  Max      Units
+                                                           MC-HS
+tSDIS CMD               Host input setup time for CMD                        4   –        ns
+tSDIS DAT               Host input setup time for DAT                        4   –        ns
+tSDIH CMD               Host input hold time for CMD                         3   –        ns
+tSDIH DAT               Host input hold time for DAT                         3   –        ns
+tSDOS CMD               Host output setup time for CMD                       3   –        ns
+tSDOS DAT               Host output setup time for DAT                       3    –       ns
+tSDOH CMD               Host output hold time for CMD                        3   –        ns
+tSDOH DAT               Host output hold time for DAT                        3   –        ns
+tSCLKR                  Clock rise time                                      –   2        ns
+tSCLKF                  Clock fall time                                      –   2        ns
+tSDCK                   Clock cycle time                                   19.2  –        ns
+SDFREQ                  Clock frequency                                      –   52      MHz
+tSDCLKOD                Clock duty cycle                                    40   60        %
+                                                        MMC-DDR52
+tSDIS CMD               Host input setup time for CMD                        4   –        ns
+tSDIS DAT               Host input setup time for DAT                      0.56  –        ns
+tSDIH CMD               Host input hold time for CMD                         3   –        ns
+tSDIH DAT               Host input hold time for DAT                       2.58  –        ns
+tSDOS CMD               Host output setup time for CMD                       3   –        ns
+tSDOS DAT               Host output setup time for DAT                     2.5   –        ns
+tSDOH CMD               Host output hold time for CMD                        3   –        ns
+tSDOH DAT               Host output hold time for DAT                      2.5   –        ns
+tSCLKR                  Clock rise time                                      –   2        ns
+tSCLKF                  Clock fall time                                      –   2        ns
+tSDCK                   Clock cycle time                                   19.2  –        ns
+SDFREQ                  Clock frequency                                          52      MHz
+tSDCLKOD                Clock duty cycle                                    45   55        %
+                                                  SD-Default Speed (SDR12)
+tSDIS CMD               Host input setup time for CMD                       24   –        ns
+tSDIS DAT               Host input setup time for DAT                       24   –        ns
+tSDIH CMD               Host input hold time for CMD                       2.5   –        ns
+tSDIH DAT               Host input hold time for DAT                       2.5   –        ns
+tSDOS CMD               Host output setup time for CMD                       5   –        ns
+tSDOS DAT               Host output setup time for DAT                       5   –        ns
+tSDOH CMD               Host output hold time for CMD                        5   –        ns
+tSDOH DAT               Host output hold time for DAT                        5   –        ns
+tSCLKR                  Clock rise time                                      –   2        ns
+tSCLKF                  Clock fall time                                      –   2        ns
+tSDCK                   Clock cycle time                                    40   –        ns
+SDFREQ                  Clock frequency                                          25      MHz
+tSDCLKOD                Clock duty cycle                                    40   60        %
+Document Number: 001-87710 Rev. *D                                                     Page 14 of 30
+
+
+                                                                                 CYUSB202X
+Table 8. S-Port Timing Parameters[2] (continued)
+      Parameter                               Description               Min  Max      Units
+                                                   SD-High-Speed(SDR25)
+tSDIS CMD               Host input setup time for CMD                     4   –        ns
+tSDIS DAT               Host input setup time for DAT                     4   –        ns
+tSDIH CMD               Host input hold time for CMD                    2.5   –        ns
+tSDIH DAT               Host input hold time for DAT                    2.5   –        ns
+tSDOS CMD               Host output setup time for CMD                    6   –        ns
+tSDOS DAT               Host output setup time for DAT                    6   –        ns
+tSDOH CMD               Host output hold time for CMD                     2   –        ns
+tSDOH DAT               Host output hold time for DAT                     2   –        ns
+tSCLKR                  Clock rise time                                   –   2        ns
+tSCLKF                  Clock fall time                                   –   2        ns
+tSDCK                   Clock cycle time                                 20   –        ns
+SDFREQ                  Clock frequency                                   –   50      MHz
+tSDCLKOD                Clock duty cycle                                 40   60        %
+                                                          SD-SDR50
+tSDIS CMD               Host input setup time for CMD                   1.5   –        ns
+tSDIS DAT               Host input setup time for DAT                   1.5   –        ns
+tSDIH CMD               Host input hold time for CMD                    2.5   –        ns
+tSDIH DAT               Host input hold time for DAT                    2.5   –        ns
+tSDOS CMD               Host output setup time for CMD                    3   –        ns
+tSDOS DAT               Host output setup time for DAT                    3   –        ns
+tSDOH CMD               Host output hold time for CMD                   0.8   –        ns
+tSDOH DAT               Host output hold time for DAT                   0.8   –        ns
+tSCLKR                  Clock rise time                                   –   2        ns
+tSCLKF                  Clock fall time                                   –   2        ns
+tSDCK                   Clock cycle time                                 10   –        ns
+SDFREQ                  Clock frequency                                      100      MHz
+tSDCLKOD                Clock duty cycle                                 40   60        %
+                                                          SD-DDR50
+tSDIS CMD               Host input setup time for CMD                     4   –        ns
+tSDIS DAT               Host input setup time for DAT                   0.92  –        ns
+tSDIH CMD               Host input hold time for CMD                    2.5   –        ns
+tSDIH DAT               Host input hold time for DAT                    2.5   –        ns
+tSDOS CMD               Host output setup time for CMD                    6   –        ns
+tSDOS DAT               Host output setup time for DAT                    3   –        ns
+tSDOH CMD               Host output hold time for CMD                   0.8   –        ns
+tSDOH DAT               Host output hold time for DAT                   0.8   –        ns
+tSCLKR                  Clock rise time                                   –   2        ns
+tSCLKF                  Clock fall time                                   –   2        ns
+tSDCK                   Clock cycle time                                 20   –        ns
+SDFREQ                  Clock frequency                                       50      MHz
+tSDCLKOD                Clock duty cycle                                 45   55        %
+Document Number: 001-87710 Rev. *D                                                  Page 15 of 30
+
+
+                                                                                                  CYUSB202X
+I2C Interface Timing
+I2C Timing
+                                                              Figure 3. I2C Timing Definition
+Table 9. I2C Timing Parameters[3]
+      Parameter                                                 Description                   Min Max      Units
+                                                             I2C Standard Mode Parameters
+ fSCL                     SCL clock frequency                                                  0   100      kHz
+ tHD:STA                  Hold time START condition                                            4    –        µs
+ tLOW                     LOW period of the SCL                                               4.7   –        µs
+ tHIGH                    HIGH period of the SCL                                               4    –        µs
+ tSU:STA                  Setup time for a repeated START condition                           4.7   –        µs
+ tHD:DAT                  Data hold time                                                       0    –        µs
+ tSU:DAT                  Data setup time                                                     250   –        ns
+ tr                       Rise time of both SDA and SCL signals                                –  1000       ns
+ tf                       Fall time of both SDA and SCL signals                                –   300       ns
+ tSU:STO                  Setup time for STOP condition                                        4    –        µs
+ tBUF                     Bus free time between a STOP and START condition                    4.7   –        µs
+ tVD:DAT                  Data valid time                                                      –  3.45       µs
+ tVD:ACK                  Data valid ACK                                                       –  3.45       µs
+ tSP                      Pulse width of spikes that must be suppressed by input filter       n/a  n/a
+  Note
+   3. All parameters guaranteed by design and validated through characterization.
+Document Number: 001-87710 Rev. *D                                                                     Page 16 of 30
+
+
+                                                                                               CYUSB202X
+Table 9. I2C Timing Parameters[3] (continued)
+    Parameter                                     Description                              Min Max      Units
+                                                   2
+                                                  I C Fast Mode Parameters
+fSCL               SCL clock frequency                                                       0  400      kHz
+tHD:STA            Hold time START condition                                               0.6   –        µs
+tLOW               LOW period of the SCL                                                   1.3   –        µs
+tHIGH              HIGH period of the SCL                                                  0.6   –        µs
+tSU:STA            Setup time for a repeated START condition                               0.6   –        µs
+tHD:DAT            Data hold time                                                            0   –        µs
+tSU:DAT            Data setup time                                                         100   –        ns
+tr                 Rise time of both SDA and SCL signals                                     –  300       ns
+tf                 Fall time of both SDA and SCL signals                                     –  300       ns
+tSU:STO            Setup time for STOP condition                                           0.6   –        µs
+tBUF               Bus-free time between a STOP and START condition                        1.3   –        µs
+tVD:DAT            Data valid time                                                           –  0.9       µs
+tVD:ACK            Data valid ACK                                                            –  0.9       µs
+tSP                Pulse width of spikes that must be suppressed by input filter             0  50        ns
+                              I2C Fast Mode Plus Parameters (Not supported at I2C_VDDQ=1.2V)
+fSCL               SCL clock frequency                                                       0 1000      kHz
+tHD:STA            Hold time START condition                                              0.26   –        µs
+tLOW               LOW period of the SCL                                                   0.5   –        µs
+tHIGH              HIGH period of the SCL                                                 0.26   –        µs
+tSU:STA            Setup time for a repeated START condition                              0.26   –        µs
+tHD:DAT            Data hold time                                                            0   –        µs
+tSU:DAT            Data setup time                                                         50    –        µs
+tr                 Rise time of both SDA and SCL signals                                     –  120       ns
+tf                 Fall time of both SDA and SCL signals                                     –  120       ns
+tSU:STO            Setup time for STOP condition                                          0.26   –        µs
+tBUF               Bus free time between a STOP and START condition                        0.5   –        µs
+tVD:DAT            Data valid time                                                           – 0.45       µs
+tVD:ACK            Data valid ACK                                                            – 0.55       µs
+tSP                Pulse width of spikes that must be suppressed by input filter             0  50        ns
+Document Number: 001-87710 Rev. *D                                                                  Page 17 of 30
+
+
+                                                                                                               CYUSB202X
+I2S Timing Diagram
+                                                              Figure 4. I2S Transmit Cycle
+                                                                         tT
+                                                                      tTR     tTF
+                                                                                    tTL        tTH
+                                     SCK
+                                                                        tThd
+                                      SA,
+                                 WS (output)
+                                                                         tTd
+Table 10. I2S Timing Parameters[4]
+    Parameter                                              Description                            Min           Max         Units
+ tT                   I2S transmitter clock cycle                                                  Ttr           –           ns
+ tTL                  I2S transmitter cycle LOW period                                         0.35 Ttr          –           ns
+ tTH                  I2S transmitter cycle HIGH period                                        0.35 Ttr          –           ns
+ tTR                  I2S transmitter rise time                                                     –         0.15 Ttr       ns
+ tTF                  I2S transmitter fall time                                                     –         0.15 Ttr       ns
+ tThd                 I2S transmitter data hold time                                                0            –           ns
+ tTd                  I2S transmitter delay time                                                    –          0.8tT         ns
+ Note tT is selectable through clock gears. Max Ttr is designed for 96-kHz codec at 32 bits to be 326 ns (3.072 MHz).
+ Note
+  4. All parameters guaranteed by design and validated through characterization.
+Document Number: 001-87710 Rev. *D                                                                                     Page 18 of 30
+
+
+                                                                                                        CYUSB202X
+SPI Timing Specification
+                                                     Figure 5. SPI Timing
+                             SSN
+                          (output)
+                                                                                                  tssnh
+                                                               tsck                        tlag
+                              SCK        tlead
+                                                                                 trf
+                          (CPOL=0,
+                           Output)                   twsck         twsck
+                              SCK
+                          (CPOL=1,
+                           Output)
+                                              tsdi
+                                                       thoi
+                             MISO
+                            (input)                LSB                                 MSB
+                                                            td                                  tdis
+                                    tsdd                     v
+                                                                             tdi
+                             MOSI                  LSB                                 MSB
+                           (output)
+                                                       SPI Master Timing for CPHA = 0
+                            SSN
+                         (output)
+                                                                                                  tssnh
+                                                               tsck                        tlag
+                                         tlead                                     trf
+                             SCK
+                         (CPOL=0,
+                           Output)                   twsck         twsck
+                             SCK
+                         (CPOL=1,
+                           Output)
+                                                        tsdi         thoi
+                           MISO
+                                                                LSB                        MSB
+                          (input)
+                                             tdv                         tdi                       tdis
+                           MOSI                                 LSB                        MSB
+                         (output)
+                                                      SPI Master Timing for CPHA = 1
+Document Number: 001-87710 Rev. *D                                                                         Page 19 of 30
+
+
+                                                                                                              CYUSB202X
+Table 11. SPI Timing Parameters[5]
+   Parameter                                 Description                             Min             Max           Units
+fop                Operating frequency                                                 0              33            MHz
+tsck               Cycle time                                                         30               –             ns
+twsck              Clock high/low time                                               13.5              –             ns
+                                                                                         [6]             [6]
+tlead              SSN-SCK lead time                                            1/2 tsck     -5 1.5 tsck + 5         ns
+tlag               Enable lag time                                                    0.5       1.5 tsck[6]+5        ns
+trf                Rise/fall time                                                      –               8             ns
+tsdd               Output SSN to valid data delay time                                 –               5             ns
+tdv                Output data valid time                                              –               5             ns
+tdi                Output data invalid                                                 0               –             ns
+tssnh              Minimum SSN high time                                              10               –             ns
+tsdi               Data setup time input                                               8               –             ns
+thoi               Data hold time input                                                0               –             ns
+tdis               Disable data output on SSN high                                     0               –             ns
+Notes
+ 5. All parameters guaranteed by design and validated through characterization.
+ 6. Depends on LAG and LEAD setting in the SPI_CONFIG register.
+Document Number: 001-87710 Rev. *D                                                                               Page 20 of 30
+
+
+                                                                                                                                                         CYUSB202X
+Absolute Maximum Ratings                                                                   ■ Additional ESD Protection levels on D+, D–, VBUS, GND pins
+                                                                                             U-port and GPIO pins LPP-Port
+Exceeding maximum ratings may shorten the useful life of the
+                                                                                           ■ ±6-KV contact discharge, ±8-KV air gap discharge based on
+device.
+                                                                                             IEC61000-4-2 level 3A, ±8-KV contact discharge, and ±15-KV
+Storage temperature .................................... –65 °C to +150 °C                   air gap discharge based on IEC61000-4-2 level 4C
+Ambient temperature with                                                                   Latch-up current ........................................................ > 200 mA
+power supplied (Industrial) ............................ –40 °C to +85 °C
+                                                                                           Maximum output short circuit current
+Supply voltage to ground potential                                                         for all I/O configurations. (Vout = 0 V) ........................ –100 mA
+VDD, AVDDQ ..................................................................... 1.25 V
+S2VDDQ,S1VDDQ, S0VDDQ, VIO4, VIO5 .............................. 3.6 V                     Operating Conditions
+U3TXVDDQ, U3RXVDDQ .................................................. 1.25 V               TA (ambient temperature under bias)
+DC input voltage to any input pin .............................. VCC + 0.3                 Commercial ....................................................... 0 °C to +70 °C
+                                                                                           Industrial ........................................................ –40 °C to +85 °C
+DC voltage applied to
+outputs in High Z State ............................................. VCC + 0.3            VDD, AVDDQ, U3TXVDDQ, U3RXVDDQ
+                                                                                           supply voltage .................................................. 1.15 V to 1.25 V
+(VCC is the corresponding I/O voltage)
+                                                                                           VBATT supply voltage .............................................. 3.2 V to 6 V
+Static discharge voltage ESD protection levels:
+                                                                                           S2VDDQ, S1VDDQ, S0VDDQ, VIO4, CVDDQ
+■ ±2.2-KV human body model (HBM) based on JESD22-A114                                      supply voltage ...................................................... 1.7 V to 3.6 V
+                                                                                           VIO5 supply voltage ............................................ 1.15 V to 3.6 V
+DC Specifications
+Table 12. DC Specifications
+  Parameter                   Description                                   Min             Max          Units                                    Notes
+ VDD           Core voltage supply                                          1.15            1.25            V       1.2-V typical
+ AVDD          Analog voltage supply                                        1.15            1.25            V       1.2-V typical
+ VIO2           SD/ MMC/ CF I/O power supply                                 1.7             3.6            V       1.8-, 2.5-, and 3.3-V typical
+               domain
+ VIO3          SD/MMC I/O power supply                                       1.7             3.6            V       1.8-, 2.5-, and 3.3-V typical
+               domain
+ VIO1          GPIO/ CF I/O power supply                                     1.7             3.6            V       1.8-, 2.5-, and 3.3-V typical
+               domain
+ VIO4          GPIO/ I/O power supply domain                                 1.7             3.6            V       1.8-, 2.5-, and 3.3-V typical
+ VBATT         USB voltage supply                                            3.2              6             V       3.7-V typical
+ VBUS          USB voltage supply                                            4.0              6             V       5-V typical
+ CVDDQ         Clock voltage supply                                          1.7             3.6            V       1.8-, 3.3-V typical
+ VIO5          I2C voltage supply                                            1.2             3.3            V       1.2-,1.8-, 2.5-, and 3.3-V typical
+ VIH1          Input HIGH voltage 1                                  0.625 × VCC         VCC + 0.3          V       For 2.0 V  VCC  3.6 V (except USB
+                                                                                                                    port).VCC is the corresponding I/O voltage
+                                                                                                                    supply.
+ VIH2          Input HIGH voltage 2                                     VCC - 0.4        VCC + 0.3          V       For 1.7 V  VCC 2.0 V
+                                                                                                                    (except USB port). VCC is the corresponding
+                                                                                                                    I/O voltage supply.
+ VIL           Input LOW voltage                                            –0.3        0.25 × VCC          V       VCC is the corresponding I/O voltage supply.
+ VOH           Output HIGH voltage                                     0.9 × VCC              –             V       IOH (max) = –100 µA tested at quarter drive
+                                                                                                                    strength. VCC is the corresponding I/O
+                                                                                                                    voltage supply.
+ VOL           Output LOW voltage                                             –          0.1 × VCC          V       IOL (min) = +100 µA tested at quarter drive
+                                                                                                                    strength. VCC is the corresponding I/O
+                                                                                                                    voltage supply.
+Document Number: 001-87710 Rev. *D                                                                                                                               Page 21 of 30
+
+
+                                                                                                       CYUSB202X
+Table 12. DC Specifications (continued)
+ Parameter             Description                   Min            Max Units                      Notes
+IIX          Input leakage current for all pins       –1             1   µA   All I/O signals held at VDDQ
+                                                                              (For I/Os that have a pull-up/down resistor
+                                                                              connected, the leakage current increases by
+                                                                              VDDQ/Rpu or VDDQ/RPD
+IOZ          Output High-Z leakage current for        –1             1   µA   All I/O signals held at VDDQ
+             all pins
+ICC Core     Core and Analog Voltage                   –            150  mA   Total current through AVDD, VDD
+             Operating Current
+ICC USB      USB voltage supply operating              –            20   mA
+             current
+ ISB1        Total suspend current during              –             –   mA   Core current: 1.5 mA
+             Suspend Mode with USB 3.0                                        I/O current: 20 uA
+             PHY enabled (L1 mode)                                            USB current: 2 mA
+                                                                              For typical PVT (Typical silicon, all power
+                                                                              supplies at their respective nominal levels at
+                                                                              25 C.)
+ ISB2        Total suspend current during              –             –   mA   Core current: 250 uA
+             Suspend Mode with USB 3.0                                        I/O current: 20 uA
+             PHYdisabled (L2 mode)                                            USB current: 1.2 mA
+                                                                              For typical PVT (Typical silicon, all power
+                                                                              supplies at their respective nominal levels at
+                                                                              25 C.)
+ ISB3        Total Standby Current during              –             –   µA   Core current: 60 uA
+             Standby Mode (L3 mode)                                           I/O current: 20 uA
+                                                                              USB current: 40 uA
+                                                                              For typical PVT (Typical silicon, all power
+                                                                              supplies at their respective nominal levels at
+                                                                              25 C.)
+ISB4         Total Standby Current during              –             –   µA   Core current: 0 uA
+             Core Power Down Mode (L4                                         I/O current: 20 uA
+             mode)                                                            USB current: 40 uA
+                                                                              For typical PVT (Typical silicon, all power
+                                                                              supplies at their respective nominal levels at
+                                                                              25 C.)
+VRAMP        Voltage Ramp Rate on Core and            0.2           50  V/ms Voltage ramp must be monotonic
+             I/O Supplies
+VN           Noise Level Permitted on VDD              –            100  mV   Max p-p noise level permitted on all supplies
+             and I/O Supplies                                                 except AVDD
+VN_AVDD      Noise Level Permitted on AVDD             –            20   mV   Max p-p noise level permitted on AVDD
+             Supply
+Thermal Characteristics
+Table 13. Thermal Characteristics
+   Parameter                                            Description                                       Value         Unit
+TJ MAX          Maximum Junction Temperature                                                                125          C
+JA             Thermal resistance (junction to ambient)                                                  34.66        C/W
+JB             Thermal resistance (junction to board)                                                    27.03        C/W
+JC             Thermal resistance (junction to case)                                                     13.57        C/W
+Document Number: 001-87710 Rev. *D                                                                            Page 22 of 30
+
+
+                                                                                                                                       CYUSB202X
+Reset Sequence
+The hard reset sequence requirements for SD2 are specified in the following table.
+Table 14. Reset and Standby Timing Parameters
+  Parameter                           Definition                                 Conditions                         Min (ms)                Max (ms)
+tRPW           Minimum RESET# pulse width                                        Clock Input                                1                   –
+                                                                                 Crystal Input                              1                   –
+tRH            Minimum high on RESET#                                                                                       5                   –
+tRR            Reset Recovery Time (after which Boot loader begins               Clock Input                                1                   –
+               firmware download)                                                Crystal Input                              5
+tSBY           Time to enter Standby/Suspend (from the time MAIN_-                                                          –                   1
+               CLOCK_EN/ MAIN_POWER_EN bit is set)
+tWU            Time to wakeup from standby                                       Clock Input                                1                   –
+                                                                                 Crystal Input                              5                   –
+tWH            Minimum time before Standby/Suspend source may be                                                            5                   –
+               reasserted
+                                                 Figure 6. Reset Sequence
+               VDD
+             ( core )
+               xVDDQ
+              XTALIN/
+               CLKIN
+                                                                                                           XTALIN/ CLKIN must be stable
+                                                                                                           before exiting Standby/Suspend
+                                  Mandatory  tRR                             tRh
+                                 Reset Pulse                 Hard Reset
+             RESET #
+                                     tRPW                                                                                           tWH
+             Standby/                                                                        tSBY                                 tWU
+             Suspend
+              Source
+                                                                        Standby/Suspend source Is asserted             Standby/Suspend
+                                                                         (MAIN_POWER_EN/ MAIN_CLK_EN bit               source Is deasserted
+                                                                        is set)
+Document Number: 001-87710 Rev. *D                                                                                                          Page 23 of 30
+
+
+                                                                                                                                                         CYUSB202X
+Package Diagram
+                             Figure 7. 121-ball FBGA (10 × 10 × 1.20 mm) Package Outline, 001-54471
+               2X     0.10 C
+                                                                                                                        E1
+                                                E                          B                                                   (datum B)           A1 CORNER
+                                                                                 A
+                                                                                                       11 10   9 8   7   6  5  4 3 2       1
+             7
+            A1 CORNER                                                                                                                            A
+                                                                                                                                                 B
+                                                                                                                                                 C
+                                                                                                6                                                D
+                                                                                              SD                                                 E
+                                                                                                                                                    D1
+                                                                                 D                                                               F
+                                                                                                                                                 G        (datum A)
+                                                                                                                                                 H
+                                                                                                                                                 J
+                                                                                                                                                 K
+                                                                                               eD
+                                                                                                                                                 L
+                                                                                         0.10 C 2X
+                                                                                                                  6
+                                                                                                                    SE                        eE
+                                          TOP VIEW
+                                                                                                                   BOTTOM VIEW
+                                                                       0.20 C
+                                                                                                                                                   DETAIL A
+                                      A1
+                                    0.08 C     C           121XØb    5
+                                                                                          A
+                                                            Ø0.15 M C A B
+                                                            Ø0.08 M C
+                                                    DETAIL A                                                           SIDE VIEW
+                                                                              NOTES:
+                                         DIMENSIONS                           1. ALL DIMENSIONS ARE IN MILLIMETERS.
+               SYMBOL
+                               MIN.          NOM.             MAX.            2. SOLDER BALL POSITION DESIGNATION PER JEP95, SECTION 3, SPP-020.
+                  A              -              -              1.20           3. "e" REPRESENTS THE SOLDER BALL GRID PITCH.
+                 A1            0.15             -                -            4. SYMBOL "MD" IS THE BALL MATRIX SIZE IN THE "D" DIRECTION.
+                 D                     10.00 BSC                                 SYMBOL "ME" IS THE BALL MATRIX SIZE IN THE "E" DIRECTION.
+                  E                                                              N IS THE NUMBER OF POPULATED SOLDER BALL POSITIONS FOR MATRIX
+                                       10.00 BSC
+                                                                                 SIZE MD X ME.
+                 D1                      8.00 BSC
+                 E1                      8.00 BSC                             5. DIMENSION "b" IS MEASURED AT THE MAXIMUM BALL DIAMETER IN A
+                                                                                 PLANE PARALLEL TO DATUM C.
+                 MD                          11
+                 ME                                                           6. "SD" AND "SE" ARE MEASURED WITH RESPECT TO DATUMS A AND B AND
+                                             11
+                                                                                  DEFINE THE POSITION OF THE CENTER SOLDER BALL IN THE OUTER ROW.
+                  N                         121
+                                               0.30                              WHEN THERE IS AN ODD NUMBER OF SOLDER BALLS IN THE OUTER ROW,
+                    b          0.25                            0.35
+                                                                                 "SD" OR "SE" = 0.
+                  eD                         0.80 BSC
+                                                                                 WHEN THERE IS AN EVEN NUMBER OF SOLDER BALLS IN THE OUTER ROW,
+                  eE                         0.80 BSC
+                                                                                  "SD" = eD/2 AND "SE" = eE/2.
+                 SD                            0.00
+                                                                              7. A1 CORNER TO BE IDENTIFIED BY CHAMFER, LASER OR INK MARK
+                 SE                            0.00
+                                                                                 METALIZED MARK, INDENTATION OR OTHER MEANS.
+                                                                              8. "+" INDICATES THE THEORETICAL CENTER OF DEPOPULATED SOLDER
+                                                                                 BALLS.
+                                                                                                                                         001-54471 *F
+Document Number: 001-87710 Rev. *D                                                                                                                                  Page 24 of 30
+
+
+                                                                                       CYUSB202X
+Ordering Information
+Table 15. Ordering Information
+        Ordering Code          SD/eMMC SDIO Ports    RAID Support           SRAM (KB) Package Type
+       CYUSB2024-BZXI                  2                   No                  512    121-ball BGA
+       CYUSB2025-BZXI                  2                   Yes                 512    121-ball BGA
+Ordering Code Definitions
+ CY USB     2 XXX     - BZ X    I  X
+                                            X = blank or T
+                                            blank = Tube; T = Tape and Reel
+                                            Temperature Range:
+                                            I = Industrial
+                                            Pb-free
+                                            Package Type:
+                                            BZ = 121-ball BGA
+                                            Marketing Part Number
+                                            Base Part Number for USB 2.0
+                                            Marketing Code: USB = USB Controller
+                                            Company ID: CY = Cypress
+Document Number: 001-87710 Rev. *D                                                          Page 25 of 30
+
+
+                                                                                      CYUSB202X
+Acronyms                                         Document Conventions
+  Acronym                      Description       Units of Measure
+BGA         ball grid array                        Symbol                  Unit of Measure
+MMC         multimedia card                      °C         degree Celsius
+PLL         phase locked loop                    µA         microamperes
+RAID        Redundant Array of Independent Disks µs         microseconds
+SD          secure digital                       mA         milliamperes
+SDIO        secure digital input / output        MBps       Megabytes per second
+                                                 MHz        mega hertz
+SLC         single-level cell
+                                                 ms         milliseconds
+USB         universal serial bus
+                                                 ns         nanoseconds
+                                                           ohms
+                                                 pF         pico Farad
+                                                 V          volts
+Document Number: 001-87710 Rev. *D                                                         Page 26 of 30
+
+
+                                                                                                                 CYUSB202X
+Errata
+This section describes the errata for SD2 USB and Mass Storage Peripheral Controller. Details include errata trigger conditions, scope
+of impact, available workaround, and silicon revision applicability. Contact your local Cypress Sales Representative if you have
+questions.
+Part Numbers Affected
+         Part Number                Device Characteristics
+       CYUSB2024-BZXI                      All Variants
+       CYUSB2025-BZXI                      All Variants
+Qualification Status
+Product Status: Production
+Errata Summary
+The following table defines the errata applicability to available SD2 USB and Mass Storage Peripheral Controller family
+devices.
+                             Items                                [Part Number]     Silicon Revision              Fix Status
+1. Turning off VIO1 during Normal, Suspend and Standby          CYUSB2024-BZXI            Rev. D       Workaround provided
+    modes causes the SD2 to stop working.                       CYUSB2025-BZXI
+2. USB enumeration failure in USB boot mode when SD2            CYUSB2024-BZXI            Rev. D       Workaround provided
+    is self-powered.                                            CYUSB2025-BZXI
+3. Bus collision is seen when the I2C block is used as a        CYUSB2024-BZXI            Rev. D       Use SD2 in single I2C master
+    master in the I2C Multi-master configuration.               CYUSB2025-BZXI                         environment only
+1. Turning off VIO1 during Normal, Suspend and Standby modes causes the SD2 to stop working.
+   ■Problem     Definition
+      Turning off the VIO1 during Normal, Suspend and Standby modes will cause the SD2 to stop working.
+   ■Parameters      Affected
+      N/A
+   ■Trigger    Conditions
+      This condition is triggered when the VIO1 is turned off during Normal, Suspend, and Standby modes.
+   ■Scope     Of Impact
+      SD2 stops working.
+   ■Workaround
+      VIO1 must stay on during Normal, Suspend, and Standby modes.
+   ■Fix   Status
+      No fix. Workaround is required.
+Document Number: 001-87710 Rev. *D                                                                                      Page 27 of 30
+
+
+                                                                                                              CYUSB202X
+2. USB enumeration failure in USB boot mode when SD2 is self-powered.
+   ■Problem   Definition
+    When SD2 is self-powered and not connected to the USB host, it enters low-power mode and does not wake up when connected
+    to USB host afterwards. This is because the bootloader does not check the VBUS pin on the connector to detect USB connection.
+    It expects that the USB bus is connected to the host when it is powered on.
+   ■Parameters    Affected
+    N/A
+   ■Trigger  Conditions
+    This condition is triggered when SD2 is self-powered in USB boot mode.
+   ■Scope   Of Impact
+    Device does not enumerate
+   ■Workaround
+    Reset the SD2 device after connecting to USB host using the RESET pin.
+   ■Fix  Status
+    No fix. Workaround is required.
+3. Bus collision is seen when the I2C block is used as a master in the I2C Multi-master configuration.
+   ■Problem   Definition
+    When SD2 is used as a master in the I2C multi-master configuration, there can be occasional bus collisions.
+   ■Parameters    Affected
+    NA
+   ■Trigger  Conditions
+    This condition is triggered only when the SD2 I2C block operates in Multi-master configuration.
+   ■Scope   Of Impact
+    The SD2 I2C block can transmit data when the I2C bus is not idle leading to bus collisions.
+   ■Workaround
+    Use SD2 in a single I2C master environment only.
+   ■Fix  Status
+    No fix. Workaround is required.
+Document Number: 001-87710 Rev. *D                                                                                  Page 28 of 30
+
+
+                                                                                                      CYUSB202X
+Document History Page
+ Document Title: CYUSB202X, SD2™ USB and Mass Storage Peripheral Controller
+ Document Number: 001-87710
+                       Orig. of    Submission
+ Revision     ECN                                                        Description of Change
+                       Change          Date
+    **     4016299       GSZ       05/31/2013  New data sheet.
+    *A     4114923       GSZ       09/05/2013  Changed status from “Company Confidential” to “Final”.
+                                               Updated to new template.
+    *B     5329287      RAJV       06/29/2016  Updated Package Diagram:
+                                               spec 001-54471 – Changed revision from *D to *E.
+                                               Updated to new template.
+    *C     5708850    AESATMP7      04/24/2017 Updated Cypress Logo and Copyright.
+    *D     6274940      ANNR       08/21/2018  Updated Features:
+                                               Updated description.
+                                               Updated Functional Overview:
+                                               Updated USB Interface (U-Port):
+                                               Updated Figure 1.
+                                               Updated I2S Interface:
+                                               Updated description.
+                                               Updated Boot Options:
+                                               Updated description.
+                                               Updated Power:
+                                               Updated description.
+                                               Updated Power Modes:
+                                               Updated description.
+                                               Updated Table 6.
+                                               Updated Pinouts:
+                                               Updated Figure 2.
+                                               Updated Pin Descriptions:
+                                               Updated Table 7.
+                                               Updated Operating Conditions:
+                                               Added Commercial Temperature Range related information.
+                                               Updated DC Specifications:
+                                               Updated Table 12.
+                                               Added Thermal Characteristics.
+                                               Updated Package Diagram:
+                                               spec 001-54471 – Changed revision from *E to *F.
+                                               Updated Ordering Information:
+                                               No change in part numbers.
+                                               Added a column “RAID Support” and added details in that column.
+                                               Added Errata.
+                                               Updated to new template.
+Document Number: 001-87710 Rev. *D                                                                         Page 29 of 30
+
+
+                                                                                                                                                                            CYUSB202X
+Sales, Solutions, and Legal Information
+Worldwide Sales and Design Support
+Cypress maintains a worldwide network of offices, solution centers, manufacturer’s representatives, and distributors. To find the office
+closest to you, visit us at Cypress Locations.
+Products                                                                                                   PSoC® Solutions
+Arm® Cortex® Microcontrollers                                          cypress.com/arm                     PSoC 1 | PSoC 3 | PSoC 4 | PSoC 5LP | PSoC 6 MCU
+Automotive                                                 cypress.com/automotive
+                                                                                                           Cypress Developer Community
+Clocks & Buffers                                                   cypress.com/clocks
+                                                                                                           Community | Projects | Video | Blogs | Training | Components
+Interface                                                      cypress.com/interface
+Internet of Things                                                       cypress.com/iot                   Technical Support
+Memory                                                          cypress.com/memory                         cypress.com/support
+Microcontrollers                                                      cypress.com/mcu
+PSoC                                                                 cypress.com/psoc
+Power Management ICs                                                 cypress.com/pmic
+Touch Sensing                                                       cypress.com/touch
+USB Controllers                                                        cypress.com/usb
+Wireless Connectivity                                           cypress.com/wireless
+© Cypress Semiconductor Corporation, 2013-2018. This document is the property of Cypress Semiconductor Corporation and its subsidiaries, including Spansion LLC (“Cypress”). This document,
+including any software or firmware included or referenced in this document (“Software”), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries
+worldwide. Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or other
+intellectual property rights. If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress
+hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to
+modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users
+(either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress’s patents that are infringed by the Software (as
+provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products. Any other use, reproduction, modification, translation, or compilation
+of the Software is prohibited.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE
+OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. No computing
+device can be absolutely secure. Therefore, despite security measures implemented in Cypress hardware or software products, Cypress does not assume any liability arising out of any security breach,
+such as unauthorized access to or use of a Cypress product. In addition, the products described in these materials may contain design defects or errors known as errata which may cause the product
+to deviate from published specifications. To the extent permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any
+liability arising out of the application or use of any product or circuit described in this document. Any information provided in this document, including any sample design information or programming
+code, is provided only for reference purposes. It is the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this
+information and any resulting product. Cypress products are not designed, intended, or authorized for use as critical components in systems designed or intended for the operation of weapons, weapons
+systems, nuclear installations, life-support devices or systems, other medical devices or systems (including resuscitation equipment and surgical implants), pollution control or hazardous substances
+management, or other uses where the failure of the device or system could cause personal injury, death, or property damage (“Unintended Uses”). A critical component is any component of a device
+or system whose failure to perform can be reasonably expected to cause the failure of the device or system, or to affect its safety or effectiveness. Cypress is not liable, in whole or in part, and you
+shall and hereby do release Cypress from any claim, damage, or other liability arising from or related to all Unintended Uses of Cypress products. You shall indemnify and hold Cypress harmless from
+and against all claims, costs, damages, and other liabilities, including claims for personal injury or death, arising from or related to any Unintended Uses of Cypress products.
+Cypress, the Cypress logo, Spansion, the Spansion logo, and combinations thereof, WICED, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress in
+the United States and other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be claimed as property of their respective owners.
+Document Number: 001-87710 Rev. *D                                                                         Revised August 21, 2018                                                     Page 30 of 30
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Cypress Semiconductor:
+ CYUSB2025-BZXI CYUSB2024-BZXI

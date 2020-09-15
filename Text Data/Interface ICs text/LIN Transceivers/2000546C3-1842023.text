@@ -1,0 +1,1018 @@
+                                                             MCP2003B
+                                          LIN Transceiver
+Features                                           Description
+• The MCP2003B is Compliant with Local             This device provides a bidirectional, half-duplex
+  Interconnect Network (LIN) Bus Specifications    communication, physical interface to automotive and
+  1.3, 2.0, 2.1, 2.2, SAE J2602, and ISO17987      industrial LIN systems to meet the LIN Bus
+• Supports Baud Rates up to 20 Kbaudwith          Specification Revision 2.2, SAE J2602, and ISO
+  LIN-Compatible Output Driver                     17987. The device is both short-circuit and
+• 60V Load Dump Protected                          overtemperature protected by internal circuitry. The
+                                                   device has been specifically designed to operate in the
+• Very High Electromagnetic Immunity (EMI) Meets
+                                                   automotive operating environment and will survive all
+  Stringent Original Equipment Manufacturers
+                                                   specified transient conditions while meeting all of the
+  (OEM) Requirements
+                                                   stringent quiescent current requirements.
+• Direct Capacitor Coupling Robustness without
+  Transient Voltage Suppressor (TVS):
+                                                   Package Types
+  - ±35V on LBUS (SAE J2962-1)
+  - ±85V on LBUS (SAE J2962-1)                                           MCP2003B
+• High Electrostatic Discharge (ESD)                                        SOIC
+  Immunity without TVS:
+                                                                    RXD 1           8 VREN
+  - >25 kV on LBUS (SAE J2962-1)
+                                                                     CS 2           7 VBB
+  - >15 kV on VBB (IEC 61000-4-2)
+  - >6 kV on LBUS (IEC 61000-4-2)                                WAKE 3             6 LBUS
+• Very High Immunity to RF Disturbances Meets                       TXD 4           5 VSS
+  Stringent OEM Requirements
+• Wide Supply Voltage: 5.5V – 30.0V Continuous                            MCP2003B
+• Extended (E) Temperature Range: -40°C to +125°C                          2x3 DFN*
+• High (H) Temperature Range: -40°C to +150°C
+                                                                   RXD 1               8 VREN
+• Interfaces to PIC® MCU EUSART and Standard
+  USARTs                                                             CS 2     EP       7 VBB
+• LIN Bus Pin:                                                   WAKE 3        9       6 LBUS
+  - Internal pull-up resistor and diode                             TXD 4              5 VSS
+  - Protected against battery shorts
+  - Protected against loss of ground
+                                                                          MCP2003B
+  - High current drive: >40 mA
+                                                                           3x3 DFN*
+• Automatic Thermal Shutdown
+• Low-Power Mode:                                                    RXD 1            8 VREN
+  - Receiver monitoring bus and transmitter off:                      CS 2    EP      7 VBB
+     ( 5 µA)                                                                  9
+                                                                  WAKE 3              6 LBUS
+                                                                     TXD 4            5 VSS
+                                                      * Includes Exposed Thermal Pad (EP); see Table 1-2.
+ 2015-2016 Microchip Technology Inc.                                                  DS20005463C-page 1
+
+
+MCP2003B
+MCP2003B Block Diagram
+DS20005463C-page 2      2015-2016 Microchip Technology Inc.
+
+
+                                                                                        MCP2003B
+1.0       DEVICE OVERVIEW                                  1.2       Internal Protection
+The MCP2003B devices provide a physical interface          1.2.1        ESD PROTECTION
+between a microcontroller and a LIN bus. These
+devices will translate the CMOS/TTL logic levels to LIN    For component-level ESD ratings, please refer to the
+logic level, and vice versa. It is intended for automotive maximum operation specifications.
+and industrial applications with serial bus speeds up to
+                                                           1.2.2        GROUND LOSS PROTECTION
+20 Kbaud.
+                                                           The LIN Bus specification states that the LIN pin must
+LIN Bus Specification Revision 2.2 requires that the
+                                                           transition to the recessive state when ground is
+transceiver of all nodes in the system is connected via
+                                                           disconnected. Therefore, a loss of ground effectively
+the LIN pin, referenced to ground and with a maximum
+                                                           forces the LIN line to a high-impedance level.
+external termination resistance load of 510 from LIN
+bus to battery supply. The 510 corresponds to
+                                                           1.2.3        THERMAL PROTECTION
+1 master and 15 slave nodes.
+                                                           The thermal protection circuit monitors the die
+The VREN pin can be used to drive the logic input of an
+                                                           temperature and is able to shut down the LIN
+external voltage regulator. This pin is high in all modes
+                                                           transmitter.
+except for Power-Down mode.
+                                                           There are two causes for a thermal overload. A thermal
+1.1       External Protection                              shutdown can be triggered by either, or both, of the
+                                                           following thermal overload conditions.
+1.1.1         REVERSE BATTERY PROTECTION                   • LIN bus output overload
+An external reverse-battery-blocking diode should be       • Increase in die temperature due to increase in
+used to provide polarity protection (see Example 1-1).        environment temperature
+                                                           Driving the TXD and checking the RXD pin makes it
+1.1.2         TRANSIENT VOLTAGE                            possible to determine whether there is a bus contention
+              PROTECTION (LOAD DUMP)                       (RX = low, TX = high) or a thermal overload condition
+An external 60V transient suppressor (TVS) diode,          (RX = high, TX = low). After a thermal overload event,
+between VBB and ground, with a 50 transient               the device will automatically recover once the die
+protection resistor (RTP) in series with the battery       temperature has fallen below the recovery temperature
+supply and the VBB pin serve to protect the device from    threshold (see Figure 1-1).
+power transients (see Example 1-1) and ESD events.
+While this protection is optional, it is considered good   FIGURE 1-1:              THERMAL SHUTDOWN
+engineering practice.                                                               STATE DIAGRAM
+                                                                                       Shorted LIN bus
+                                                                                       to VBB
+                                                                            Operation         Transmitter
+                                                                             Mode             Shutdown
+                                                                                    Temp < ShutdownTEMP
+ 2015-2016 Microchip Technology Inc.                                                             DS20005463C-page 3
+
+
+MCP2003B
+1.3        Modes of Operation                              The device will go into Power-Down mode on the falling
+                                                           edge of CS, or return to Operation mode if all faults are
+For an overview of all operational modes, refer to         resolved.
+Table 1-1.
+1.3.1         POWER-DOWN MODE
+In Power-Down mode, everything is off except the
+wake-up section. The internal 30 k pull-up resistor
+switch is open, which enables the high ohmic pull-up
+resistor (900 k typical). This is the lowest power
+mode. The receiver is off, thus its output is open-drain.
+On CS going to a high level or a falling edge on WAKE,
+the device will enter Ready mode as soon as internal
+voltage stabilizes. Refer to Section 2.4 “AC
+Specifications” for further information. In addition, LIN
+bus activity will change the device from Power-Down
+mode to Ready mode; The MCP2003B wakes up on a
+rising edge on LBUS preceded by a low level lasting at
+least 70 µs typically. See Figure 1-2 about remote
+wake-up. If CS is held high as the device transitions
+from Power-Down to Ready mode, the device will
+transition to either Operation or Transmitter Off mode,
+depending on TXD input, as soon as internal voltages
+stabilize.
+1.3.2        READY MODE
+Transitioning from POR into Ready mode is achieved
+when VBB > VBBUV_RISE. Upon entering Ready mode,
+VREN is enabled and the receiver detect circuit is
+powered-up. The transmitter remains disabled and the
+device is ready to receive data but not to transmit.
+Upon VBB supply pin power-on, the device will remain
+in Ready mode as long as CS is low. When CS
+transitions high, the device will either enter Operation
+mode if the TXD pin is held high, or the device will enter
+Transmitter Off mode if the TXD pin is held low.
+1.3.3        OPERATION MODE
+In this mode, all internal modules are operational. Note
+that the part cannot transmit if the pull-up resistance is
+missing on RX pin. See Section 1.5.1.1 “RXD
+Monitoring” for details.
+The device will go into Power-Down mode on the falling
+edge of CS and the TXD pin is held high. The device will
+enter Transmitter Off mode in the event of a Fault con-
+dition such as thermal overload, bus contention or TXD
+timer expiration.
+The VBB to LBUS ~30 kΩ pull-up resistor (RSLAVE) is
+connected only in Operation mode.
+1.3.4        TRANSMITTER OFF MODE
+Transmitter Off mode is reached whenever the
+transmitter is disabled due to a Fault condition. Fault
+conditions include thermal overload, bus contention,
+RXD monitoring and TXD timer expiration.
+DS20005463C-page 4                                                              2015-2016 Microchip Technology Inc.
+
+
+                                                                                                        MCP2003B
+FIGURE 1-2:               OPERATIONAL MODES STATE DIAGRAM – MCP2003B
+                      POR                      V BAT > V BBUV_RISE
+                  VREN OFF
+                    RX OFF                                                  Ready Mode
+                    TX OFF                                                    VREN ON
+             RPU switch OFF                                                     RX ON
+                                                                               TX OFF
+                                                                          RPU switch OFF
+                                                                           TXD = 1 And CS = 1
+                                            TOFF Mode                           NO Fault,               Operation Mode
+                                             VREN ON             And RXD > 2.5V while LBUS recessive(1)     VREN ON
+                                               RX ON                                                          RX ON
+                                              TX OFF                                                          TX ON
+              Rising Edge on LBUS or
+                      CS = 1 or           RPU switch OFF                          Fault:                 RPU switch ON
+                                                                            Thermal or Timer
+             Falling Edge on WAKE pin
+                                                                            Power-Down
+                                                                                 Mode
+                                                                             VREN OFF
+                                                                               RX OFF
+                                                                               TX OFF
+                                                                          RPU switch OFF
+        Note 1: Achieved via pull-up resistor on RXD (See Example 1-1)
+TABLE 1-1:           OVERVIEW OF OPERATIONAL MODES
+     State     Transmitter Receiver VREN                               Operation                                  Comments
+ POR                OFF          OFF     OFF  Check CS: if low, then proceed to Ready mode;               VBB > VBB(MIN) and
+                                              If high, transition to either TOFF or Operation mode,       Internal Supply stable.
+                                              depending on TXD.                                           High ohmic pull-up resistor
+                                                                                                          enabled (900 k typical).
+ Ready              OFF          ON      ON   On CS high level, proceed to Operation or TOFF mode.        Bus Off state.
+                                                                                                          High ohmic pull-up resistor
+                                                                                                          enabled (900 k typical).
+ Operation           ON          ON      ON   On CS low level, proceed to Power-Down.                     Normal Operation mode.
+                                              On a fault condition, proceed to TOFF mode.                 RXD has to be at a high
+                                                                                                          level (>2.5V typical) while
+                                                                                                          LBUS is recessive.
+ Power-Down         OFF         Activity OFF  On CS high level, proceed to Ready mode then                Low-Power mode.
+                                Detect        proceed to either Operation or TOFF mode.                   High ohmic pull-up resistor
+                                              Falling edge on WAKE will put the device into               enabled (900 k typical).
+                                              Ready mode.
+                                              Rising edge on LIN bus will put the device into
+                                              Ready mode.
+ Transmitter        OFF          ON      ON   On CS low level, proceed to Power-Down mode;                High ohmic pull-up resistor
+ Off                                          On TXD high and no fault condition, proceed to              enabled (900k typical).
+                                              Operation mode.
+ 2015-2016 Microchip Technology Inc.                                                                          DS20005463C-page 5
+
+
+MCP2003B
+1.4     Typical Applications
+EXAMPLE 1-1:          TYPICAL MCP2003B APPLICATION
+                                                                        VBAT
+                                                                                 optional resistor and transient suppressor
+                                     VBAT
+                                                                    50
+                                                                  60V       1.0 µF     Master Node Only
+                                                                                             VBAT
+                                                 (Note 1)
+                            3.9 k
+              VDD                         Voltage Reg       VREN         VBB
+                                 (2)
+                           4.7 k
+              TXD                                           TXD                         1 k
+              RXD                                           RXD         LBUS                                  LIN Bus
+               I/O                                          CS
+                                                33 k
+                                                            WAKE
+                                                                               220 pF
+                                          Wake-up
+                                                           VSS
+     Note 1: For applications with current requirements of less than 20 mA, the connection to VBAT can be
+              deleted, and voltage to the regulator supplied directly from the VREN pin.
+          2: Required for transmission.
+          3: A Transient Voltage Suppressor on the LIN Bus is not required to sustain SAE J2962-1 ESD
+              and Direct Capacitor Coupling tests.
+EXAMPLE 1-2:          TYPICAL LIN NETWORK CONFIGURATION
+                                                          40m
+                                                        + Return
+                                                                                                              LIN bus
+               1 k
+    VBB
+                   LIN bus                     LIN bus                    LIN bus                      LIN bus
+                 MCP2003B                   MCP2003B                    MCP2003B                     MCP2003B
+                                                Slave 1                    Slave 2                  Slave n <23
+                                                (MCU)                      (MCU)                        (MCU)
+                    Master
+                    (MCU)
+DS20005463C-page 6                                                                     2015-2016 Microchip Technology Inc.
+
+
+                                                                                             MCP2003B
+1.5       Pin Descriptions
+TABLE 1-2:           PINOUT DESCRIPTIONS
+                                   8-Lead
+          Pin Name                               2x3 DFN   3x3 DFN                      Normal Operation
+                                    SOIC
+ RXD                                  1              1        1         Receive Data Output (OD), HV tolerant
+ CS                                   2              2        2         Chip Select (TTL), HV tolerant
+ WAKE                                 3              3        3         Wake-up, HV tolerant
+ TXD                                  4              4        4         Transmit Data Input (TTL), HV tolerant
+ VSS                                  5              5        5         Ground
+ LBUS                                 6              6        6         LIN Bus (bidirectional)
+ VBB                                  7              7        7         Battery Positive
+ VREN                                 8              8        8         Voltage Regulator Enable Output
+ EP                                   —              9        9         Exposed Thermal Pad. Do not electrically
+                                                                        connect or connect to Vss.
+ Legend: TTL = TTL Input Buffer; OD = Open-Drain Output
+1.5.1         RECEIVE DATA OUTPUT (RXD)                         If CS = 1 when the VBB supply is turned on, the device
+                                                                will proceed to Operation mode, or TXOFF (refer to
+The Receive Data Output pin is an open-drain (OD)
+                                                                Figure 1-2), as soon as internal voltages stabilize.
+output and follows the state of the LIN pin, except in
+Power-Down mode.                                                This pin may also be used as a local wake-up input
+                                                                (refer to Example 1-1). In this implementation, the
+1.5.1.1         RXD Monitoring                                  microcontroller I/O controlling the CS should be
+The RXD pin is internally monitored. It has to be at a          converted to a high-impedance input allowing the
+high level (> 2.5V typical) while LBUS is recessive in          internal pull-down resistor to keep CS low. An external
+Operation mode. Otherwise, an internal fault will be            switch, or other source, can then wake-up both the
+created and the device will transition to Transmitter Off       transceiver and the microcontroller (if powered). Refer
+mode.                                                           to Section 1.3 “Modes of Operation”, for detailed
+                                                                operation of CS.
+   Note:      A voltage regulator sensing circuit is
+              connected to RXD. This sensing circuit               Note:     It is not recommended to tie CS high, as
+              internally monitors the RXD pin when                           this can result in the device entering
+              LBUS is recessive (RXD = 1). It will not                       Operation         mode       before      the
+              allow the device to switch (or stay) in                        microcontroller is initialized and may
+              Operation Mode if the RXD pin is left                          result in unintentional LIN traffic. The CS
+              open. The RXD pin must be connected to                         pin is internally pulled down to ground with
+              a valid supply through a pull-up resistor as                   190 k when CS is less than VIL, and
+              RXD is an open drain pin.                                      2 M when CS is greater than VIH. The
+                                                                             current on CS is limited to about 2 µA
+1.5.2         CHIP SELECT (CS)                                               when CS is greater than VIH.
+This is the Chip Select Input pin. An internal pull-down
+                                                                1.5.3        WAKE-UP INPUT (WAKE)
+resistor will keep the CS pin low. This is done to ensure
+that no disruptive data will be present on the bus while        The WAKE pin has an internal 800 kΩ pull-up to VBB.
+the microcontroller is executing a Power-on Reset and           A falling edge on the WAKE pin causes the device to
+an I/O initialization sequence. The pin must detect a           wake from Power-Down mode. Upon waking, the
+high level to activate the transmitter. An internal Low-        MCP2003B will enter Ready mode.
+Pass filter, with a typical time constant of 10 µs,
+prevents unwanted wake-up (or transition to Power-              1.5.4        TRANSMIT DATA INPUT (TXD)
+Down mode) on glitches.                                         The Transmit Data Input pin has an internal pull-up.
+If CS = 0 when the VBB supply is turned on, the device          The LIN pin is low (dominant) when TXD is low, and high
+goes to Ready mode as soon as internal voltages sta-            (recessive) when TXD is high.
+bilize, and stays there as long as the CS pin is held low       For extra bus security, TXD is internally forced to ‘1’
+(0). In Ready mode, the receiver is on and the LIN              whenever the transmitter is disabled, regardless of
+transmitter driver is off.                                      external TXD voltage.
+ 2015-2016 Microchip Technology Inc.                                                                  DS20005463C-page 7
+
+
+MCP2003B
+1.5.4.1        TXD Dominant Timeout
+If TXD is driven low for longer than approximately
+25 ms, the LBUS pin is switched to Recessive mode and
+the part enters TOFF Mode. This is to prevent the LIN
+node from permanently driving the LIN Bus dominant.
+The transmitter is reenabled on TXD rising edge.
+1.5.5        GROUND (VSS)
+This is the Ground pin.
+1.5.6        LIN BUS (LBUS)
+The bidirectional LIN Bus pin (LBUS) is controlled by the
+TXD input. LBUS has a current limited open collector
+output. To reduce EMI, the edges during the signal
+changes are slope controlled and include corner
+rounding control for both falling and rising edges.
+The internal LIN receiver observes the activities on the
+LIN bus, and matches the output signal RXD to follow
+the state of the LBUS pin.
+1.5.6.1        Bus Dominant Timer
+The Bus Dominant Timer is an internal timer that
+deactivates the LBUS transmitter after approximately
+25 ms of dominant state on the LBUS pin. The timer is
+reset on any recessive LBUS state.
+The LIN bus transmitter will be reenabled after a
+recessive state on the LBUS pin as long as CS is high.
+Disabling can be caused by the LIN bus being
+externally held dominant, or by TXD being driven low.
+1.5.7        BATTERY (VBB)
+This is the Battery Positive Supply Voltage pin.
+1.5.8        VOLTAGE REGULATOR ENABLE
+             OUTPUT (VREN)
+This is the External Voltage Regulator Enable pin.
+Open-drain output is pulled high to VBB in all modes
+except Power-Down.
+1.5.9        EXPOSED THERMAL PAD (EP)
+Do not electrically connect, or connect to VSS.
+DS20005463C-page 8                                         2015-2016 Microchip Technology Inc.
+
+
+                                                                                                                               MCP2003B
+2.0       ELECTRICAL CHARACTERISTICS
+2.1       Absolute Maximum Ratings†
+VIN DC Voltage on RXD, TXD, CS ...................................................................................................................-0.3 to +50V
+VIN DC Voltage on WAKE and VREN ..............................................................................................................-0.3 to +VBB
+VBB Battery Voltage, continuous, non-operating(1) ........................................................................................-0.3 to +50V
+VBB Battery Voltage, non-operating (LIN bus recessive)(2) ............................................................................-0.3 to +60V
+VBB Battery Voltage, transient ISO 7637 Test 1 ......................................................................................................-200V
+VBB Battery Voltage, transient ISO 7637 Test 2a ...................................................................................................+150V
+VBB Battery Voltage, transient ISO 7637 Test 3a ....................................................................................................-300V
+VBB Battery Voltage, transient ISO 7637 Test 3b ...................................................................................................+200V
+VLBUS Bus Voltage, continuous.......................................................................................................................-18 to +50V
+VLBUS Bus Voltage, transient(3) .......................................................................................................................-27 to +60V
+VLBUS Bus Voltage, Direct Capacitor Coupling without TVS (SAE J2962-1) ........................................... ±35V and ±85V
+ILBUS Bus Short-Circuit Current Limit....................................................................................................................200 mA
+ESD protection on LIN, without TVS (SAE J2962-1) ............................................................................................. ±25 kV
+ESD protection on LIN, VBB, WAKE (IEC 61000-4-2)(4) .......................................................................................... ±6 kV
+ESD protection on LIN, VBB, WAKE, CS (Human Body Model)(5) ........................................................................... ±8 kV
+ESD protection on all other pins (Human Body Model)(5) ........................................................................................ ±4 kV
+ESD protection on all pins (Charge Device Model)(6) .............................................................................................. ±2 kV
+ESD protection on all pins (Machine Model)(7) .......................................................................................................±400V
+Maximum Junction Temperature ........................................................................................................................... +150C
+Storage Temperature .................................................................................................................................. -65 to +150C
+ † NOTICE: Stresses above those listed under “Absolute Maximum Ratings” may cause permanent damage to the
+ device. This is a stress rating only and functional operation of the device, at those or any other conditions above those
+ indicated in the operational listings of this specification, is not implied. Exposure to maximum rating conditions for
+ extended periods may affect device reliability.
+   Note 1: LIN 2.x compliant specification.
+         2: SAE J2602 compliant specification.
+         3: ISO 7637/1 load dump compliant (t < 500 ms).
+         4: According to IEC 61000-4-2, 330, 150 pF and Transceiver EMC Test Specifications [2] to [4]. For WAKE
+             pin to meet the specification, series resistor must be in place (refer to Example 1-2).
+         5: According to AEC-Q100-002/JESD22-A114.
+         6: According to AEC-Q100-011B.
+         7: According to AEC-Q100-003/JESD22-A115.
+ 2015-2016 Microchip Technology Inc.                                                                                                        DS20005463C-page 9
+
+
+MCP2003B
+2.2       Nomenclature Used in This Document
+Some terms and names used in this data sheet deviate from those referred to in the LIN specifications. Equivalent
+values are shown in Table 2-1.
+TABLE 2-1:         EQUIVALENT VALUES
+     LIN specifications Name              Term used in the following tables                    Definition
+                 VBAT                                 not used                ECU operating voltage
+                 VSUP                                    VBB                  Supply voltage at device pin
+               IBUS_LIM                                  ISC                  Current Limit of driver
+               VBUSREC                                VIH(LBUS)               Recessive state
+              VBUSDOM                                 VIL(LBUS)               Dominant state
+2.3       DC Specifications
+                                Electrical Characteristics: Unless otherwise indicated, all limits are specified for
+                                VBB = 5.5V to 30.0V
+      DC Specifications
+                                Extended (E): TA = -40°C to +125°C
+                                High (H): TA = -40°C to +150°C
+          Parameter                  Sym.          Min.        Typ.      Max.       Units             Conditions
+ Power
+ VBB Quiescent Operating              IBBQ           —          65        150        µA      Operating Mode,
+ Current                                                                                     bus recessive
+                                                     —          —         160        µA      VBB > 18V
+ VBB Transmitter-off Current         IBBTO           —          60        120        µA      Transmitter off,
+                                                                                             bus recessive
+                                                     —          —         130        µA      VBB > 18V
+ VBB Power-Down Current              IBBPD           —           6         15        µA
+                                                     —          —          20        µA      VBB > 18V
+                                                     —          14         20        µA      LIN bus shorted to GND
+                                                                                             VLIN = 0V, VBB < 12V
+ VBB Current                       IBBNOGND          -1         —          1         mA      VBB = 12V, GND to VBB,
+ with VSS Floating                                                                           VLIN = 0-27V
+ VBB Undervoltage                 VBBUV_FALL         3.8         4        4.4         V      VBB falling (Note 3)
+ Threshold (switching from
+ Operation mode to TOFF
+ and VREN OFF)
+ VBB Undervoltage                 VBBUV_RISE         5.5        5.6       6.0         V      VBB rising (Note 3)
+ Recovery Threshold
+ (switching from POR to
+ Ready mode)
+ Microcontroller Interface
+ High-Level Input Voltage              VIH           2.0        —          30         V
+ (TXD)
+ Low-Level Input Voltage               VIL          -0.3        —         0.8         V
+ (TXD)
+ High-Level Input Current              IIH           -5         —          —         µA      Input voltage = 4.0V
+ (TXD)
+ Note 1:    Internal current limited. 2.0 ms maximum recovery time (RLBUS = 0, TX = 0.4 VREG, VLBUS = VBB).
+       2:   Node has to sustain the current that can flow under this condition; bus must be operational under this
+            condition.
+       3:   Characterized; not 100% tested.
+DS20005463C-page 10                                                                  2015-2016 Microchip Technology Inc.
+
+
+                                                                                           MCP2003B
+2.3      DC Specifications (Continued)
+                                Electrical Characteristics: Unless otherwise indicated, all limits are specified for
+                                VBB = 5.5V to 30.0V
+     DC Specifications
+                                Extended (E): TA = -40°C to +125°C
+                                High (H): TA = -40°C to +150°C
+          Parameter                   Sym.          Min.      Typ.       Max.       Units             Conditions
+Low-Level Input Current                 IIL          -12       —           —         µA      Input voltage = 0.5V
+(TXD)
+High-Level Voltage (VREN)           VHVREN          -0.3       —       VBB + 0.3      V
+High-Level Output Current            IHVREN          -40       —           -5        mA      Output voltage = VBB - 0.5V
+(VREN)                                              -120       —          -20                Output voltage = VBB - 2.0V
+High-Level Input Voltage               VIH           2.0       —           30         V      Through a current limiting
+(CS)                                                                                         resistor
+Low-Level Input Voltage                VIL          -0.3       —           0.8        V
+(CS)
+High-Level Input Current                IIH           —        —          10.0       µA      Input voltage = 4.0V
+(CS)
+Low-Level Input Current                 IIL           —        —           7.0       µA      Input voltage = 0.5V
+(CS)
+Low-Level Input Voltage                VIL       VBB - 4.0V    —           —          V
+(WAKE)
+High-Level Input Current                IIH          -12       —           —         µA
+(WAKE)                                               -15       —           —         µA      VBB > 18V
+Low-Level Input Current                 IIL          -30       —           —         µA
+(WAKE)                                               -45       —           —         µA      VBB > 18V
+Low-Level Output Voltage               VOL            —        —           0.4        V      IIN = 2 mA
+(RXD)
+Input Threshold Level              VTH(RXD)           —        2.5         —          V      RXD > VTH;
+(RXD)                                                                                        LBUS recessive in
+                                                                                             Operating mode
+High-Level Output Current              IOH            -1       —           -1        µA      VLIN = VBB, VRXD = 5.5V
+(RXD)
+Bus Interface
+High-Level Input Voltage           VIH(LBUS)      0.6 VBB      —           —          V      Recessive state
+Low-Level Input Voltage            VIL(LBUS)          -8       —        0.4 VBB       V      Dominant state
+Input Hysteresis                      VHYS            —        —      0.175 VBB       V      VIH(LBUS) - VIL(LBUS)
+Low-Level Output Current           IOL(LBUS)         40        —          200        mA      Output voltage = 0.2 VBB,
+                                                                                             VBB = 12V
+                                                    16.5       —           —         mA      Output voltage = 0.2 VBB,
+                                                                                             VBB = 18V
+High-Level Output Current          IOH(LBUS)          —        —           20        µA
+Short-Circuit Current Limit            ISC           50        —          200        mA      (Note 1)
+High-Level Output Voltage          VOH(LBUS)      0.8 VBB      —          VBB         V
+Driver Dominant Voltage             V_LOSUP           —        —           1.2        V      RLOAD = 500
+Input Leakage Current            IBUS_PAS_DO          -1      -0.4         —         mA      Driver off,
+(at the receiver during                  M                                                   VBUS = 0V,
+dominant bus level)                                                                          VBB = 12V
+Note 1:     Internal current limited. 2.0 ms maximum recovery time (RLBUS = 0, TX = 0.4 VREG, VLBUS = VBB).
+       2:   Node has to sustain the current that can flow under this condition; bus must be operational under this
+            condition.
+       3:   Characterized; not 100% tested.
+ 2015-2016 Microchip Technology Inc.                                                               DS20005463C-page 11
+
+
+MCP2003B
+2.3       DC Specifications (Continued)
+                                 Electrical Characteristics: Unless otherwise indicated, all limits are specified for
+                                 VBB = 5.5V to 30.0V
+      DC Specifications
+                                 Extended (E): TA = -40°C to +125°C
+                                 High (H): TA = -40°C to +150°C
+           Parameter                  Sym.           Min.      Typ.       Max.       Units             Conditions
+ Input Leakage Current           IBUS_PAS_REC         —         12         20         µA      Driver off,
+ (at the receiver during                                                                      8V < VBB < 18V
+ recessive bus level)                                                                         8V < VBUS < 18V
+                                                                                              VBUS  VBB
+ Leakage Current                  IBUS_NO_GND        -10        1.0       +10         µA      GNDDEVICE = VBB,
+ (disconnected from ground)                                                                   0V < VBUS < 18V,
+                                                                                              VBB = 12V
+ Leakage Current                  IBUS_NO_VBB         —         —          10         µA      VBB = GND,
+ (disconnected from VBB)                                                                      0 < VBUS < 18V,
+                                                                                              (Note 2)
+ Receiver Center Voltage            VBUS_CNT      0.475 VBB 0.5 VBB    0.525 VBB       V      VBUS_CNT = (VIL (LBUS) +
+                                                                                              VIH (LBUS))/2
+ Slave Termination                   RSLAVE           20        30         60         k
+ Capacitance of Slave Node           CSLAVE           —         —         100         pF      (Note 3)
+ Note 1:     Internal current limited. 2.0 ms maximum recovery time (RLBUS = 0, TX = 0.4 VREG, VLBUS = VBB).
+        2:   Node has to sustain the current that can flow under this condition; bus must be operational under this
+             condition.
+        3:   Characterized; not 100% tested.
+DS20005463C-page 12                                                                   2015-2016 Microchip Technology Inc.
+
+
+                                                                                         MCP2003B
+2.4       AC Specifications
+                                   Electrical Characteristics: Unless otherwise indicated, all limits are specified for
+                                   VBB = 5.5V to 27.0V
+AC Characteristics
+                                   Extended (E): TA = -40°C to +125°C
+                                   High (H): TA = -40°C to +150°C
+             Parameter                 Sym.     Min.   Typ.   Max.   Units              Test Conditions
+Bus Interface – Constant Slope Time Parameters
+Slope Rising and Falling Edges        tSLOPE     3.5     —     22.5    µs   7.3V ≤ VBB ≤ 18V
+Propagation Delay of                tTRANSPD      —      —      4.0    µs   tTRANSPD = max (tTRANSPDR or
+Transmitter                                                                 tTRANSPDF)
+Propagation Delay of Receiver         tRECPD      —      —      6.0    µs   tRECPD = max (tRECPDR or tRECPDF)
+Symmetry of Propagation              tRECSYM     -2.0    —      2.0    µs   tRECSYM = max (tRECPDF - tRECPDR)
+Delay of Receiver Rising Edge                                               RRXD 2.4 to VCC, CRXD 20 pF
+w.r.t. Falling Edge
+Symmetry of Propagation            tTRANSSYM     -2.0    —      2.0    µs   tTRANSSYM = max (tTRANSPDF - tTRANSPDR)
+Delay of Transmitter Rising
+Edge w.r.t. Falling Edge
+Duty Cycle 1 @20.0 kbit/sec                     0.396    —      —      —    CBUS; RBUS conditions:
+                                                                            1 nF; 1 k | 6.8 nF; 660 | 10 nF; 500
+                                                                            THREC(MAX) = 0.744 × VBB,
+                                                                            THDOM(MAX) = 0.581 × VBB,
+                                                                            VBB =7.0V - 18V; tBIT = 50 µs
+                                                                            D1 = tBUS_REC(MIN)/2 × tBIT)
+Duty Cycle 2 @20.0 kbit/sec                       —      —    0.581    —    CBUS; RBUS conditions:
+                                                                            1 nF; 1 k | 6.8 nF; 660 | 10 nF; 500
+                                                                            THREC(MAX) = 0.284 × VBB,
+                                                                            THDOM(MAX) = 0.422 × VBB,
+                                                                            VBB =7.6V - 18V; tBIT = 50 µs
+                                                                            D2 = tBUS_REC(MAX)/2 × tBIT)
+Duty Cycle 3 @10.4 kbit/sec                     0.417    —      —      —    CBUS; RBUS conditions:
+                                                                            1 nF; 1 k | 6.8 nF; 660 | 10 nF; 500
+                                                                            THREC(MAX) = 0.778 × VBB,
+                                                                            THDOM(MAX) = 0.616 × VBB,
+                                                                            VBB =7.0V – 18V; tBIT = 96 µs
+                                                                            D3 = tBUS_REC(MIN)/2 × tBIT)
+Duty Cycle 4 @10.4 kbit/sec                       —      —    0.590    —    CBUS; RBUS conditions:
+                                                                            1 nF; 1 k | 6.8 nF; 660 | 10 nF; 500
+                                                                            THREC(max) = 0.251 × VBB,
+                                                                            THDOM(MAX) = 0.389 × VBB,
+                                                                            VBB =7.6V – 18V; tBIT = 96 µs
+                                                                            D4 = tBUS_REC(MAX)/2 × tBIT)
+Wake-up Timing
+Bus Activity Debounce time              tBDB      30     70    125     µs
+Bus Activity to VREN on              tBACTVE      10     60    110     µs
+WAKE to VREN on                        tWAKE      —      —     150     µs
+Chip Select to VREN on                 tCSOR      —      —     150     µs   VREN floating
+Chip Select to VREN off                tCSPD      —      —     200     µs   VREN floating
+ 2015-2016 Microchip Technology Inc.                                                              DS20005463C-page 13
+
+
+MCP2003B
+2.5      Thermal Specifications
+               Parameter                   Symbol        Typ.      Max.     Units             Test Conditions
+ Recovery Temperature                    RECOVERY       +160        —        C
+ Shutdown Temperature                   SHUTDOWN        +180        —        C
+ Short-Circuit Recovery Time               tTHERM         1.5       5.0       ms
+ Thermal Package Resistances
+ Thermal Resistance, 2x3 8L-DFN              JA          75         —       C/W
+ Thermal Resistance, 3x3 8L-DFN              JA         56.7        —       C/W
+ Thermal Resistance, 8L-SOIC                 JA        149.5        —       C/W
+ Note 1:    The maximum power dissipation is a function of TJMAX, JA and ambient temperature TA. The maximum
+            allowable power dissipation at an ambient temperature is PD = (TJMAX - TA)JA. If this dissipation is
+            exceeded, the die temperature will rise above 150C and the device will go into thermal shutdown.
+DS20005463C-page 14                                                               2015-2016 Microchip Technology Inc.
+
+
+                                                                                                      MCP2003B
+2.6                    Typical Performance Curves
+        Note:            The graphs and tables provided following this note are a statistical summary based on a limited number of
+                         samples and are provided for informational purposes only. The performance characteristics listed herein
+                         are not tested or guaranteed. In some graphs or tables, the data presented may be outside the specified
+                         operating range (e.g., outside specified power supply range) and therefore outside the warranted range.
+Note: Unless otherwise indicated, VBB = 5.5V to 18.0V, Extended (E): TA = -40°C to +125°C and
+High (H): TA = -40°C to +150°C.
+                150
+                        -45    -10       25
+                        130    150
+                125
+                100
+ Current (μA)
+                 75
+                 50
+                 25
+                  0
+                       5.5       6             7     12    18   27   30
+                                               VBB (V)
+FIGURE 2-1:                                   Typical IBBQ.
+                15.0
+                         -45    -10       25
+                         130    150
+                12.5
+                10.0
+ Current (μA)
+                 7.5
+                 5.0
+                 2.5
+                 0.0
+                        5.5          6          7     12   18   27   30
+                                                VBB (V)
+FIGURE 2-2:                                   Typical IBBPD.
+                120
+                        -45    -10       25
+                        130    150
+                100
+                80
+ Current (μA)
+                60
+                40
+                20
+                 0
+                       5.5       6             7      12   18   27   30
+                                                VBB (V)
+FIGURE 2-3:                                   Typical IBBTO.
+ 2015-2016 Microchip Technology Inc.                                                                        DS20005463C-page 15
+
+
+MCP2003B
+2.7     Timing Diagrams and Specifications
+FIGURE 2-4:           BUS TIMING DIAGRAM
+                  TXD
+                                50%                50%
+                  LBUS
+                                                          .95VLBUS
+                                                          .50VBB
+                                                           0.05VLBUS
+                                                                           0.0V
+                                      TTRANSPDF            TTRANSPDR
+                                           TRECPDF               TRECPDR
+                  RXD
+                                          50%                 50%
+FIGURE 2-5:           CS TO VREN TIMING DIAGRAM
+           CS
+                                    TCSOR
+                                                               VBB
+          VREN                                                                 OFF
+                                                   TCSPD
+FIGURE 2-6:           REMOTE WAKE-UP
+               LBUS
+              0.4VBB
+                        tBDB
+                                                       tBACTIVE
+              VBB
+              VREN
+DS20005463C-page 16                                       2015-2016 Microchip Technology Inc.
+
+
+                                                                                          MCP2003B
+3.0      PACKAGING INFORMATION
+3.1      Package Marking Information
+                8-Lead DFN (2x3)                                                        Examples:
+                                                     Device            Code
+                                                MCP2003B-E/MC           ADP                ADP
+                                               MCP2003BT-E/MC           ADP                 613
+                                                                                             25
+                                                MCP2003B-H/MC           ADR
+                                               MCP2003BT-H/MC           ADR
+               8-Lead DFN (3x3)                                                          Examples:
+                                                   Device             Code
+                                                                                            DAEC
+                                              MCP2003B-E/MF           DAEC                   1613
+                                             MCP2003BT-E/MF           DAEC                    256
+                                              MCP2003B-H/MF           DAEE
+                                             MCP2003BT-H/MF           DAEE
+                8-Lead SOIC (150 mil)                                                   Examples:
+                                                                                        MCP2003B
+                                                                                        SN^^^1613
+                                                                                             e3
+                                                                                                 256
+                              NNN                                                               NNN
+                Legend: XX...X        Customer-specific information
+                            Y         Year code (last digit of calendar year)
+                            YY        Year code (last 2 digits of calendar year)
+                            WW        Week code (week of January 1 is week ‘01’)
+                            NNN       Alphanumeric traceability code
+                             e3       Pb-free JEDEC® designator for Matte Tin (Sn)
+                            *         This package is Pb-free. The Pb-free JEDEC designator ( e3 )
+                                      can be found on the outer packaging for this package.
+                Note:    In the event the full Microchip part number cannot be marked on one line, it will
+                         be carried over to the next line, thus limiting the number of available
+                         characters for customer-specific information.
+ 2015-2016 Microchip Technology Inc.                                                             DS20005463C-page 17
+
+
+MCP2003B
+                 !""#$%&
+    '     2% & %! % *        " )    '           %   *          $ % % " %
+             %% 133)))& &3      * 
+                                     D                                                            e
+                                                                                   b
+                             N                                                                        N
+                                                                     L
+                                                                         K
+                                                      E                                                     E2
+                                                             EXPOSED PAD
+               NOTE 1
+                                                                                                             NOTE 1
+                               1    2                                                          2    1
+                                                                                           D2
+                                 TOP VIEW                                          BOTTOM VIEW
+                                                      A
+               A3                             A1           NOTE 2
+                                                               4%                55,,
+                                                   &  5&%         6          67            8
+                    6!&( $                                6                        9
+                    %                                                            ./0
+                    7  :  %                                        9                    
+                    % "$$                                                                .
+                    0% %*                              +                   ,2
+                    7  5  %                                                  /0
+                    7  ;"%                                ,                   +/0
+                    ,#     " "5  %                                 +           <            ..
+                    ,#     " ";"%                         ,         .           <            .
+                    0% %;"%                                (                  .           +
+                    0% %5  %                               5         +                    .
+                    0% % % ,#    " "                      =                    <              <
+  '
+  ! " #$ %! &  '(!%&! %(  % ")%%  % "  
+  *     &    &  #  "% (   % " 
++  *       )  ! % "
+ &    "%    ,-.
+       /01 / &    %  # % !  ))%!%%   
+       ,21  $   &  '! ! )%!%%   '$$& % !      
+                                                                                               ) 0 +0
+DS20005463C-page 18                                                                           2015-2016 Microchip Technology Inc.
+
+
+                                                                                      MCP2003B
+   Note:    For the most current package drawings, please see the Microchip Packaging Specification located at
+            http://www.microchip.com/packaging
+ 2015-2016 Microchip Technology Inc.                                                         DS20005463C-page 19
+
+
+MCP2003B
+   Note:  For the most current package drawings, please see the Microchip Packaging Specification located at
+          http://www.microchip.com/packaging
+DS20005463C-page 20                                                            2015-2016 Microchip Technology Inc.
+
+
+                                                                                      MCP2003B
+   Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+           http://www.microchip.com/packaging
+ 2015-2016 Microchip Technology Inc.                                                        DS20005463C-page 21
+
+
+MCP2003B
+  Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+          http://www.microchip.com/packaging
+DS20005463C-page 22                                                            2015-2016 Microchip Technology Inc.
+
+
+                                                                                      MCP2003B
+   Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+           http://www.microchip.com/packaging
+ 2015-2016 Microchip Technology Inc.                                                        DS20005463C-page 23
+
+
+MCP2003B
+  Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+          http://www.microchip.com/packaging
+DS20005463C-page 24                                                            2015-2016 Microchip Technology Inc.
+
+
+                                                                               MCP2003B
+          (" ) *(++, !""#$%()-&
+    '   2% & %! % *    " ) '   %   *   $ % % " %
+           %% 133)))& &3  * 
+ 2015-2016 Microchip Technology Inc.                                                DS20005463C-page 25
+
+
+MCP2003B
+NOTES:
+DS20005463C-page 26  2015-2016 Microchip Technology Inc.
+
+
+                                                   MCP2003B
+APPENDIX A:              REVISION HISTORY
+Revision C (April 2016)
+The following is the list of modifications:
+• Updated MCP2003B Block Diagram.
+• Updated Section 1.3.1, Power-Down Mode.
+• Updated Figure 1-2.
+• Updated Table 1-1.
+• Added VBBUV_FALL, VBBUV_RISE and updated
+  IBBPD.
+Revision B (December 2015)
+The following is the list of modifications:
+• Included Features and Electrical Characteristics
+  for the SAE J2962-1.
+• Minor typographical changes.
+Revision A (November 2015)
+• Original release of this document.
+ 2015-2016 Microchip Technology Inc.                DS20005463C-page 27
+
+
+MCP2003B
+NOTES:
+DS20005463C-page 28  2015-2016 Microchip Technology Inc.
+
+
+                                                                                                             MCP2003B
+PRODUCT IDENTIFICATION SYSTEM
+To order or obtain information, e.g., on pricing or delivery, refer to the factory or the listed sales office.
+  PART NO.              X             /XX                                                Examples:
+                                                                                         a)    MCP2003B-E/MC: Extended Temperature,
+    Device       Temperature       Package
+                                                                                                               8LD 2x3 DFN package
+                    Range
+                                                                                         b)    MCP2003B-E/MF:  Extended Temperature,
+                                                                                                               8LD 3x3 DFN package
+  Device:               MCP2003B: LIN Transceiver                                        c)    MCP2003B-E/SN:  Extended Temperature,
+                        MCP2003BT: LIN Transceiver (Tape and Reel)                                             8LD SOIC package
+                                                                                         d)    MCP2003BT-H/MC: Tape and Reel,
+                                                                                                               High Temperature,
+  Temperature Range: E       = -40°C to +125°C (Extended)                                                      8LD 2x3 DFN package
+                        H    = -40°C to +150°C (High)
+                                                                                         e)    MCP2003BT-H/MF: Tape and Reel,
+                                                                                                               High Temperature,
+  Package:              MC = 8-Lead Plastic Dual Flat, No Lead Package –                                       8LD 3x3 DFN package
+                               2x3x0.9 mm Body (DFN)
+                        MF = 8-Lead Plastic Dual Flat, No Lead Package –                 f)    MCP2003BT-H/SN: Tape and Reel,
+                               3x3x0.9 mm Body (DFN)                                                           High Temperature,
+                        SN = 8-Lead Plastic Small Outline – Narrow 3.90 mm Body                                8LD SOIC package
+                               (SOIC)
+ 2015-2016 Microchip Technology Inc.                                                                           DS20005463C-page 29
+
+
+MCP2003B
+NOTES:
+DS20005463C-page 30  2015-2016 Microchip Technology Inc.
+
+
+ Note the following details of the code protection feature on Microchip devices:
+ •     Microchip products meet the specification contained in their particular Microchip Data Sheet.
+ •     Microchip believes that its family of products is one of the most secure families of its kind on the market today, when used in the
+       intended manner and under normal conditions.
+ •     There are dishonest and possibly illegal methods used to breach the code protection feature. All of these methods, to our
+       knowledge, require using the Microchip products in a manner outside the operating specifications contained in Microchip’s Data
+       Sheets. Most likely, the person doing so is engaged in theft of intellectual property.
+ •     Microchip is willing to work with the customer who is concerned about the integrity of their code.
+ •     Neither Microchip nor any other semiconductor manufacturer can guarantee the security of their code. Code protection does not
+       mean that we are guaranteeing the product as “unbreakable.”
+ Code protection is constantly evolving. We at Microchip are committed to continuously improving the code protection features of our
+ products. Attempts to break Microchip’s code protection feature may be a violation of the Digital Millennium Copyright Act. If such acts
+ allow unauthorized access to your software or other copyrighted work, you may have a right to sue for relief under that Act.
+Information contained in this publication regarding device                  Trademarks
+applications and the like is provided only for your convenience             The Microchip name and logo, the Microchip logo, AnyRate,
+and may be superseded by updates. It is your responsibility to
+                                                                            dsPIC, FlashFlex, flexPWR, Heldo, JukeBlox, KeeLoq,
+ensure that your application meets with your specifications.
+                                                                            KeeLoq logo, Kleer, LANCheck, LINK MD, MediaLB, MOST,
+MICROCHIP MAKES NO REPRESENTATIONS OR
+                                                                            MOST logo, MPLAB, OptoLyzer, PIC, PICSTART, PIC32 logo,
+WARRANTIES OF ANY KIND WHETHER EXPRESS OR
+                                                                            RightTouch, SpyNIC, SST, SST Logo, SuperFlash and UNI/O
+IMPLIED, WRITTEN OR ORAL, STATUTORY OR                                      are registered trademarks of Microchip Technology
+OTHERWISE, RELATED TO THE INFORMATION,                                      Incorporated in the U.S.A. and other countries.
+INCLUDING BUT NOT LIMITED TO ITS CONDITION,
+QUALITY, PERFORMANCE, MERCHANTABILITY OR                                    ClockWorks, The Embedded Control Solutions Company,
+FITNESS FOR PURPOSE. Microchip disclaims all liability                      ETHERSYNCH, Hyper Speed Control, HyperLight Load,
+arising from this information and its use. Use of Microchip                 IntelliMOS, mTouch, Precision Edge, and QUIET-WIRE are
+devices in life support and/or safety applications is entirely at           registered trademarks of Microchip Technology Incorporated
+the buyer’s risk, and the buyer agrees to defend, indemnify and             in the U.S.A.
+hold harmless Microchip from any and all damages, claims,                   Analog-for-the-Digital Age, Any Capacitor, AnyIn, AnyOut,
+suits, or expenses resulting from such use. No licenses are                 BodyCom, chipKIT, chipKIT logo, CodeGuard, dsPICDEM,
+conveyed, implicitly or otherwise, under any Microchip                      dsPICDEM.net, Dynamic Average Matching, DAM, ECAN,
+intellectual property rights unless otherwise stated.                       EtherGREEN, In-Circuit Serial Programming, ICSP, Inter-Chip
+                                                                            Connectivity, JitterBlocker, KleerNet, KleerNet logo, MiWi,
+                                                                            motorBench, MPASM, MPF, MPLAB Certified logo, MPLIB,
+                                                                            MPLINK, MultiTRAK, NetDetach, Omniscient Code
+                                                                            Generation, PICDEM, PICDEM.net, PICkit, PICtail,
+                                                                            PureSilicon, RightTouch logo, REAL ICE, Ripple Blocker,
+                                                                            Serial Quad I/O, SQI, SuperSwitcher, SuperSwitcher II, Total
+                                                                            Endurance, TSHARC, USBCheck, VariSense, ViewSpan,
+                                                                            WiperLock, Wireless DNA, and ZENA are trademarks of
+                                                                            Microchip Technology Incorporated in the U.S.A. and other
+                                                                            countries.
+                                                                            SQTP is a service mark of Microchip Technology Incorporated
+                                                                            in the U.S.A.
+ Microchip received ISO/TS-16949:2009 certification for its worldwide
+ headquarters, design and wafer fabrication facilities in Chandler and      Silicon Storage Technology is a registered trademark of
+ Tempe, Arizona; Gresham, Oregon and design centers in California           Microchip Technology Inc. in other countries.
+ and India. The Company’s quality system processes and procedures
+ are for its PIC® MCUs and dsPIC® DSCs, KEELOQ® code hopping                GestIC is a registered trademarks of Microchip Technology
+ devices, Serial EEPROMs, microperipherals, nonvolatile memory and          Germany II GmbH & Co. KG, a subsidiary of Microchip
+ analog products. In addition, Microchip’s quality system for the design
+ and manufacture of development systems is ISO 9001:2000 certified.         Technology Inc., in other countries.
+                                                                            All other trademarks mentioned herein are property of their
+                                                                            respective companies.
+  QUALITY MANAGEMENT SYSTEM                                                 © 2015-2016, Microchip Technology Incorporated, Printed in
+                  CERTIFIED BY DNV                                          the U.S.A., All Rights Reserved.
+                                                                            ISBN: 978-1-5224-0505-4
+            == ISO/TS 16949 ==
+ 2015-2016 Microchip Technology Inc.                                                                              DS20005463C-page 31
+
+
+                          Worldwide Sales and Service
+AMERICAS                  ASIA/PACIFIC               ASIA/PACIFIC                   EUROPE
+Corporate Office          Asia Pacific Office        China - Xiamen                 Austria - Wels
+2355 West Chandler Blvd.  Suites 3707-14, 37th Floor Tel: 86-592-2388138            Tel: 43-7242-2244-39
+Chandler, AZ 85224-6199   Tower 6, The Gateway       Fax: 86-592-2388130            Fax: 43-7242-2244-393
+Tel: 480-792-7200         Harbour City, Kowloon      China - Zhuhai                 Denmark - Copenhagen
+Fax: 480-792-7277         Hong Kong                  Tel: 86-756-3210040            Tel: 45-4450-2828
+Technical Support:        Tel: 852-2943-5100         Fax: 86-756-3210049            Fax: 45-4485-2829
+http://www.microchip.com/ Fax: 852-2401-3431         India - Bangalore              France - Paris
+support
+                          Australia - Sydney         Tel: 91-80-3090-4444           Tel: 33-1-69-53-63-20
+Web Address:
+                          Tel: 61-2-9868-6733        Fax: 91-80-3090-4123           Fax: 33-1-69-30-90-79
+www.microchip.com
+                          Fax: 61-2-9868-6755        India - New Delhi              Germany - Dusseldorf
+Atlanta                                              Tel: 91-11-4160-8631           Tel: 49-2129-3766400
+                          China - Beijing
+Duluth, GA
+                          Tel: 86-10-8569-7000       Fax: 91-11-4160-8632           Germany - Karlsruhe
+Tel: 678-957-9614
+                          Fax: 86-10-8528-2104       India - Pune                   Tel: 49-721-625370
+Fax: 678-957-1455
+                          China - Chengdu            Tel: 91-20-3019-1500           Germany - Munich
+Austin, TX                Tel: 86-28-8665-5511
+Tel: 512-257-3370                                    Japan - Osaka                  Tel: 49-89-627-144-0
+                          Fax: 86-28-8665-7889       Tel: 81-6-6152-7160            Fax: 49-89-627-144-44
+Boston                                               Fax: 81-6-6152-9310
+                          China - Chongqing                                         Italy - Milan
+Westborough, MA
+                          Tel: 86-23-8980-9588       Japan - Tokyo                  Tel: 39-0331-742611
+Tel: 774-760-0087
+                          Fax: 86-23-8980-9500       Tel: 81-3-6880- 3770           Fax: 39-0331-466781
+Fax: 774-760-0088
+                          China - Dongguan           Fax: 81-3-6880-3771            Italy - Venice
+Chicago                   Tel: 86-769-8702-9880      Korea - Daegu                  Tel: 39-049-7625286
+Itasca, IL
+Tel: 630-285-0071         China - Hangzhou           Tel: 82-53-744-4301            Netherlands - Drunen
+Fax: 630-285-0075         Tel: 86-571-8792-8115      Fax: 82-53-744-4302            Tel: 31-416-690399
+                          Fax: 86-571-8792-8116      Korea - Seoul                  Fax: 31-416-690340
+Cleveland
+                          China - Hong Kong SAR      Tel: 82-2-554-7200             Poland - Warsaw
+Independence, OH
+Tel: 216-447-0464         Tel: 852-2943-5100         Fax: 82-2-558-5932 or          Tel: 48-22-3325737
+Fax: 216-447-0643         Fax: 852-2401-3431         82-2-558-5934
+                                                                                    Spain - Madrid
+                          China - Nanjing            Malaysia - Kuala Lumpur        Tel: 34-91-708-08-90
+Dallas
+                          Tel: 86-25-8473-2460       Tel: 60-3-6201-9857            Fax: 34-91-708-08-91
+Addison, TX
+Tel: 972-818-7423         Fax: 86-25-8473-2470       Fax: 60-3-6201-9859
+                                                                                    Sweden - Stockholm
+Fax: 972-818-2924         China - Qingdao            Malaysia - Penang              Tel: 46-8-5090-4654
+                          Tel: 86-532-8502-7355      Tel: 60-4-227-8870
+Detroit                                                                             UK - Wokingham
+                          Fax: 86-532-8502-7205      Fax: 60-4-227-4068
+Novi, MI                                                                            Tel: 44-118-921-5800
+Tel: 248-848-4000         China - Shanghai           Philippines - Manila           Fax: 44-118-921-5820
+                          Tel: 86-21-5407-5533       Tel: 63-2-634-9065
+Houston, TX
+Tel: 281-894-5983         Fax: 86-21-5407-5066       Fax: 63-2-634-9069
+                          China - Shenyang           Singapore
+Indianapolis
+                          Tel: 86-24-2334-2829       Tel: 65-6334-8870
+Noblesville, IN
+Tel: 317-773-8323         Fax: 86-24-2334-2393       Fax: 65-6334-8850
+Fax: 317-773-5453         China - Shenzhen           Taiwan - Hsin Chu
+                          Tel: 86-755-8864-2200      Tel: 886-3-5778-366
+Los Angeles
+                          Fax: 86-755-8203-1760      Fax: 886-3-5770-955
+Mission Viejo, CA
+Tel: 949-462-9523         China - Wuhan              Taiwan - Kaohsiung
+Fax: 949-462-9608         Tel: 86-27-5980-5300       Tel: 886-7-213-7828
+                          Fax: 86-27-5980-5118       Taiwan - Taipei
+New York, NY
+Tel: 631-435-6000         China - Xian               Tel: 886-2-2508-8600
+                          Tel: 86-29-8833-7252       Fax: 886-2-2508-0102
+San Jose, CA
+Tel: 408-735-9110         Fax: 86-29-8833-7256       Thailand - Bangkok
+                                                     Tel: 66-2-694-1351
+Canada - Toronto
+Tel: 905-673-0699                                    Fax: 66-2-694-1350
+Fax: 905-673-6509
+                                                                                                      07/14/15
+DS20005463C-page 32                                                         2015-2016 Microchip Technology Inc.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ MCP2003BT-E/MC

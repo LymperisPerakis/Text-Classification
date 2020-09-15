@@ -1,0 +1,2078 @@
+Freescale Semiconductor                                                                             Document Number: MC33781
+Advance Information                                                                                                Rev. 5.0, 11/2009
+Quad DSI 2.02 Master with
+Differential Drive and                                                                               33781
+Frequency Spreading
+    The 33781 is a master device for four differential DSI 2.02 buses.
+It contains the logic to interface the buses to a standard serial
+                                                                                        DIFFERENTIAL DSI 2.02 MASTER
+peripheral interface (SPI) port and the analog circuitry to drive data
+and power over the bus, as well as receive data from the remote slave
+devices.
+    The differential mode of the 33781 generates lower
+electromagnetic interference (EMI) in situations where data rates and
+wiring make this a problem. Frequency spreading further reduces
+interference by spreading the energy across many frequencies,
+reducing the energy in any single frequency.
+                                                                                              EK SUFFIX (PB-FREE)
+Features                                                                                          98ASA10556D
+                                                                                                32-PIN SOICW EP
+• Four independent differential DSI (DBUS) channels
+• Dual SPI interface
+• Enhanced bus fault performance                                                            ORDERING INFORMATION
+• Automatic message cyclical redundancy checking (CRC)                                              Temperature
+    generation and checking for each channel                                         Device                                Package
+                                                                                                     Range (TA)
+• Enhanced register set with addressable buffer allows queuing of 4
+    independent slave commands at one time for each channel                      MCZ33781EK/R2      -40°C to 90°C       32 SOICW EP
+• 8- to 16-Bit messages with 0- to 8-Bit CRC
+• Independent frequency spreading for each channel
+• Pseudo bus switch feature on channel 0
+• Pb-free packaging designated by suffix code EK
+                                     +5.0V
+                                                                            +25V
+                                                           33781
+                         VCC                         VCC            VSUP1        1.0μF
+                                                                                                             DBUS SLAVE
+                       SCLK                          SCLK0            DPH
+                          CS                         CS0               DPL
+                                                                                                             DBUS SLAVE
+        MCU1            MOSI                         MOSI0            D0H
+                        MISO                         MISO0             D0L
+                                                                                                             DBUS SLAVE
+                         RST                         RST              D1H
+                         CLK                         CLK               D1L
+                                                                                                             DBUS SLAVE
+                GND                                  VDD              D2H
+                                      0.1μF
+                                                     VSS_IDDQ          D2L
+                                                                                                             DBUS SLAVE
+                      SCLK1                          SCLK1            D3H
+                       MISO1                         MISO1             D3L
+        MCU2
+                         CS1                         CS1
+                                                     AGND    GND      VSS                     2.2nF capacitors from DOH, D0L,
+                GND                                                                           D1H, D1L, D2H, D2L, D3H and D3L
+                                                                                              to circuit ground are required for
+                                                                                              proper operation
+                                            Figure 1. 33781 Simplified Application Diagram
+* This document contains certain information on a new product.
+Specifications and information herein are subject to change without notice.
+© Freescale Semiconductor, Inc., 2007-2009. All rights reserved.
+
+
+INTERNAL BLOCK DIAGRAM
+                                      INTERNAL BLOCK DIAGRAM
+                           VCC                                              VSUP1      VSUP2
+                                                                                    Pseudo Bus Switch         DPH
+            VDD          2.5 V Regulator
+                                                                           DSIF
+                                                                           DSIS                               D0H
+                                                                                        DBUS
+                                                                                    Driver/Receiver
+                                                                                                              D0L
+             CLK                                                           DSIR
+                                                                                    Pseudo Bus Switch         DPL
+                                                                           DSIF
+                                                         Protocol Engine
+                                                                           DSIS                               D1H
+                                   Spreader                                             DBUS
+                                                                                    Driver/Receiver           D1L
+        VSS_IDDQ                                                           DSIR
+                                                                           DSIF
+           AGND
+                                                                           DSIS                               D2H
+                                                                                        DBUS
+           TESTIN                                                                   Driver/Receiver           D2L
+         TESTOUT
+                                                                           DSIR
+                                                                           DSIF
+                                                                           DSIS                               D3H
+          SCLK0                                                                         DBUS
+           MISO0                     SPI0,                                          Driver/Receiver           D3L
+                                 Registers and                             DSIR
+           MOSI0
+                                 State Machine
+             CS0                                  TLIM
+             RST
+                                                                                                              GND
+          SCLK1                                                                                               GND
+           MISO1                     SPI1,                                                                    GND
+                                 Registers and                                                                VSS
+             CS1                 State Machine
+                                       Figure 2. 33781 Internal Block Diagram
+33781
+                                                                                       Analog Integrated Circuit Device Data
+2                                                                                                  Freescale Semiconductor
+
+
+                                                                                                                      PIN CONNECTIONS
+                                                   PIN CONNECTIONS
+                                         RST         1                        32        GND
+                                       SCLK0         2                        31        DPL
+                                       MOSI0         3                        30        D0L
+                                       MISO0         4                        29        DPH
+                                       SCLK1         5                        28        D0H
+                                       MISO1         6                        27        VSUP1
+                                         CS0         7                        26        D1H
+                                       AGND          8                        25        D1L
+                                         CS1         9                        24        GND
+                                         VSS         10                       23        D2L
+                                         VDD         11                       22        D2H
+                                         VPP         12                       21        VSUP2
+                                         VCC         13                       20        D3H
+                                         CLK         14                       19        D3L
+                                      TESTIN         15                       18        GND
+                                    TESTOUT          16                       17        VSS_IDDQ
+                                              Figure 3. 33781 Pin Connections
+Table 1. 33781 Pin Definitions
+  A functional description of each Pin can be found in the Functional Pin Descriptions section beginning on page 15.
+    Pin       Pin Name     Pin Function      Formal Name                                        Definition
+      1          RST           Reset            IC Reset        A low level on this pin returns all registers to a known state as indicated
+                                                                in the sections entitled SPI0 Register and Bit Descriptions and SPI1
+                                                                Communications.
+      2         SCLK0           Input    SPI0 Serial Data Clock Clocks data in from and out to SPI0. MISO0 data changes on the negative
+                                                                transition of SCLK0. MOSI0 is sampled on the positive edge of SCLK0.
+      3         MOSI0           Input    SPI0 Master Out Slave SPI data into SPI0. This data input is sampled on the positive edge of
+                                                    In          SCLK0
+      4         MISO0          Output     SPI0 Master In Slave  SPI0 data sent to the MCU by this device. This data output changes on
+                                                   Out          the negative edge of SCLK0. When CS0 is high, this Pin is high-
+                                                                impedance.
+      5         SCLK1           Input    SPI1 Serial Data Clock Clocks data out from SPI1. MISO1 data changes on the negative
+                                                                transition of SCLK1.
+      6         MISO1          Output     SPI1 Master In Slave  SPI1 data sent to the MCU by this device. This data output changes on
+                                                   Out          the negative edge of SCLK1. When CS1 is high, this Pin is high-
+                                                                impedance.
+      7          CS0            Input      SPI0 Chip Select     When this signal is high, SPI signals on SPI0 are ignored. Asserting this
+                                                                pin low starts an SPI0 transaction. The SPI0 transaction is signaled as
+                                                                completed when this signal returns high.
+      8         AGND          Ground        Analog Ground       Ground for the analog circuits. This pin is not connected internally to the
+                                                                other grounds on the chip. It should be connected to a quiet ground on
+                                                                the board.
+      9          CS1            Input      SPI1 Chip Select     When this signal is high, SPI signals on SPI1 are ignored. Asserting this
+                                                                pin low starts an SPI1 transaction. The SPI1 transaction is signaled as
+                                                                completed when this signal returns high.
+     10          VSS          Ground         Digital Ground     Digital ground connected internally to the other on-chip grounds. This
+                                                                ground is connected to circuits that will consume current during IDDQ
+                                                                testing.
+     11          VDD           Power        Digital Voltage     Output of the Internal 2.5V regulator for the digital circuits. No external
+                                                                current draw is allowed from this pin.
+                                                                                                                                        33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                                                     3
+
+
+PIN CONNECTIONS
+Table 1. 33781 Pin Definitions
+  A functional description of each Pin can be found in the Functional Pin Descriptions section beginning on page 15.
+    Pin       Pin Name     Pin Function      Formal Name                                         Definition
+     12          VPP           Input           Test Mode       A high-voltage on this pin puts the device in test mode for IC
+                                                               manufacturing test. It must be grounded in the application.
+     13          VCC           Input          Logic Supply     Regulated 5V input
+     14          CLK           Input           Clock Input     4.0MHz clock input
+     15         TESTIN          Test            Test Input     Input pin for device test. This pin must be tied to ground in the application.
+     16       TESTOUT           Test          Test Output      Output pin for device test. This pin is left floating in the application.
+     17       VSS_IDDQ        Ground       Digital Ground and  Ground reference for the digital circuits that should not consume current
+                                               IDDQ Test       during IDDQ testing. This ground is not connected to the other grounds
+                                                               internally.
+     18          GND          Ground         Power Ground      Bus power return
+     19          D3L       Output Driver    Low Side Bus 3     Bus 3 low side
+     20          D3H       Output Driver    High Side Bus 3    Bus 3 high side
+     21         VSUP2          Power       Positive Supply for This supply input is used to provide the positive level output of buses 2
+                                              Bus Outputs      and 3.
+     22          D2H       Output Driver    High Side Bus 2    Bus 2 high side
+     23          D2L       Output Driver    Low Side Bus 2     Bus 2 low side
+     24          GND          Ground         Power Ground      Bus power return
+     25          D1L       Output Driver    Low Side Bus 1     Bus 1 low side
+     26          D1H       Output Driver    High Side Bus 1    Bus 1 high side
+     27         VSUP1          Power       Positive Supply for This supply input is used to provide the positive level output of buses 0
+                                              Bus Outputs      and 1.
+     28          D0H       Output Driver    High Side Bus 0    Bus 0 high side
+     29          DPH       Output Driver High Side Pseudo Bus Pseudo Bus high side
+     30          D0L       Output Driver    Low Side Bus 0     Bus 0 low side
+     31          DPL       Output Driver Low Side Pseudo Bus Pseudo Bus low side
+     32          GND          Ground         Power Ground      Bus power return
+33781
+                                                                                                Analog Integrated Circuit Device Data
+4                                                                                                              Freescale Semiconductor
+
+
+                                                                                                         ELECTRICAL CHARACTERISTICS
+                                                                                                                        MAXIMUM RATINGS
+                                             ELECTRICAL CHARACTERISTICS
+                                                             MAXIMUM RATINGS
+Table 2. Maximum Ratings
+  All voltages are with respect to GND unless otherwise noted. Exceeding these ratings may cause a malfunction or permanent
+damage to the device.
+                                    Ratings                                            Symbol                  Value               Unit
+ELECTRICAL RATINGS
+ Supply Voltages                                                                                                                     V
+    VSUPn                                                                            VSUP1 and             -0.3 to 26.5
+                                                                                        VSUP2
+    Load Dump VSUPn (300ms maximum - either pin)                                        VSUPLD                   40
+    VCC                                                                                   VCC               -0.3 to 7.0
+    VDD                                                                                   VDD               -0.3 to 3.1
+    VPP                                                                                   VPP              -0.3 to 10.0
+ Maximum Voltage on Logic Input/Output Pins                                                 –           -0.3 to VCC + 0.3            V
+ Maximum Voltage on DBUS Pins                                                           VDBUS          -0.3 to VSUPn + 0.3           V
+ Maximum DBUS Pin Current                                                                IDBUS                  400                mA
+ Maximum Logic Pin Current                                                              ILOGIC                   20                mA
+ ESD  Voltage(1)                                                                                                                     V
+    Human Body Model (HBM)                                                               VESD                 ±2000
+    Machine Model (MM)                                                                                         ±200
+    Charge Device Model (CDM)
+       Corner pins                                                                                             ±750
+       All other pins
+                                                                                                               ±500
+THERMAL RATINGS
+ Storage Temperature                                                                     TSTG               -55 to 150              °C
+ Operating Ambient Temperature                                                             TA                -40 to 90              °C
+ Operating Junction Temperature                                                            TJ               -40 to 150              °C
+ Thermal Shutdown (Bus Drivers and Pseudo Bus Switch)                                     TSD              155 to 190               °C
+ Resistance, Junction-to-Ambient                                                          RθJA                   71               °C/W
+ Resistance, Junction-to-Board                                                            RθJB                    6               °C/W
+ Soldering Reflow Temperature                                                          TSOLDER                  260                 °C
+ Peak Package Reflow Temperature During Reflow ,     (2) (3)
+                                                                                        TPPRT                  Note 3               °C
+Notes
+  1. ESD1 testing is performed in accordance with the Human Body Model (HBM) (CZAP = 100pF, RZAP = 1500Ω); ESD2 testing is performed
+       in accordance with the Machine Model (MM) (CZAP = 200pF, RZAP = 0Ω); and Charge Body Model (CBM).
+  2.   Pin soldering temperature limit is for 10 seconds maximum duration. Not designed for immersion soldering. Exceeding these limits may
+       cause malfunction or permanent damage to the device.
+  3.   Freescale’s Package Reflow capability meets Pb-free requirements for JEDEC standard J-STD-020C. For Peak Package Reflow
+       Temperature and Moisture Sensitivity Levels (MSL), Go to www.freescale.com, search by part number [e.g. remove prefixes/suffixes
+       and enter the core ID to view all orderable parts. (i.e. MC33xxxD enter 33xxx), and review parametrics.
+                                                                                                                                        33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                                                    5
+
+
+ELECTRICAL CHARACTERISTICS
+STATIC ELECTRICAL CHARACTERISTICS
+                                           STATIC ELECTRICAL CHARACTERISTICS
+Table 3. Static Electrical Characteristics
+    Characteristics noted under conditions 4.75V ≤ VCC ≤ 5.25V, 9.0V ≤ VSUPn ≤ 25V,-40°C ≤ TA ≤ 90°C, unless otherwise
+noted. Voltages relative to GND, unless otherwise noted. Typical values noted reflect the approximate mean values of the
+parameter at TA = 25°C under nominal conditions, unless otherwise noted.
+                              Characteristic                          Symbol         Min         Typ        Max         Unit
+POWER INPUT REQUIREMENTS (VSUPn, VCC)
+   IVSUPT Supply Current (Test Mode, CLK = 4.0MHz)                    IVSUPT                                             mA
+     High Z                                                                            –           –         16
+     Signal, Idle (Ibus = 0)                                                           –           –         33
+     Signal, Idle (Ibus = 10mA on all channels, a total of 40mA)                       –           –         61
+  IVCC Supply Current (CLK = 4.0MHz, RST = high)                        IVCC                                             mA
+     Signal, Idle (Ibus = 0)                                                           –           –        10.0
+     Signal, Idle (Ibus = 10mA on all channels, a total of 40mA)                       –           –        12.0
+  VSUPn Low Detect Threshold                                         VVSUPnLO         9.1          –         9.9         V
+      Vcc > 4.75V
+  VSUPn Low Mask Time                                                  tMASK           20          –         25          μs
+      Vcc > 4.75V
+MICROCONTROLLER INTERFACE (RST, CSn, MOSI0, MISOn, SCLKn, and CLK)
+  I/O Logic Levels (RST, CSn, MOSI0, SCLKn, and CLK)                                                                     V
+     Input High Voltage                                                  VIH          2.0          -      VCC +0.3
+     Input Low Voltage                                                   VIL         -0.3          -         1.0
+     Input Hysteresis(4)                                               VHYST          0.1          -         0.5
+  Input Capacitance(4)                                                    CI                                             pF
+     CSn, MOSI0, and SCLKn                                                             –           –         10
+     RST and CLK                                                                       –           –         20
+  Output Low Voltage                                                    VOL                                              V
+     MISOn Pin = 0.3mA                                                                 0           –         0.8
+  Output High Voltage                                                   VOH                                              V
+     MISOn Pin = -0.3mA                                                            VCC - 0.8       –        VCC
+  Output Leakage Current                                               IMISO                                             μA
+     MISOn Pin = 0V                                                                   -10          –         10
+     MISOn Pin = VCC                                                                  -10          –         10
+  SCLKn, CSn Pull-up Current                                             IPU                                             μA
+     VOUT = VCC - 2.0 V                                                               -50        -30         -10
+  RST Pull-down Current                                               IRSTPD                                             μA
+     VOUT = 1.0V                                                                      5.0          -         13
+  CLK, MOSI0 Pull-down Current                                           IPD                                             μA
+     VOUT = 1.0V                                                                      5.0         10         13
+Notes
+    4. Not measured in production.
+33781
+                                                                                          Analog Integrated Circuit Device Data
+6                                                                                                     Freescale Semiconductor
+
+
+                                                                                                   ELECTRICAL CHARACTERISTICS
+                                                                                            STATIC ELECTRICAL CHARACTERISTICS
+Table 3. Static Electrical Characteristics (continued)
+  Characteristics noted under conditions 4.75V ≤ VCC ≤ 5.25V, 9.0V ≤ VSUPn ≤ 25V,-40°C ≤ TA ≤ 90°C, unless otherwise
+noted. Voltages relative to GND, unless otherwise noted. Typical values noted reflect the approximate mean values of the
+parameter at TA = 25°C under nominal conditions, unless otherwise noted.
+                                Characteristic                            Symbol          Min         Typ           Max         Unit
+BUS TRANSMITTER (DnH, DnL)
+ Output Bus Idle Voltage (Drop)                                       VDnD(Drop)(7)(8)                                           V
+                                   (6)                                                     –            –           1.6
+    InH = -200mA, InL = 200mA
+ Output Signal High Voltage (Differential)                                        (7)
+                                                                      VDnD(HIGH)                                                 V
+                                                     (6)                                4.175          4.5         4.825
+    -12.5mA ≤ InH ≤ 1.0mA, -1.0mA ≤ InL ≤ 12.5mA
+ Output Signal Low Voltage (Differential)                              VDnD(LOW)(7)                                              V
+                                                   (6)                                  1.175          1.5         1.825
+    -12.5mA ≤ InH ≤ 1.0mA, -1.0mA ≤ InL ≤ 12.5mA
+ Vmid, (DnH + DnL)/2 (Voltage Halfway Between Bus High Side and           VMID(8)      VSUPn/      VSUPn/2        VSUPn /        V
+ Bus Low Side                                                                           2 - 0.8                   2 +0.8
+ VCM Peak to Peak (Maximum Vmid-Minimum Vmid)                              VCMP            0            –            30         mV
+ For Vmid (Idle), Vmid (Signal_H), Vmid (Signal_L)(5)
+ Bus Driver Vmid Peak to Peak, (DnH+DnL)/2(5)                          VMIDPP(IDLE)        –            –           300         mV
+ For Signal to Idle, Idle, Idle to Signal,
+ VmidPP(Idle)=Vmid(Max)- Vmid (Min)
+ Bus Driver Vmid Peak to Peak (Dnh+DnL)/2(5)                          VMIDPP(SIGNAL)       –            –            80         mV
+ For Signal_H to Signal_L, Signal_L, Signal_L to Signal_H, Signal_H
+ VmidPP(Signal)=Vmid(Max)-Vmid(Min)
+ Output High Side (DnH) Driver Current Limit                            ICL(HIGH)                                               mA
+    Fault Condition: DnH = 0V                                                            -600           –          -200
+    Normal Operation                                                                     -400           –          -200
+    Fault Condition: DnH = VSUPn                                                          150           –           350
+ Output Low Side (DnL) Driver Current Limit                              ICL(LOW)                                               mA
+    Fault Condition: DnL = 0V                                                            -350           –          -150
+    Fault Condition: DnL = VSUPn                                                          200           –           400
+ Signal mode Over-current Shutdown                                         ISSD            20                        60         mA
+    l ISSD l DnH, DnL
+ Disabled High Side (DnH) Bus Leakage (DnL open)                        ILK(HIGH)                                               mA
+    DnH = 0V                                                                              -1.0          –           1.0
+    DnH = VSUPn                                                                           -1.0          –           1.0
+                                                    (9)
+ Disabled Low Side (DnL) Bus Leakage (DnH open)                          ILK(LOW)                                               mA
+    DnL = 0V                                                                              -1.0          –           1.0
+    DnL = VSUPn                                                                           -1.0          –           1.0
+Notes
+   5. Not measured in production.
+   6. InH=bus current at DnH, InL=bus current at DnL
+   7. VDnD=VDnH-VDnL
+   8.   Max VDnD = VSUPn - 2 * VMID_OFFSET - VDnD(Drop), VMID_OFFSET = |VMID - VSUPn / 2|
+   9.   Worst Case Disabled Low Side Bus Leakage for DnL occurs with DnL = VSUP and DnH = 0V. In this configuration, the DnL leakage
+        current can exceed 1mA. This is not measured in production.
+                                                                                                                                  33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                                              7
+
+
+ELECTRICAL CHARACTERISTICS
+STATIC ELECTRICAL CHARACTERISTICS
+Table 3. Static Electrical Characteristics (continued)
+   Characteristics noted under conditions 4.75V ≤ VCC ≤ 5.25V, 9.0V ≤ VSUPn ≤ 25V,-40°C ≤ TA ≤ 90°C, unless otherwise
+noted. Voltages relative to GND, unless otherwise noted. Typical values noted reflect the approximate mean values of the
+parameter at TA = 25°C under nominal conditions, unless otherwise noted.
+                             Characteristic                          Symbol          Min         Typ        Max         Unit
+BUS TRANSMITTER (DnH, DnL) (CONTINUED)
+  High Side Pseudo Bus Switch Resistance                               RSWH            –         8.0        16.0         Ω
+     ISWH=160mA
+  Low Side Pseudo Bus Switch Resistance                                RSWL            –         8.0        16.0         Ω
+     ISWL=160mA
+  Pseudo Bus Switch Matching                                        RPSMATCH           –           –         1.0         Ω
+  High Side Pseudo Bus Switch Leakage Current                         IDPHLK          -20          –         20          μA
+      DPH = Open: CH0 drivers in Idle, DPH = 0V or
+                  CH0 drivers in Signal_H, DPH = 25V
+  Low Side Pseudo Bus Switch Leakage Current                          IDPLLK          -20          –         20          μA
+      DPL = Open: CH0 drivers in Idle, DPL = 25V,or
+                  CH0 drivers in Signal_H, DPL = 0V
+BUS RECEIVER (DnH, DnL)
+  Comparator Trip Point for High Side                               COMPHIGH          5.0        6.0         7.0         mA
+  Comparator Trip Point for Low Side                                COMPLOW           5.0        6.0         7.0         mA
+  Comparator Trip Point for Adder                                   COMPADD           6.0         12         18          mA
+33781
+                                                                                          Analog Integrated Circuit Device Data
+8                                                                                                     Freescale Semiconductor
+
+
+                                                                                                 ELECTRICAL CHARACTERISTICS
+                                                                                         DYNAMIC ELECTRICAL CHARACTERISTICS
+                                         DYNAMIC ELECTRICAL CHARACTERISTICS
+Table 4. Dynamic Electrical Characteristics
+  Characteristics noted under conditions 4.75V ≤ VCC ≤ 5.25V, 9.0V ≤ VSUPn ≤ 25V,-40°C ≤ TA ≤ 90°C, unless otherwise
+noted. Voltages relative to GND, unless otherwise noted. Typical values noted reflect the approximate mean values of the
+parameter at TA = 25°C under nominal conditions, unless otherwise noted.
+                        Characteristic                          Symbol              Min          Typ         Max         Unit
+CLOCK
+ CLK Periods (System requirement)(10)                                                                                     ns
+    Time High                                                     tCLKHI             75           –            –
+    Time Low                                                     tCLKLO              75           –            –
+    Period                                                      tCLKPER             245          250         255
+ CLK Transition (System requirement)(10)                                                                                  ns
+    Time for Low-to-High Transition of the CLK Input Signal      tCLKLH               –           –          100
+    Time for High-to-Low Transition of the CLK Input Signal      tCLKHL               –           –          100
+ Reset Low Time                                                  tRSTLO             100           –            –          ns
+SPI INTERFACE TIMING
+ SPI Clock Cycle Time                                              tCYC             100           –            –          ns
+ SPI Clock High Time                                                 tHI             40           –            –          ns
+ SPI Clock Low Time                                                 tLO              40           –            –          ns
+ SPI CSn Lead  Time(11)                                           tLEAD              50           –            –          ns
+                   (11)
+ SPI CSn Lag Time                                                  tLAG              50           –            –          ns
+ SPI CS0 Time Between    Bursts(10)                              tCS0HI              80           –            –          ns
+ SPI CS1 Time Between    Bursts(10)                              tCS1HI             300           –            –          ns
+ Data Setup Time                                                    tSU                                                   ns
+    MOSI0 Valid Before SCLK0 Rising Edge(11)                                         10           –            –
+ Data Hold Time                                                                                                           ns
+    MOSI0 Valid After SCLK0 Rising Edge(11),(10)                     tH              10           –            –
+ Data Valid Time                                                     tV                                                   ns
+                                                   (12)                               –           –           25
+    SCLKn Falling Edge to MISOn Valid, C = 50pF
+ Output Disable Time                                                tDIS                                                  ns
+    CSn Rise to MISOn Hi-Z                                                            –           –           50
+ Rise Time (30% VCC to 70% VCC)(10)                                  tR                                                   ns
+    SCLKn, MOSI0                                                                      –           –           10
+ Fall Time (70% VCC to 30% VCC)(10)                                   tF                                                  ns
+    SCLKn, MOSI0                                                                      –           –           10
+Notes
+ 10. Not measured in production.
+ 11. SPI signal timing from the production test equipment is programmed to ensure compliance.
+ 12. Conditions are verified indirectly during test.
+                                                                                                                         33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                                       9
+
+
+ELECTRICAL CHARACTERISTICS
+DYNAMIC ELECTRICAL CHARACTERISTICS
+Table 4. Dynamic Electrical Characteristics (continued)
+   Characteristics noted under conditions 4.75V ≤ VCC ≤ 5.25V, 9.0V ≤ VSUPn ≤ 25V,-40°C ≤ TA ≤ 90°C, unless otherwise
+noted. Voltages relative to GND, unless otherwise noted. Typical values noted reflect the approximate mean values of the
+parameter at TA = 25°C under nominal conditions, unless otherwise noted.
+                         Characteristic                          Symbol              Min            Typ             Max         Unit
+BUS TRANSMITTER
+ Idle-to-Signal and Signal-to-Idle Slew Rate(13)               tSLEW(IDLE)            3.0            6.0            8.0         V/μs
+ Signal High-to-Low and Signal Low-to-High Slew              tSLEW(SIGNAL)            3.0            6.0            8.0         V/μs
+ Rate(13),(14) (See Data Valid DSIS to DnD Timing)
+ Communication Data Rate Capability(14) (Ensured by               DRATE              77.1             –             200         kbps
+ Transmitter Data
+ Valid and Receiver Delay Measurements)
+ Data Rate(before frequency spreading)
+ Signal Bit Time (1 / DRATE)(14)                                    tBIT              5.0             –              –           μs
+ The Max value depends on the settings in the FSEL bits
+ DBUS Start Delay, CS0 Rising Edge to DBUS(14)                                                                                   μs
+     note: DLY is the inter-message delay selected in the     tDBUSSTART2  2/3tBIT + (DLY-2) * tBIT   –     5/3tBIT + (DLY-2) *
+     DnCTRL register                                                                                                tBIT
+ Data Valid(13)                                                                                                                  μs
+     DSIF = 0.5 * VCC to DnD Fall = 5.5 V (9V < VSUPn < 40V)      tDVLD1               –              –             5.3
+     DSIS = 0.5 * VCC to DnD Fall = 2.8V (9V < VSUPn < 40V)       tDVLD2               –              –             1.0
+     DSIS = 0.5 * VCC to DnD Rise = 3.2V (9V < VSUPn < 40V)       tDVLD3               –              –             1.0
+     DSIF = 0.5 * VCC to DnD Rise = 6.5 V (9V < VSUPn < 40V)      tDVLD4               –              –             1.0
+ Signal mode Over-current Shutdown Delay(14)                        tOC               3.0            5.0            7.0          μs
+ Signal Low Time for Logic Zero
+     33.3% Duty Cycle                                              t0LO           0.6 * tBIT        2/3 *       0.73 * tBIT      μs
+     (2/3*tBIT) + 10% for threshold delta                                                            tBIT
+ Signal Low Time for Logic One
+     66.7% Duty Cycle                                              t1LO           0.3 * tBIT        1/3 *       0.37 * tBIT      μs
+     (1/3*tBIT) + 10% for threshold delta                                                            tBIT
+Notes
+  13. C = 2.8nF from DnH to DnL and 2.2nF from DnH and DnL to GND, capacitor tolerance = ±10%.
+  14. Not measured in production.
+33781
+                                                                                                Analog Integrated Circuit Device Data
+10                                                                                                          Freescale Semiconductor
+
+
+                                                                                              ELECTRICAL CHARACTERISTICS
+                                                                                    DYNAMIC ELECTRICAL CHARACTERISTICS
+Table 4. Dynamic Electrical Characteristics (continued)
+  Characteristics noted under conditions 4.75V ≤ VCC ≤ 5.25V, 9.0V ≤ VSUPn ≤ 25V,-40°C ≤ TA ≤ 90°C, unless otherwise
+noted. Voltages relative to GND, unless otherwise noted. Typical values noted reflect the approximate mean values of the
+parameter at TA = 25°C under nominal conditions, unless otherwise noted.
+                      Characteristic                       Symbol              Min            Typ         Max            Unit
+BUS RECEIVER
+ Receiver Delay Time (IRSP = 0mA / 11mA step)(15)                                                                         ns
+    IRSP = -6.0mA to DSIR = 0.5 * VCC                         tDRH              –              –           500
+    IRSP = -6.0mA to DSIR = 0.5 * VCC                         tDRL              –              –           500
+ Common Mode Current Noise Rejection (2.5ms max.)           ICMNR              -50             –          +50            mA
+SPREAD SPECTRUM
+ Base Frequency Range                                         fCEN          77.1 - 2%          –        200 + 2%         kHz
+PSEUDO BUS
+ Pseudo Bus On Delay Time                                    tPBD1              –              5            10            μs
+ Pseudo Bus Off Delay Time                                   tPBD2              –              5            10            μs
+Notes
+ 15. Not measured in production.
+                                                                                                                         33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                                     11
+
+
+TIMING DIAGRAMS
+DYNAMIC ELECTRICAL CHARACTERISTICS
+                                               TIMING DIAGRAMS
+                      t BIT          t BIT                t BIT                          t BIT
+                                    Logic 1             Logic 0
+        5.0V
+ DSIS
+          0V
+        5.0V
+ DSIF
+          0V
+                                                                                                          tDVLD4
+                   t DVLD1
+                                                                                     t SLEW(FRAME)
+ DnD VSUPn
+        6.5V
+                                                   t DVLD3                    t SLEW(SIGNAL)
+        5.5V
+                                        t DVLD2
+        4.5V
+        3.2V
+       2.8V
+       1.5V
+                            t1LO                                                     t0LO
+        IOUT
+      6.0mA
+        0mA
+                               tDRH                             tDRL
+        5.0V
+ DSIR
+          0V
+                                      Figure 4. DBUS Timing Characteristics
+33781
+                                                                            Analog Integrated Circuit Device Data
+12                                                                                        Freescale Semiconductor
+
+
+                                                                                                TIMING DIAGRAMS
+                                                                             DYNAMIC ELECTRICAL CHARACTERISTICS
+ DnH      VSUPn
+   VMID + 2.25V
+   VMID + 0.75V
+           VMID
+   VMID - 0.75V
+   VMID - 2.25V
+ DnL         0V
+                                         Figure 5. DBUS Normal Bus Waveforms
+ DnH      VSUPn
+   Over-voltage
+      Threshold
+   VMID + 2.25V
+   VMID + 0.75V
+ VMID (Clamped)
+   VMID - 0.75V
+   VMID - 2.25V
+ DnL         0V
+                                      Figure 6. DBUS Over-voltage Bus Waveforms
+                                                                                                            33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                       13
+
+
+TIMING DIAGRAMS
+DYNAMIC ELECTRICAL CHARACTERISTICS
+                                                                                                                  VIH
+        CS0         VIL                                                                                           VIL
+                                             tCYC                                                           tLAG
+              tLEAD                     tHI          tLO       tF                   tR
+        SCLK0                 VIH                                       VIH        VIH                            VIH
+                              VIL                                                        VIL
+                               tSU
+                                    tH
+                    VIH
+        MOSI0                    MSB                                                                LSB
+                    VIL
+                                                 tV                                                           tDIS
+                   VOH                                                                                            VOH
+        MISO0             X         MSB                                                        LSB
+                   VOL                                                                                            VOL
+         X = Don’t care
+         VIH = 70% VCC, VOH = 70% VCC
+         VIL = 30% VCC, VOL = 30% VCC
+                                                    Figure 7. SPI0 Interface Timing
+                                                                                                                VIH
+       CS1         VIL                                                                                          VIL
+                                            tCYC                                                           tLAG
+             tLEAD                     tHI         tLO        tF                   tR
+       SCLK1                VIH                                        VIH        VIH                           VIH
+                            VIL                                                         VIL
+                                                tV                                                           tDIS
+                  VOH                                                                                           VOH
+       MISO1             X         MSB                                                        LSB
+                  VOL                                                                                           VOL
+        X = Don’t care
+        VIH = 70% VCC, VOH = 70% VCC
+        VIL = 30% VCC, VOL = 30% VCC
+                                                    Figure 8. SPI1 Interface Timing
+33781
+                                                                                       Analog Integrated Circuit Device Data
+14                                                                                                 Freescale Semiconductor
+
+
+                                                                                                      FUNCTIONAL DESCRIPTIONS
+                                                                                                                   INTRODUCTION
+                                              FUNCTIONAL DESCRIPTIONS
+                                                           INTRODUCTION
+    The 33781 is intended to be used as a master device in a       amount of change between the two bus wires, the
+distributed system. It contains both protocol generators and       capacitance to ground only conducts half as much current as
+physical interfaces, to allow an MCU to communicate with           it would if connected directly across the bus. The equivalent
+devices on the bus using two different SPI interfaces. Four        bus capacitance of a capacitor to ground from the bus wires
+differential buses are provided. The physical layer uses a         is one half of the actual amount of the capacitor. The amount
+two-wire bus to carry power and signal. The physical layer         of capacitance from either bus wire to ground should be kept
+uses wave-shaped voltage signals for commands from the             the same in order to achieve the lowest radiated EMI energy.
+master and wave-shaped current signals for responses from          The 2.2nF capacitors required between the bus wires and
+the slaves. The protocol and physical layer conform to the         ground result in an equivalent of 1.1nF of capacitance across
+DSI 2.02 specification.                                            the bus as seen by either bus wire.
+    The equivalent bus capacitance consists of capacitors              Table 5 shows the voltages used for operation. Low side
+connected between the two bus wires and capacitors                 (LS) is the bus wire that is the most negative and high side
+between the bus wires and ground. Because the voltage              (HS) is the bus wire that is the most positive. Figure 5 shows
+change on either of the bus wires to ground is only 1/2 the        the bus waveforms in normal operation.
+Table 5. High Side and Low Side Typical Voltages (Voltage Relative to Ground)
+                           Low Side                                                     High Side
+         IDLE                 HIGH                 LOW            IDLE                     HIGH                      LOW
+                                    (16)                 (16)                                    (16)
+           0             Vmid-2.25            Vmid-0.75           VSUPn               Vmid+2.25                 Vmid+0.75 (16)
+Notes
+  16. VMID = VSUPn /2.
+                                               FUNCTIONAL PIN DESCRIPTIONS
+RESET (RST)                                                        CLOCK (CLK)
+    When pulled low, this will reset all internal registers to a       This is the main clock source for the internal logic. It must
+known state as indicated in the section entitled SPI0 Register     be 4.0MHz.
+and Bit Descriptions on page 29.
+                                                                   GROUND (GND)
+CHIP SELECT n (CSn)                                                    Ground source for DSI/DBUS return.
+    This input is used to select the SPIn port when pulled to
+ground. When high, the associated SPIn port signals are            DIGITAL GROUND (VSS)
+ignored. The SPIn transaction is signaled as completed when            Ground source for logic.
+this signal returns high.
+                                                                   DIGITAL GROUND AND IDDQ (VSS_IDDQ)
+MASTER OUT/SLAVE IN 0 (MOSI0)
+                                                                       Used for IDDQ testing during IC manufacturing test.
+    This is the SPI data input to the device. This data is
+sampled on the positive (rising) edge of SCLK0. There is no
+MOSI pin or function for SPI1.
+                                                                   ANALOG GROUND (AGND)
+                                                                       Ground source for analog circuits.
+SERIAL CLOCK (SCLKn)
+    This is the clock signal from the SPIn master device. It
+                                                                   POWER SOURCE (VCC)
+controls the clocking of data to SPIn and data reads from the          Nominal +5.0V Regulated Input.
+SPIn.
+                                                                   DIGITAL REGULATOR OUTPUT (VDD)
+MASTER IN/SLAVE OUT (MISOn)                                            Nominal +2.5V internal regulator Pin. This must be
+    This is the SPIn data from SPIn to the SPIn master. Data       bypassed with a small capacitor to ground (100nF)
+changes on the negative (falling) transition of the associated
+SCLKn.
+                                                                                                                                33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                          15
+
+
+ FUNCTIONAL DESCRIPTIONS
+ FUNCTIONAL PIN DESCRIPTIONS
+LOW SIDE BUS (DnL)                                                    up to maintain a regulated supply to the slave device. VSUP1
+   There are four independent low side outputs, D0L, D1L,             powers devices DBUS0 and DBUS1, and VSUP2 powers
+D2L and D3L. They comprise the low side differential output           devices on DBUS2 and DBUS3. See Figure 9.
+signal of the DBUS physical layer as shown in Figure 5. They              The two supplies are interdependent internally, however,
+also provide power to the slave modules during the DBUS               as can be seen in Figure 9: VSUP1 is used to create the
+idle time. The output of DnL should have a bypass capacitor           VCM_REF voltage for all four driver buffers, and VSUP2 is used
+of 2.2nF to ground.                                                   to supply the charge pump voltage. Consequently, both
+                                                                      VSUP1 and VSUP2 are required for internal functions: for
+HIGH SIDE BUS (DnH)                                                   example, the internal voltage regulator VREG_8V is supplied
+                                                                      from VSUP1, but uses the VSUP2-derived charge pump
+   There are four independent high side outputs, D0H, D1H,
+                                                                      voltage to supply the output NMOS devices.
+D2H, and D3H. They comprise the high side differential
+output signal of the DBUS physical layer. They also provide
+power to the slave modules during the DBUS idle time. See             PSEUDO BUS (DPH AND DPL)
+Figure 5. The output of DnH should have a bypass capacitor                These bus high and bus low pins are created by closing
+of 2.2nF to ground.                                                   the pseudo bus switches attached to the D0H and D0L bus
+                                                                      lines internal to the 33781. This allows a second external set
+POSITIVE SUPPLY FOR BUS OUTPUT (VSUPn)                                of bus lines to communicate over the D0 Channel. The
+                                                                      pseudo bus switches are controlled by the system MCU
+   This 9.0V to 25V power supply is used to provide power to
+                                                                      through SPI0.
+the slave devices attached to the DBUS. During the bus idle
+time, the storage capacitors in the slave modules are charged
+                                                                                     VSUP1 (27)            GND (32)
+            RNE control for ch0, ch1, ch2
+            and ch3 status register                  VSUP                                                                D0H/L
+                                                                                                    DBUS 0
+                                                    Voltage
+                                                                                               Driver/ Receiver
+                                                    Monitor                                                              D1H/L
+                                                    VCP
+                                               VREG_8V                                              DBUS 1
+                                           Voltage Regulator              V_8V                                           GND (24)
+                                                                                                    DBUS 2
+                                                              VMID
+                                                            Reference                                                    D2H/L
+                                                    for common mode voltage                         DBUS 3
+                                                                             VCM_REF            Driver/ Receiver
+                                                                                                                         D3H/L
+                                          VCP
+                                                   VCharge_pump
+                                                                                     VSUP2 (21)            GND (18)
+                                                    Figure 9. VSUP Block Diagram
+33781
+                                                                                               Analog Integrated Circuit Device Data
+16                                                                                                          Freescale Semiconductor
+
+
+                                                                                                       FUNCTIONAL DESCRIPTIONS
+                                                                                      FUNCTIONAL INTERNAL BLOCK DESCRIPTION
+                                      FUNCTIONAL INTERNAL BLOCK DESCRIPTION
+                            MC33781 - Functional Block Diagram
+                                            Supply Voltage                                 Power Stage
+                                                2.5V Regulator
+                                          HCAP Charging Circuitry
+                                                                                           DBUS Drivers
+                                           VSUP Voltage Monitor                            and Receivers
+                                           Logic and Control
+                               Clock Generation and Frequency Spreading
+                                        CRC Generation and Checking
+                                     SPI0 Registers and State Machine
+                                                                                             Pseudo-bus
+                                     SPI1 Registers and State Machine                          Switches
+                                            Over-current Sensing
+                                         Over-temperature Sensing
+                                  Supply Voltage               Logic and Control                 Power Stage
+                                                     Figure 10. Block Illustration
+   The 33781 is controlled by an MCU through the SPI0                    The SPI0 port can handle 2-byte and 4-byte transfers. It
+interface. It handles the digital and physical layer portions of      addresses 87 registers. The organization of the registers is
+a DBUS master node. Four separate DBUS channels are                   described in the section entitled SPI0 Register and Bit
+included. The physical layer uses a two-wire bus with analog          Descriptions on page 29.
+wave-shaped voltage and current signals. Refer to Figure 1.
+   Major subsystems include the following:                            SPI1 AND REGISTERS
+• SPI0 interface and registers to a main MCU                             The 33781 has a second SPI port (called SPI1) that allows
+• SPI1 interface and registers to a second MCU                        valid response data from Bus Channel 2 and 3, along with the
+• Four channels of DSI 2.02 protocol state logic                      slave address, to be read independently by a second MCU.
+• CRC block for each channel                                          This block contains the SPI1 interface logic and the response
+• Control and status registers                                        registers that are read from the SPI1 interface.
+• Four addressable register sets per channel for queuing up              The IC is an SPI slave-type device, so MISO1 (Master-In-
+   to four commands and data per bus. The addressable                 Slave-Out) is an output, and CS1 and SCLK1 are inputs. SPI1
+   buffer acts as a circular buffer for command writes and            does not use the MOSI (Master-Out-Slave-In) pin or function
+   data reads.                                                        as it does not receive commands.
+• Pseudo Bus Switch from D0H/L to DPH/L                                  The SPI1 port handles only 16-bit transfers. It addresses
+                                                                      eight registers which are read only.
+SPI0 AND REGISTERS
+   This block contains the SPI0 interface logic and the control       PROTOCOL ENGINE
+and response registers that are written to and read from the             This block converts the data to be transmitted from the
+SPI interface.                                                        registers into the DBUS sequences, and converts DBUS
+   The IC is an SPI slave-type device, so MOSI0 (Master-              response sequences to data in the registers.
+Out-Slave-In) is an input and MISO0 (Master-In-Slave-Out) is             The DBUS transmit protocol uses a return to 1 type data
+an output. CS0 and SCLK0 are also inputs.                             with a duty cycle determined by the logic state. The protocol
+                                                                      includes Cyclical Redundancy Check (CRC) generation and
+                                                                      validation.
+                                                                                                                               33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                         17
+
+
+ FUNCTIONAL DESCRIPTIONS
+ FUNCTIONAL INTERNAL BLOCK DESCRIPTION
+VSUPn VOLTAGE MONITOR                                                   device is reset by the RST pin or the EN bits in the DnEN
+   This function monitors the voltage on the VSUPn pin. If the          registers are first set to zero, and then to one (disabled and
+voltage on the pin drops below the defined voltage threshold            then enabled). By monitoring the RNE bits the MCU will know
+for longer than the voltage threshold mask time, the 33781              that communications have been disrupted and can take the
+will continue to send queued DBUS commands, but not set                 appropriate action.
+any RNE bits in the DnSTAT registers to 1, until either the
+                              Receiver
+                   Receiver Low     n     Low n
+                  Receiver High     n
+                              Receiver   High n
+                             Receiver
+                  Receiver Sum     n     Sum n               Adder
+                                 Over-current
+                  Signal Mode Over     Current n           Over-current
+                                                           Over Current
+                  IdleIdle
+                        Mode Over-current
+                           Mode  Over-current
+                              Over   Current n n            Over-temp
+                                                            Over  Temp
+                  Over Tempn n Over-temp n
+                 Over-temp                                     Sense
+                                                               Sense
+                  DSISn                                                                                                   DnH
+                                                                                                                           DnH
+                                                           Differential
+                                                           Differential
+                  DSIFn                                       Signal
+                                                             Signal               Driver
+                     hiZn
+                   hiZn                                    Generation
+                                                           Generation                                                     DnL
+                                                                                                                           DnL
+                                                       Over-voltage
+                                                      Overvoltage                             Common
+                                                                                             Common
+                                                                                             ModeMode
+                                                                                             Correction
+                                                                                             Correction
+                                              Figure 11. Driver/Receiver Block Diagram
+DBUS DRIVER /RECEIVER (PHYSICAL LAYER)                                      The internal signal DSIF controls the Idle to Signalling
+   There are four independent differential bus driver/receiver          state change, and internal signal DSIS controls the signal
+blocks on the 33781. These blocks translate the transmit data           level, high or low. DSIR is the slave device response signal to
+to the voltage and current needed to drive the DBUS. They               the logic. This is shown in Table 6.
+also detect the response current from the slave devices and
+translate that current into digital levels. These circuits can            Table 6. Internal Signal Truth Table
+drive their outputs to the levels listed in Table 5.
+                                                                            DSIF      DSIS        TS         DSIR             DnD
+   The DBUS driver/receiver block diagram is shown in
+Figure 11. The circuit uses a common driver for both the Idle                 0         0          0      Return Data      Signal Low
+and Signal modes to minimize common mode noise. The
+drivers are disabled in HiZ.                                                  0         1          0      Return Data      Signal High
+   During Idle mode the driver is required to supply a high                   1         0          0           0        High-impedance
+current to recharge the Slave device storage capacitors. In
+both Idle and Signal modes it is required to drive the DBUS                   1         1          0           0               Idle
+load capacitances and control the slew rate over a wide
+                                                                              X         X          1           0        High-impedance
+supply voltage range and load conditions. Current limit, over-
+current shutdown and thermal shutdown are included to                       Bus wire faults on a bus do not disrupt communications on
+protect the device from fault conditions. More information can          another bus. In addition, each bus channel has independent
+be found in the Protection and Diagnostic Features and SPI0             thermal shutdown protection. Once the channel thermal limit
+Register and Bit Descriptions sections.                                 is reached the bus drivers become high-impedance, the TS
+   To ensure stability of the bus drivers, capacitors must be           bit is set to a 1 and the EN bit set to 0 in the channel DEN
+connected between each output and ground. These are the                 register. In addition the channel address buffer registers and
+DBUS common mode capacitors. In addition, a bypass                      pointers are reset. There is a 4 usec filter on Tlim to prevent
+capacitor is required at VSUPn. These capacitors must be                false triggering.
+located close to the IC Pins and provide a low-impedance                    The Differential Signal Generation block converts the
+path to ground.                                                         DSIS signal to the DBUS differential signal voltage levels.
+                                                                        This differential signal is buffered and slew rate controlled by
+33781
+                                                                                                  Analog Integrated Circuit Device Data
+18                                                                                                            Freescale Semiconductor
+
+
+                                                                                                 FUNCTIONAL DESCRIPTIONS
+                                                                                 FUNCTIONAL INTERNAL BLOCK DESCRIPTION
+the driver. The over-voltage input causes the driver            outputs is passed to a CRC generation and checking block.
+characteristics to be modified under over-voltage conditions.   A logic block determines which (if any) of the receiver filter
+This is described in more detail in the Load Dump Operation     blocks has produced the correct result, by comparing the
+section.                                                        CRC results along with the bit-by-bit XOR of the high side and
+   A special requirement of the differential bus is to maintain low side bit pattern. Table 7 shows how the logic determines
+a low common mode voltage. This is accomplished by              which (if any) receiver outputs contain a valid response. The
+monitoring the common mode voltage and modifying the            data is selected from either the Receiver High, Receiver Low
+driver slew rates. This is the function of the Common Mode      or Receiver Sum circuit and the ER bit is set accordingly in
+Correction block.                                               the DnRnSTAT register.
+   Current signals sent by the slave are detected on both the      If either Receiver High or Receiver Low has all 1’s for data,
+high side and the low side of the bus using a differential      including the CRC bits, then the ER bit will be set. For either
+current sense architecture. Sense resistors between the         of these two conditions, the ER bit will be set regardless of
+Signal driver and the DnH and DnL outputs detect the slave      the Receiver Sum data value and regardless of whether or
+device response current. Sensing the current on both bus        not all the 1’s caused a CRC error on the High or Low side.
+lines improves the fault diagnostics of the bus. Also included     Note that SPI0 and SPI1 do not use the same sources for
+is an adder circuit which is used to improve the reception of   their respective output data streams. SPI0 chooses between
+sensor data in the presence of common mode noise. The           Receiver High or Receiver Sum0; SPI1 chooses between
+comparators in the blocks output a high or low value            Receiver Low and Receiver Sum1.
+depending on if the input is above or below the signal             In order to provide the maximum protection against a
+threshold.                                                      single-point failure causing a disruption in communication,
+   The Receiver High, Receiver Low, and Receiver Sum            the decision paths for the two SPI channels are internally
+outputs are sent to the device logic block which is shown in    independent . For example, Receiver Sum0 and Receiver
+Figure 23. The data is sampled at the falling edge of DSIS. In  Sum1 use different holding registers in the Receiver logic.
+the presence of faults or common mode noise it is possible      These registers are duplicates, although they will always hold
+that all three receiver circuits will not produce the same bit  the same data unless there is a fault in one of the data paths.
+pattern. To check for this, each of the three receiver filter
+                                                                                                                           33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                      19
+
+
+ FUNCTIONAL DESCRIPTIONS
+ FUNCTIONAL INTERNAL BLOCK DESCRIPTION
+Table 7. Receiver Decision Logic
+                 Receiver    Receiver     Receiver     High and    High and        Low and
+    Bus Pin                                                                                                      SPI0        SPI1
+                 High 6 ± 1 Low 6 ± 1     Sum 12 ±     Low XOR    Sum XOR         Sum XOR         ER Bit
+ Conditions                                                                                                  DnRnxData DnRnxData
+                    mA         mA            6mA        (bit/bit)   (bit/bit)       (bit/bit)
+                                                                                                               Receiver     Receiver
+                                                        H*L Ok                                       0
+                                                                                                                 High         Low
+    Normal        CRC Ok     CRC Ok        CRC Ok                     N/A             N/A
+                                                                                                               Receiver     Receiver
+                                                      H*L Not OK                                     1
+                                                                                                                 High         Low
+                                                                                                               Receiver     Receiver
+                                                        H*L Ok                                       0
+                                                                                                                 High         Low
+ Out of Spec      CRC Ok     CRC Ok       Bad CRC                     N/A             N/A
+                                                                                                               Receiver     Receiver
+                                                      H*L Not OK                                     1
+                                                                                                                 High         Low
+                                                                                                               Receiver     Receiver
+                                                                    H*S Ok                           0
+                                                                                                                 High        Sum1
+      Fault       CRC Ok     Bad CRC       CRC Ok         N/A                         N/A
+                                                                                                               Receiver     Receiver
+                                                                  H*S Not OK                         1
+                                                                                                                 High         Low
+                                                                                                               Receiver     Receiver
+     Fault L      CRC Ok     Bad CRC      Bad CRC         N/A         N/A             N/A            1
+                                                                                                                 High         Low
+                                                                                                               Receiver     Receiver
+                                                                                    L*S Ok           0
+                                                                                                                Sum0          Low
+      Fault      Bad CRC     CRC OK       CRC OK          N/A         N/A
+                                                                                                               Receiver     Receiver
+                                                                                 L*S Not OK          1
+                                                                                                                 High         Low
+                                                                                                               Receiver     Receiver
+    Fault H      Bad CRC     CRC Ok       Bad CRC         N/A         N/A             N/A            1
+                                                                                                                 High         Low
+   Common                                                                                                      Receiver     Receiver
+                 Bad CRC     Bad CRC       CRC Ok         N/A         N/A             N/A            0
+ Mode Noise                                                                                                     Sum0         Sum1
+                                                                                                               Receiver     Receiver
+      Fault      Bad CRC     Bad CRC      Bad CRC         N/A         N/A             N/A            1
+                                                                                                                 High         Low
+PSEUDO BUS SWITCHES                                                     The dominant source of radiated electromagnetic
+    Pseudo Bus Switches are provided on the Channel 0 bus.          interference (EMI) from the DBUS bus is due to the regular
+They allow one channel to communicate via two external bus          periodic frequency of the data bits. At a steady bit rate, the
+wire sets (D0H/D0L and DPH/DPL). There is a pseudo bus              time period for each bit is the same, which results in a steady
+switch on both the bus high and bus low driver. Upon device         fundamental frequency plus harmonics. This results in
+reset the bus switches are open. This allows the master to          undesired signals appearing at multiples of the frequency
+initialize devices on D0H/D0L. After all of these slaves are        that can be strong enough to interfere with a desired signal.
+initialized, the pseudo bus switches can be closed, allowing            A significant decrease in radiated EMI can be achieved by
+the devices on DPH/DPL to be initialized.                           randomly changing the duration of each bit. This can
+    The Pseudo Bus Switches can only be commanded closed            significantly reduce the amplitude by having the signal spend
+by the BSWH and BSWL bits in the D0EN register. These bits          a much smaller percentage of time at any specific frequency.
+can also open the switch at any time.                               The signal strength of the fundamental and harmonics are
+                                                                    reduced directly by the percentage of time it spends on a
+    The Pseudo Bus Switches have independent thermal
+                                                                    specific frequency.
+shutdown protection. Once the thermal shutdown point is
+reached, the bus switch is opened (becoming high-                       A circuit to do this is included in this IC, and can perform
+impedance) and the BSWH and/or BSWL bit is cleared in the           the spreading of the signal independently for each channel,
+channel 0 DEN register. If this occurs, the Pseudo Bus              while generating the bit clock timing for the channel. This is
+Switches can only be closed again by setting the BSWH and/          done in the Spread Spectrum (SS) Block Diagram shown in
+or BSWL bit to a 1 with a write command to the channel 0            Figure 12.
+DEN register.                                                           To implement the channel bit clock a common 64MHz
+    SPREAD SPECTRUM                                                 clock is created from the on board 4MHz oscillator using a
+                                                                    digital PLL. Multiples of this clock period (15.625 nsec) are
+                                                                    used to select the minimum channel bit time. The Spread
+33781
+                                                                                               Analog Integrated Circuit Device Data
+20                                                                                                          Freescale Semiconductor
+
+
+                                                                                                      FUNCTIONAL DESCRIPTIONS
+                                                                                    FUNCTIONAL INTERNAL BLOCK DESCRIPTION
+Spectrum block does this by multiplying the 8-bit value in the     the DxSSCTL registers) allowed beyond the base time
+DxFSEL register by 2 and then adding it to the number 320          period. The resulting value is added to the minimum bit time
+(decimal). The user must choose a minimum bit time                 and fed to the bit clock logic, which generates the DSI bit
+appropriate for his system. Factors which must be considered       clock.
+are the slave response time, bus wire delays, and the                 It is important for the user to select a maximum deviation
+minimum idle time needed to recharge the slave H_CAPs for          value that is appropriate for the system. A larger maximum
+the channel.                                                       deviation results in spreading the bit energy to more
+   To spread the spectrum beyond this minimum bit time a           frequencies. However, this number also establishes the
+random delay based on a multiple of 1/64 MHz periods can           maximum period for any random bit on that channel. If the
+be added to each bit. This delay is created by a Pseudo            system requires that a minimum number of bits be transferred
+Random Bit Sequence Generator from which a 7-bit random            within a fixed time period, then the user must select a
+number is created. This number is further qualified by the         minimum base bit time and maximum deviation time that will
+maximum number of counts (chosen by the DEV[2:0] bits in           meet the criteria.
+                                                              64MHz Clock
+        4MHz Clock                  PLL
+                                     Divide by 8
+                             24-bit PRBS
+                                                        Deviation                                          Bit
+                       7-bit random number                             7                                                 Bit
+                                                   7      Select                 Adder                    Clock
+                                                                                               10                       Clock
+                                                                                                          Logic
+                         Maximum Count Deviation
+                         (from DxSSCTL)                 3
+                                                                     10
+                                               320
+                                                          Adder
+        Base Time Period                  Mult x 2
+        (from DxFSEL)               8                9
+                                           Figure 12. Spread Spectrum Block Diagram
+                                                                                                                             33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                       21
+
+
+ FUNCTIONAL DEVICE OPERATION
+ LOGIC COMMANDS AND REGISTERS
+                                           FUNCTIONAL DEVICE OPERATION
+                                              LOGIC COMMANDS AND REGISTERS
+SPI0 COMMUNICATIONS                                                   commands as a circular buffer, accessing the appropriate
+   All SPI0 transactions are either 16 or 32-bits long. They          command register for the command and data to be sent as
+start with a command byte and can be followed by 1 or 3               the bus becomes available. Data received in response to the
+bytes of data. The start of an SPI transaction is signaled by         commands is queued up for sequential response back to the
+CS0 being asserted low. The first bit sent (bit 7) of the first       MCU during the next set of SPI commands. If an SPI0
+byte signals a read or write (write = 1) of data. The last seven      attempts to write to a transmit register that is not empty the
+bits (bits 6–0) of the command set a pointer to the desired           new command will be ignored.
+register. The 33781 uses 16-bit commands to access control                Figure 14 shows an example of a write operation. During
+registers, and 32-bit commands to access both control                 the first byte of the SPI transaction, the first MOSI bit is 1
+registers, and to queue up transfers over the DBUS.                   (write), and the last seven are the address of the register to
+Figure 13 is a diagram of 16-bit transfers and Figure 14 is a         be accessed. During this command byte, MISO returns
+diagram of 32-bit transfers. In these multi-byte transfers, as        dummy bits set to all zeros. During the next SPI transactions,
+long as CS0 is asserted low, each additional byte sent over           MOSI updates the data in the register pointed to in the
+the SPI will be a read/write of data to the sequential next           previous byte with new data, while reading back the old data
+register.                                                             via MISO.
+   33781 utilizes, transmit, and receive addressable FIFOs                During an SPI0 transaction the 33781 checks for SPI
+for sending commands and responses over the DBUS. There               framing errors. A framing error is defined as any number of
+are separate command and response registers, and a                    clocks received that is not either 16 or 32. If that occurs, all
+transmit queue is used to allow up to 4 bus commands to be            bits sent by the SPI master are discarded and no registers
+scheduled for each bus. The transmit queue schedules                  are update.
+                                      SCLK
+                                                    WRITE COMMAND                 DATA TO
+                                     MOSI          POINT TO REGISTER             REGISTER
+                                                                                DATA FROM
+                                     MISO                00000000                REGISTER
+                                     CS0
+                                            Figure 13. SPI016-Bit Burst Transfer Example.
+                  SCLK
+                             WRITE COMMAND
+                  MOSI        POINT TO D0R0H        DATA TO D0R0H          DATA TO D0R0L                  XXXXXXXX
+                  MISO             00000000        DATA FROM D0R0H       DATA FROM D0R0L         DATA FROM D0R0STAT
+                  CS0
+                                            Figure 14. SPI0 32-Bit Burst Transfer Example
+   The bit definitions for SPI0 depend on the type of SPI                 Figure 13 shows the bit encoding for 16-bit SPI0 burst
+transfer, and if the transfer will be to/from the addressable         transfers. In this transfer the first byte contains the address of
+FIFOs, whether the DBUS for that channel is set for Long              the control register to be written to or read from, and the
+Words or Enhanced Short words.                                        second byte is the data to be written. The SPI0 response is
+                                                                      the data from that register, latched at the falling edge of CS0.
+                                                                      If the address pointed to by the first byte is not a control
+33781
+                                                                                               Analog Integrated Circuit Device Data
+22                                                                                                            Freescale Semiconductor
+
+
+                                                                                                   FUNCTIONAL DEVICE OPERATION
+                                                                                                LOGIC COMMANDS AND REGISTERS
+register, the transfer is considered to have a framing error        addressable FIFO portion of the register set. In this case, the
+and no write will occur.                                            first byte is again the 1st address of the register to be
+   Figure 16 shows the bit encoding for 32-bit SPI0 burst           accessed in this read/write, the second byte contains the
+transfers when the DBUS channel is set for long words. In           upper two bits of the data to be written, and the third byte is
+this transfer, the first byte contains the address of the control   the lower 8-bits of data to be written. The SPI0 response
+register to be written to and read from, the second byte is the     encoding begins with the 2nd byte in the transfer with the 4-
+data to/from that register, and the next two bytes are the data     bit DBUS address of the slave, which sent the data contained
+to/from the next numerically successive registers. In the case      in the rest of the word. This is followed by the 10-bits of data
+of reading or writing from the addressable FIFO registers, the      from the DBUS slave, and then the value in the DnRnSTAT
+1st data byte would be the DnRnH byte, the next byte would          register.
+be the DnRnL byte, and the third byte would be the                      Although it looks like the read and write for an address are
+DnRnSTAT byte as shown in Figure 15. Notice that in this            occurring at the same time, the changes caused earlier
+case, the 4th Tx byte is don’t care and is not written. If this     during the same burst would not be reflected by the data
+transfer would be sent to an address in the control register        returned, because the DnRnSTAT register is latched at CS0
+section of the register bank, the bytes sent and returned           going low.
+would be first the addressed register, and then the next                Refer to the section SPI0 Register and Bit Descriptions on
+consecutive registers.                                              page 29 for the bit descriptions in Figure 15, Figure 16, and
+   Figure 17 shows the bit encoding for 32-bit SPI0 burst           Figure 17.
+transfers when the DBUS channel is set for enhanced short
+words. This transfer mode is only valid when accessing the
+                                  Bit 7       Bit6         BIt5    Bit4          Bit3         Bit2        Bit1         Bit0
+             First TX Byte        R/W        ADDR6       ADDR5    ADDR4        ADDR3        ADDR2        ADDR1       ADDR0
+           Second TX Byte          D7          D6          D5       D4            D3          D2           D1           D0
+                                  Bit 7       Bit6         BIt5    Bit4          Bit3         Bit2        Bit1         Bit0
+             First RX Byte          0           0           0        0             0           0            0            0
+           Second RX Byte          D7          D6          D5       D4            D3          D2           D1           D0
+                               Figure 15. SPI0 Communications, 16-Bit Burst Transfer Bit Definitions
+                                  Bit 7       Bit6         BIt5    Bit4          Bit3         Bit2        Bit1         Bit0
+             First TX Byte        R/W        ADDR6       ADDR5    ADDR4        ADDR3        ADDR2        ADDR1       ADDR0
+           Second TX Byte         D15         D14          D13     D12           D11          D10          D9           D8
+             Third TX Byte         D7          D6          D5       D4            D3          D2           D1           D0
+            Fourth TX Byte          X           X           X       X             X            X           X            X
+                                  Bit 7       Bit6         BIt5    Bit4          Bit3         Bit2        Bit1         Bit0
+             First RX Byte          0           0           0        0             0           0            0            0
+           Second RX Byte         D15         D14          D13     D12           D11          D10          D9           D8
+            Third RX Byte          D7          D6          D5       D4            D3          D2           D1           D0
+            Fourth RX Byte         ER          TE         SDS      RNE           ICL           0          FIX1         FIX0
+              Figure 16. SPI0 Communications, 32-Bit Burst Transfer Long Word DBUS Transfer Bit Definitions
+                                                                                                                                33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                          23
+
+
+ FUNCTIONAL DEVICE OPERATION
+ LOGIC COMMANDS AND REGISTERS
+                                Bit 7        Bit6          BIt5          Bit4          Bit3          Bit2       Bit1          Bit0
+             First TX Byte      R/W        ADDR6         ADDR5         ADDR4          ADDR3        ADDR2       ADDR1         ADDR0
+           Second TX Byte         X            X            X             X             X             X          D9            D8
+             Third TX Byte       D7           D6            D5            D4            D3           D2          D1            D0
+            Fourth TX Byte        X            X            X             X             X             X           X            X
+                                Bit 7        Bit6          BIt5          Bit4          Bit3          Bit2       Bit1          Bit0
+             First RX Byte        0            0             0             0             0            0           0             0
+           Second RX Byte       SA3          SA2           SA1           SA0             0            0          D9            D8
+            Third RX Byte        D7           D6            D5            D4            D3           D2          D1            D0
+            Fourth RX Byte       ER           TE           SDS           RNE           ICL            0         FIX0          FIX1
+            Figure 17. SPI0 Communications, 32-Bit Burst Transfer Enhanced Short Word DBUS Bit Definitions
+SPI1 COMMUNICATIONS                                                       write. These last two bits indicate that the transaction
+   All SPI1 transactions are read only, are 16-bits in length,            occurred on channel 2. The data bits will only be written if the
+and are asynchronous to SPI0. There is no MOSI pin or                     status bits for that bus transaction all indicate no errors. If a
+function associated with SPI1, since there are no commands                status error is indicated, the address and channel indicator
+sent. Figure 18 shows the signals associated with an SPI1                 bits are stored as described, but the data bits are all set to
+transfer, and Figure 19 contains the order of bits sent for               zeros. If there was a bus driver shutdown during the
+each SPI1 transaction.                                                    transaction, no buffer write will occur. Further transactions
+                                                                          are written to the next cyclic buffer register in the same way,
+   SPI1 transfers start with the 1st SCLK1 transition after
+                                                                          overwriting data if necessary.
+CS1 asserts and ends once CS1 negates. The start of an SPI
+transaction is signaled by CS1 being asserted low. If the SPI1                This same sequence occurs for channel three
+logic sees more than 16 SCLK1 pulses while CS1 is                         transactions, except that the channel indicator bits are “10”,
+asserted, zeros are returned for all additional bits (bits                and writes occur to a separate set of four 16-bit cyclic
+beyond bit 15). If a SPI1 transaction contains less than 16-              registers.
+bits (too few SCLK cycles), the data that was in process of                   If the channel has been put into loop mode, the same
+being sent during the transaction is discarded and not saved              sequence is used except the buffer write occurs only if the
+for retry.                                                                data is all ones or all zeros, and the saved address from the
+   There are eight registers which can be read by SPI1 in a               previous transaction is the complement of the data. The
+cyclic fashion. Four of these registers are associated with bus           channel indicator bits are written the same as if the channel
+channel 2, and four are associated with bus channel 3. Data               were in normal mode. The buffer pointer always advances,
+is deposited into these registers under the following                     even if the buffer is not written, so that it is synchronous with
+conditions:                                                               the SPI0 RX buffer pointer.
+   When the bus channel 2 is set for enhanced 10-bit short                    The channel buffers are not cleared, in the case of a
+words, the SPI1 state machine monitors outgoing bus                       channel abort.
+addresses and commands on the channel. If the command                         Reads from this register by the SPI1 master are also
+sent is $2 (Request AN0), the address portion of the                      accomplished in a cyclic buffer way, except the two channels
+command is saved. The response received on the next                       are concatenated, with channel 3 following channel 2 in the
+command is stored into one of the four 16-bit register pointed            cyclic sequence. During these buffer reads, if a buffer
+to by the channel 2 cyclic buffer write pointer, along with the           position does not contain data, it is skipped. After each buffer
+address that generated that response (saved from the                      location is read it is cleared by the SPI1 logic.
+previous transaction) with the bits “01”, completing the 16 bit
+                              CSB
+                              SLCK
+                              MISO       b00 b01 b02 b03 b04 b05 b06 b07 b08 b09 b10 b11 b12 b13 b14 b15
+                                          Figure 18. SPI1 16-Bit Burst Transfer Example
+33781
+                                                                                                     Analog Integrated Circuit Device Data
+24                                                                                                               Freescale Semiconductor
+
+
+                                                                                                        FUNCTIONAL DEVICE OPERATION
+                                                                                                     LOGIC COMMANDS AND REGISTERS
+    .
+       SPI     Bit 0   Bit 1  Bit 2   Bit 3    Bit 4   Bit 5 Bit 6  Bit 7      Bit 8    Bit 9    Bit    Bit     Bit    Bit      Bit  Bit
+   Data Bit                                                                                      10      11     12     13       14   15
+      Read     DO0     DO1    DO2     DO3      DO4    DO5    DO6    DO7        DO8      DO9      A0     A1      A2     A3      C0   C1
+      Only
+                                                      Figure 19. SPI1 Bit Encoding
+DO[0:9]- Data Bits                                                      C[0:1] - Channel indicator Bits
+    The received data bits from the bus channel transaction. If             The bits indicate which bus channel the data came from.
+the transaction had any CRC or SDS errors (See page 32                  “01” indicates channel 2, and “10” indicates channel 3.
+and page 33), then these bits are set to all zeros.
+                                                                        DBUS COMMUNICATIONS
+A[0:3] - Sensor Address Bits                                                The DBUS messages contain data from the DnH and DnL
+    The address of the slave that sent the data. This is a copy         registers. A CRC pattern is automatically appended to each
+of the address sent out during the previous bus transaction.            message. The data and CRC lengths are programmed by the
+                                                                        DnLENGTH register. Figure 20 shows the structure of the
+                                                                        DBUS message.
+                        Bit n         …………………                              Bit 0        CRC n        ……           CRC 0
+                                             Figure 20. DBUS Communications Message
+    DBUS Driver/Receiver communications involve a frame                     At the end of a DBUS transfer (and after the CRC error
+(DSIF), a data signal (DSIS), and a data return (DSIR) signal.          status is stable), the RNE flag is set to indicate there is data
+These are signals internal to the IC associated with the                in the register available to be read.
+protocol engine.
+    A message starts with a falling edge on the DSIF signal,            DATA RATE
+which marks the start of a frame. There is a one bit-time delay             The base data rate is determined by the system clock
+before the MSB of data appears on DSIS. Data bits start with            (CLK) and the values in the DnFSEL register. The CLK is
+a falling edge on DSIS. The low time is 1/3 of the bit time for         assumed to be 4MHz. The CLK is converted to a 64MHz
+a 1, and 2/3 of a bit time for a 0. Data is transmitted on DSIS         internal clock with a digital PLL, which is used to form the bit
+and received on DSIR simultaneously. Receive data is the                rate clock. The minimum bit clock period which may be
+captured level on DSIR at the end of each bit time. As a                programmed is:
+message is received, it is stored bit-by-bit into the appropriate           (1/16*fCLK) x 320 = 5 usec
+receive register. For each data value received, there is a one-
+bit status flag (ER) to indicate whether or not there was a                 However, this period may not meet overall system
+CRC error while receiving the data. At the end of the bit time          requirements       for minimum bit time. Longer base clock
+for the last CRC bit, DSIF returns to a logic high (Idle level).        periods can be selected by using the DxFSEL register. There
+A minimum delay is imposed between successive frames as                 are 8 bits in the DxFSEL register representing values from 0
+determined by the DnCTRL register.                                      to 255. The complete equation for determining the base clock
+                                                                        period is:
+    Users initiate a message by writing (via the SPI0 interface
+from the MCU) to the high and low byte of the data registers                ((1/16*fCLK) x (320 +2x)) where x = 0 to 255
+(DnRnH/L). Transactions are scheduled once the CS0 for                      Table    8 gives some examples of the base data rate for
+that transfer rises. When 9- to 16-bit messages are to be               f CLK = 4.0MHz.
+sent, the user writes to the DnH register first, and then the              Table 8. Examples of Base Data Rate
+DnL register, before the combined 9 to 16-bit data value                                         Base Bit Period    Base Bit Frequency
+DnH:DnL is sent on the DBUS. The user should first check                          FSEL
+                                                                                                     (usec)                (kbps)
+the TE status flag to be sure the command register is not full
+                                                                                 00000000             5.000                 200.0
+before writing a new data value to DnH and/or DnL. When the
+minimum inter-frame delay has been satisfied, and CS0 has                        00000001             5.031                 198.8
+risen, and if no SPI0 framing error has occurred, DSIF will go                   00001101             5.406                 184.9
+low, indicating the start of a new transfer frame.                               00101000             6.250                 160.0
+                                                                                 11111110            12.938                  77.3
+                                                                                 11111111            12.969                  77.1
+                                                                                                                                    33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                               25
+
+
+ FUNCTIONAL DEVICE OPERATION
+ LOGIC COMMANDS AND REGISTERS
+CRC GENERATION /CHECKING                                           DnRnSTAT register is set at the end of the message along
+    Whenever a message is sent on the DBUS, a 0- to 8-bit          with the RNE bit.
+CRC value is computed and serially sent as the next n bits            When no remote peripheral responds to a message, the
+after the LSB of the data. The CRC length, polynomial, and         data pattern received will be all zeros with a CRC value of 0,
+initial seed are determined by the CRCLEN[3:0],                    which may be detected as a CRC error depending on the
+CRCPOLY[7:0], and CRCSEED[7:0] control register fields.            values of CRCLEN[3:0], CRCPOLY[7:0], and
+The message, including the CRC bits, is passed along to a          CRCSEED[7:0].
+remote peripheral, which computes a separate CRC value as
+the message data is received. If this computed and CRC             CRC COMPUTATION
+does not agree with the CRC value received in the message,            The CRC algorithm uses a programmable initialization
+the peripheral device considers the message invalid.               value, or seed of CRCSEED[7:0], and a programmable
+    Messages received include a 0- to 8-bit CRC value, which       polynomial of CRCPOLY[7:0]. Figure 21 is a VHDL
+was computed in the peripheral device that is responding. As       description of the CRC algorithm for the DBUS standard 4-bit
+the message is received, a separate 0- to 8-bit CRC value is       CRC, with its initial value of 1010. A seed value is chosen so
+computed and is compared with the CRC value in the                 that a zero data value will generate a CRC value of 1010. A
+received message. If these values do not agree, the message        block diagram of the default CRC calculation is shown in
+is considered invalid and the ER status bit in the associate       Figure 22.
+    --------------------------------------------------------------------------
+    -- Calculates the 4-bit CRC (x^4 + 1) serially for 8 to 16 bits of data.
+    --------------------------------------------------------------------------
+        constant CRCPoly: std_logic_vector: = “0001”; -- x^4 +1
+        constant InitCrc: std_logic_vector: = “1010”;
+        procedure SerialCalculateCRC4(CRC: input std_logic_vector;Data: in std_logic) is vari-
+    able Xor1: std_logic;
+        begin
+              Xor1: = CRC(3) xor Data;
+              CRC: = CRC(2 downto 0) & ‘0’; -- Shift left 1 bit
+              if Xor1 = ‘1’ then
+                  CRC: = CRC xor CRCPoly
+              end if;
+    end SerialCalculateCRC4;
+                                                    Figure 21. CRC Algorithm
+                                        C3       C2      C1      C0
+                                                                                        Input Data
+                                        T         T       T      T
+                                       1X4   +   0X3  +   0X2  + 0X1    +  +X0     = X4+1
+                                             Figure 22. Default CRC Block Diagram
+MESSAGE SIZE SPECIAL CASES                                            Example 1: If the previous message was a short word and
+    The response to any 8- to 15-bit message is expected to        the current message is a long word, the response message
+be another 8- to 15-bit message, and the response to any           (which is also a short word) finishes before the current
+16-bit message is expected to be another 16-bit message.           message frame, and the CRC bits look like data bits in the
+This gives rise to some special cases when there is a              long word format. Since the CRC validation of this short word
+transition from one message size to a different message size.      message response is not reliable, this short word response
+Some messages must be long words (16 bits of data), and            should not be used.
+others can be short words (8 to 15 bits of data).                     Example 2: If the previous message was a long word and
+    The following are examples where the word is a standard        the current message is a short word, the response message
+DSI formatted short word (8 bits of data and 4 bits of CRC).       (which is also a long word) cannot finish before the current
+                                                                   message frame. Bits three to zero of the data and the CRC
+                                                                   bits are lost. Data bits seven to four of the 16-bit response
+33781
+                                                                                            Analog Integrated Circuit Device Data
+26                                                                                                       Freescale Semiconductor
+
+
+                                                                                                                   FUNCTIONAL DEVICE OPERATION
+                                                                                                              LOGIC COMMANDS AND REGISTERS
+message look like the CRC bits of an 8-bit response and                        peripheral in line on the bus. Each peripheral responds to an
+almost certainly would not be correct. Because the response                    address assignment only once (during the next message
+is incomplete and the CRC check is probably not valid, this                    after the command that set its address). After the last
+response is not useful.                                                        peripheral has been assigned an address, any subsequent
+    The long word to short word message size transition                        address assignments will receive no response. When the
+normally only occurs after setting up the DBUS peripherals.                    master MCU fails to receive a response, it knows it has
+During address setup, a message with address 0000 is sent                      passed the last peripheral. At this point, short word messages
+to attempt to set the address of the next peripheral on the                    may be sent. The first such message will have no meaningful
+daisy-chained bus. Before any peripherals have been                            response associated with it.
+assigned an address, their bus switches are opened so the                           The first message after reset is also a special case,
+addressing message only goes to the first peripheral in line.                  because there was no previous message, therefore there will
+As each peripheral gets an address, it closes its bus switch                   be no meaningful response during the first message transfer.
+so the next address assignment command can reach the next
+                                              1/3RD BIT CLOCK
+                        FREQUENCY                                                                                                    BUS Driver/Receiver Logic
+        CLK 64
+                      SPREADING and
+         MHz         CLOCK DIVIDERS                      Addressed Rx Buffer                                           Loop Sel
+                                                                                data    16
+                                                              data       stat
+                              SPI0                                                                                      Loop                        receiver lowN
+                                       16      data                              stat   4           CRC                           Sample
+                                                              data       stat                         CRC               Mode          Filter        receiver highN
+                                                                                                    check
+                                                                                                        CRC                             Filter
+                         control regs   5      stat                                                   check             Mux                         receiver sumN
+                                                              data       stat                           check
+                         enable regs                                               push
+                           poly regs                                                                                                              signal mode
+                                                              data       stat                                                     Filter          over currentN
+                          seed regs
+                         length regs                                                                                                               idle mode
+                         spread dev                                                                            Filter
+                                                         Addressed Tx Buffer                                                                       over currentN
+                         spread fsel                                                pop                                           Filter
+                           mask ID                         data                                                                                     over tempN
+                                       data  16                         x pop      data     16
+       RSTB             check pattern
+                       test mode regs                      data           ptr
+       PORB
+                                                           data                                                         CRC                      DSISn
+                          reg pointer                                   slave                                         generate
+                                                           data         addr
+                           bit pointer                                        Tx not empty                                                       DSIFn
+          SCLK0                                                                                                                                   HZN
+          MOSI0                                                  enN                                DBUS XFER
+                                                                 abort                                                      Loop Sel
+                                                                                                  STATE MACHINE
+          MISO0
+                                                        SPI1 Registers
+            CSB0
+                                                            data       addr
+                                                                                                 Misc. Functions
+                                SPI1                        data       addr
+          SCLK1                                                                                               Filter             VSUP voltage
+                                                            data       addr                                                        compare
+          MISO1                           10  data
+                                                            data       addr
+                                           4    addr
+            CSB1                                                                                              Filter              Bus switch
+                                                                                                                                  over temp
+                                                       Figure 23. Logic Block Diagram
+LOGIC BLOCK DIAGRAM DESCRIPTION                                                the SPI. Its operation is described in detail in the section
+    Figure 23, Logic Block Diagram, shows a block diagram of                   entitled SPI0 COMMUNICATIONS on page 22.
+the major logic blocks in the IC.                                                   The register set consists of transmit, receive, control, and
+                                                                               status registers. They are written and read using the SPI0
+SPI0                                                                           interface, and are affected by events in the IC. Detailed
+                                                                               descriptions of their operation and use can be found in
+    The SPI0 is a standard slave serial peripheral interface.
+                                                                               section SPI0 Register and Bit Descriptions.
+This interface provides two-way communications between
+the IC and an MCU. The MCU can write to registers that
+control the operation of the IC, and read back the conditions                  SPI1
+in the IC using the SPI. It can also write data to be sent out                      The SPI1 is a slave serial peripheral interface. It operates
+on the DBUS, and read data that was returned on the DBUS.                      asynchronously to the SPI0. It uses 16-bit transfers and is
+The register pointer and bit pointer are used to control which                 read only. The MOSI function is not implemented. SPI1 only
+registers and bits are being written to, and read from using                   reads the SPI1 8 16-bit circular buffer registers.
+                                                                                                                                                               33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                                                           27
+
+
+ FUNCTIONAL DEVICE OPERATION
+ LOGIC COMMANDS AND REGISTERS
+SPI1 REGISTERS                                                    response data. Each buffer is a 3-byte set that contains the
+   An eight position circular buffer made up of 16-bit words.     data high byte, data low byte, and status word of a DBUS
+                                                                  response.
+   Reads of these registers occur in a round robin (sequential
+order with wrap around at the end) fashion. If a buffer does          The received data from DBUS transactions is stored in the
+not contain any data it is skipped during the round robin         same receive buffer number as the transmit buffer for that
+sequence. More information on this buffer can be found in the     transaction.
+section SPI1 Communications.
+                                                                  BUS DRIVER/RECEIVER LOGIC
+RST                                                                   This block controls the physical layer drivers and receive
+   Asserting this pin low will cause the part to reset, forcing   data from the physical layer receivers. The physical layer
+registers to a known state and resetting the SPI0 and SPI1        converts the 0V to 5.0V low power logic signals to the higher
+buffer pointers. All bus activity will be halted and not allowed  voltage and drive levels required for the bus. It also converts
+to restart, and no SPI activity will be recognized until the RST  the low current (0mA to 11mA typical) loading of the response
+goes to a logic high level.                                       signal from the slave to logic voltage levels, to allow the
+                                                                  response from the slaves to be received.
+ADDRESSED TX BUFFER                                                   Each channel contains a CRC generator, that adds a
+                                                                  series of bits to each of the transmitted data words sent out
+The Addressed TX Buffer is a cyclic register set that allows      on the DBUS. The CRC bits are created from the data pattern
+up to four transmit data packets to be stored for future          and are used by the slave devices to determine if one or more
+transmission on the DBUS. This is done to prevent the             of the data bits sent was in error. The detailed operation and
+overwrite of transmit data if the transmission of the previous    control of this function is covered in the section entitled CRC
+data has not been completed. Each buffer is a 2-byte set that     GENERATION /CHECKING on page 26.
+contains the high byte and low byte of a DBUS command.                This block also checks the CRC bits that have been added
+   The transmit buffer queue looks for the lowest register        to the end of the response by the slave device. For a given
+number in the channel with data to be sent, and sends it over     pattern of received data, a new CRC is generated and
+the DBUS. It then checks the next sequential buffer - if there    compared to the CRC bits received. This is performed on the
+is data to be sent it will send it. If not, that buffer will be   received data from the bus high side, bus low side and bus
+skipped and the next buffer sent if it contains data. If no other sum circuits in the bus receiver. The results of these checks,
+buffers have data ready to be sent, the queue moves back to       determine if the data are valid, and whether or not the error
+the top of the buffer and continues checking until data is        bit is set as shown in Table 9. This bit is read back using the
+available.                                                        SPI during the same SPI transaction that reads the response,
+                                                                  in order to keep them associated with each other. The CRC
+                                                                  bits are removed by the IC and not seen by the MCU, when
+ADDRESSED RX BUFFER
+                                                                  reading the data registers. Operation of the CRC Check is
+   The Addressed RX Buffer is a cyclic register set that          covered in the section entitled CRC GENERATION /
+allows up to four responses to be stored without being            CHECKING on page 26.
+transferred to the MCU via the SPI. This is done so that data
+will not be lost, even if the MCU takes time to read the
+33781
+                                                                                           Analog Integrated Circuit Device Data
+28                                                                                                      Freescale Semiconductor
+
+
+                                                                                                 FUNCTIONAL DEVICE OPERATION
+                                                                                             LOGIC COMMANDS AND REGISTERS
+SPI0 REGISTER AND BIT DESCRIPTIONS                                 of control registers, along with separate command and data
+   The 33781 has 87 registers associated with the SPI0             registers, for queuing up to four commands. There are also
+interface, shown in Table 8. Each bus channel has its own set      registers containing check pattern data.
+  Table 9. Register List
+    Register   Register
+                               Register Definition       Bit7   Bit6       Bit5      Bit4      Bit3     Bit2    Bit1   Bit0
+    Address      Name
+    0000000     D0R0H      DBUS 0 Reg 0 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0000001     D0R0L      DBUS 0 Reg 0 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+    0000010   D0R0STAT     DBUS 0 Reg 0 Status           ER     TE        SDS       RNE        ICL       0      FIX0  FIX1
+    0000011     D0R1H      DBUS 0 Reg 1 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0000100     D0R1L      DBUS 0 Reg 1 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+    0000101   D0R1STAT     DBUS 0 Reg 1 Status           ER     TE        SDS       RNE        ICL       0      FIX0  FIX1
+    0000110     D0R2H      DBUS 0 Reg 2 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0000111     D0R2L      DBUS 0 Reg 2 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+    0001000   D0R2STAT     DBUS 0 Reg 2 Status           ER     TE        SDS       RNE        ICL       0      FIX0  FIX1
+    0001001     D0R3H      DBUS 0 Reg 3 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0001010     D0R3L      DBUS 0 Reg 3 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+    0001011   D0R3STAT     DBUS 0 Reg 3 Status           ER     TE        SDS       RNE        ICL       0      FIX0  FIX1
+    0001100    D0CTRL      DBUS 0 Control Register        -      -       DLYB       DLYA         -    LOOP1   LOOP0    MS
+    0001101      D0EN      DBUS 0 Enable Register        TS    ISDD         -         -          -    BSWH     BSWL    EN
+    0001110    D0POLY      DBUS 0 Polynomial            CRC    CRC        CRC       CRC       CRC      CRC      CRC   CRC
+                                                       POLY7  POLY6      POLY5     POLY4     POLY3    POLY2   POLY1  POLY0
+    0001111    D0SEED      DBUS 0 CRC Seed              CRC    CRC      CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE
+                                                       SEED7  SEED6        D5        D4         D3      D2       D1    D0
+    0010000   D0LENGTH     DBUS 0 Short Word and         SW     SW         SW        SW       CRC      CRC      CRC   CRC
+                           CRC Lengths
+                                                        LEN3   LEN2       LEN1      LEN0      LEN3     LEN2    LEN1   LEN0
+    0010001   D0SSCTRL     DBUS 0 Spread Spectrum         -      -          -         -          -     DEV2    DEV1   DEV0
+                           Control
+    0010010    D0FSEL      DBUS 0 Frequency Select     FSEL7  FSEL6      FSEL5     FSEL4     FSEL3    FSEL2    FSEL1 FSEL0
+    0010011   RESERVED Writes/reads of this address       -      -          -         -          -       -        -     -
+                           are ignored
+    0010100   RESERVED Writes/reads of this address       -      -          -         -          -       -        -     -
+                           are ignored
+    0010101     D1R0H      DBUS 1 Reg 0 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0010110     D1R0L      DBUS 1 Reg 0 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+    0010111   D1R0STAT     DBUS 1 Reg 0 Status           ER     TE        SDS       RNE        ICL       0      FIX0  FIX1
+    0011000     D1R1H      DBUS 1 Reg 1 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0011001     D1R1L      DBUS 1 Reg 1 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+    0011010   D1R1STAT     DBUS 1 Reg 1 Status           ER     TE        SDS       RNE        ICL       0      FIX0  FIX1
+    0011011     D1R2H      DBUS 1 Reg 2 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0011100     D1R2L      DBUS 1 Reg 2 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+    0011101   D1R2STAT     DBUS 1 Reg 2 Status           ER     TE        SDS       RNE        ICL       0      FIX0  FIX1
+    0011110     D1R3H      DBUS 1 Reg 3 Upper Byte       D15    D14        D13       D12       D11      D10      D9    D8
+    0011111     D1R3L      DBUS 1 Reg 3 Lower Byte       D7     D6         D5        D4         D3      D2       D1    D0
+                                                                                                                          33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                    29
+
+
+FUNCTIONAL DEVICE OPERATION
+LOGIC COMMANDS AND REGISTERS
+ Table 9. Register List (continued)
+   Register  Register
+                             Register Definition    Bit7   Bit6    Bit5   Bit4    Bit3     Bit2    Bit1      Bit0
+   Address    Name
+   0100000  D1R3STAT     DBUS 1 Reg 3 Status        ER     TE     SDS    RNE      ICL       0      FIX0     FIX1
+   0100001   D1CTRL      DBUS 1 Control Register     -      -    DLYB   DLYA        -    LOOP1   LOOP0       MS
+   0100010    D1EN       DBUS 1 Enable Register     TS    ISDD      -      -        -       -        -       EN
+   0100011   D1POLY      DBUS 1 Polynomial         CRC    CRC     CRC    CRC     CRC      CRC      CRC      CRC
+                                                  POLY7  POLY6   POLY5  POLY4   POLY3    POLY2   POLY1     POLY0
+   0100100   D1SEED      DBUS 1 CRC Seed           CRC    CRC   CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE
+                                                  SEED7  SEED6     D5     D4       D3      D2       D1       D0
+   0100101  D1LENGTH     DBUS 1 Short Word and      SW     SW      SW     SW     CRC      CRC      CRC      CRC
+                         CRC Lengths
+                                                   LEN3   LEN2    LEN1   LEN0    LEN3     LEN2    LEN1      LEN0
+   0100110  D1SSCTRL     DBUS 1 Spread Spectrum      -      -       -      -        -     DEV2    DEV1     DEV0
+                         Control
+   0100111   D1FSEL      DBUS 1 Frequency Select  FSEL7  FSEL6   FSEL5  FSEL4   FSEL3    FSEL2    FSEL1    FSEL0
+   0101000  RESERVED Writes/reads of this address    -      -       -      -        -       -        -        -
+                         are ignored
+   0101001  RESERVED Writes/reads of this address    -      -       -      -        -       -        -        -
+                         are ignored
+   0101010    D2R0H      DBUS 2 Reg 0 Upper Byte    D15    D14     D13    D12     D11      D10      D9       D8
+   0101011    D2R0L      DBUS 2 Reg 0 Lower Byte    D7     D6      D5     D4       D3      D2       D1       D0
+   0101100  D2R0STAT     DBUS 2 Reg 0 Status        ER     TE     SDS    RNE      ICL       0      FIX0     FIX1
+   0101101    D2R1H      DBUS 2 Reg 1 Upper Byte    D15    D14     D13    D12     D11      D10      D9       D8
+   0101110    D2R1L      DBUS 2 Reg 1 Lower Byte    D7     D6      D5     D4       D3      D2       D1       D0
+   0101111  D2R1STAT     DBUS 2 Reg 1 Status        ER     TE     SDS    RNE      ICL       0      FIX0     FIX1
+   0110000    D2R2H      DBUS 2 Reg 2 Upper Byte    D15    D14     D13    D12     D11      D10      D9       D8
+   0110001    D2R2L      DBUS 2 Reg 2 Lower Byte    D7     D6      D5     D4       D3      D2       D1       D0
+   0110010  D2R2STAT     DBUS 2 Reg 2 Status        ER     TE     SDS    RNE      ICL       0      FIX0     FIX1
+   0110011    D2R3H      DBUS 2 Reg 3 Upper Byte    D15    D14     D13    D12     D11      D10      D9       D8
+   0110100    D2R3L      DBUS 2 Reg 3 Lower Byte    D7     D6      D5     D4       D3      D2       D1       D0
+   0110101  D2R3STAT     DBUS 2 Reg 3 Status        ER     TE     SDS    RNE      ICL       0      FIX0     FIX1
+   0110110   D2CTRL      DBUS 2 Control Register     -      -    DLYB   DLYA        -    LOOP1   LOOP0       MS
+   0110111    D2EN       DBUS 2 Enable Register     TS    ISDD      -      -        -       -        -       EN
+   0111000   D2POLY      DBUS 2 Polynomial         CRC    CRC     CRC    CRC     CRC      CRC      CRC      CRC
+                                                  POLY7  POLY6   POLY5  POLY4   POLY3    POLY2   POLY1     POLY0
+   0111001   D2SEED      DBUS 2 CRC Seed           CRC    CRC   CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE
+                                                  SEED7  SEED6     D5     D4       D3      D2       D1       D0
+   0111010  D2LENGTH     DBUS 2 Short Word and      SW     SW      SW     SW     CRC      CRC      CRC      CRC
+                         CRC Lengths
+                                                   LEN3   LEN2    LEN1   LEN0    LEN3     LEN2    LEN1      LEN0
+   0111011  D2SSCTRL     DBUS 2 Spread Spectrum      -      -       -      -        -     DEV2    DEV1     DEV0
+                         Control
+   0111100   D2FSEL      DBUS 2 Frequency Select  FSEL7  FSEL6   FSEL5  FSEL4   FSEL3    FSEL2    FSEL1    FSEL0
+   0111101  RESERVED Writes/reads of this address    -      -       -      -        -       -        -        -
+                         are ignored
+   0111110  RESERVED Writes/reads of this address    -      -       -      -        -       -        -        -
+                         are ignored
+33781
+                                                                               Analog Integrated Circuit Device Data
+30                                                                                         Freescale Semiconductor
+
+
+                                                                                     FUNCTIONAL DEVICE OPERATION
+                                                                                 LOGIC COMMANDS AND REGISTERS
+ Table 9. Register List (continued)
+   Register   Register
+                              Register Definition     Bit7   Bit6    Bit5   Bit4   Bit3    Bit2    Bit1    Bit0
+   Address      Name
+   0111111     D3R0H      DBUS 3 Reg 0 Upper Byte     D15    D14     D13    D12    D11     D10      D9      D8
+   1000000     D3R0L      DBUS 3 Reg 0 Lower Byte     D7      D6      D5     D4     D3      D2      D1      D0
+   1000001   D3R0STAT     DBUS 3 Reg 0 Status         ER      TE    SDS    RNE     ICL       0    FIX0    FIX1
+   1000010     D3R1H      DBUS 3 Reg 1 Upper Byte     D15    D14     D13    D12    D11     D10      D9      D8
+   1000011     D3R1L      DBUS 3 Reg 1 Lower Byte     D7      D6      D5     D4     D3      D2      D1      D0
+   1000100   D3R1STAT     DBUS 3 Reg 1 Status         ER      TE    SDS    RNE     ICL       0    FIX0    FIX1
+   1000101     D3R2H      DBUS 3 Reg 2 Upper Byte     D15    D14     D13    D12    D11     D10      D9      D8
+   1000110     D3R2L      DBUS 3 Reg 2 Lower Byte     D7      D6      D5     D4     D3      D2      D1      D0
+   1000111   D3R2STAT     DBUS 3 Reg 2 Status         ER      TE    SDS    RNE     ICL       0    FIX0    FIX1
+   1001000     D3R3H      DBUS 3 Reg 3 Upper Byte     D15    D14     D13    D12    D11     D10      D9      D8
+   1001001     D3R3L      DBUS 3 Reg 3 Lower Byte     D7      D6      D5     D4     D3      D2      D1      D0
+   1001010   D3R3STAT     DBUS 3 Reg 3 Status         ER      TE    SDS    RNE     ICL       0    FIX0    FIX1
+   1001011    D3CTRL      DBUS 3 Control Register       -      -   DLYB   DLYA       -   LOOP1   LOOP0     MS
+   1001100      D3EN      DBUS 3 Enable Register      TS    ISDD       -      -      -       -       -     EN
+   1001101    D3POLY      DBUS 3 Polynomial          CRC    CRC     CRC    CRC    CRC      CRC    CRC     CRC
+                                                    POLY7  POLY6   POLY5  POLY4  POLY3   POLY2   POLY1   POLY0
+   1001110    D3SEED      DBUS 3 CRC Seed            CRC    CRC   CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE CRCSEE
+                                                    SEED7  SEED6      D5     D4     D3      D2      D1      D0
+   1001111   D3LENGTH     DBUS 3 Short Word and       SW     SW      SW     SW    CRC      CRC    CRC     CRC
+                          CRC Lengths
+                                                     LEN3   LEN2    LEN1   LEN0   LEN3    LEN2    LEN1    LEN0
+   1010000   D3SSCTRL     DBUS 3 Spread Spectrum        -      -       -      -      -    DEV2    DEV1   DEV0
+                          Control
+   1010001    D3FSEL      DBUS 3 Frequency Select   FSEL7  FSEL6   FSEL5  FSEL4  FSEL3    FSEL2  FSEL1   FSEL0
+   1010010    MASKID      Mask Version ID Code      FPAR     ID6     ID5    ID4    ID3     ID2     ID1     ID0
+   1010011    CHKCD0      Check Pattern 0          CKPTN2 CKPTN2 CKPTN2 CKPTN2 CKPTN1 CKPTN1 CKPTN1 CKPTN1
+                                                        3      2       1      0      9       8       7       6
+   1010100    CHKCD1      Check Pattern 1          CKPTN1 CKPTN1 CKPTN1 CKPTN1 CKPTN1 CKPTN1 CKPTN9 CKPTN8
+                                                        5      4       3      2      1       0
+   1010101    CHKCD2      Check Pattern 2          CKPTN7 CKPTN6 CKPTN5 CKPTN4 CKPTN3 CKPTN2 CKPTN1 CKPTN0
+   1010110    NCKCD0      Negative Check Pattern 0 NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN
+                                                       23     22      21     20     19      18      17      16
+   1010111    NCKCD1      Negative Check Pattern 1 NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN
+                                                       15     14      13     12     11      10       9       8
+   1011000    NCKCD2      Negative Check Pattern 2 NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN NCKPTN
+                                                        7      6       5      4      3       2       1       0
+   1011001   RESERVED Writes/reads of this address      -      -       -      -      -       -       -       -
+                          are ignored
+   1011010   RESERVED Writes/reads of this address      -      -       -      -      -       -       -       -
+                          are ignored
+                                                                                                               33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                          31
+
+
+ FUNCTIONAL DEVICE OPERATION
+ LOGIC COMMANDS AND REGISTERS
+DnRnH REGISTERS                                                         The bit assignments are shown in Figure 24. Even if a
+    These are read/write registers. There are sixteen of these       short word of 8 bits is selected for this bus (MSn = 1), this
+registers, four for each of the buses, as shown in Table 8.          register must be written in the SPI burst sequence. When the
+When written to, the data is the high byte of a 9- to16-bit          short word length is set at other than 8 bits, this register will
+command. When read, it is the high byte of a 9- to 16-bit            contain the bits above eight, starting with the ninth bit in the
+return on the DBUS. Writing to this register and the low byte        least significant bit position of the register. Unused bit
+register without a framing error schedules a DBUS                    positions are don’t care values.
+transaction.
+            SPI Data Bit        Bit 7        6            5        4              3           2             1           0
+            Read/Write         Bit 15     Bit 14       Bit 13    Bit 12         Bit 11      Bit 10        Bit 9       Bit 8
+            Reset                 0          0            0        0              0           0             0           0
+                                        Figure 24. DnRnH Data Register Bit Assignments
+DnRnL REGISTERS                                                      register and the high byte register without a framing error,
+    These are read/write registers. There are sixteen of these       schedules a DBUS transaction. The bit assignments are
+registers, four for each of the buses. When written to, the data     shown in Figure 25
+is the low byte of a 16-bit command. When in read, it is the            If this address is pointed to by the first SPI0 byte of a SPI
+low byte of a 16-bit return on the DBUS. Writing to this             burst transaction, that transaction is ignored.
+            SPI Data Bit        Bit 7        6            5        4              3           2             1           0
+            Read/Write          Bit 7      Bit 6        Bit 5    Bit 4          Bit 3       Bit 2         Bit 1       Bit 0
+            Reset                 0          0            0        0              0           0             0           0
+                                        Figure 25. DnRnL Data Register Bit Assignments
+DnRnSTAT REGISTER                                                    CS0 is de-asserted. This is done to ensure that partial
+    There are read-only registers. These registers cover the         updates will not occur. If this address is pointed to by the first
+status of their associated DnRnH and DnRnl registers. The            SPI0 byte of a SPI burst transaction, that transaction is
+values are latched when CS0 is asserted low. Any changes of          ignored.
+status detected by these bits will not update the register until        The bit assignments are shown in Figure 26.
+            SPI Data Bit        Bit 7        6            5        4              3           2             1           0
+            Read                 ER         TE          SDS      RNE             ICL          0           FIX0        FIX1
+            Reset                 0          1            0        0              0           0             0           1
+                                        Figure 26. DnRnSTAT Register Bit Assignments
+ER–CRC Error Bit                                                     whenever data is written from the DBUS into the DnRnH/L
+    • 0 = CRC value for the data in the read buffer was              receive registers. If Channel Thermal Shutdown or Idle and
+      correct.                                                       SIgnal Mode Disable occur, these bits will be reset along with
+                                                                     the other channel register bits.
+    • 1 = CRC value for the data in the read buffer was not
+      correct (data not valid).
+                                                                     TE–Transmit Register Empty Bit
+    CRC errors are associated with each receive buffer, so
+that each buffer has a bit to indicate whether the data in that         • 0 = Transmit buffer not empty.
+buffer was received correctly. Whenever a received data                 • 1 = Transmit buffer empty.
+value is available in the DnRnH and DnRnL registers, the                This bit indicates that data has been written to the
+associated CRC error status is available at ERn in the               associated channel register high and/or low, but has not been
+associated DnRnSTAT register. The ER bit is set or cleared           read for sending on the DBUS. The bit is set to 0 on the rising
+33781
+                                                                                               Analog Integrated Circuit Device Data
+32                                                                                                           Freescale Semiconductor
+
+
+                                                                                                    FUNCTIONAL DEVICE OPERATION
+                                                                                                  LOGIC COMMANDS AND REGISTERS
+edge of CS0 after a SPI0 write to the associated DnRnH/L                   During Idle mode, the current limit is independently sensed
+registers. It is set to 1 once the DBUS state machine                   on both the high side and the low side of the bus driver. An
+completes sending the DnRnH/L data in the buffer over the               over-current fault condition occurs if either DnH or DnL is
+DBUS.                                                                   within the sourcing or sinking limit (500mA). This is
+    If SPI0 attempts to write to a transmit register that is not        characterized by both DnH and DnL voltage levels being
+empty, the new command will be ignored.                                 simultaneously at either ground or the bus voltage VBUS.
+                                                                           The ICL bit is set and the drivers are disabled if either of
+SDS - Signal Mode Shutdown                                              the following conditions are true:
+    • 0 = Bus driver is active.                                         • the fault condition occurs continuously for 2.5μs
+    • 1 = High side or low side bus driver had a current                • the fault condition occurs four times with 50μs or less
+        shutdown during signal mode in this DBUS transaction.              between occurrences
+    The bus driver current is independently sensed on both the             Figure 27 shows a representation of the over-current fault
+high side and the low side of the driver during signaling mode.         condition circuitry.
+This bit is set if either driver exceeds the over-current
+detection threshold for greater than the delay time. In that
+event, the driver is disabled (becomes high-impedance) for
+the remainder of that DBUS transaction.                                       LIM_DH_H
+    The MCU can use this bit along with other fault condition                 LIM_DL_H
+bits to detect that the data in this buffer may be invalid.                                                            Over-current Fault
+                                                                              LIM_DH_L
+RNE–Receive Register Not Empty Bit                                             LIM_DL_L
+    • 0 = No new data ready.
+    • 1 = Data is available to be read.                                     Figure 27. Over-current Fault Condition for ICL Bit
+    This bit is set when the DBUS writes to the associated
+DnRnH and DnRnL registers. The bit is cleared on the rising             Fix[0:1] - Fixed Bits
+edge of CS0 after a read of the DnRn STAT register. This bit               These are hard coded bits - FIX0 is always zero and FIX1
+is cleared even if a SPI0 framing error occurred during the             is always one. These bits are the last two bits transmitted
+SPI burst transfer that read the receive register.                      during the SPI message. Since their values are always fixed,
+    This bit will not be set if the VSUP voltage falls below the        these bits enable the Main MCU software to determine if the
+low voltage detect threshold for longer than the VSUP low               SPI data was shifted due to one too many, or one too few SPI
+mask time during the associated bus transfer.                           clocks.
+ICL - Idle Mode Double Current Limit Bit (Idle Mode                     DnCTRL REGISTER
+Shutdown)                                                                  The read/write DnCTRL register sets up conditions to be
+    • 0 = Idle mode current limit not active.                           used on the DBUS. There are four of these registers, one for
+    • 1 = Idle mode current limit active.                               each of the buses. The bit assignments are shown in
+                                                                        Figure 28.
+             SPI Data Bit         Bit 7        6             5        4             3           2            1            0
+             Read/Write             -          -          DLYB      DLYA             -       LOOP1       LOOP0           MS
+             Reset                 0           0             0        0             0           0            0            0
+                                            Figure 28. Dn Control Register Bit Assignment
+    Each bus n has an associated DnCTRL register. This                  high to IDLE voltage transition) to the start of a new DBUS
+register should be written to before data is sent over its bus.         transaction (signaled by the start of the IDLE voltage to signal
+A write to the register will abort any current activity on the bus.     high transition).
+Any bit changes will take place on the next DBUS transaction
+following the conclusion of the SPI write to the register. Refer
+to the Protocol Engine section for more detail.                         Table 10. DLY[B:A] Frame Spacing
+DLY[B:A]–Interframe Delay for Channel n                                                           Minimum Delay Between Frames
+                                                                              DLY[B:A]
+                                                                                                              (Bit Times)
+    These bits specify the minimum delay between transfer
+frames on the bus as illustrated in Table 10. For example,                        00                                4
+when DLY[B:A] is set to 00, there is a minimum of four bit
+times of IDLE voltage level. The time is measured from the                        01                                5
+end of a DBUS transaction (signaled by the start of the signal
+                                                                                                                                      33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                                  33
+
+
+ FUNCTIONAL DEVICE OPERATION
+ LOGIC COMMANDS AND REGISTERS
+Table 10. DLY[B:A] Frame Spacing (continued)                         disables the bus channel and clears the EN bit in the DnEN
+                                                                     register.
+           10                               6
+           11                               8
+                                                                     MS–Message Size for Channel n
+                                                                     • 0 = Long Word.
+LOOP[1:0]- LOOP MODE CONTROL                                         • 1 = Short Word
+    • 00, 01, 10 = Loop Mode disabled.                                   The Long Word will contain 16 bits of data and 0 to 8 bits
+    • 11 = Loop Mode enabled                                         of CRC. The Short Word can be made to have between 8 and
+                                                                     15 bits of data and 0 to 8 bits of CRC. Long words are
+    When loop mode is enabled, the transmitter and receiver
+                                                                     generally used for configuration and setup messages. Short
+circuits are connected within the IC. This allows data to be
+                                                                     words are generally used for DBUS data transactions.
+passed directly through the transmit and receive circuits
+without going out on the DBUS channel. When LOOP mode
+is enabled, the DBUS channel is disconnected from the                DnEN REGISTER
+transmitter and receiver circuits, so that any bus fault                 This read/write register is used to enable or disable each
+conditions do not interfere with this test. Setting this bit also    of the buses. It also allows the channel thermal shutdown and
+                                                                     bus driver shutdown bits to be read. The bit assignments are
+                                                                     shown in Figure 29.
+          SPI Data Bit         Bit 7          6           5        4             3             2           1             0
+          Read/Write            TS         ISDD            -       -              -         BSWH         BSWL           EN
+                                                                                         (D0EN only) (D0EN only)
+          Reset                  0            0           0        0             0             0           0             0
+                                                    Figure 29. DnEN Register Bits
+TS – Indicates a Thermal Shutdown on Channel n                       remainder of the channel registers are not changed. Any
+    • 0 = No thermal shutdown occurring on the Channel.              DBUS transfer that was in progress is stopped. The ISDD bit
+                                                                     is cleared when the MCU writes a zero to this bit.
+    • 1 = Thermal shutdown has occurred on the Channel.
+    If the channel bus thermal limit is reached for either of the    BSWH - Bus Switch High Enable
+channel bus drivers, the channel drivers are disabled and the
+TS bit is set. There is a 4 μsec filter on Tlim to prevent false         • 0 = Channel 0 Bus High Switch Open
+triggering. When this bit is set, the channel registers are all          • 1 = Channel 0 Bus High Switch Close
+reset along with the buffer pointers. Any DBUS transfer that             Channel 0 of the 33781 has a switch on both the high side
+was in progress is stopped.                                          and the low side of the bus output driver to allow the channel
+    If the shutdown occurs on channel zero, the pseudo bus           to drive two separate sets of bus wires. Through this bus
+switches are also opened and the BSWH and BSWL bits are              switch the bus receiver can also receive data from slaves on
+cleared. If the thermal limit is reached on either of the pseudo     both of these buses. When the BSWH bit is written as zero,
+bus switches (but not on the channel zero drivers), the bus          the high side bus switch will be open. When the bit is written
+switches are opened, only the BSWH and BSWL bits are                 as a 1, the high side bus switch will be closed. Reads of this
+cleared, and no other register bits are changed.                     bit show the current state of the high side bus switch.
+    The TS bit is cleared after a zero has been written to the           The BSWH bit is cleared and the bus switch opened if a
+TS bit.                                                              channel zero thermal shutdown occurs, if the channel zero
+                                                                     EN bit is cleared or ISDD bit is set, or if the high side or low
+ISDD - Idle and Signal Mode Disable on Channel n                     side pseudo bus thermal limit is exceeded. It is necessary to
+                                                                     write a one to the BSWH bit to close the switch again.
+    • 0 = Idle and signal mode are active on the Channel.
+    • 1 = During signaling mode, the bus driver has shut             BSWL - Bus Switch Low Enable
+        down for sequential transactions on the Channel and
+        the bus drivers are now disabled (high-impedance).               • 0 = Channel 0 Bus Low Switch Open
+                                                                         • 1 = Channel 0 Bus Low Switch Close
+    If a channel high side or low side bus driver over-current
+limit is reached during signaling mode in 2 consecutive                  When the BSWL bit is written as zero, the low side bus
+frames, the bus drivers are disabled and the ISDD bit is set.        switch will be open. When the bit is written as a 1, the low side
+If the condition occurs on channel zero, the pseudo bus              bus switch will be closed. Reads of this bit show the current
+switches are also opened and the BSWH and BSWL bits are              state of the low side bus switch.
+cleared. In addition, the channel buffer registers are reset, the        The BSWL bit is cleared and the bus switch opened, if a
+buffer pointers are reset, and the EN bit is cleared. The            channel 0 thermal shutdown occurs, if the channel zero EN
+33781
+                                                                                               Analog Integrated Circuit Device Data
+34                                                                                                         Freescale Semiconductor
+
+
+                                                                                                      FUNCTIONAL DEVICE OPERATION
+                                                                                                   LOGIC COMMANDS AND REGISTERS
+bit is cleared or the ISDD bit is set, or if the high side or low       stopped. If the write is to channel 0, the pseudo bus switches
+side pseudo bus thermal limit is exceed. It is necessary to             are also opened and the BSWH and BSWL bits are cleared.
+write a one to the BSWL bit to close the switch again.                     The EN bit is also cleared and the channel disabled if a
+                                                                        thermal shutdown occurs. It is necessary to write a 1 to the
+EN – Controls Enabling and Disabling of Channel                         EN bit to turn it back on.
+    • 0 = The Channel is disabled.
+    • 1 = The Channel is enabled.                                       DnPOLY REGISTERS
+    When the channel is disabled, the channel addressed                    These read/write registers control the polynomial used for
+buffer data bits, the status register bits, and the buffer              calculating the CRC that is transmitted/received on the DBUS
+pointers are reset. Any DBUS transfer that was in progress is           channels. There are four of these registers, one for each
+                                                                        DBUS channel. The bit assignments are shown in Figure 30.
+           SPI Data Bit          Bit 7         6            5         4             3            2            1           0
+           Read/Write       CRCPOLY7 CRCPOLY6 CRCPOLY5 CRCPOLY4 CRCPOLY3 CRCPOLY2 CRCPOLY1 CRCPOLY0
+           Reset                  0            0            0         1             0            0            0           1
+                                         Figure 30. Dn Polynomial Register Bit Assignments
+    Each bit represents a polynomial term in the CRC                       A write to the register will abort any current activity on the
+equation. Bit 7 represents x7, bit 6 represents x6, and so on.          bus. Any bit changes will take place on the next DBUS
+Both the short and long word command use the same                       transaction following the conclusion of the SPI write to the
+polynomial. The polynomial bits beyond what is specified in             register.
+the CRCLEN[3:0] registers are ignored, and the most
+significant term of each polynomial is assumed to be on. So,            DnSEED REGISTERS
+for example, to represent a 6-bit CRC with a polynomial of                 These read/write registers control the initial value, or seed,
+x6+ x3 + 1, the value in DnPOLY is xx001001. Bits 7 and 6 are           used  for calculating the CRC that is transmitted/received on
+ignored in this case. These registers reset to 00010001 (x4 +           the DBUS channels. There are four of these registers, one for
+1), which is the default DSI value (bit 4 does not need to be
+on for this case, but is included for readability).                        each DBUS channel. The bit assignments are shown in
+                                                                        Figure 31.
+           SPI Data Bit          Bit 7         6            5         4             3            2            1           0
+           Read/Write       CRCSEED7 CRCEED6           CRCEED5     CRCEED4     CRCEED3      CRCEED2      CRCEED1     CRCEED0
+           Reset                  0            0            0         0             1            0            1           0
+                                         Figure 31. Dn CRC Seed Register Bit Assignments
+    The bits in these registers form a word that is used as the         transaction following the conclusion of the SPI write to the
+seed for the CRC calculations. Both the short and long word             register.
+commands use the same seed. The seed bits beyond what is
+specified in the CRCLEN[3:0] registers are ignored. So, for             DnLENGTH REGISTERS
+example, to represent a 6-bit CRC with a seed 010101, the                  These read/write registers control the short word lengths
+value in DnSEED is xx010101. Bits 7 and 6 are ignored in this           and CRC lengths for data that is transmitted/received on the
+case. These registers reset to 00001010, which is the default           DBUS channels. There are four of these registers, one for
+DSI value.                                                              each DBUS channel. The bit assignments are shown in
+    A write to the register will abort any current activity on the      Figure 32.
+bus. Any bit changes will take place on the next DBUS
+           SPI Data Bit          Bit 7         6            5         4             3            2            1           0
+           Read/Write        SWLEN3        SWLEN2       SWLEN1     SWLEN0      CRCLEN3      CRCLEN2      CRCLEN1     CRCLEN0
+           Reset                  1            0            0         0             0            1            0           0
+                              Figure 32. Dn Short Word and CRC Length Register Bit Assignments
+    A write to the register will abort any current activity on the      transaction following the conclusion of the SPI write to the
+bus. Any bit changes will take place on the next DBUS                   register.
+                                                                                                                                     33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                                35
+
+
+ FUNCTIONAL DEVICE OPERATION
+ LOGIC COMMANDS AND REGISTERS
+SWLEN[3:0]–Short Word Length in Bits                                  CRCLEN[3:0] values range from 0 bits (no CRC) to 8 bits. If
+   These bits specify the bit length of the short word                an attempt is made to write a value that is greater than 8 bits,
+command that will be sent onto the specified DBUS channel.            the value 8 (1000) is automatically written into this register.
+The reset value for these bits is 1000 (8 bits), which is the         The CRCLEN[3:0] value overrides the CRCPOLY and
+default DSI value. Allowed SWLEN[3:0] values range from               CRCSEED bit values that are beyond what the CRCLEN[3:0]
+8 bits to 15 bits. If an attempt is made to write a value that is     specifies.
+less than 8 bits, a 1 is automatically written to SWLEN3,
+thereby making the register value greater than or equal to 8          DnSSCTRL REGISTERS
+bits.                                                                     These registers control the operation of the spread
+                                                                      spectrum circuits.
+CRCLEN[3:0]–CRC Length in Bits                                            A write to the register will abort any current activity on the
+   These bits specify the bit length of CRCs that are sent out        bus. Any bit changes will take place on the next DBUS
+with commands and read back in. The length is valid for both          transaction following the conclusion of the SPI write to this
+short and long word commands. The reset value for these               register. The bit assignments are shown in Figure 33.
+bits is 0100 (4 bits), which is the default DSI value. Allowed
+           SPI Data Bit        Bit 7          6           5         4              3           2             1           0
+           Read/Write             -           -           -         -              -         DEV2         DEV1        DEV0
+           Reset                  0           0           0         0              0           0             0           0
+                                Figure 33. Dn Spread Spectrum Control Register Bit Assignment
+DEV[2:0]–Spread Spectrum Frequency Deviation for                      period to the base time period plus 1 μsec in 64 equal steps.
+Channel n                                                             The mode with deviation disabled may be used to achieve
+   These bits control the frequency deviation of the spread           fine control of the bit rate without frequency spreading.
+spectrum signalling.
+   DEV[2:0] = 000 - No Deviation.
+                                                                      DnFSEL REGISTERS
+   DEV[2:0] = 001 - 16 1/64 MHz periods Max Deviation                     These read/write registers control the spread spectrum
+                                                                      base time period. There are four of these registers, one for
+   DEV[2:0] = 010 - 32 1/64 MHz periods Max Deviation                 each DBUS channel. The bit assignments are shown in
+   DEV[2:0] = 011 - 64 1/64 MHz periods Max Deviation                 Figure 34.
+   DEV[2:0] = 100 - 78 1/64 MHz periods Max Deviation                     A write to one of these registers will abort any current
+   The deviation is the max number of 1/64MHz time periods            activity on the bus. Any bit changes will take place on the next
+which are randomly added to the base time period to achieve           DBUS transaction following the conclusion of the SPI write to
+the spread spectrum effect. So for example, if you choose             the register. Refer to the Spread Spectrum section for more
+DEV=011, the bit time will randomly vary from the base time           detail.
+           SPI Data Bit        Bit 7          6           5         4              3           2             1           0
+           Read/Write         FSEL7        FSEL6       FSEL5      FSEL4         FSEL3       FSEL2         FSEL1       FSEL0
+           Reset                  0           0           1         0              1           0             0           0
+                                    Figure 34. Dn Frequency Selection Register Bit Assignments
+DnFSEL[7:0] - Channel Frequency Selection Bits                            With a 4MHz clock and these bits set to zero the max bit
+   These bits select the channel base time period. These bits         rate is 200kbps. Table 8 gives some examples of the max bit
+determine the minimum bit time (maximum bit frequency for             rate and minimum bit time for f CLK = 4.0MHz.
+a channel. The equation for the minimum bit time is:
+   ((1/16*fCLK) x (320 +2x)) where x = 0 to 255 (decimal)
+                                                                      MASKID REGISTER
+                                                                          This read-only register contains seven mask ID bits for the
+                                                                      silicon. This ID can reflect the version, design change
+   The hex value for x in the equation is represented by the          number, or other encoded information. The purpose is for the
+FSEL[7:0] bits                                                        central module CPU to be able to know what version of silicon
+33781
+                                                                                                Analog Integrated Circuit Device Data
+36                                                                                                            Freescale Semiconductor
+
+
+                                                                                                  FUNCTIONAL DEVICE OPERATION
+                                                                                                LOGIC COMMANDS AND REGISTERS
+is in the system. The Fuse Parity Error Bit is also included in
+this register. The bit encoding is shown in Figure 35
+           SPI Data Bit         Bit 7           6           5       4            3            2           1           0
+           Read Only           FPAR            ID6         ID5     ID4          ID3          ID2         ID1         ID0
+           Reset                  0             0           0       0            0            0           0           1
+                                             Figure 35. Mask ID Register Bit Assignments
+FPAR – Fuse Parity Error Bit                                          ID[6:0] – Mask ID number
+    • 0 = No fuse parity error.                                          The mask ID that identifies different versions or revisions
+    • 1 = There is a fuse parity error.                               of the device.
+    Some parameters in the device are trimmed by fuses.
+Since these parameters can be impacted by the state of the            Check Pattern and Negative Check Pattern
+fuses, a fuse parity is calculated and stored during device           RegisteRS
+manufacturing. When the device is powered up, the current                These read-only registers are for checking whether there
+fuse parity is checked against the stored parity. If they do not      is a stuck bus bit. These registers are read as a 3 byte burst
+match this bit is set. This bit is also set if the part is            using a standard SPI burst frame The bit encoding is shown
+untrimmed.                                                            in Figure 36 and Figure 37
+           SPI Data Bit         Bit 7           6           5       4            3            2           1           0
+           Read             CKPTN23       CKPTN22        CKPTN21 CKPTN20      CKPTN19     CKPTN18     CKPTN17     CKPTN16
+           Reset                  1             0           1       0            1            0           1           0
+           Read             CKPTN15       CKPTN14        CKPTN13 CKPTN12      CKPTN11     CKPTN10     CKPTN09     CKPTN08
+           Reset                  0             1           0       1            0            1           0           1
+           Read             CKPTN07       CKPTN06        CKPTN05 CKPTN04      CKPTN03     CKPTN02     CKPTN01     CKPTN00
+           Reset                  1             0           1       0            1            0           1           0
+                                        Figure 36. Check Pattern Registers Bit Assignments
+           SPI Data Bit         Bit 7           6           5       4            3            2           1           0
+           Read             NCKPTN23 NCKPTN22 NCKPTN21 NCKPTN20 NCKPTN19 NCKPTN18 NCKPTN17 NCKPTN16
+           Reset                  0             1           0       1            0            1           0           1
+           Read             NCKPTN15 NCKPTN14 NCKPTN13 NCKPTN12 NCKPTN11 NCKPTN10 NCKPTN09 NCKPTN08
+           Reset                  1             0           1       0            1            0           1           0
+           Read             NCKPTN07 NCKPTN06 NCKPTN05 NCKPTN04 NCKPTN03 NCKPTN02 NCKPTN01 NCKPTN00
+           Reset                  0             1           0       1            0            1           0           1
+                                   Figure 37. Negative Check Pattern Registers Bit Assignments
+                                                                                                                                33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                           37
+
+
+ FUNCTIONAL DEVICE OPERATION
+ PROTECTION AND DIAGNOSTIC FEATURES
+                                        PROTECTION AND DIAGNOSTIC FEATURES
+OVER-CURRENT PROTECTION                                           that both drivers are protected. When a thermal fault is
+    Current limiters on the outputs prevent damage in the case    detected, the channel drivers are disabled (Hi-Z) until they
+of shorts. Running in current limit results in high power         are re-enabled via the SPI. The thermal protection
+dissipation of the IC. If the power dissipation becomes high      incorporates hysteresis, preventing the channel bus drivers
+enough, the die temperature will rise above its maximum           from being re-enabled until the temperature has decreased.
+rating and an over-temperature circuit on the IC will shut        Thermal fault information is reported via the DEN register.
+down the DBUS Driver/Receiver block.                              See DnEN Register section for a description of the fault
+                                                                  reporting and clearing of the EN bits.
+    Each channel high and low side bus drivers have current
+limits for protection of both this device and slave devices
+connected on the DBUS. During idle mode, the DnH drivers          LOAD DUMP OPERATION
+have a high value current limit when sourcing current to allow       During an over-voltage condition (e.g., when load dump is
+the drivers to charge the slave power storage capacitors, and     applied at the VSUPn pins), the DBUS voltage waveform is
+a lower value current limit when sinking current and slewing      modified to ensure that power dissipation is minimized,
+the load capacitance. Conversely, the DnL drivers have a          DBUS timing is not violated, and internal components are
+high value current limit when they are sinking current, and a     protected.
+lower value current limit when they are sourcing current.            The midpoint of the signalling voltage is clamped at about
+    In addition, the device monitors the current limit on each    13V, such that for VSUPn greater than 26V, the signalling
+channel to see if the channel is in “double current limit” during voltage levels do not increase. An over-voltage detection
+every idle state. See ICL - Idle Mode Double Current Limit Bit    circuit connected to DnH, having a threshold at about 26V,
+(Idle Mode Shutdown) on page 33. If the idle current limit is     causes the slew rates and driver conditions to be modified.
+detected, the ICL bit is set in the DnSTAT register for the next  For a Signal-to-Idle transition, this causes the DnH voltage to
+DBUS transaction.                                                 rise rapidly to the Idle state, and the DnL voltage is
+    During signaling mode, the drivers incorporate a gross        maintained close to zero. For an Idle-to-Signal transition, the
+current limit and an over-current shutdown. The current           DnH voltage will decrease rapidly until the over-voltage
+shutdown is set at a low value, such that the channel high and    threshold is reached, when normal operation resumes.
+low side bus driver will shut down if the sourcing or sinking     During this rapid fall of DnH, the DnL voltage is maintained
+current remains at a value larger than the response current.      close to zero by forcing that driver on. See Figure 6.
+The over-current shutdown is delayed by a filter to allow the
+load capacitors to be slewed without causing a shutdown.          RESET FUNCTION
+    The purpose of the gross current limit is to protect the         A low level on RST forces all internal registers to a known
+drivers during the filter delay time. This current limit is set   (reset) state and the receive and transmit queue pointers are
+higher than the peak current required to slew the load            reset. Because the DBUS channels are now disabled (ENn =
+capacitance.                                                      0), the DBUS lines are tri-stated.
+    The signals from the sourcing and sinking current
+detection circuits are connected to a logical OR. The             ABORT FUNCTION
+combined signal passes through a common filter before                An abort is generated on a channel whenever a control
+setting the over-current latch. During signaling mode, the        register (DnCTRL, DnPOLY, DnSEED, DnLENGTH,
+over-current shutdown disables both bus drivers and sets the      DnSSCTRL or DnFSEL) is addressed while writing, even if
+SDS (Signal Driver Shutdown) bit in the appropriate DnSTAT        the data is unchanged. No other register writes cause an
+register. The drivers remain high-impedance until the end of      abort, and reads of any register do not cause an abort. The
+Frame, when the bus returns to the Idle state.                    abort is only taken for the channel where the write occurs - all
+    The end of Frame clears the over-current shutdown state,      other channels are not effected. The DEN register is not
+allowing the bus drivers to retry in the next Frame. However,     affected by an abort.
+if the signal mode over-current shutdown occurs in two               The abort occurs as soon as the address of the control
+sequential frames for the channel, the bus drivers are            register is received on the SPI. Any DBUS transfer that was
+disabled and can only be re-enabled on command from the           in progress is stopped, and DBUS lines return to their Idle
+MCU. The ISDD bit is also set in the channel DEN register. If     states. The abort condition remains true throughout the SPI0
+the affected channel is channel 0 this set of conditions also     write to the DBUS control registers. After the last bit of the
+disables the pseudo bus switch.                                   DBUS control register is written, the channel addressed
+                                                                  buffer data bits and the SPI1 registers are cleared, the status
+THERMAL PROTECTION                                                register bits are reset, and the transmit and receive queue
+    Independent thermal protection is provided for each           pointers are reset for both SPI0 and SPI1. The programmed
+channel and the Pseudo bus switches. The thermal limit cell       inter-frame delay is then enforced (using the new values of
+is located adjacent to the bus drivers for each channel, such     the delay control bits) to allow reservoir capacitors in remote
+33781
+                                                                                           Analog Integrated Circuit Device Data
+38                                                                                                       Freescale Semiconductor
+
+
+                                                                                             FUNCTIONAL DEVICE OPERATION
+                                                                                    PROTECTION AND DIAGNOSTIC FEATURES
+nodes to charge. In the case of DLY changing, any partial        without going out on the DBUS channel. When LOOP mode
+inter-frame delay based on old control settings is lost.         is enabled the DBUS channel is disconnected from the
+                                                                 transmitter and receiver circuits so that any bus fault
+ENABLE (DISABLE) FUNCTION                                        conditions do not interfere with this test. When the loop
+   When a DBUS channel is disabled, the 33781 device             function is enabled, the EN bit in the DnEN register is cleared,
+forces its bus output to tri-state. When the channel is disabled the buffer data bits are cleared, the status register bits are
+the channel addressed buffer data bits are cleared, the status   reset, and the transmit and receive queue reset the by the
+register bits are reset, and the transmit and receive queue      state machine. When the loop mode is exited the state
+reset. Any DBUS transfer that was in progress is stopped.        machine sets the registers to their reset state and resets the
+                                                                 transmit and receive queue. This allows proper start up of bus
+                                                                 transactions.
+CHANNEL LOOP FUNCTION
+                                                                    The channel queue pointers work the same as in non-loop
+   When loop mode is enabled the transmitter and receiver
+                                                                 mode.
+circuits are connected within the IC. This allows data to be
+passed directly through the transmit and receive circuits
+                                                                                                                             33781
+ Analog Integrated Circuit Device Data
+ Freescale Semiconductor                                                                                                       39
+
+
+PACKAGING
+PACKAGE DIMENSIONS
+                                                       PACKAGING
+                                                 PACKAGE DIMENSIONS
+   For the most current package revision, visit www.freescale.com and perform a keyword search using the “98A” listed below.
+                                                 EK SUFFIX (PB-FREE)
+                                                         32-PIN
+                                                     98ASA10556D
+                                                        ISSUE B
+33781
+                                                                                      Analog Integrated Circuit Device Data
+40                                                                                                Freescale Semiconductor
+
+
+                                                          PACKAGE DIMENSIONS
+                                      EK SUFFIX (PB-FREE)
+                                            32-PIN
+                                         98ASA10556D
+                                           ISSUE B
+                                                                         33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                    41
+
+
+PACKAGE DIMENSIONS
+                   EK SUFFIX (PB-FREE)
+                         32-PIN
+                      98ASA10556D
+                        ISSUE B
+33781
+                                       Analog Integrated Circuit Device Data
+42                                                 Freescale Semiconductor
+
+
+                                                                                                                 REVISION HISTORY
+                                                                                                           PACKAGE DIMENSIONS
+                                                 REVISION HISTORY
+REVISION    DATE               DESCRIPTION OF CHANGES
+     1       3/2008            • Initial Release
+     2       5/2008            • Deleted rows from Figure 7, Receiver Decision Logic
+                               • Corrected several parameter adjustments
+     3       7/2008            • Numerous minor label and limit changes to Electrical Characteristics
+                               • Text corresponding to the changes in the Electrical Characteristics were also made.
+     4       7/2008            • Changed line to read: In addition, the device monitors the current limit on each channel
+                                 to see if the channel is in “double current limit” during every idle state. In the OVER-
+                                 CURRENT Protection
+    5.0      11/2009           • Changed Part Number from PCZ33781EK/R2 to MCZ33781EK/R2
+                                                                                                                              33781
+Analog Integrated Circuit Device Data
+Freescale Semiconductor                                                                                                         43
+
+
+How to Reach Us:
+Home Page:
+www.freescale.com
+Web Support:
+http://www.freescale.com/support
+USA/Europe or Locations Not Listed:
+Freescale Semiconductor, Inc.
+Technical Information Center, EL516
+2100 East Elliot Road
+Tempe, Arizona 85284
+1-800-521-6274 or +1-480-768-2130
+www.freescale.com/support
+Europe, Middle East, and Africa:
+Freescale Halbleiter Deutschland GmbH
+Technical Information Center
+Schatzbogen 7
+81829 Muenchen, Germany
++44 1296 380 456 (English)
++46 8 52200080 (English)
++49 89 92103 559 (German)
++33 1 69 35 48 48 (French)
+www.freescale.com/support
+Japan:
+Freescale Semiconductor Japan Ltd.
+Headquarters
+ARCO Tower 15F
+1-8-1, Shimo-Meguro, Meguro-ku,
+Tokyo 153-0064
+Japan
+0120 191014 or +81 3 5437 9125
+support.japan@freescale.com                            Information in this document is provided solely to enable system and
+                                                       software implementers to use Freescale Semiconductor products. There are
+Asia/Pacific:                                          no express or implied copyright licenses granted hereunder to design or
+Freescale Semiconductor China Ltd.                     fabricate any integrated circuits or integrated circuits based on the
+Exchange Building 23F                                  information in this document.
+No. 118 Jianguo Road
+Chaoyang District
+                                                       Freescale Semiconductor reserves the right to make changes without further
+Beijing 100022
+                                                       notice to any products herein. Freescale Semiconductor makes no warranty,
+China
+                                                       representation or guarantee regarding the suitability of its products for any
++86 10 5879 8000
+                                                       particular purpose, nor does Freescale Semiconductor assume any liability
+support.asia@freescale.com
+                                                       arising out of the application or use of any product or circuit, and specifically
+                                                       disclaims any and all liability, including without limitation consequential or
+For Literature Requests Only:
+                                                       incidental damages. “Typical” parameters that may be provided in Freescale
+Freescale Semiconductor Literature Distribution Center Semiconductor data sheets and/or specifications can and do vary in different
+P.O. Box 5405                                          applications and actual performance may vary over time. All operating
+Denver, Colorado 80217                                 parameters, including “Typicals”, must be validated for each customer
+1-800-441-2447 or +1-303-675-2140                      application by customer’s technical experts. Freescale Semiconductor does
+Fax: +1-303-675-2150                                   not convey any license under its patent rights nor the rights of others.
+LDCForFreescaleSemiconductor@hibbertgroup.com          Freescale Semiconductor products are not designed, intended, or authorized
+                                                       for use as components in systems intended for surgical implant into the body,
+                                                       or other applications intended to support or sustain life, or for any other
+                                                       application in which the failure of the Freescale Semiconductor product could
+                                                       create a situation where personal injury or death may occur. Should Buyer
+                                                       purchase or use Freescale Semiconductor products for any such unintended
+                                                       or unauthorized application, Buyer shall indemnify and hold Freescale
+                                                       Semiconductor and its officers, employees, subsidiaries, affiliates, and
+                                                       distributors harmless against all claims, costs, damages, and expenses, and
+                                                       reasonable attorney fees arising out of, directly or indirectly, any claim of
+                                                       personal injury or death associated with such unintended or unauthorized
+                                                       use, even if such claim alleges that Freescale Semiconductor was negligent
+                                                       regarding the design or manufacture of the part.
+                                                       Freescale™ and the Freescale logo are trademarks of
+                                                       Freescale Semiconductor, Inc. All other product or service names
+                                                       are the property of their respective owners.
+                                                       © Freescale Semiconductor, Inc. 2009. All rights reserved.
+                                                       MC33781
+                                                       Rev. 5.0
+                                                       11/2009
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+NXP:
+ MCZ33781EK MCZ33781EKR2

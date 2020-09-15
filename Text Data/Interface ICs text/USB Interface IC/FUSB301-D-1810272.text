@@ -1,0 +1,503 @@
+FUSB301
+Autonomous USB Type-C
+Controller with Super Speed
+Switch Control
+Description
+  The FUSB301 is a fully autonomous Type-C controller optimized                                 www.onsemi.com
+for <15 W applications. The FUSB301 offers CC logic detection for
+Source Mode, Sink Mode, Dual Role Port Mode, accessory detection
+support, and dead battery support. The FUSB301 features an external
+switch pin (SS_SW) to enable an external USB Super Speed Switch
+without interrupting the processor. The FUSB301 features an
+extremely low power disable mode as well as low power during                                        Bottom View
+normal operation. It is available in an ultra thin, 10-Lead TMLP                              X2QFN10 1.6x1.2, 0.4P
+                                                                                                   CASE 722AC
+package.
+Features
+                                                                                          ORDERING INFORMATION
+•  Fully Autonomous Type−C Controller                                         See detailed ordering and shipping information on page 2
+•  Supports Type−C Versions 1.1 and 1.0                                       of this data sheet.
+•  VDD Operating Range, 3.0 V − 5.5 V
+•  Low Disable Power: ICC = 2 mA (Max.)
+•  Low Standby Power: ICC = 7 mA (Max.)
+•  Dual Role Port Mode with Optional Accessory Support
+•  Capable of Supporting Try.SNK and Try.SRC
+•  Super Speed Switch Control
+•  Dead Battery Support (SINK Support when No Power Applied)
+•  2 kV HBM ESD Protection
+•  Small Packaging, 10 Lead TMLP (1.6 mm × 1.2 mm × 0.375 mm)
+Applications
+• Smartphones                                                     • Notebooks
+• Tablets                                                         • Ultra Portable Applications
+                                                  Figure 1. Typical Application
+ © Semiconductor Components Industries, LLC, 2015              1                                          Publication Order Number:
+ June, 2018 − Rev. 0                                                                                                       FUSB301/D
+
+
+                                                               FUSB301
+ ORDERING INFORMATION
+                                                    Operating
+      Part Number            Top Mark         Temperature Range                      Package                       Packing Method†
+                                                                             10−Lead Ultra−thin Molded
+      FUSB301TMX                NU                 −40 to 85°C               Leadless Package (TMLP)                Tape and Reel
+                                                                           1.6 mm × 1.2 mm × 0.375 mm
+†For information on tape and reel specifications, including part orientation and tape sizes, please refer to our Tape and Reel Packaging
+ Specifications Brochure, BRD8011/D.
+BLOCK DIAGRAM
+                                                       Figure 2. Block Diagram
+PIN CONFIGURATION
+                                         Figure 3. Pin Assignment (Top Through View)
+                                                           www.onsemi.com
+                                                                     2
+
+
+                                                            FUSB301
+  PIN DESCRIPTIONS
+        Pin #                Name                Type                                         Description
+  USB Type−C Connector Interface
+         6, 7              CC1, CC2                I/O         Type−C Configuration Channel
+           8                 VBUS                 Input        VBUS input pin for attach and detach detection
+           4                 GND                Ground         Ground
+  Power Interface
+           5                 VDD                 Power          Input Supply Voltage
+  Signal Interface
+           1                 SDA                  Input         I2C serial data signal to be connected to the I2C master
+           2                  SCL              Open−Drain       I2C serial clock signal to be connected to the I2C master
+                                                   I/O
+           3                   ID              Open−Drain       Used to Identify if connected device is Source to Sink. The ID Pin can
+                                                 Output         be used to interface with USB 2.0 Input on the processor.
+           9                SS_SW             CMOS Output       External Super Speed Switch control without processor interrupt.
+          10                INT_N              Open−Drain       Active Low open drain interrupt output used to prompt processor to
+                                                 Output         read I2C register bits.
+Dead Battery                                                         processor, the INT_N pin stays high impedance in
+   If power is not applied to FUSB301 and it is attached to          preparation of future interrupts. When an interruptible event
+a Source device, then the Source would pull up the CC line           occurs, INT_N is driven LOW and is in a high impedance
+connected through the cable. The FUSB301 in response                 state again when the processor clears the interrupt by reading
+would turn on the pull−down that will bring the CC voltage           the interrupt registers. Subsequent to the initial power up or
+to a range that the Source can detect an attach and turn on          reset; if the processor writes a “1” to global interrupt mask
+VBUS.                                                                bit when the system is already powered up, the INT_N pin
+                                                                     stays in a high impedance state and ignores all interrupts
+Power Up, Initialization and Reset, Interrupt Operation
+                                                                     until the global interrupt mask bit is cleared. If an event
+   When power is first applied, the FUSB301 will power up            happens that would ordinarily cause an interrupt when the
+in Sink mode with all interrupts masked. The local processor         global interrupt mask bit is set, the INT_N pin goes LOW
+must configure the FUSB301 to the desired mode and clear             when the global interrupt mask is cleared.
+the global interrupt mask bit, INT_MASK. The INT_N pin
+is an active low, open drain output. This pin indicates to the       SuperSpeed Switch Control
+host processor that an interrupt has occurred in the                    For applications that require a SuperSpeed USB switch
+FUSB301 which needs attention. The INT_N pin is in a high            (USB3.1 Gen 1), the SS_SW pin will autonomously control
+impedance state by default after power−up or device reset,           the USB switch, such as the FUSB340TMX, without
+and the global interrupt mask (INT_MASK in Control                   interrupting the processor.
+register) is set. After INT_MASK bit is cleared by the local
+  Table 1. SUPERSPEED SWITCH TRUTH TABLE
+             CC1                       CC2                   ORIENT1                       ORIENT0                     SS_SW
+       Not Connected              Not Connected                  0                             0                          Low
+      Connected to CC                                            0                             1                          Low
+                                Connected to CC                  1                             0                          High
+       Not Connected              Not Connected                  1                             1                          Low
+  Table 2. ID PIN TRUTH TABLE
+         TYPE Register (h12, bit 4)                         Description                                          ID
+                  SINK = b0                              SINK Not Detected                                 Hi−Z (default)
+                  SINK = b1                                SINK Detected                                        Low
+                                                        www.onsemi.com
+                                                                 3
+
+
+                                                                      FUSB301
+  ABSOLUTE MAXIMUM RATINGS
+      Symbol                                              Parameter                                              Min.          Max.          Unit
+         VDD            Supply Voltage from VDD                                                                  −0.5           6.0            V
+         VBUS           VBUS Supply Voltage                                                                      −0.5            28            V
+     VCC_HDDRP          CC pins when configured as Host, Device or Dual Role Port                                −0.5           6.0            V
+     TSTORAGE           Storage Temperature Range                                                                −65           +150           °C
+          TJ            Maximum Junction Temperature                                                                           +150           °C
+          TL            Lead Temperature (Soldering, 10 seconds)                                                               +260           °C
+         ESD            IEC 6100−4−2 System ESD                              Connector Pins      Air Gap          15                          kV
+                                                                               (VBUS, CC1
+                                                                                 and CC2)        Contact           8
+                        Human Body Model, JEDEC                                    Connector Pins                  4
+                        JESD22−A114                                             (VBUS, CC1 and CC2)
+                                                                                       Others                      2
+                        Charged Device Model, JEDEC                                    All Pins                    1
+                        LESD22−C101
+Stresses exceeding those listed in the Maximum Ratings table may damage the device. If any of these limits are exceeded, device functionality
+should not be assumed, damage may occur and reliability may be affected.
+  RECOMMENDED OPERAING CONDITIONS
+      Symbol                                       Parameter                                      Min.           Typ.          Max.          Unit
+         VBUS           VBUS Supply Voltage                                                        3.7            5.0            21            V
+         VDD            Supply Voltage                                                           2.8 (1)          3.3           5.5            V
+          TA            Operating Temperature                                                      −40                          +85           °C
+1. This is for functional operation only and isn’t the lowest limit for all subsequent electrical specifications below. All electrical parameters have
+    a minimum of 3 V operation.
+  DC AND TRANSIENT CHARACTERISTICS
+  Unless otherwise specified: Recommended TA and TJ temperature ranges. All typical values are at TA = 25°C and VDD = 3.3 V unless
+  otherwise specified.
+                                                                                                         TA = −40 to +855C
+                                                                                                         TJ = −40 to +1255C
+      Symbol                                       Parameter                                      Min.           Typ.          Max.          Unit
+  Type C Specific Parameters
+       I80_CCX          Source 80 mA CC Current (Default) HOST_CUR1 = 0,                           64             80             96           mA
+                        HOST_CUR0 = 1
+      I180_CCX          Source 180 mA CC Current (1.5 A) HOST_CUR1 = 1,                            166           180            194           mA
+                        HOST_CUR0 = 0
+      I330_CCX          Source 330 mA CC Current (3 A) HOST_CUR1 = 1,                              304           330            356           mA
+                        HOST_CUR0 = 1
+       VSNKDB           Sink Pull−Down Voltage in Dead Battery Under all Pull−up                                               2.18            V
+                        SOURCE Loads
+      RDEVICE           Sink Pull−Down Resistance when VDD is within Operating                     4.6            5.1           5.6           kW
+                        Range
+       zOPEN            CC Resistance for Disabled State                                           126                                        kW
+    vRa−SRCdef          Ra Detection Threshold for CC Pin for Source for Default                  0.15           0.20          0.25            V
+                        Current on VBUS
+   vRa−SRC1.5A          Ra Detection Threshold for CC Pin for Source for 1.5 A                    0.35           0.40          0.45            V
+                        Current on VBUS
+    vRa−SRC3A           Ra Detection Threshold for CC Pin for Source for 3 A                      0.75           0.80          0.85            V
+                        Current on VBUS
+                                                                www.onsemi.com
+                                                                             4
+
+
+                                                              FUSB301
+DC AND TRANSIENT CHARACTERISTICS
+Unless otherwise specified: Recommended TA and TJ temperature ranges. All typical values are at TA = 25°C and VDD = 3.3 V unless
+otherwise specified. (continued)
+                                                                                               TA = −40 to +855C
+                                                                                               TJ = −40 to +1255C
+      Symbol                                  Parameter                                  Min.          Typ.         Max.       Unit
+   vRd−SRCdef        Rd Detection Threshold for Source for Default Current               1.50          1.60         1.65        V
+                     (HOST_CUR1/0 = 01)
+ vRd−SRC1.5A         Rd Detection Threshold for Source for 1.5 A Current                 1.50          1.60         1.65        V
+                     (HOST_CUR1/0 = 10)
+   vRd−SRC3A         Rd Detection Threshold for Source for 3 A Current                   2.45          2.60         2.75        V
+                     (HOST_CUR1/0 = 11)
+     vRa−SNK         Ra Detection Threshold for CC Pin for Sink                          0.15          0.20         0.25        V
+      vRd−def        Rd Default Current Detection Threshold for Sink                     0.61          0.66         0.70        V
+     vRd−1.5A        Rd 1.5 A Current Detection Threshold for Sink                       1.16          1.23         1.31        V
+     vRd−3.0A        Rd 3 A Current Detection Threshold for Sink                         2.04          2.11         2.18        V
+     vVBUSthr        VBUS Threshold at which I_VBUSOK Interrupt is Triggered             3.7                                    V
+CURRENT CONSUMPTION
+                                                                                                        TA = −40 to +855C
+                                                                                                        TJ = −40 to +1255C      Unit
+      Symbol                 Parameter              VDD (V)                Conditions                Min.      Typ.      Max.   Unit
+      Idisable       Disabled Current              3.0 to 5.5     Disabled State                               0.35       2.0    mA
+        Istby        Unattached Sink               3.0 to 5.5     Nothing attached                              3.5       7.0    mA
+                     Unattached Sink + Acc,                       Nothing attached, Internally                   5        20     mA
+                     Source + Acc, or DRP                         Toggling
+       Iattach       Attach Current (Less Host     3.0 to 5.5     Attached as a Sink                             5        15     mA
+                     Current)
+                                                                  Attached as a Source                          10        15     mA
+TIMING PARAMETERS
+                                                                                                        TA = −40 to +855C
+                                                                                                        TJ = −40 to +1255C      Unit
+      Symbol                                       Parameter                                         Min.      Typ.      Max.   Unit
+  tCCDebounce        Debounce Time for CC (Source or Accessory)                                      100        150       200    ms
+                     Debounce Time for CC (Sink)                                                      63        75        87     ms
+  tPDDebounce        Debounce Time for CC Detach Detection                                            10        15        20     ms
+    tAccDetect       Debounce Time to Detect AudioAccessory, or DebugAccessory is At-                 50        100       200    ms
+                     tached
+ tErrorRecovery      Time staying in the ErrorRecovery State if sent there via the                    25        50        100    ms
+                     ERROR_REC bit or by a change of Modes
+   tVBUSondeb        Debounce Time of VBUS Detection when acting as a Sink to Signal VBUS           0.167      0.200     0.375   ms
+                     is present
+   tVBUSoffdeb       Debounce Time of VBUS Detection when acting as a Sink to Signal VBUS             10        15        20     ms
+                     has been removed
+   tDRPToggle1       For DRP Operation, Time Spent in Unat-                DRPROGGLE = 00             35                  70     ms
+                     tached.Sink before going to Unattached.Source
+                     State                                                 DRPROGGLE = 01             30                  60
+                                                                           DRPROGGLE = 10             25                  50
+                                                                           DRPROGGLE = 11             20                  40
+                                                         www.onsemi.com
+                                                                    5
+
+
+                                                            FUSB301
+TIMING PARAMETERS
+                                                                                                 TA = −40 to +855C
+                                                                                                 TJ = −40 to +1255C     Unit
+    Symbol                                          Parameter                                 Min.      Typ.     Max.   Unit
+  tDRPToggle2       For DRP Operation, Time Spent in Unat-           DRPROGGLE = 00            15                  30   ms
+                    tached.Source before going to Unattached.Sink
+                    State                                            DRPROGGLE = 01            20                  40
+                                                                     DRPROGGLE = 10            25                  50
+                                                                     DRPROGGLE = 11            30                  60
+IO SPECIFICATIONS
+                                                                                              TA = −40 to +855C
+                                                                                              TJ = −40 to +1255C        Unit
+    Symbol                       Parameter                 VDD (V)     Conditions        Min.         Typ.      Max.    Unit
+Host Interface Pins (ID)
+      VOLID         Output Low Voltage                    3.0 to 5.5 IOL = 4 mA                                  0.4     V
+Host Interface Pins (SS_SW)
+     VOHSW          Output High Voltage                   3.0 to 5.5 IOH = −2 mA        0.7VDD                           V
+     VOLSW          Output Low Voltage                    3.0 to 5.5 IOL = 4 mA                                  0.4     V
+Host Interface Pins (INT_N)
+    VOLINTN         Output Low Voltage                    3.0 to 5.5 IOL = 4 mA                                  0.4     V
+I2C Interface Pins − Fast Mode SDA, SCL
+      VILI2C        Low−Level Input Voltage               3.0 to 5.5                                             0.4     V
+      VIHI2C        High−Level Input Voltage              3.0 to 5.5                      1.2                            V
+      VHYS          Hysteresis of Schmitt Trigger In-     3.0 to 5.5                      0.2                            V
+                    puts
+        II2C        Input Current of SDA and SCL Pins     3.0 to 5.5 Input Voltage        −10                     10     mA
+                                                                     0.26 V to 2 V
+     ICCTI2C        VDD Current when SDA and SCL          3.0 to 5.5 Input Voltage        −10                     10     mA
+                    is HIGH                                          1.8 V
+    VOLSDA          Low−Level Output Voltage at 3 mA      3.0 to 5.5                       0                     0.3     V
+                    Sink Current (Open−Drain)
+         CI         Capacitance for Each I/O Pin          3.0 to 5.5                                              10     pF
+FAST MODE I2C SPECIFICATIONS (see Figure 4)
+                                                                                              Fast Mode
+    Symbol                                     Parameter                                Min.               Max.       Unit
+       fSCL         I2C_SCL Clock Frequency                                              0                 400        kHz
+     tHD;STA        Hold Time (Repeated) START Condition                                0.6                            ms
+      tLOW          LOW Period of I2C_SCL Clock                                         1.3                            ms
+      tHIGH         HIGH Period of I2C_SCL Clock                                        0.6                            ms
+     tSU;STA        Set−up Time for Repeated START Condition                            0.6                            ms
+     tHD;DAT        Data Hold Time                                                       0                 0.9         ms
+     tSU;DAT        Data Set−up Time                                     (Note 2)       100                            ns
+          tr        Rise Time of I2C_SDA and I2C_SCL Signals             (Note 3)  20*(VDD/5.5V)           250         ns
+          tf        Fall Time of I2C_SDA and I2C_SCL Signals             (Note 3)  20*(VDD/5.5V)           250         ns
+    tSU;STO         Set−up Time for STOP Condition                                      0.6                            ms
+                                                        www.onsemi.com
+                                                                  6
+
+
+                                                                     FUSB301
+  FAST MODE I2C SPECIFICATIONS (see Figure 4) (continued)
+                                                                                                           Fast Mode
+      Symbol                                        Parameter                                        Min.                Max.            Unit
+       tBUF            BUS−Free Time between STOP and START Conditions                               1.3                                  ms
+        tSP            Pulse Width of Spikes that Must Be Suppressed by the Input                     0                   50              ns
+                       Filter
+2. A fast−mode I2C bus device can be used in a standard−mode I2C bus system, but the requirement tSU;DAT ≥ 250 ns must be met. This is
+   automatically the case of the device does not stretch the LOW period of the I2C_SCL signal. If such a device does stretch the LOW period
+   I2C_SCL signal, it must output the next data bit to the I2C_SDA line tr_max + tSU;DAT = 1000 + 250 = 1250 ns (according to the standard−mode
+   I2C bus specification) before the I2C_SCL line is released.
+3. Cb equals the total capacitance of one bus line in pF. If mixed with high−speed devices, faster fall times are allowed according to the I2C
+   specification.
+                          Figure 4. Definition of Timing for Full−Speed Mode Devices on the I2C Bus
+I2C INTERFACE                                                                   requirements. This block is designed for fast mode.
+   The FUSB301 includes a full I2C slave controller. The I2C                    Examples of an I2C write and read sequence are shown
+slave fully complies with the I2C specification version 6                       Figure 5 and Figure 6 respectively.
+    NOTE:     Single Byte read is initiated by Master with P immediately following first data byte.
+                                                         Figure 5. I2C Write Example
+           Register address to Read specified            Single or multi byte read executed from current register location (Single Byte read
+                                                                 is initiated by Master with NA immediately following first data byte)
+   NOTE:    If Register is not specified Master will begin read from current register. In this case only sequence showing in Red bracket
+            is needed.
+                                                         Figure 6. I2C Read Example
+                                                               www.onsemi.com
+                                                                            7
+
+
+                                                                      FUSB301
+I2C ADDRESS
+  Table 3. FUSB301 I2C SLAVE ADDRESS
+       Name            Size (Bits)       Bit 7         Bit 6            Bit 5       Bit 4          Bit 3          Bit 2            Bit 1      Bit 0
+  Slave Address             8             0              1                0           0               1              0                1       R/W
+REGISTER DEFINITIONS
+  Table 4. REGISTER MAP
+               Register             RST
+   Address      Name        Type     Val      Bit 7     Bit 6          Bit 5      Bit 4         Bit 3          Bit 2              Bit 1       Bit 0
+     0×01      Device ID     RO      12                     Version ID [3:0]                                       Revision ID [3:0]
+     0×02       Modes        R/W     04                             DRP+ACC       DRP        Sink+ACC           Sink          Source+ACC     Source
+     0×03       Control      R/W     03                                   DRPTOGGLE                        HOST_CUR1         HOST_CUR0    INT_MASK
+     0×04       Manual       W/C     00                                                    UNATT_SNK       UNATT_SRC           DISABLED  ERROR_REC
+     0×05       Reset        W/C     00                                                                                                     SW_RES
+  0×06−0×0F    Reserved       X      xx                                                    Do Not Use
+     0×10        Mask        R/W     00                                                     M_ACC_CH         M_BC_LVL         M_DETACH    M_ATTACH
+     0×11       Status       RO      00                              ORIENT1    ORIENT0      VBUSOK           BC_LVL1           BC_LVL0     ATTACH
+     0×12        Type        RO      00                                           Sink        Source                          DEBUGACC    AUDIOACC
+     0×13      Interrupt     R/C     00                                                     I_ACC_CH         I_BC_LVL          I_DETACH    I_ATTACH
+  0×14−0×1F    Reserved       X      xx                                                    Do Not Use
+4. Do not use registers that are blank.
+5. Values read from undefined register bits are invalid. Do not write to undefined registers.
+  Table 5. DEVICE ID
+  Address: 01h
+  Reset Value: 0×0001_0010
+  Type: Read Only
+        Bit #                Name               Size (Bits)                                            Description
+          7:4              Version ID               4               Device version ID by Trim or etc.
+                                                                    A_[Version ID]: 0001
+          3:0             Revision ID               4               Revision History of each version
+                                                                    [Revision ID]_revC: 0010
+  Table 6. MODES
+  Address: 02h
+  Reset Value: 0×0000_0100
+  Type: Read/Write
+        Bit #                Name               Size (Bits)                                            Description
+          7:6              Reserved                 2               Do Not Use
+           5              DRP+ACC                   1               1: Configure device as a Dual Role Port (DRP) with accessory support
+           4                  DRP                   1               1: Configure device as a Dual Role Port (DRP) without accessory support
+           3              Sink+ACC                  1               1: Configure device as a Sink with accessory support
+           2                  Sink                  1               1: Configure device as a Sink without accessory support
+           1             Source+ACC                 1               1: Configure device as a Source with accessory support
+           0                 Source                 1               1: Configure device as a Source without accessory support
+                                                               www.onsemi.com
+                                                                             8
+
+
+                                                                    FUSB301
+  Table 7. CONTROL
+  Address: 03h
+  Reset Value: 0×XX00_X011
+  Type: Read/Write
+       Bit #             Name              Size (Bits)                                           Description
+        7:6           Reserved                  2           Do Not Use
+        5:4         DRPTOGGLE                   2            Selects different timing for Dual Role Port Toggle between Unattached. Sink
+                                                             State and Unattached.SOURCE State.
+                                                             00: 35 ms min. in Unattached.Sink and 15 ms min. In Unattached.SOURCE
+                                                             01: 30 ms min. In Unattached.Sink and 20 ms min. In Unattached.SOURCE
+                                                             10: 25 ms min. In Unattached.Sink and 25 ms min. In Unattached.SOURCE
+                                                             11: 20 ms min. In Unattached.Sink and 30 ms min. In Unattached.SOURCE
+         3            Reserved                  1           Do Not Use
+        2:1          HOST_CUR                   2           1: Controls the pull−up current when device enabled as a Source
+                          [1:0]                             00: No Current
+                                                            01: 80 mA − Default USB Power
+                                                            10: 180 mA − Medium Current Mode: 1.5 A
+                                                            11: 330 mA − High Current Mode: 3 A
+         0           INT_MASK                   1           1: Global interrupt mask to mask all interrupts
+  Table 8. MANUAL (Note 6)
+  Address: 04h
+  Reset Value: 0×XXXX_0000
+  Type: Write/Clear
+       Bit #                 Name                 Size (Bits)                                        Description
+        7:4                Reserved                    4           Do Not Use
+         3               UNATT_SNK                     1            1: Put device in Unattached.Sink state as defined in the Type C spec
+                            (Note 7)
+         2               UNATT_SRC                     1            1: Put device in Unattached.Source state as defined in the Type C spec
+         1                DISABLED                     1            1: Put device in Disabled state as defined in the Type C spec
+                            (Note 8)
+         0              ERROR_REC                      1            1: Put device in ErrorRecovery state as defined in the Type C spec
+6. If more than one bit is set to ‘‘b1‘‘ simultaneously then an order of priority will be used. 1st priority is DISABLED, 2nd is ERROR_REC, 3rd
+   is UNATT_SRC, last is UNATT_SNK. The highest priority bit will take precedence and all other bits will be cleared automatically.
+7. Wait 2 ms between Modes = Sink and Manual = UNATT_SNK writes.
+8. The DISABLED bit must be manually cleared.
+  Table 9. RESET
+  Address: 05h
+  Reset Value: 0×XXXX_XXX0
+  Type: Write/Clear
+       Bit #                 Name                 Size (Bits)                                        Description
+        7:6                Reserved                    7           Do Not Use
+         0                 SW_RES                      1            1: Reset the system and I2C Register.
+  Table 10. MASK
+  Address: 10h
+  Reset Value: 0×XXXX_0000
+  Type: Read/Write
+       Bit #                 Name                 Size (Bits)                                        Description
+        7:4                Reserved                    4           Do Not Use
+         3               M_ACC_CH                      1            1: Mask a change from Accessory Present to Attached Accessory
+         2                M_BC_LVL                     1            1: Mask a change in I_BC_LVL interrupt bit
+                                                                www.onsemi.com
+                                                                           9
+
+
+                                               FUSB301
+Table 10. MASK (continued)
+Address: 10h
+Reset Value: 0×XXXX_0000
+Type: Read/Write
+     Bit #              Name    Size (Bits)                                   Description
+       1            M_DETACH         1        1: Mask the I_DETACH interrupt bit
+       0            M_ATTACH         1        1: Mask a change in the I_ATTACH interrupt bit
+Table 11. STATUS
+Address: 11h
+Reset Value: 0×XX00_0000
+Type: Read
+     Bit #              Name    Size (Bits)                                   Description
+      7:6             Reserved       2        Do Not Use
+      5:4           ORIENT[1:0]      2        Status to indicate which CCx pins has the CC cable connection
+                                              11: A fault has occurred during the detection
+                                              10: Cable CC is connected through the CC2 pin
+                                              01: Cable CC is connected through the CC1 pin
+                                              00: No or unresolved connection detected.
+       3               VBUSOK        1        1: Status to indicate VBUS is in the valid range
+      2:1           BC_LVL[1:0]      2        Thresholds that allow detection of current advertisement on CC line
+                                              00: Ra or unattached Sink
+                                              01: Rd threshold for Sink default current advertisement
+                                              10: RD threshold for Sink 1.5 A current advertisement
+                                              11: RD threshold for Sink 3 A current advertisement
+       0               ATTACH        1        1: Attached to a device or accessory of a type shown in the Type register
+Table 12. TYPE
+Address: 12h
+Reset Value: 0×XXX0_0X00
+Type: Read
+     Bit #              Name    Size (Bits)                                   Description
+      7:5             Reserved       3        Do Not Use
+       4                 Sink        1        1: Indicates a Sink has been detected
+       3                Source       1        1: Indicates a Source has been detected
+       2              Reserved       1        Do Not Use
+       1            DEBUGACC         1        1: Indicates a Debug Accessory has been detected
+       0            AUDIOACC         1        1: Indicates a Audio Accessory has been detected
+Table 13. INTERRUPT0
+Address: 13h
+Reset Value: 0×XXXX_X000
+Type: Write/Clear
+     Bit #              Name    Size (Bits)                                   Description
+      7:4             Reserved       4        Do Not Use
+       3             I_ACC_CH        1        1: Interrupt flagged when a change from Accessory Present to Audio Ac-
+                                              cessory or Debug Accessory occurs.
+       2              I_BC_LVL       1        1: Interrupt flagged when a change in BC_LVL advertised current level has
+                                              occurred
+                                            www.onsemi.com
+                                                    10
+
+
+                                                                      FUSB301
+Table 13. INTERRUPT0 (continued)
+Address: 13h
+Reset Value: 0×XXXX_X000
+Type: Write/Clear
+     Bit #                 Name                 Size (Bits)                                          Description
+      1                  I_DETACH                     1               1: Interrupt flagged when a device or accessory has been detached
+      0                  I_ATTACH                     1               1: Interrupt flagged when a device or accessory of type indicated in the
+                                                                      Type register has been attached
+ON Semiconductor is licensed by the Philips Corporation to carry the I2C bus protocol.
+                                                                www.onsemi.com
+                                                                            11
+
+
+MECHANICAL CASE OUTLINE
+PACKAGE DIMENSIONS
+                                                                              X2QFN10 1.6x1.2, 0.4P
+                                                                                       CASE 722AC
+                                                                                           ISSUE O
+                                                                                                                                                                  DATE 30 SEP 2016
+                                                                                             Electronic versions are uncontrolled except when accessed directly from the Document Repository.
+ DOCUMENT NUMBER:                             98AON13692G                                    Printed versions are uncontrolled except when stamped “CONTROLLED COPY” in red.
+               DESCRIPTION:                   X2QFN10 1.6x1.2, 0.4P                                                                                                     PAGE 1 OF 1
+ ON Semiconductor and              are trademarks of Semiconductor Components Industries, LLC dba ON Semiconductor or its subsidiaries in the United States and/or other countries.
+ ON Semiconductor reserves the right to make changes without further notice to any products herein. ON Semiconductor makes no warranty, representation or guarantee regarding
+ the suitability of its products for any particular purpose, nor does ON Semiconductor assume any liability arising out of the application or use of any product or circuit, and specifically
+ disclaims any and all liability, including without limitation special, consequential or incidental damages. ON Semiconductor does not convey any license under its patent rights nor the
+ rights of others.
+© Semiconductor Components Industries, LLC, 2019                                                                                                                       www.onsemi.com
+
+
+  ON Semiconductor and            are trademarks of Semiconductor Components Industries, LLC dba ON Semiconductor or its subsidiaries in the United States and/or other countries.
+  ON Semiconductor owns the rights to a number of patents, trademarks, copyrights, trade secrets, and other intellectual property. A listing of ON Semiconductor’s product/patent
+  coverage may be accessed at www.onsemi.com/site/pdf/Patent−Marking.pdf. ON Semiconductor reserves the right to make changes without further notice to any products herein.
+  ON Semiconductor makes no warranty, representation or guarantee regarding the suitability of its products for any particular purpose, nor does ON Semiconductor assume any liability
+  arising out of the application or use of any product or circuit, and specifically disclaims any and all liability, including without limitation special, consequential or incidental damages.
+  Buyer is responsible for its products and applications using ON Semiconductor products, including compliance with all laws, regulations and safety requirements or standards,
+  regardless of any support or applications information provided by ON Semiconductor. “Typical” parameters which may be provided in ON Semiconductor data sheets and/or
+  specifications can and do vary in different applications and actual performance may vary over time. All operating parameters, including “Typicals” must be validated for each customer
+  application by customer’s technical experts. ON Semiconductor does not convey any license under its patent rights nor the rights of others. ON Semiconductor products are not
+  designed, intended, or authorized for use as a critical component in life support systems or any FDA Class 3 medical devices or medical devices with a same or similar classification
+  in a foreign jurisdiction or any devices intended for implantation in the human body. Should Buyer purchase or use ON Semiconductor products for any such unintended or unauthorized
+  application, Buyer shall indemnify and hold ON Semiconductor and its officers, employees, subsidiaries, affiliates, and distributors harmless against all claims, costs, damages, and
+  expenses, and reasonable attorney fees arising out of, directly or indirectly, any claim of personal injury or death associated with such unintended or unauthorized use, even if such
+  claim alleges that ON Semiconductor was negligent regarding the design or manufacture of the part. ON Semiconductor is an Equal Opportunity/Affirmative Action Employer. This
+  literature is subject to all applicable copyright laws and is not for resale in any manner.
+PUBLICATION ORDERING INFORMATION
+LITERATURE FULFILLMENT:                                  TECHNICAL SUPPORT
+Email Requests to: orderlit@onsemi.com                   North American Technical Support:                            Europe, Middle East and Africa Technical Support:
+                                                         Voice Mail: 1 800−282−9855 Toll Free USA/Canada              Phone: 00421 33 790 2910
+ON Semiconductor Website: www.onsemi.com                 Phone: 011 421 33 790 2910                                   For additional information, please contact your local Sales Representative
+ ◊                                                                                 www.onsemi.com
+                                                                                                1
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+ON Semiconductor:
+ FUSB301TMX

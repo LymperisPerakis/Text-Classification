@@ -1,0 +1,1004 @@
+                                                     ATA6629/ATA6631
+     LIN Bus Transceiver with Integrated Voltage Regulator
+                                                                       DATASHEET
+Features
+● Supply voltage up to 40V
+● Operating voltage VS = 5V to 27V
+● Typically 10µA supply current during sleep mode
+● Typically 35µA supply current in silent mode
+● Linear low-drop voltage regulator, 85mA current capability:
+     ●   Normal, fail-safe, and silent mode
+     ●   Atmel ATA6629: VCC = 3.3V ±2%
+     ●   Atmel ATA6631: VCC = 5.0V ±2%
+     ●   Sleep mode: VCC is switched off
+● VCC undervoltage detection with reset open drain output NRES (4ms reset time)
+● Voltage regulator is short-circuit and over-temperature protected
+● LIN physical layer according to LIN 2.0, 2.1 and SAEJ2602-2
+● Wake-up capability via LIN bus (90µs dominant)
+● TXD time-out timer
+● Bus pin is overtemperature and short-circuit protected versus GND and battery
+● Advanced EMC and ESD performance
+● Fulfills the OEM “hardware requirements for LIN in automotive applications rev.1.1”
+● Interference and damage protection according to ISO7637
+● Package: SO8
+                                                                      9165F-AUTO-10/14
+
+
+1. Description
+   Atmel® ATA6629/ATA6631 is a fully integrated LIN transceiver, designed according to the LIN specification 2.0, 2.1 and
+   SAEJ2602-2, with a low-drop voltage regulator (3.3V/5V/85mA). The combination of voltage regulator and bus transceiver
+   makes it possible to develop simple, but powerful, slave nodes in LIN bus systems. ATA6629/ATA6631 is designed to
+   handle the low-speed data communication in vehicles (for example, in convenience electronics). Improved slope control at
+   the LIN driver ensures secure data communication up to 20kBaud. The bus output is designed to withstand high voltage.
+   Sleep mode and silent mode guarantee minimized current consumption even in the case of a floating or a short circuited
+   LIN-bus.
+   Figure 1-1. Block Diagram
+                                   Atmel ATA6629/ATA6631                                                       1 VS
+                              VCC
+                               5kΩ                                                    Normal and
+               RXD  5                    Receiver                                      Fail-safe
+                                                                                         Mode
+                                                -
+                                               +                                                               4 LIN
+                                                                                         RF-filter
+                           VCC
+                                                     Wake-up bus timer                       Short-circuit and
+                                                                                             overtemperature
+                                                                                             protection
+               TXD  6                  TXD            Slew rate control
+                                     Time-out
+                                       timer
+                                                                                                               8 VCC
+                EN                                              Sleep                                          7
+                    2                                                     Normal/Silent/                         NRES
+                                                      Control    mode
+                                                                         Fail-safe Mode
+                                                        unit     VCC
+                                                                             3.3V/5V
+                                                               switched
+               GND  3                                             off
+                                                                        Undervoltage reset
+2  ATA6629/ATA6631 [DATASHEET]
+   9165F–AUTO–10/14
+
+
+2. Pin Configuration
+   Figure 2-1. Pinning SO8
+                                                   VS     1       8 VCC
+                                                   EN     2       7 NRES
+                                                 GND      3       6 TXD
+                                                  LIN     4       5 RXD
+   Table 2-1.  Pin Description
+       Pin       Symbol    Function
+        1           VS     Battery supply
+        2          EN      Enables normal mode if the input is high
+        3         GND      Ground, heat sink
+        4          LIN     LIN bus line input/output
+        5         RXD      Receive data output
+        6          TXD     Transmit data input
+        7         NRES     Output undervoltage reset, low at reset
+        8         VCC      Output voltage regulator 3.3V/5V/50mA
+                                                                        ATA6629/ATA6631 [DATASHEET]      3
+                                                                                        9165F–AUTO–10/14
+
+
+3.  Functional Description
+3.1 Physical Layer Compatibility
+    Since the LIN physical layer is independent from higher LIN layers (e.g., LIN protocol layer), all nodes with a LIN physical
+    layer according to revision 2.x can be mixed with LIN physical layer nodes, which are according to older versions (i.e., LIN
+    1.0, LIN 1.1, LIN 1.2, LIN 1.3) without any restrictions.
+3.2 Supply Pin (VS)
+    LIN operating voltage is VS = 5V to 27V. An undervoltage detection is implemented to disable transmission if VS falls below
+    5V, in order to avoid false bus messages. After switching on VS, the IC starts with the fail-safe mode and the voltage
+    regulator is switched on.
+    The supply current in sleep mode is typically 10µA and 35µA in silent mode.
+3.3 Ground Pin (GND)
+    The IC does not affect the LIN bus in the event of GND disconnection. It is able to handle a ground shift up to 11.5% of VS.
+3.4 Voltage Regulator Output Pin (VCC)
+    The internal 3.3V/5V voltage regulator is capable of driving loads up to 85mA, supplying the microcontroller and other ICs on
+    the PCB and is protected against overload by means of current limitation and overtemperature shut-down. Furthermore, the
+    output voltage is monitored and will cause a reset signal at the NRES output pin if it drops below a defined threshold Vthun.
+3.5 Undervoltage Reset Output (NRES)
+    If the VCC voltage falls below the undervoltage detection threshold Vthun, NRES switches to low after tres_f
+    (Figure 6-1 on page 15). Even if VCC = 0V the NRES stays low, because it is internally driven from the VS voltage. If VS
+    voltage ramps down, NRES stays low until VS < 1.5V and then becomes highly resistant.
+    The implemented undervoltage delay keeps NRES low for tReset = 4ms after VCC reaches its nominal value.
+3.6 Bus Pin (LIN)
+    A low-side driver with internal current limitation and thermal shutdown as well as an internal pull-up resistor according to LIN
+    specification 2.x is implemented. The voltage range is from –27V to +40V. This pin exhibits no reverse current from the LIN
+    bus to VS, even in the event of a GND shift or VBatt disconnection. The LIN receiver thresholds are compatible with the LIN
+    protocol specification.
+    The fall time (from recessive to dominant) and the rise time (from dominant to recessive) are slope controlled.
+3.7 Input/Output (TXD)
+    In normal mode the TXD pin is the microcontroller interface to control the state of the LIN output. TXD must be pulled to
+    ground in order to drive the LIN bus low. If TXD is high or unconnected (internal pull-up resistor), the LIN output transistor is
+    turned off and the bus is in the recessive state. During fail-safe mode, this pin is used as output and is signalling the fail-safe
+    source.
+3.8 Dominant Time-out Function (TXD)
+    The TXD input has an internal pull-up resistor. An internal timer prevents the bus line from being driven permanently in the
+    dominant state. If TXD is forced to low longer than tDOM > 27ms, the LIN bus driver is switched to the recessive state.
+    Nevertheless, when switching to sleep mode, the actual level at the TXD pin is relevant.
+    To reactivate the LIN bus driver, switch TXD to high (> 10µs).
+4   ATA6629/ATA6631 [DATASHEET]
+    9165F–AUTO–10/14
+
+
+3.9  Output Pin (RXD)
+     This pin reports the state of the LIN bus to the microcontroller. LIN high (recessive state) is reported by a high level at RXD;
+     LIN low (dominant state) is reported by a low level at RXD. The output has an internal pull-up resistor with typically 5kΩ to
+     VCC. The AC characteristics are measured with an external load capacitor of 20pF.
+     The output is short-circuit protected. In unpowered mode (that is, VS = 0V), RXD is switched off.
+3.10 Enable Input Pin (EN)
+     The enable input pin controls the operation mode of the device. If EN is high, the circuit is in normal mode, with transmission
+     paths from TXD to LIN and from LIN to RXD both active. The VCC voltage regulator operates with 3.3V/5V/85mA output
+     capability.
+     If EN is switched to low while TXD is still high, the device is forced to silent mode. No data transmission is then possible, and
+     the current consumption is reduced to IVS typ. 35µA. The VCC regulator has its full functionality.
+     If EN is switched to low while TXD is low, the device is forced to sleep mode. No data transmission is possible, and the
+     voltage regulator is switched off.
+                                                                                       ATA6629/ATA6631 [DATASHEET]                   5
+                                                                                                            9165F–AUTO–10/14
+
+
+4.  Modes of Operation
+    Figure 4-1. Modes of Operation
+                                                         Unpowered Mode                              a: VS > VSthF
+                                                          (See section 4.5)                          b: VS < VSthU
+                                                                                                     c: Bus wake-up event
+                                                                                                     d: NRES switches to low
+                                                             b          a
+                                                           Fail-safe Mode
+                                       b                    VCC: 3.3V/5V                                 b
+                                                    with undervoltage monitoring
+                                                       Communication: OFF                     c or d
+                                          d
+                                          EN = 1                                 EN = 1
+                                                                                  or c
+                                                                                            b
+                                                        Go to silent command
+                                             EN = 0
+                                                                                                            Silent Mode
+                                            TXD = 1
+                                                         Local wake-up event                               VCC: 3.3V/5V
+                         Normal Mode         EN = 1                                               with undervoltage monitoring
+                                                                                                     Communication: OFF
+                         VCC: 3.3V/5V
+                        with undervoltage
+                            monitoring                  Go to sleep command
+                                             EN = 0
+                      Communication: ON     TXD = 0                                         Sleep Mode
+                                                                                          VCC: switched off
+                                                                                        Communication: OFF
+    Table 4-1.     Modes of Operation
+         Modes of Operation                      Transceiver                             VCC                               LIN
+                Fail safe                           OFF                                3.3V/5V                          Recessive
+                Normal                               ON                                3.3V/5V                       TXD depending
+                 Silent                             OFF                                3.3V/5V                          Recessive
+                 Sleep                              OFF                                   0V                            Recessive
+4.1 Normal Mode
+    This is the normal transmitting and receiving mode of the LIN interface, in accordance with LIN specification 2.x. The VCC
+    voltage regulator operates with a 3.3V/5V output voltage, with a low tolerance of ±2% and a maximum output current of
+    85mA.
+    If an undervoltage condition occurs, NRES is switched to low and the IC changes its state to fail-safe mode.
+6   ATA6629/ATA6631 [DATASHEET]
+    9165F–AUTO–10/14
+
+
+4.2 Silent Mode
+    A falling edge at EN while TXD is high switches the IC into silent mode. The TXD signal has to be logic high during the mode
+    select window (Figure 4-3 on page 8). The transmission path is disabled in silent mode. The overall supply current from VBatt
+    is a combination of the IVSsilent = 35µA plus the VCC regulator output current IVCC.
+    Figure 4-2. Switch to Silent Mode
+                                Normal Mode                                                  Silent Mode
+                              EN
+                                                                Mode select window
+                             TXD
+                                                          td = 3.2μs
+                           NRES
+                            VCC
+                                                         Delay time silent mode
+                                                       td_sleep = maximum 20μs
+                              LIN
+                                                     LIN switches directly to recessive mode
+    In silent mode the internal slave termination between pin LIN and pin VS is disabled to minimize the current consumption in
+    case pin LIN is short-circuited to GND. Only a weak pull-up current (typically 10µA) between pin LIN and pin VS is present.
+    The silent mode can be activated independently from the current level on pin LIN.
+    If an undervoltage condition occurs, NRES is switched to low and the Atmel® ATA6629/ATA6631 changes its state to
+    fail-safe mode.
+    A voltage less than the LIN pre-wake detection VLINL at pin LIN activates the internal LIN receiver and starts the wake-up
+    detection timer.
+                                                                                        ATA6629/ATA6631 [DATASHEET]            7
+                                                                                                         9165F–AUTO–10/14
+
+
+  A falling edge at the LIN pin followed by a dominant bus level maintained for a certain time period (> tbus) and the following
+  rising edge at pin LIN (see Figure 4-3) results in a remote wake-up request which is only possible if TXD is high. The device
+  switches from silent mode to fail-safe mode, then the internal LIN slave termination resistor is switched on. The remote
+  wake-up request is indicated by a low level at pin RXD and TXD to interrupt the microcontroller (Figure 4-3). EN high can be
+  used to switch directly to normal mode.
+  Figure 4-3. LIN Wake-up Waveform Diagram from Silent Mode
+                                 Bus wake-up filtering time
+                                            tbus                                 Fail-safe mode      Normal mode
+                 LIN bus
+                     RXD                    High                                       Low
+                     TXD                    High                                                       High
+                     VCC             Silent mode 3.3V/5V                     Fail-safe mode 3.3V/5V Normal mode
+                                                                                                    EN High
+                      EN
+                   NRES                              Undervoltage detection active
+8 ATA6629/ATA6631 [DATASHEET]
+  9165F–AUTO–10/14
+
+
+4.3 Sleep Mode
+    A falling edge at EN while TXD is low switches the IC into sleep mode. The TXD signal has to be logic low during the mode
+    select window (Figure 4-5 on page 10).
+    Figure 4-4. Switch to Sleep Mode
+                               Normal Mode                                                  Sleep Mode
+                              EN
+                                                               Mode select window
+                             TXD
+                                                        td = 3.2μs
+                           NRES
+                             VCC
+                                                       Delay time sleep mode
+                                                      td_sleep = maximum 20μs
+                              LIN
+                                                      LIN switches directly to recessive mode
+    In order to avoid any influence to the LIN-pin during switching into sleep mode it is possible to switch the EN up to 3.2µs
+    earlier to low than the TXD. Therefore, the best an easiest way are two falling edges at TXD and EN at the same time.
+    In sleep mode the transmission path is disabled. Supply current from VBatt is typically IVSsleep = 10µA. The VCC regulator is
+    switched off; NRES and RXD are low. The internal slave termination between pin LIN and pin VS is disabled to minimize the
+    current consumption in case pin LIN is short-circuited to GND. Only a weak pull-up current (typically 10µA) between pin LIN
+    and pin VS is present. The sleep mode can be activated independently from the current level on pin LIN.
+    A voltage less than the LIN pre-wake detection VLINL at pin LIN activates the internal LIN receiver and starts the wake-up
+    detection timer.
+    A falling edge at the LIN pin followed by a dominant bus level maintained for a certain time period (> tbus) and a following
+    rising edge at pin LIN results in a remote wake-up request. The device switches from sleep Mode to fail-safe mode.
+    The VCC regulator is activated, and the internal LIN slave termination resistor is switched on. The remote wake-up request is
+    indicated by a low level at RXD and TXD to interrupt the microcontroller (Figure 4-5 on page 10).
+    EN high can be used to switch directly from sleep/silent to fail-safe mode. If EN is still high after VCC ramp up and
+    undervoltage reset time, the IC switches to normal mode.
+                                                                                       ATA6629/ATA6631 [DATASHEET]                9
+                                                                                                           9165F–AUTO–10/14
+
+
+   Figure 4-5. LIN Wake-up Diagram from Sleep Mode
+                              Bus wake-up filtering time
+                                        tbus                   Fail-safe Mode            Normal Mode
+                    LIN bus
+                       RXD             Low                           Low
+                                                                                          High
+                        TXD
+                      VCC
+                                                                     On state
+                    voltage
+                                          Off state
+                  regulator
+                                                          Regulator wake-up time
+                                                                                         EN High
+                         EN
+                                                         Reset
+                                                          time
+                     NRES              Low
+                                                                       Microcontroller
+                                                                     start-up time delay
+10 ATA6629/ATA6631 [DATASHEET]
+   9165F–AUTO–10/14
+
+
+4.4 Sleep or Silent Mode: Behavior at a Floating LIN-bus or a Short Circuited LIN to GND
+    In sleep or in silent mode the device has a very low current consumption even during short-circuits or floating conditions on
+    the bus. A floating bus can arise if the master pull-up resistor is missing, e.g., if it is switched off when the LIN- master is in
+    sleep mode or even if the power supply of the master node is switched off.
+    In order to minimize the current consumption IVS in sleep or silent mode during voltage levels at the LIN-pin below the LIN
+    pre-wake threshold, the receiver is activated only for a specific time tmon. If tmon elapses while the voltage at the bus is lower
+    than pre-wake detection low (VLINL) and higher than the LIN dominant level, the receiver is switched off again and the circuit
+    changes back to sleep respectively silent mode. The current consumption is then IVSsleep_short or IVSsilent_short (typ. 10µA more
+    than IVSsleep respectively IVSsilent). If a dominant state is reached on the bus no wake-up will occur. Even if the voltage rises
+    above the pre-wake detection high (VLINH), the IC will stay in sleep respectively silent mode (see Figure 4-6 on page 11).
+    This means the LIN-bus must be above the pre-wake detection threshold VLINH for a few microseconds before a new LIN
+    wake-up is possible.
+    Figure 4-6. Floating LIN-bus During Sleep or Silent Mode
+                                                                                                                 LIN Pre-wake
+                                    VLINL
+                   LIN BUS
+                                                                                                           LIN dominant state
+                                    VBUSdom
+                                                                       tmon
+                                                                                         IVSsleep_short /
+                                                                      IVSfail             IVSsilent_short
+                        IVS
+                                    IVSsleep/silent                                                       IVSsleep/silent
+                   Mode of
+                  operation     Sleep/Silent Mode        Wake-up Detection Phase                Sleep/Silent Mode
+                Int. Pull-up
+                  Resistor                                        off (disabled)
+                    RLIN
+    If the Atmel® ATA6629/ATA6631 is in sleep or silent mode and the voltage level at the LIN-bus is in dominant state
+    (VLIN < VBUSdom) for a time period exceeding tmon (during a short circuit at LIN, for example), the IC switches back to sleep
+    mode respectively silent mode. The VS current consumption then is IVSsleep_short or IVSsilent_short (typ. 10µA more than IVSsleep
+    respectively IVSsilent). After a positive edge at pin LIN the IC switches directly to fail-safe mode (see Figure 4-7 on page 12).
+                                                                                     ATA6629/ATA6631 [DATASHEET]                      11
+                                                                                                                9165F–AUTO–10/14
+
+
+    Figure 4-7. Short Circuit to GND on the LIN bus During Sleep- or Silent Mode
+                                                                                                           LIN Pre-wake
+                                 VLINL
+                  LIN BUS
+                                                                                                      LIN dominant state
+                                 VBUSdom
+                                                                         tmon
+                                                                 tmon
+                                                                                    IVSsleep_short/
+                                                                IVSfail              IVSsilent_short
+                       IVS
+                                  IVSsleep/silent
+                  Mode of
+                              Sleep/Silent Mode     Wake-up Detection Phase         Sleep/Silent     Fail-Safe Mode
+                 operation
+                                                                                        Mode
+               Int. Pull-up
+                 Resistor                             off (disabled)                                 on (enabled)
+                   RLIN
+4.5 Fail-safe Mode
+    The device automatically switches to fail-safe mode at system power-up. The voltage regulator is switched on
+    (see Figure 6-1 on page 15). The NRES output switches to low for tres = 4ms and gives a reset to the microcontroller. LIN
+    communication is switched off. The IC stays in this mode until EN is switched to high. The IC then changes to normal mode.
+    A power down of VBatt (VS < VSth) during silent or sleep mode switches the IC into fail-safe mode after power up. A low at
+    NRES switches the IC into fail-safe mode directly. During fail-safe mode the TXD pin is an output and signals the fail-safe
+    source.
+    The LIN SBC can operate in different modes, like normal, silent or sleep mode. The functionality of these modes is described
+    in Table 4-2.
+    Table 4-2.    TXD, RXD Depending from Operation Modes
+                 Different Modes                                   TXD                                        RXD
+                  Fail-safe Mode                                     Signalling fail-safe sources (see Table 4-3)
+                   Normal Mode                                                Follows data transmission
+                    Silent Mode                                    High                                       High
+                    Sleep Mode                                     Low                                         Low
+12  ATA6629/ATA6631 [DATASHEET]
+    9165F–AUTO–10/14
+
+
+      A wake-up event from either silent or sleep mode will be signalled to the microcontroller using the two pins RXD and TXD.
+      The coding is shown in Table 4-3.
+      A wake-up event will lead the IC to the fail-safe mode.
+      Table 4-3.     Signalling Fail-safe Sources
+                            Fail-safe Sources                                                           TXD                                   RXD
+                          LIN wake up (pin LIN)                                                          Low                                   Low
+                   VSth (battery) undervoltage detection                                                High                                   Low
+4.6   Unpowered Mode
+      If you connect battery voltage to the application circuit, the voltage at the VS pin increases according to the block capacitor
+      (see Figure 6-1 on page 15). After VS is higher than the VS undervoltage threshold VSth, the IC mode changes from
+      unpowered mode to fail-safe mode. The VCC output voltage reaches its nominal value after tVCC. This time, tVCC, depends
+      on the VCC capacitor and the load.
+      The NRES is low for the reset time delay treset. During this time, treset, no mode change is possible.
+      IF VS drops below VSth, then the IC switches to unpowered mode. The behaviour of VCC, NRES and LIN is shown in
+      Figure 4-8.
+      Figure 4-8. VCC versus VS for the VCC = 3.3V Regulator
+                                                6.0
+                                                5.5
+                                                5.0
+                                                4.5                   Regulator drop voltage VD
+                                                4.0                                                                        LIN
+                                                3.5
+                                       V in V
+                                                3.0
+                                                2.5                     VS
+                                                2.0                                                       NRES
+                                                1.5
+                                                1.0                                         VCC
+                                                0.5
+                                                 0
+                                                      0   0.5   1.0     1.5   2.0    2.5   3.0    3.5   4.0    4.5   5.0   5.5   6.0
+                                                                                        VS in V
+                                                                                                              ATA6629/ATA6631 [DATASHEET]                 13
+                                                                                                                                       9165F–AUTO–10/14
+
+
+5. Fail-safe Features
+     ●    During a short-circuit at LIN to VBattery , the output limits the output current to IBUS_LIM. Due to the power dissipation, the
+          chip temperature exceeds TLINoff and the LIN output is switched off. The chip cools down and after a hysteresis of Thys,
+          switches the output on again. RXD stays on high because LIN is high. During LIN overtemperature switch-off, the VCC
+          regulator is working independently.
+     ●    During a short-circuit from LIN to GND the IC can be switched into sleep or Silent mode and even in this case the
+          current consumption is lower than 30µA in sleep mode and lower than 70µA in silent mode. If the short-circuit
+          disappears, the IC starts with a remote wake-up.
+     ●    Sleep or silent mode: During a floating condition on the bus the IC switches back to sleep mode/silent mode
+          automatically and thereby the current consumption is lower than 30µA/70µA.
+     ●    The reverse current is < 2µA at pin LIN during loss of VBatt . This is optimal behavior for bus systems where some
+          slave nodes are supplied from battery or ignition.
+     ●    During a short circuit at VCC, the output limits the output current to IVCClim. Because of undervoltage, NRES switches
+          to low and sends a reset to the microcontroller. The IC switches into fail-safe mode. If the chip temperature exceeds
+          the value TVCCoff, the VCC output switches off. The chip cools down and after a hysteresis of Thys, switches the output
+          on again. Because of fail-safe mode, the VCC voltage will switch on again although EN is switched off from the
+          microcontroller.The microcontroller can then start with normal operation.
+     ●    Pin EN provides a pull-down resistor to force the transceiver into recessive mode if EN is disconnected.
+     ●    Pin RXD is set floating if VBatt is disconnected.
+     ●    Pin TXD provides a pull-up resistor to force the transceiver into recessive mode if TXD is disconnected.
+     ●    After switching the IC into normal mode the TXD pin must be pulled to high longer than 10µs in order to activate the
+          LIN driver. This feature prevents the bus from being driven into dominant state when the IC is switched into normal
+          mode and TXD is low.
+     ●    If TXD is short-circuited to GND, it is possible to switch to sleep mode via ENABLE after t > tdom.
+14 ATA6629/ATA6631 [DATASHEET]
+   9165F–AUTO–10/14
+
+
+6.   Voltage Regulator
+     Figure 6-1. VCC Voltage Regulator: Ramp Up and Undervoltage
+                                          VS
+                                      12V
+                           5.5V/3.8V
+                                 VCC
+                              5V/3.3V
+                                Vthun
+                                                            tVCC       tReset                                               tres_f
+                              NRES
+                             5V/3.3V
+     The voltage regulator needs an external capacitor for compensation and to smooth the disturbances from the
+     microcontroller. It is recommended to use an electrolytic capacitor with C > 1.8µF and a ceramic capacitor with C = 100nF.
+     The values of these capacitors can be varied by the customer, depending on the application.
+     With this special SO8 package (fused lead frame to pin 3) an Rthja of 80K/W is achieved.
+     Therefore, it is recommended to connect pin 3 with a wide GND plate on the printed board to get a good heat sink.
+     The main power dissipation of the IC is created from the VCC output current IVCC, which is needed for the application.
+     Figure 6-2 shows the safe operating area of the Atmel® ATA6631.
+     Figure 6-2. Power Dissipation: Safe Operating Area: VCC Output Current versus Supply Voltage VS at Different
+                 Ambient Temperatures Due to Rthja = 80K/W
+                                           90
+                                           80
+                                           70
+                                           60
+                              IVCC (mA)
+                                           50                                                                           Tamb = 85°C
+                                           40                                                                           Tamb = 95°C
+                                                                                                                        Tamb = 105°C
+                                           30
+                                                                                                                        Tamb = 115°C
+                                           20
+                                           10
+                                            0
+                                                5   6   7      8   9   10       11   12   13   14   15   16   17   18
+                                                                                VS (V)
+     For programming purposes of the microcontroller, it is potentionally necessary to supply the VCC output via an external
+     power supply while the VS Pin of the system basis chip is disconnected. This will not affect the system basis chip.
+                                                                                                         ATA6629/ATA6631 [DATASHEET]                     15
+                                                                                                                                      9165F–AUTO–10/14
+
+
+7.         Absolute Maximum Ratings
+Stresses beyond those listed under “Absolute Maximum Ratings” may cause permanent damage to the device. This is a stress rating
+only and functional operation of the device at these or any other conditions beyond those indicated in the operational sections of this
+specification is not implied. Exposure to absolute maximum rating conditions for extended periods may affect device reliability.
+Parameters                                            Symbol              Min.             Typ.              Max.             Unit
+Supply voltage VS                                         VS              –0.3                               +40                V
+Pulse time ≤ 500ms
+Ta = 25°C                                                 VS                                                 +40                V
+Output current IVCC ≤ 85mA
+Pulse time ≤ 2 min
+Ta = 25°C                                                 VS                                                  27                V
+Output current IVCC ≤ 85mA
+Logic pins (RxD, TxD, EN, NRES)                                           –0.3                               +5.5               V
+Output current NRES                                     INRES                                                 +2              mA
+LIN
+- DC voltage                                                               –27                               +40                V
+VCC
+- DC voltage                                                              –0.3                               +5.5               V
+ESD according to IBEE LIN EMC
+Test specification 1.0 following IEC 61000-4-2
+- Pin VS, LIN to GND                                                        ±8                                                KV
+ESD HBM following STM5.1
+with 1.5 kΩ/100 pF
+  - Pin VS, LIN to GND                                                      ±6                                                KV
+HBM ESD
+ANSI/ESD-STM5.1                                                             ±3                                                KV
+JESD22-A114
+AEC-Q100 (002)
+CDM ESD STM 5.3.1                                                         ±750                                                  V
+Machine model ESD
+                                                                          ±200                                                  V
+AEC-Q100-RevF(003)
+Junction temperature                                       Tj              –40                               +150              °C
+Storage temperature                                        Ts              –55                               +150              °C
+8.         Thermal Characteristics
+Parameters                                         Symbol             Min.             Typ.               Max.              Unit
+Thermal resistance junction to ambient
+                                                     Rthja                                                145               K/W
+(free air)
+Special heat sink at GND (pin 3) on PCB              Rthja                               80                                 K/W
+Thermal shutdown of VCC regulator                   TVCCoff            150              160               170                °C
+Thermal shutdown of LIN output                      TLINoff            150              160               170                °C
+Thermal shutdown hysteresis                          Thys                                10                                  °C
+16         ATA6629/ATA6631 [DATASHEET]
+           9165F–AUTO–10/14
+
+
+9.       Electrical Characteristics
+5V < VS < 27V, –40°C < Tj < 150°C; unless otherwise specified all values refer to GND pins.
+   No.   Parameters                  Test Conditions            Pin       Symbol          Min.   Typ.    Max.     Unit   Type*
+    1    Vs pin
+         Nominal DC voltage
+   1.1                                                           VS            VS           5    13.5     27        V      A
+         range
+                                     Sleep mode
+                                     VLIN > VS – 0.5V            VS        IVSsleep         2     10      14       µA      A
+         Supply current in sleep     VS < 14V
+   1.2
+         mode                        Sleep mode, VLIN = 0V
+                                     Bus shorted to GND          VS     IVSsleep_short      3     20      30       µA      A
+                                     VS < 14V
+                                     Bus recessive
+                                     VS < 14V                    VS        IVSsilent       20     35      50       µA      A
+                                     Without load at VCC
+         Supply current in silent
+   1.3                               Silent mode
+         mode
+                                     VS < 14V
+                                                                 VS     IVSsilent_short    25     45      70       µA      A
+                                     Bus shorted to GND
+                                     Without load at VCC
+                                     Bus recessive
+         Supply current in normal
+   1.4                               VS < 14V                    VS          IVSrec        0.3            0.8      mA      A
+         mode
+                                     Without load at VCC
+                                     Bus dominant
+         Supply current in normal
+   1.5                               VS < 14V                    VS         IVSdom         50             53       mA      A
+         mode
+                                     VCC load current 50mA
+                                     Bus recessive
+         Supply current in fail-safe
+   1.6                               VS < 14V                    VS          IVSfail      0.35           0.53      mA      A
+         mode
+                                     Without load at VCC
+         VS undervoltage             Switch to unpowered mode    VS          VSthU         3.7    4.2     4.7       V      A
+   1.7
+         threshold                   Switch to fail-safe mode    VS          VSthF         4.0    4.5      5        V      A
+         VS undervoltage
+   1.8                                                           VS       VSth_hys                0.3               V      A
+         hysteresis
+    2    RXD output pin
+         Low level output sink       Normal Mode
+   2.1                                                         RXD            IRXD         1.3    2.5      8       mA      A
+         current                     VLIN = 0V, VRXD = 0.4V
+   2.2   Low level output voltage IRXD = 1mA                   RXD          VRXDL                         0.4       V      A
+   2.3   Internal resistor to VCC                              RXD           RRXD           3      5       7       kΩ      A
+    3    TXD input/output pin
+   3.1   Low level voltage input                               TXD          VTXDL         –0.3           +0.8       V      A
+                                                                                                        VCC +
+   3.2   High level voltage input                              TXD          VTXDH           2                       V      A
+                                                                                                         0.3V
+   3.3   Pull-up resistor            VTXD = 0V                 TXD           RTXD         125    250     400       kΩ      A
+         High level leakage
+   3.4                               VTXD = VCC                TXD            ITXD         –3             +3       µA      A
+         current
+                                     Fail-safe Mode
+         Low level output sink
+                                     V = VS
+   3.5   current at local wake-up LIN                          TXD        ITXDwake          2     2.5      8       mA      A
+                                     VWAKE = 0V
+         request
+                                     VTXD = 0.4V
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                        ATA6629/ATA6631 [DATASHEET]          17
+                                                                                                        9165F–AUTO–10/14
+
+
+9.       Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C; unless otherwise specified all values refer to GND pins.
+   No.   Parameters                Test Conditions              Pin      Symbol       Min.   Typ.     Max.      Unit Type*
+    4    EN input pin
+   4.1   Low level voltage input                                 EN        VENL       –0.3            +0.8       V     A
+                                                                                                      VCC +
+   4.2   High level voltage input                                EN        VENH         2                        V     A
+                                                                                                      0.3V
+   4.3   Pull-down resistor        VEN = VCC                     EN         REN        50    125       200      kΩ     A
+   4.4   Low level input current   VEN = 0V                      EN          IEN       –3               +3      µA     A
+    5    NRES open drain output pin
+                                   VS ≥ 5.5V
+   5.1   Low level output voltage                             NRES
+                                   INRES = 1mA                            VNRESL                       0.14      V     A
+                                   10 kΩ to 5V
+   5.2   Low level output low                                 NRES        VNRESLL                       0.2      V     A
+                                   VCC = 0V
+                                   VVS ≥ 5.5V
+   5.3   Undervoltage reset time                              NRES         tReset       2      4         6      ms     A
+                                   CNRES = 20pF
+         Reset debounce time for VVS ≥ 5.5V
+   5.4                                                        NRES          tres_f     1.5              10       µs    A
+         falling edge              CNRES = 20pF
+         Switch off leakage
+   5.5                             VNRES = 5.5V               NRES                     –3               +3      µA     A
+         current
+    6    VCC Voltage Regulator Atmel ATA6629
+                                   4V < VS < 18V
+                                                               VCC        VCCnor     3.234            3.366      V     A
+                                   (0mA to 50mA)
+   6.1   Output voltage VCC
+                                   4.5V < VS < 18V
+                                                               VCC        VCCnor     3.234            3.366      V     C
+                                   (0mA to 85mA)
+         Output voltage VCC at                                                       VVS –
+   6.2                             3V < VS < 4V                VCC        VCClow                      3.366      V     A
+         low VS                                                                       VDrop
+   6.3   Regulator drop voltage    VS > 3V, IVCC = –15mA       VCC          VD1                        200      mV     A
+   6.4   Regulator drop voltage    VS > 3V, IVCC = –50mA       VCC          VD2              500       700      mV     A
+   6.5   Line regulation maximum 4V < VS < 18V                 VCC        VCCline             0.1       0.2      %     A
+         Load regulation
+   6.6                             5 mA < IVCC < 50mA          VCC        VCCload             0.1       0.5      %     A
+         maximum
+                                   10 Hz to 100kHz
+         Power supply ripple
+   6.7                             CVCC = 10µF                                         50                       dB     D
+         rejection
+                                   VS = 14V, IVCC = –15mA
+   6.8   Output current limitation VS > 4V                     VCC         IVCCs      –240  –160       –85      mA     A
+                                   0.2Ω < ESR < 5Ω at
+                                   100kHz
+   6.9   External load capacity    for phase margin ≥ 60°      VCC         Cload       1.8    10                 µF    D
+                                   ESR < 0.2Ω at 100kHz
+                                   for phase margin ≥ 30°
+         VCC undervoltage          Referred to VCC
+   6.10                                                        VCC         VthunN      2.8              3.2      V     A
+         threshold                 VS > 4V
+         Hysteresis of             Referred to VCC
+   6.11                                                        VCC       Vhysthun            150                mV     A
+         undervoltage threshold    VS > 4V
+         Ramp up time VS > 4V to CVCC = 2.2µF
+   6.12                                                        VCC          tVCC             320       500       µs    A
+         VCC = 3.3V                Iload = –5mA at VCC
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+18       ATA6629/ATA6631 [DATASHEET]
+         9165F–AUTO–10/14
+
+
+9.       Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C; unless otherwise specified all values refer to GND pins.
+   No.   Parameters                 Test Conditions                Pin      Symbol     Min.      Typ.      Max.       Unit Type*
+    7    VCC voltage regulator Atmel ATA6631
+                                    5.5V < VS < 18V
+                                                                  VCC        VCCnor     4.9                 5.1         V    A
+                                    (0mA to 50mA)
+   7.1   Output voltage VCC
+                                    6V < VS < 18V
+                                                                  VCC        VCCnor     4.9                 5.1         V    C
+                                    (0mA to 85mA)
+         Output voltage VCC at
+   7.2                              4V < VS < 5.5V                VCC        VCClow  VVS – VD               5.1         V    A
+         low VS
+   7.3   Regulator drop voltage     VS > 4V, IVCC = –20mA         VCC          VD1                         250        mV     A
+   7.4   Regulator drop voltage     VS > 4V, IVCC = –50mA         VCC          VD2                400      600        mV     A
+   7.5   Regulator drop voltage     VS > 3.3V, IVCC = –15mA       VCC          VD3                         200        mV     A
+   7.6   Line regulation maximum 5.5V < VS < 18V                  VCC        VCCline              0.1       0.2        %     A
+         Load regulation
+   7.7                              5 mA < IVCC < 50mA            VCC       VCCload               0.1       0.5        %     A
+         maximum
+                                    10Hz to 100kHz
+         Power supply ripple
+   7.8                              CVCC = 10µF                                         50                             dB    D
+         rejection
+                                    VS = 14V, IVCC = –15mA
+   7.9   Output current limitation VS > 5.5V                      VCC         IVCCs    –240      –160      –85        mA     A
+                                    0.2Ω < ESR < 5Ω at
+                                    100kHz
+   7.10  External load capacity     for phase margin ≥ 60°        VCC         Cload     1.8       10                   µF    D
+                                    ESR < 0.2Ω at 100kHz
+                                    for phase margin ≥ 30°
+         VCC undervoltage           Referred to VCC
+   7.11                                                           VCC        VthunN     4.2                 4.8         V    A
+         threshold                  VS > 5.5V
+         Hysteresis of              Referred to VCC
+   7.12                                                           VCC       Vhysthun              250                 mV     A
+         undervoltage threshold     VS > 5.5V
+         Ramp up time VS > 5.5V CVCC = 2.2µF
+   7.13                                                           VCC         TVCC                320      500         µs    A
+         to VCC = 5V                Iload = –5mA at VCC
+         LIN bus driver: bus load conditions:
+         load 1 (Small): 1nF, 1kΩ; load 2 (large): 10nF, 500Ω; internal pull-up RRXD = 5kΩ ; CRXD = 20pF, Load 3 (medium): 6.8nF,
+    8
+         660Ω characterized on samples
+         10.7 and 10.8 specifies the timing parameters for proper operation at 20kBit/s and 10.9 and 10.10 at 10.4kBit/s
+         Driver recessive output
+   8.1                              Load1/load2                    LIN       VBUSrec 0.9 × VS               VS          V    A
+         voltage
+                                    VVS = 7V
+   8.2   Driver dominant voltage                                   LIN      V_LoSUP                         1.2         V    A
+                                    Rload = 500Ω
+                                    VVS = 18V
+   8.3   Driver dominant voltage                                   LIN       V_HiSUP                         2          V    A
+                                    Rload = 500Ω
+                                    VVS = 7V
+   8.4   Driver dominant voltage                                   LIN    V_LoSUP_1k    0.6                             V    A
+                                    Rload = 1000Ω
+                                    VVS = 18V
+   8.5   Driver dominant voltage                                   LIN    V_HiSUP_1k    0.8                             V    A
+                                    Rload = 1000Ω
+                                    The serial diode is
+   8.6   Pull–up resistor to VS                                    LIN         RLIN     20        30        47         kΩ    A
+                                    mandatory
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                     ATA6629/ATA6631 [DATASHEET]               19
+                                                                                                          9165F–AUTO–10/14
+
+
+9.       Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C; unless otherwise specified all values refer to GND pins.
+   No.   Parameters                 Test Conditions             Pin       Symbol       Min.     Typ.      Max.   Unit Type*
+         Voltage drop at the serial In pull-up path with Rslave
+   8.7                                                          LIN       VSerDiode     0.4                1.0    V     D
+         diodes                     ISerDiode = 10mA
+         LIN current limitation
+   8.8                                                          LIN        IBUS_LIM     40      120       200    mA     A
+         VBUS = VBatt_max
+         Input leakage current at   Input leakage current
+         the receiver including     driver off
+   8.9                                                          LIN    IBUS_PAS_dom     –1     –0.35             mA     A
+         pull-up resistor as        VBUS = 0V
+         specified                  VBatt = 12V
+                                    Driver off
+         Leakage current LIN        8V < VBatt < 18V
+   8.10                                                         LIN     IBUS_PAS_rec             10        20    µA     A
+         recessive                  8V < VBUS < 18V
+                                    VBUS ≥ VBatt
+         Leakage current when
+         control unit disconnected
+                                    GNDDevice = VS
+         from ground.
+   8.11                             V = 12V                     LIN     IBUS_NO_gnd    –10      +0.5      +10    µA     A
+         loss of local ground must Batt
+                                    0V < VBUS < 18V
+         not affect communication
+         in the residual network
+         Leakage current at
+         disconnected battery.
+         Node has to sustain the VBatt disconnected
+   8.12  current that can flow      VSUP_Device = GND           LIN      IBUS_NO_bat             0.1        2    µA     A
+         under this condition. Bus 0V < VBUS < 18V
+         must remain operational
+         under this condition.
+         Capacitance on pin LIN
+   8.13                                                         LIN          CLIN                          20     pF    D
+         to GND
+     9   LIN bus receiver
+         Center of receiver         VBUS_CNT =                                       0.475 ×   0.5 ×    0.525 ×
+   9.1                                                          LIN       VBUS_CNT                                V     A
+         threshold                  (Vth_dom + Vth_rec)/2                               VS       VS        VS
+   9.2   Receiver dominant state VEN = 5V                       LIN        VBUSdom     –27              0.4 × VS  V     A
+   9.3   Receiver recessive state VEN = 5V                      LIN        VBUSrec   0.6 × VS              40     V     A
+                                                                                     0.028 ×            0.175 ×
+   9.4   Receiver input hysteresis Vhys = Vth_rec – Vth_dom     LIN        VBUShys            0.1 x VS            V     A
+                                                                                        VS                 VS
+         Pre-wake detection LIN
+   9.5                                                          LIN         VLINH    VS – 2V           VS + 0.3V  V     A
+         High level input voltage
+         Pre-wake detection LIN
+   9.6                              Activates the LIN receiver  LIN          VLINL     –27             VS – 3.3V  V     A
+         Low level input voltage
+    10   Internal Timers
+         Dominant time for wake–
+   10.1                             VLIN = 0V                   LIN           tbus      30       90       150     µs    A
+         up via LIN bus
+         Time delay for mode
+   10.2  change from fail-safe into VEN = 5V                     EN          tnorm       5       15        20     µs    A
+         normal mode via pin EN
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+20       ATA6629/ATA6631 [DATASHEET]
+         9165F–AUTO–10/14
+
+
+9.       Electrical Characteristics (Continued)
+5V < VS < 27V, –40°C < Tj < 150°C; unless otherwise specified all values refer to GND pins.
+   No.   Parameters                Test Conditions                 Pin    Symbol       Min.   Typ.    Max.      Unit   Type*
+         Time delay for mode
+         change from normal
+   10.3                            V = 0V                           EN      tsleep      8      16       25       µs      A
+         mode to sleep mode via EN
+         pin EN
+         TXD dominant time out
+   10.4                            VTXD = 0V                       TXD       tdom       27     55       70       ms      A
+         time
+         Time delay for mode
+   10.5  change from silent mode VEN = 5V                           EN       ts_n       5      15       40       µs      A
+         into normal mode via EN
+         Monitoring time for wake-
+   10.6                                                            LIN       tmon       6      10       15       ms      A
+         up over LIN bus
+                                   THRec(max) = 0.744 × VS
+                                   THDom(max) = 0.581 × VS
+   10.7  Duty cycle 1              VS = 7.0V to 18V                LIN        D1      0.396                              A
+                                   tBit = 50µs
+                                   D1 = tbus_rec(min)/(2 × tBit)
+                                   THRec(min) = 0.422 × VS
+                                   THDom(min) = 0.284 × VS
+   10.8  Duty cycle 2              VS = 7.6V to 18V                LIN        D2                      0.581              A
+                                   tBit = 50µs
+                                   D2 = tbus_rec(max)/(2 × tBit)
+                                   THRec(max) = 0.778 × VS
+                                   THDom(max) = 0.616 × VS
+   10.9  Duty cycle 3              VS = 7.0V to 18V                LIN        D3      0.417                              A
+                                   tBit = 96µs
+                                   D3 = tbus_rec(min)/(2 × tBit)
+                                   THRec(min) = 0.389 × VS
+                                   THDom(min) = 0.251 × VS
+  10.10 Duty cycle 4               VS = 7.6V to 18V                LIN        D4                      0.590              A
+                                   tBit = 96µs
+                                   D4 = tbus_rec(max)/(2 × tBit)
+         Slope time falling and                                          tSLOPE_fall
+  10.11                            VS = 7.0V to 18V                LIN                 3.5             22.5      µs      A
+         rising edge at LIN                                             tSLOPE_rise
+         Receiver electrical AC parameters of the LIN physical layer
+    11
+         LIN receiver, RXD load conditions: internal pull-up; CRXD = 20pF
+         Propagation delay of
+                                   VS = 7.0V to 18V
+   11.1  receiver                                                  RXD      trx_pd                      6        µs      A
+                                   trx_pd = max(trx_pdr , trx_pdf)
+         Figure 9-1 on page 22
+         Symmetry of receiver
+                                   V = 7.0V to 18V
+   11.2  propagation delay rising S                                RXD     trx_sym      –2              +2       µs      A
+                                   trx_sym = trx_pdr – trx_pdf
+         edge minus falling edge
+*) Type means: A = 100% tested, B = 100% correlation tested, C = Characterized on samples, D = Design parameter
+                                                                                     ATA6629/ATA6631 [DATASHEET]           21
+                                                                                                      9165F–AUTO–10/14
+
+
+   Figure 9-1. Definition of Bus Timing Characteristics
+                                                       tBit                         tBit                 tBit
+                           TXD
+              (Input to transmitting node)
+                                                               tBus_dom(max)             tBus_rec(min)
+                                                                                                               Thresholds of
+                                     THRec(max)
+                                                                                                              receiving node1
+                   VS                THDom(max)
+         (Transceiver supply
+         of transmitting node)                              LIN Bus Signal
+                                                                                                               Thresholds of
+                                      THRec(min)                                                              receiving node2
+                                     THDom(min)
+                                                              tBus_dom(min)                tBus_rec(max)
+                         RXD
+           (Output of receiving node1)
+                                            trx_pdf(1)                                    trx_pdr(1)
+                         RXD
+           (Output of receiving node2)
+                                                                         trx_pdr(2)                              trx_pdf(2)
+22 ATA6629/ATA6631 [DATASHEET]
+   9165F–AUTO–10/14
+
+
+Figure 9-2. Application Circuit
+   VCC                                                                                                                       VBAT
+                            Atmel ATA6629/31                                                       1 VS
+                        VCC
+                                                                                                                     +
+                         5kΩ
+                                                                          Normal and
+             RXD 5               Receiver                                  Fail-safe                           100nF  22μF
+                                                                             Mode                           1k
+                                        -
+                                       +
+                                                                                                   4 LIN                 LIN-BUS
+                                                                             RF filter
+                                                                                                                     220pF
+                     VCC
+   Micro-                                 Wake-up bus timer                      Short circuit and
+ controller                                                                      overtemperature
+                                                                                 protection
+            TXD  6              TXD       Slew rate control
+                              Time-out
+                                timer
+                                                                                                   8 VCC
+                                                    Sleep     Normal/Silent/
+             EN  2                                   mode    Fail-safe mode
+                                          Control                                                  7 NRES
+                                                     VCC         3.3V/5V
+                                           unit
+                                                   switched
+            GND  3                                                                                       10kΩ
+                                                      off
+                                                            Undervoltage reset
+                                                                                                               100nF   10μF
+   GND
+                                                                               ATA6629/ATA6631 [DATASHEET]                    23
+                                                                                                      9165F–AUTO–10/14
+
+
+10.   Ordering Information
+      Extended Type Number                                Package                               Remarks
+          ATA6629-GAQW                                     SO8      3.3V LIN system basis chip, Pb-free, 4k, taped and reeled
+          ATA6631-GAQW                                     SO8      5V LIN system basis chip, Pb-free, 4k, taped and reeled
+11.   Package Information
+                                  D                                              E1
+                                                                                                     C
+                                                                                            L
+                   b                               A1     A2   A
+                             e                                                   E
+                         8                 5
+                                                                                technical drawings
+                                                                                according to DIN
+                                                                                specifications
+                                                                              Dimensions in mm
+                         1                 4
+                                                                              COMMON DIMENSIONS
+                                 Pin 1 identity                                  (Unit of Measure = mm)
+                                                                     Symbol     MIN      NOM           MAX      NOTE
+                                                                         A       1.5      1.65           1.8
+                                                                        A1       0.1      0.15         0.25
+                                                                        A2       1.4      1.47         1.55
+                                                                         D       4.8       4.9           5
+                                                                         E       5.8        6            6.2
+                                                                        E1       3.8       3.9           4
+                                                                         L       0.4      0.65           0.9
+                                                                         C      0.15       0.2         0.25
+                                                                         b       0.3       0.4           0.5
+                                                                         e             1.27 BSC
+                                                                                                                            05/08/14
+                                                  TITLE                                          GPC         DRAWING NO.       REV.
+              Package Drawing Contact:            Package: SO8
+              packagedrawings@atmel.com                                                                   6.543-5185.01-4       1
+24    ATA6629/ATA6631 [DATASHEET]
+      9165F–AUTO–10/14
+
+
+12. Revision History
+    Please note that the following page numbers referred to in this section refer to the specific revision mentioned, not to this
+    document.
+            Revision No.             History
+                                     • Put datasheet in the latest template
+    9165F-AUTO-10/14                 • Section 10 “Ordering Information” on page 24 updated
+                                     • Section 11 “Package Information” on page 25 updated
+    9165E-AUTO-04/14                 • Put datasheet in the latest template
+                                     • Features on page 1 changed
+                                     • Section 1 “Description” on pages 1 to 2 changed
+                                     • Section 3 “Functional Description” on pages 3 to 4 changed
+                                     • Section 4 “Modes of Operation” on pages 5 to 12 changed
+    9165D-AUTO-03/11
+                                     • Section 5 “Fail-safe Features” on page 13 changed
+                                     • Section 6 “Voltage Regulator” on pages 14 to 15 changed
+                                     • Section 7 “Absolute Maximum Ratings” on page 16 changed
+                                     • Section 9 “Electrical Characteristics” on pages 17 to 23 changed
+                                     • Section 9 “Electrical Characteristics” numbers 1.7 on page 17 and 10.3 on page 20
+    9165C-AUTO-10/10
+                                       changed
+                                     • Features on page 1 changed
+                                     •Text under heading 3.3 changed
+                                     •Text under heading 4.2 changed
+    9165B-AUTO-05/10                 •Abs.Max.Rat.Table -> Values in row “ESD HBM following....” changed
+                                     • El.Char.Table -> rows changed: 1.2, 1.3, 5.1, 5.2, 6.5, 6.6, 6.7, 6.8, 6.12, 7.6, 7.7, 7.8, 7.9,
+                                       7.13
+                                     • El.Char.Table -> row 8.13 added
+                                                                                  ATA6629/ATA6631 [DATASHEET]                        25
+                                                                                                          9165F–AUTO–10/14
+
+
+                                                                                                                                             XXXXXX
+Atmel Corporation              1600 Technology Drive, San Jose, CA 95110 USA                   T: (+1)(408) 441.0311          F: (+1)(408) 436.4200           |      www.atmel.com
+© 2014 Atmel Corporation. / Rev.: 9165F–AUTO–10/14
+Atmel®, Atmel logo and combinations thereof, Enabling Unlimited Possibilities®, and others are registered trademarks or trademarks of Atmel Corporation or its
+subsidiaries. Other terms and product names may be trademarks of others.
+DISCLAIMER: The information in this document is provided in connection with Atmel products. No license, express or implied, by estoppel or otherwise, to any intellectual property right
+is granted by this document or in connection with the sale of Atmel products. EXCEPT AS SET FORTH IN THE ATMEL TERMS AND CONDITIONS OF SALES LOCATED ON THE
+ATMEL WEBSITE, ATMEL ASSUMES NO LIABILITY WHATSOEVER AND DISCLAIMS ANY EXPRESS, IMPLIED OR STATUTORY WARRANTY RELATING TO ITS PRODUCTS
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. IN NO EVENT
+SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT, CONSEQUENTIAL, PUNITIVE, SPECIAL OR INCIDENTAL DAMAGES (INCLUDING, WITHOUT LIMITATION, DAMAGES
+FOR LOSS AND PROFITS, BUSINESS INTERRUPTION, OR LOSS OF INFORMATION) ARISING OUT OF THE USE OR INABILITY TO USE THIS DOCUMENT, EVEN IF ATMEL HAS
+BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. Atmel makes no representations or warranties with respect to the accuracy or completeness of the contents of this
+document and reserves the right to make changes to specifications and products descriptions at any time without notice. Atmel does not make any commitment to update the information
+contained herein. Unless specifically provided otherwise, Atmel products are not suitable for, and shall not be used in, automotive applications. Atmel products are not intended,
+authorized, or warranted for use as components in applications intended to support or sustain life.
+SAFETY-CRITICAL, MILITARY, AND AUTOMOTIVE APPLICATIONS DISCLAIMER: Atmel products are not designed for and will not be used in connection with any applications where
+the failure of such products would reasonably be expected to result in significant personal injury or death (“Safety-Critical Applications”) without an Atmel officer's specific written
+consent. Safety-Critical Applications include, without limitation, life support devices and systems, equipment or systems for the operation of nuclear facilities and weapons systems.
+Atmel products are not designed nor intended for use in military or aerospace applications or environments unless specifically designated by Atmel as military-grade. Atmel products are
+not designed nor intended for use in automotive applications unless specifically designated by Atmel as automotive-grade.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ ATA6629-TAQY ATA6631-TAQY ATA6631-GAQW ATA6629-GAQW

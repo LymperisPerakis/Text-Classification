@@ -1,0 +1,1692 @@
+                                                                   MCP2050
+                      LIN Transceiver with Voltage Regulator
+Features:                                           • Meets Stringent Automotive Design Requirements
+                                                       Including “OEM Hardware Requirements for LIN,
+• The MCP2050 is compliant with:
+                                                       CAN and FlexRay Interfaces in Automotive
+  - LIN Bus Specifications Version 1.3, 2.1 and        Applications”, Version 1.3, May 2012
+     with SAE J2602-2
+                                                    • Multiple Package Options Including Small 5x5
+• Support Baud Rates Up to 20 kBaud
+                                                       QFN
+• 43V Load Dump Protected
+• Maximum Continuous Input Voltage of 30V
+                                                    Description:
+• Wide LIN Compliant Supply Voltage, 6.0-18.0V
+• Extended Temperature Range: -40 to +125°C         The MCP2050 provides a bidirectional, half-duplex
+• Interface to PIC® EUSART and Standard USARTs      communication physical interface to meet the LIN bus
+• Wake-Up on LIN Bus Activity or Local Wake Input   specification Revision 2.1 and SAE J2602. The device
+                                                    incorporates a voltage regulator with 5V or 3.3V 70 mA
+• LIN Bus Pin
+                                                    regulated power supply output. The on-chip WWDT
+  - Internal pull-up termination resistor and diode allows users to adjust the size of the reset window by
+     for slave node                                 using an external resistor. The ratiometric VBAT pin
+  - Protected against VBAT shorts                   scales down VBAT to the range of VREG so it can be
+  - Protected against loss of ground                monitored by an A/D converter.
+  - High current drive                              The device has been designed to meet the stringent
+• TXD and LIN Bus Dominant Time-Out Function        quiescent current requirements of the automotive
+• Two Low-Power Modes                               industry and will survive +43V load dump transients,
+  - Transmitter Off mode: 90 µA (typical)           and double battery jumps.
+  - Power Down mode: 4.5 µA (typical)               MCP2050 family members:
+• Output Indicating Internal Reset State (POR or       - MCP2050-500, 14-pin, LIN driver with 5.0V
+  Sleep Wake)                                            regulator
+• MCP2050 On-Chip Voltage Regulator                    - MCP2050-330, 14-pin, LIN driver with 3.3V
+  - Output voltage of 5.0V or 3.3V with 70 mA            regulator
+     capability and tolerances of ±3% over             - MCP2050-500, 20-pin QFN, LIN driver with
+     operating temperature range                         5.0V regulator
+  - Internal short-circuit current limit               - MCP2050-330, 20-pin QFN, LIN driver with
+  - Only external filter and load capacitors needed      3.3V regulator
+• Programmable Windowed Watchdog Timer
+  (WWDT)
+  - External resistor programmable from 7 ms to
+     140 ms
+  - Disabled by connecting the WWDTSELECT
+     pin to VREG or let the pin float
+• Ratiometric Output of VBAT Voltage Scaled to
+  VREG
+• Automatic Thermal Shutdown
+• High Electromagnetic Immunity (EMI), Low
+  Electromagnetic Emission (EME)
+• Robust ESD Performance: ±15 kV for LBUS and
+  VBB pin (IEC61000-4-2)
+• Transient Protection for LBUS and VBB Pins in
+  Automotive Environment (ISO7637)
+ 2012-2014 Microchip Technology Inc.                                                  DS20002299C-page 1
+
+
+MCP2050
+Package Types
+                      MCP2050                                                         MCP2050
+                     PDIP, SOIC                                                       5 x 5 QFN*
+                                                                                                       WWDTRESET
+      VBAT RATIO     1       14      WWDTRESET
+                                                                                          VBAT RATIO
+             RXD     2       13      WWDTTRIG
+      CS/LWAKE       3
+                                                                                                       NC
+                             12      WWDTSELECT
+            VREG     4       11      FAULT/TXE
+                                                                                   NC
+                                                                                   NC
+           TXD       5       10      VBB
+         RESET       6        9      LBUS
+           NC        7        8      VSS                                           20
+                                                                                        19
+                                                                                        18             17   16
+                                                                  RXD          1                                   15      WWDTTRIG
+                                                            CS/LWAKE           2                                   14     WWDTSELECT
+                                                                 VREG          3          EP
+                                                                                                                   13      FAULT/TXE
+                                                                                          21
+                                                                  TXD          4                                   12     VBB
+                                                                   RESET       5                                   11     NC
+                                                                                   6      8
+                                                                                          9
+                                                                                   7      10
+                                                                                     NC                NC
+                                                                                   LBUS                NC
+                                                                                     VSS
+ * Includes Exposed Thermal Pad (EP), see Table 1-2.
+Block Diagram
+                                  4.2V
+     WWDTTRIG                                        Programmable                                                          WWDTRESET
+                                                                                                            VREG
+     WWDTselect                                   Windowed Watchdog
+                                                       Thermal                                                             RESET
+                                                      Protection
+                         Short-Circuit
+                          Protection
+                                                       Voltage
+                                                                                                                           VBB
+                                                      Regulator
+                                                                                   Ratiometric
+                                                                                   Reference
+           VREG                                       Wake-Up
+                     Internal Circuits 4.2V           Logic and
+                                                    Power Control     Bus Wakeup
+                          VREG
+            RXD
+                                                                                                                    ~30
+      CS/LWAKE                                                        Slope Control                                 kΩ
+                                                                                                                           LBUS
+             TXD
+                                                                                 Bus
+      FAULT/TXE                                                                Dominant                                    VSS
+                                                                                Timer
+                                                                         VBB
+                                                                                   VREG
+                                                          Thermal
+                                                             and
+                                                         Short-Circuit                                                     VBATRATIO
+                                                          Protection
+                                                                                                         300Ω
+DS20002299C-page 2                                                                         2012-2014 Microchip Technology Inc.
+
+
+                                                                                             MCP2050
+1.0       FUNCTION DESCRIPTION                                1.1       Modes of Operation
+The MCP2050 provides a physical interface between a           The MCP2050 works in five modes: Power-On Reset
+microcontroller and a LIN half-duplex bus. It is intended     mode, Power-Down mode, Ready mode, Operation
+for automotive and industrial applications with serial        mode, and Transmitter Off mode. For an overview of all
+bus baud rates up to 20 kbaud. This device will               operational modes, please refer to Table 1-1. For the
+translate the CMOS/TTL logic levels to LIN logic levels,      operational mode transition, please refer to Figure 1-1.
+and vice versa. The device offers optimum EMI and
+ESD performance; it can withstand high voltage on the
+LIN bus. The device supports two low-power modes to
+meet automotive industry power consumption
+requirements. The MCP2050 also provides a +5V or
+3.3V 70 mA regulated power output.
+FIGURE 1-1:              STATE DIAGRAM
+       POR(2)                                  READY
+     VREG OFF                                 VREG ON                          CS/LWAKE = 1 &
+                          VBB > VON                                           FAULT/TXE = 1 (3) &
+       RX OFF                                   RX ON
+       TX OFF                                  TX OFF                               TXD = 1&
+                                                                                VREG_OK = 1 (1)
+                                           CS/LWAKE = 1&
+                                           FAULT/TXE = 0
+                                                                  CS/LWAKE = 1&
+        CS/LWAKE = 1 OR                                          FAULT/TXE = 1 (3)&
+  Voltage Rising Edge on LBUS                                         TXD = 1
+                                               TX OFF                                              OPERATION
+                                              VREG ON                                               VREG ON
+                                               RX ON                                                 RX ON
+                                               TX OFF                                                TX ON
+                                                                   CS/LWAKE = 1&
+                                                                   FAULT/TXE = 0
+                                           CS/LWAKE = 0
+                                           POWER-DOWN
+                                              VREG OFF
+                                               RX OFF                           CS/LWAKE = 0
+                                               TX OFF
+   Note 1: VREG_OK: Regulator Output Voltage > 0.8VREG_NOM.
+         2: If the voltage on pin VBB falls below VOFF, the device will enter Power-On Reset mode from all other
+              modes, which is not shown in the figure.
+         3: FAULT/TXE = 1 represents input and no fault conditions. FAULT/TXE = 0 represents input low or a fault
+              condition. Refer to Table 1-3.
+ 2012-2014 Microchip Technology Inc.                                                             DS20002299C-page 3
+
+
+MCP2050
+1.1.1          POWER-ON-RESET MODE                         1.1.4         TRANSMITTER OFF MODE
+Upon application of VBB, or whenever the voltage on        In Transmitter Off mode, the receiver is enabled but the
+VBB is below the threshold of regulator turn-off voltage   LBUS transmitter is off. It is a lower-power mode.
+VOFF (typically. 4.50V), the device enters Power-On        In order to minimize the power consumption, the
+Reset mode (POR). During this mode, the device             window watchdog timer is disabled and the regulator
+maintains the digital section in a reset mode and waits    operates in a reduced-power mode. It has a lower
+until the voltage on pin VBB rises above the threshold of  GBW product and thus is slower. However, the 70 mA
+regulator turn-on voltage VON (typically 5.75V) to enter   drive capability is unchanged.
+into Ready mode. In Power-On-Reset mode, the LIN
+physical layer and voltage regulator are disabled, and     The transmitter may be re-enabled whenever the
+RESET output is forced to low.                             FAULT/TXE signal returns high, by removing the
+                                                           internal fault condition and the CPU returning the
+1.1.2          READY MODE                                  FAULT/TXE high. The transmitter will not be enabled
+                                                           even if the FAULT/TXE pin is brought high externally,
+The device enters Ready mode from POR mode after
+                                                           when the internal fault is still present. However,
+the voltage on VBB rises above the threshold of
+                                                           externally forcing the FAULT/TXE high, while the
+regulator turn-on voltage VON or from Power-Down
+                                                           internal fault is still present, should be avoided since
+mode when a remote or local wake-up event happens.
+                                                           this will induce high current and power dissipation in
+Upon entering Ready mode, the voltage regulator and        the FAULT/TXE pin.
+receiver section of the transceiver are powered up. The
+                                                           The transmitter is also turned off whenever the voltage
+transmitter remains in off state. The device is ready to
+                                                           regulator is unstable or recovering from a fault. This
+receive data but not to transmit. In order to minimize the
+                                                           prevents unwanted disruption of the bus during times of
+power consumption, the regulator operates in a
+                                                           uncertain operation.
+reduced-power mode. It has a lower GBW product and
+thus is slower. However, the 70 mA drive capability is     1.1.5         POWER-DOWN MODE
+unchanged.
+                                                           In Power-Down mode, the transceiver and the voltage
+The device stays in Ready mode until the output of the     regulator are both off. Only the Bus Wake-up section
+voltage regulator has stabilized and the CS/LWAKE pin      and the CS/LWAKE pin wake-up circuits are in opera-
+is high (‘1’).                                             tion. This is the lowest-power mode.
+1.1.3          OPERATION MODE                              If any bus activity (e.g. a BREAK character) occurs
+                                                           during Power-Down mode, the device will immediately
+If VREG is OK (VREG > 0.8 VREG_NOM), CS/LWAKE
+                                                           enter Ready mode and enable the voltage regulator.
+pin, FAULT/TXE pin and TXD pin are high, the part
+                                                           Then, once the regulator output has stabilized (approx-
+enters the Operation mode from either Ready or
+                                                           imately 0.3 ms to 1.2 ms) it goes to Operation mode.
+Transmitter Off mode.
+                                                           Refer to Section 1.1.6 “Remote Wake-up” for more
+In this mode, all internal modules are operational. The    details.
+internal pull-up resistor between LBUS and VBB is
+                                                           The part will also enter Ready mode from Power-Down
+connected only in this mode.
+                                                           mode, followed by Operation mode, if the CS/LWAKE
+The device goes into the Power-Down mode at the fall-      pin becomes active high (‘1’).
+ing edge on CS/LWAKE; or to the Transmitter Off mode
+at the falling on FAULT/TXE while CS/LWAKE stays high.     1.1.6         REMOTE WAKE-UP
+                                                           The remote wake-up sub module observes the LBUS in
+                                                           order to detect bus activity. In Power-Down mode, nor-
+                                                           mal LIN recessive/dominant threshold is disabled, and
+                                                           the LIN bus Wake-Up Voltage Threshold VWK(LBUS) is
+                                                           used to detect bus activities. Bus activity is detected
+                                                           when the voltage on the LBUS falls below the LIN bus
+                                                           Wake-Up Voltage Threshold VWK(LBUS) (approximately
+                                                           3.4V) for at least tBDB (a typical duration of 80 µs) fol-
+                                                           lowed by a rising edge. Such a condition causes the
+                                                           device to leave Power-Down mode
+DS20002299C-page 4                                                                2012-2014 Microchip Technology Inc.
+
+
+                                                                                                             MCP2050
+.
+TABLE 1-1:            OVERVIEW OF OPERATIONAL MODES
+                                            Internal     Voltage Watch Dog
+         State     Transmitter Receiver                                                         Operation                     Comments
+                                         Wake Module Regulator      Timer
+  PoR                  Off       Off           Off         Off       Off      Proceed to Ready mode after VBB>VON.           —
+  Ready                Off       On            Off         On        On       If CS/LWAKE high, then proceed to Operation    Bus Off state
+                                                                              or Transmitter Off mode.
+  Operation            On        On            Off         On        On       If CS/LWAKE low level, then proceed to         Normal
+                                                                              Power-Down.                                    Operation
+                                                                              If FAULT/TXE low level, then Transmitter-Off   mode
+                                                                              mode.
+  Power-Down           Off       Off           On          Off       Off      On LIN bus rising edge or CS/LWAKE high        Lowest-
+                                         Activity Detect                      level, proceed to READY mode.                  Power mode
+  Transmitter Off      Off       On            Off         On        Off      If CS/LWAKE low level, then proceed to         Bus Off state,
+                                                                              Power down.                                    Lower-Power
+                                                                              If FAULT/TXE high, then Operation mode.        mode
+1.2            Windowed Watchdog Reset                                 1.2.1           WWDT DURING INITIAL POWER-UP
+The Watchdog Timer monitors for activity on the                        The WWDTRESET is driven high after a power-on
+Windowed Watchdog Timer Trigger input pin                              reset. The Watchdog Timer begins counting at this
+WWDTTRIG. The WWDTTRIG pin is expected to be                           point, awaiting an edge on WWDTTRIG pin. Note that
+strobed within a given time frame. When this time frame                there is no window enabled, yet. If no falling edge is
+has expired without an edge transition on the WWDTTRIG                 detected on the WWDTTRIG pin before the timer
+pin, the WWDTRESET pin is driven active (low) to reset                 expires, the WWDTRESET is pulse low and the timer
+the system. This feature is enabled by connecting a                    is restarted. When a trigger edge on the WWDTTRIG
+resistor between the WWDTSELECT pin and VSS.                           pin is seen, the window is enabled and the timer is reset.
+Monitoring is then done by requiring the host processor to
+force a falling edge transition on the WWDTTRIG pin
+within a predetermined time frame (TWD).
+The start time of the trigger window is fixed at 50% of
+the total watchdog period, after the last trigger. The
+length of the window is determined by the value of the
+resistor on pin WWDTSELECT. The Watchdog Timer is
+disabled if WWDTSELECT is floating.
+FIGURE 1-2:                WWDTRESET DURING INITIAL POWER-UP
+      Internal
+        reset
+   WWDTRESET
+                                     tPOWERUP                tWDRST         tPOWERUP              tWDRST            tPOWERUP
+Figure 1-2 shows the behavior of the WWDTRESET                         Duration for tPOWERUP and tWDRST are:
+pin after a system reset with no trig at all. If no trig is            • tPOWERUP = 0.8 ms x (RWWDTSELECT+1) typical
+given during the power-up window, WWDTRESET is                         • tWDRST = 150 μs typical
+reset low for the time tWDRST.
+                                                                       • RWWDTSELECT is in kΩ
+The power-up window length tPOWERUP duration is                        Once a trig is asserted, the power-up sequence “stops”
+determined by the value of the resistor connected                      and the normal behavior begins.
+between pin WWDTSELECT and pin VSS, while the
+reset pulse duration is about 150 μs.
+ 2012-2014 Microchip Technology Inc.                                                                             DS20002299C-page 5
+
+
+MCP2050
+    1.2.2         WINDOWED WATCHDOG                                              EQUATION 1-1:
+                  BEHAVIOR
+    After windowed watchdog begins its normal behavior,                           tWLENGTH = (0.175 ms × RWWDTSELECT) + 1.2 typical
+    three different cases can appear.
+    • A pulse (falling edge) on the WWDTTRIG pin is                              tWDRST = 150 μs typical
+       detected within the trigger window; the watchdog                          RWWDTSELECT is in kΩ; its value ranges from 33 kΩ to
+       timer will be reset, and a new watchdog period will                       680 kΩ and window length ranges from 7 ms to 120 ms
+       begin; WWDTRESET pin remains high (Figure 1-3.)                           typical.
+    • A pulse (falling edge) on the WWDTTRIG pin is                              If the WWDTSELECT pin is floating, the watchdog is
+       detected before the trigger window (too early trig-                       disabled and the WWDTRESET remains high.
+       ger); WWDTRESET is asserted (low) immediately
+       after the falling edge is detected for approximately
+       tWDRST; the counter is reset and the next watchdog
+       period begins at the rising edge of the voltage on
+       WWDTRESET pin (Figure 1-12).
+    • No pulse on the WWDTTRIG pin is detected
+       during the whole watchdog window (no trigger);
+       WWDTRESET is asserted (low) for approximately
+       tWDRST when the timer has expired; the counter is
+       reset and the next watchdog period begins at the
+       rising edge of the voltage on WWDTRESET pin
+       (Figure 1-5).
+    The trigger window is between 50% to 100% of the
+    watchdog window length, tWLENGTH. The window
+    length is determined by the external resistor between
+    WWDTSELECT pin and VSS.
+    FIGURE 1-3:               CORRECT TRIGGER
+                                      Window length                                                   Next period
+                          50%                                    TWD
+                        Too early                          Trigger window
+                                    Earliest trigger point                  Lastest trigger point
+                                                               1
+        WWDTTRIG                                                     0
+                                                               1
+        WWDTRESET
+                                                                  New period begins
+                                                                                                  Window length
+                                                                                      50%
+                                                                                   Too early                      Trigger window
+DS20002299C-page 6                                                                                 2012-2014 Microchip Technology Inc.
+
+
+                                                                                                                                     MCP2050
+FIGURE 1-4:               TOO EARLY TRIGGER
+                                            Window length                                                                     Next period
+                       50%                                                  TWD
+                     Too early                                     Trigger window
+                                        Earliest trigger point                                 Lastest trigger point
+                            1
+   WWDTTRIG
+                                       0
+                            1
+                                       tWDRST
+   WWDTRESET
+                                       0
+                     New period begins
+                                                                            Window length
+                                                         50%
+                                                      Too early                                          Trigger window
+FIGURE 1-5:               NO TRIGGER
+                           Window length                                                       Next period
+               50%                                   TWD
+             Too early                          Trigger window
+                         Earliest trigger point                Lastest trigger point
+                                                                     1
+                                                                                 No trigger, timer expired
+   WWDTTRIG
+                                                                  1
+   WWDTRESE                                                                      tWDRST
+      T                                                                        0
+                                                                            New period begins                           Window length
+                                                                                                               50%
+                                                                                                             Too early                 Trigger window
+ 2012-2014 Microchip Technology Inc.                                                                                                    DS20002299C-page 7
+
+
+MCP2050
+1.3       Pin Descriptions
+Please refer to Table 1-2 for the pinout overview.
+TABLE 1-2:           PINOUT DESCRIPTIONS
+                             Devices                                                         Function
+     PIN Name          14-Pin                           PIN Type
+                                   5 x 5 QFN                                            Normal Operation
+                    PDIP, SOIC
+    VBATRATIO             1            18            Analog Output       VBATRATIO = VBAT/24 × VREG
+        RXD               2             1                Output          Receive Data Output
+    CS/LWAKE              3             2        TTL Input, HV-tolerant Chip Select and Local Wake-up Input
+       VREG               4             3                Output          Voltage Regulator Output
+        TXD               5             4          Input, HV-tolerant    Transmit Data Input
+      RESET               6             5                Output          Reset Output
+         NC               7        6,9,10,11,        Not Connected       —
+                                    16,19,20
+        VSS               8             8                 Power          Ground
+        LBUS              9             7                I/O, HV         LIN Bus
+        VBB              10            12                 Power          Battery
+    FAULT/TXE            11            13           I/O, HV-tolerant     Fault Detect Output/Transmitter Enable Input
+ WWDTSELECT              12            14                  Input         A Resistor between this pin and Ground
+                                                                         determines the Watchdog Window length
+   WWDTTRIG              13            15                  Input         Windowed Watchdog Trigger Input
+  WWDTRESET              14            17         Output, HV-tolerant    Windowed Watchdog Reset Output
+         EP              —             21        Exposed Thermal Pad Exposed Thermal Pad can be left unconnected,
+                                                           (EP)          or connected to the ground.
+1.3.1        VBATRATIO                                             An internal pull-down resistor will keep the CS/LWAKE
+                                                                   pin low to ensure that no disruptive data will be present
+This is an analog output pin that reflects the voltage at
+                                                                   on the bus while the microcontroller is executing a
+the VBAT pin. It is scaled by VREG such that:
+                                                                   Power-on Reset and I/O initialization sequence. When
+VBATRATIO = VBAT/24 × VREG                                         CS/LWAKE is ‘1’, a weak pull-down (~600 kΩ) is used
+0 <= VBATRATIO <= VREG                                             to reduce current. When CS/LWAKE is ‘0’ a stronger
+                                                                   pull-down (~300 kΩ) is used to maintain the logic level.
+The resistive divider and the output driver are switched
+off during Power-Down mode in order to reduce power                This pin may also be used as a local wake-up input
+consumption.                                                       (see Figure 1-12). The microcontroller will set the I/O
+                                                                   pin to control the CS/LWAKE. An external switch, or
+1.3.2        RXD                                                   other source, can then wake-up both the transceiver
+                                                                   and the microcontroller.
+Receive Data Output pin. The RXD pin is a standard
+CMOS output pin and it follows the state of the LBUS pin.
+                                                                      Note:    CS/LWAKE should NOT be tied directly to
+1.3.3        CS/LWAKE                                                          pin VREG as this could force the
+                                                                               MCP2050 into Operation Mode before the
+Chip Select and Local Wake-Up Input pin (TTL level,                            microcontroller is initialized.
+high voltage tolerant). This pin controls the device state
+transition. Refer to Figure 1-1.
+If CS/LWAKE = 1, the device can work in Operation
+mode (FAULT/TXE = 1) or Transmitter Off mode
+(FAULT/TXE = 0).
+If CS/LWAKE = 0, the device can work in Power-Down
+mode or Ready mode.
+DS20002299C-page 8                                                                     2012-2014 Microchip Technology Inc.
+
+
+                                                                                           MCP2050
+1.3.4         VREG                                         1.3.10       FAULT/TXE
+Positive Supply Voltage Regulator Output pin. An on-       Fault Detect Output/Transmitter Enable Input pin. The
+chip LDO gives +5.0 or +3.3V 70 mA regulated voltage       output section is HV tolerant open drain (up to 30V).
+on this pin.                                               The input section is identical with TXD section (TTL
+                                                           level, HV compliant, adaptive pull-up). The internal pull-
+1.3.5         TXD                                          up resistor may be too weak for some applications. An
+Transmit Data Input pin (TTL level, HV compliant,          external 10kΩ pull-up resistor is recommended to
+adaptive pull-up). The transmitter reads the data          ensure a logic high level. Its state is defined as shown
+stream on TXD pin and sends it to LIN bus. The LBUS        in Table 1-3. The device is placed in Transmitter Off
+pin is low (dominant) when TXD is low, and high            mode whenever this pin is low (‘0’), either from an
+(recessive) when TXD is high.                              internal fault condition or by external drive.
+The Transmit Data Input pin has an internal adaptive       If CS/LWAKE is high (‘1’), the FAULT/TXE signals a mis-
+pull-up to an internally-generated 4.2V (approximate).     match between the TXD input and the LBUS level. This
+When TXD is ‘0’, a weak pull-up (~900 kΩ) is used to       can be used to detect a bus contention. Since the bus
+reduce current. When TXD is ‘1’ a stronger pull-up         exhibits a propagation delay, the sampling of the inter-
+(~300 kΩ) is used to maintain the logic level. A series    nal compare is debounced to eliminate false faults.
+reverse-blocking diode allows applying TXD input           After the device wakes up, the FAULT/TXE indicates
+voltages greater than the internally generated 4.2V and    what wakes the device if CS/LWAKE remains low (‘0’)
+renders TXD pin HV compliant up to 30V (see the Block      (refer to Table 1-3).
+Diagram on page 2).
+                                                           The FAULT/TXE pin sampled at a rate faster than every
+                                                           10 µs.
+1.3.6          RESET
+Reset Output pin. This pin is open drain with ~90 kΩ       1.3.11       WWDTSELECT
+pull-up to VREG. It indicates the internal voltage has
+                                                           This is an analog input pin that sets the open window
+reached a valid, stable level. As long as the internal
+                                                           time to accept a trigger reset. A resistor between this
+voltage is valid (above 0.8VREG), this pin will remain
+                                                           pin and VSS sets this time. The equation to determine
+high (‘1’); otherwise the RESET pin switches to low (‘0’).
+                                                           the value of the resistor can be found in Section 1.2.2
+                                                           “Windowed Watchdog Behavior”.
+1.3.7         VSS
+Ground pin.                                                1.3.12        WWDTTRIG
+                                                           This is an input pin to reset the Windowed Watchdog
+1.3.8         LBUS
+                                                           Timer. A high-to-low transition during the open window
+LBUS is a bidirectional LIN bus Interface pin and is       time will reset the timer and prevent the WWDT from
+controlled by the signal TXD. It has an open collector     timing out. The pin has an internal adaptive pull-up to
+output with a current limitation. To reduce                an internally-generated 4.2V (approximate.).
+electromagnetic emission, the slopes during signal
+                                                           When WWDTTRIG is ‘0’, a weak pull-up (~800 kΩis
+changes are controlled, and the LBUS pin has
+                                                           connectedto reduce current.
+corner-rounding control for both falling and rising edges.
+                                                           When WWDTTRIG is ‘1’, the pull-up is stronger to
+The internal LIN receiver observes the activities on LIN
+                                                           maintain the logic level.
+bus, and generates the output signal RXD that follows
+the state of the LBUS. A first degree 160 kHz, low-pass
+                                                           1.3.13        WWDTRESET
+input filter optimizes electromagnetic immunity.
+                                                           WWDTRESET is an open-drain output pin. This pin is
+1.3.9         VBB                                          asserted low when the internal Windowed Watchdog
+                                                           Timer has expired or an attempt was made to clear the
+Battery Positive Supply Voltage pin. An external diode
+                                                           timer before the window has opened.
+is connected in series to prevent the device from being
+reversely powered (refer Figure 1-12).
+                                                           1.3.14       EP
+                                                           It is recommended to connect this pad to VSS to enhance
+                                                           electromagnetic immunity and thermal resistance.
+ 2012-2014 Microchip Technology Inc.                                                           DS20002299C-page 9
+
+
+MCP2050
+TABLE 1-3:       FAULT/TXE TRUTH TABLE
+                                                   FAULT/TXE
+  TXD    RXD     LIN BUS      Thermal
+                                             External       Driven                      Definition
+   In    Out       I/O        Override
+                                               Input        Output
+                                                     CS = 1
+    L     H        VBB          OFF              H             L      FAULT, TXD driven low, LBUS shorted to VBB
+                                                                      (Note 1), or LBUS/TXD permanent dominant
+                                                                      detected, and transmit time-out shutdown.
+   H      H        VBB          OFF              H            H       OK
+    L     L       GND           OFF              H            H       OK
+   H      L       GND           OFF              H            H       OK, data is being received from LBUS
+    x     x        VBB           ON              H             L      FAULT, transceiver in thermal shutdown
+    x     x        VBB            x              L             x      NO FAULT, the CPU is commanding the
+                                                                      transceiver to turn off the transmitter driver
+                                             CS = 0 after a wake-up
+    x     x         x             x              x             L      Wake-up from LIN bus activity
+    x     x         x             x              x            H       Wake-up from POR
+ Legend: x = don’t care
+ Note 1: The FAULT/TXE is valid after approximately 25 µs after TXD falling edge. This is to eliminate false fault
+          reporting during bus propagation delays.
+FIGURE 1-6:           VBATRATIO OUTPUT RANGE
+                          VBATRATIO
+                     .75VREG
+                       VREG/2
+                     .25VREG
+                            0                                                           VBB
+                                        6V       12V        18V       24V
+                     Note 1:   Linear range of VBATRATIO is between VBB = 6.0-18.0V.
+DS20002299C-page 10                                                             2012-2014 Microchip Technology Inc.
+
+
+                                                                                        MCP2050
+1.4        Fail-Safe Features                            1.4.3        TXD/LBUS TIME-OUT TIMER
+1.4.1          GENERAL FAIL-SAFE FEATURES                LIN bus can be driven to a dominant level either from
+                                                         TXD pin or externally. An internal timer deactivates the
+• An internal pull-down resistor on the CS/LWAKE         LBUS transmitter if a dominant status (low) on LIN bus
+   pin disables the transmitter if the pin is floating.  lasts longer than Bus Dominant Time-Out Time tTO(LIN)
+• An internal pull-up resistor on the TXD pin places     (approximately 20 ms); at the same time, RXD output is
+   TXD in high, thus the LBUS is recessive if the TXD    put in recessive (high), FAULT/TXE is also driven to low
+   pin is floating.                                      and the internal LIN pull-up resistor is disconnected.
+• High-Impedance and low leakage current on LBUS         The timer is reset on any recessive LBUS status or POR
+   during loss of power or ground.                       mode. The recessive status on LBUS can be caused
+• The current limit on LBUS protects the transceiver     either by the bus being externally pulled up or by TXD
+   from being damaged if the pin is shorted to VBB.      pin being returned high.
+1.4.2          THERMAL PROTECTION
+The thermal protection circuit monitors the die
+temperature and is able to shut down the LIN
+transmitter and voltage regulator.
+There are three causes for a thermal overload. A thermal
+shut down can be triggered by any one, or a combination
+of, the following thermal overload conditions.
+• Voltage regulator overload
+• LIN bus output overload
+• Increase in die temperature due to increase in
+   environment temperature
+The recovery time from the thermal shutdown is equal
+to adequate cooling time.
+Driving the TXD and checking the RXD pin makes it
+possible to determine whether there is a bus contention
+(TXD = high, RXD = low) or a thermal overload condition
+(TXD = low, RXD = high).
+FIGURE 1-7:                THERMAL SHUTDOWN
+                           STATE DIAGRAMS
+                                      LIN bus
+                   Output             shorted
+                   Overload           to VBB
+          Voltage                            Transmitter
+                            Operation
+         Regulator                            Shutdown
+                             Mode
+         Shutdown
+              Temp < SHUTDOWNTEMP Temp < SHUTDOWNTEMP
+ 2012-2014 Microchip Technology Inc.                                                       DS20002299C-page 11
+
+
+MCP2050
+1.5        Internal Voltage Regulator
+                                                                      Note:     The regulator overload current limit is
+The MCP2050 has a positive regulator capable of                                 approximately 250 mA. The regulator
+supplying +5.0V or +3.3V at up to 70 mA of load current                         output voltage VREG is monitored. If
+with tolerances of ±3% over the entire operating                                output voltage VREG is lower than VSD, the
+temperature range of -40°C to +125°C. The regulator                             voltage regulator will turn off. After a
+uses an LDO design, is short-circuit-protected and will                         recovery time of about 3 ms, the VREG will
+turn the regulator output off if its output falls below the                     be checked again. If there is no short
+Shutdown Voltage Threshold VSD.                                                 circuit, (VREG > VSD) then the voltage
+With a load current of 70 mA, the minimum input-to-                             regulator remains on.
+output voltage differential required for the output to
+                                                                    The regulator requires an external output bypass
+remain in regulation is typically +0.5V (+1V maximum
+                                                                    capacitor for stability. See Figure 2-1 for correct
+over the full operating temperature range). Quiescent
+                                                                    capacity and ESR for stable operation.
+current is less than 100 µA with a full 70 mA load
+current when the input-to-output voltage differential is              Note:     A ceramic capacitor of at least 10 µF, or a
+greater than +3.00V.                                                            tantalum capacitor of at least 2.2 µF is
+Regarding the correlation between VBB, VREG and IDD,                            recommended for stability.
+refer to Figure 1-9 and Figure 1-10. When the input
+voltage (VBB) drops below the differential needed to
+                                                                      Warning: In worst-case scenarios, the ceramic
+provide stable regulation, the voltage regulator output
+                                                                                capacitor may derate by 50%, based on
+VREG will track the input down to approximately VOFF.
+                                                                                tolerance, voltage and temperature.
+The regulator will turn off the output at this point. This
+                                                                                Therefore, in order to ensure stability,
+will allow PIC® microcontrollers, with internal POR
+                                                                                ceramic capacitors smaller than 10 µF may
+circuits, to generate a clean arming of the Power-on
+                                                                                require a small series resistance to meet the
+Reset trip point. The MCP2050 will then monitor VBB
+                                                                                ESR requirements, as shown in Table 1-4.
+and turn on the regulator when VBB is above the
+threshold of regulator turn-on voltage VON.
+Under specific ambient temperature and battery                      TABLE 1-4:          RECOMMENDED SERIES
+voltage range, the voltage regulator can output as high                                 RESISTANCE FOR CERAMIC
+as 150 mA current.                                                                      CAPACITORS
+For current load capability of the voltage regulator, refer                Resistance                     Capacitor
+to Figure 1-9 and Figure 1-10.                                                 1                            1 µF
+In Power-Down mode, the VBB monitor is turned off.                            0.47                         2.2 µF
+                                                                              0.22                         4.7 µF
+                                                                              0.1                          6.8 µF
+FIGURE 1-8:             VOLTAGE REGULATOR BLOCK DIAGRAM
+            VREG                                             Pass                                            VBB
+                                                           Element
+                                   Sampling
+                                   Network
+                                                             Fast
+                                                           Transient
+                                                             Loop
+                                                                        Buffer
+                                                                                                             VSS
+                                       VREF
+DS20002299C-page 12                                                                      2012-2014 Microchip Technology Inc.
+
+
+                                                                                              MCP2050
+FIGURE 1-9:            VOLTAGE REGULATOR OUTPUT ON POWER-ON RESET
+                                      VBB
+                                                                               Minimum VBB to maintain regulation
+                                       V
+                              8
+                                       VON
+                              6
+                                                                     VOFF
+                              4
+                              2
+                              0                                                          t
+                                    VREG
+                                       V
+                              5                    VREG-NOM
+                             4
+                             3
+                             2
+                             1
+                              0                                                          t
+                                         (1)           (2)        (3)      (4)
+                          Note 1:     Start-Up, VBB < VON, regulator off.
+                                2:    VBB > VON, regulator on.
+                                3:    VBB  minimum VBB to maintain regulation.
+                                4:    VBB < VOFF, regulator will turn off.
+ 2012-2014 Microchip Technology Inc.                                                           DS20002299C-page 13
+
+
+MCP2050
+FIGURE 1-10:            VOLTAGE REGULATOR OUTPUT ON OVER CURRENT SITUATION
+                                       IREG
+                                        mA
+                              lLIM
+                                 0                                                            t
+                                       VREG
+                                 6       V
+                                             VREG-NOM
+                                 5
+                                 4
+                             VSD
+                                 3
+                                 2
+                                 1
+                                 0                                                            t
+                                              (1)             (2)
+           Note 1:   IREG less than lLIM, regulator on.
+                 2:  After IREG exceeds lLIM, the voltage regulator output will be reduced until VSD is reached.
+1.6        Optional External Protection                           Equation 1-4 provides a max RTP value according to
+                                                                  the maximum relative variation the user can accept on
+1.6.1        REVERSE BATTERY PROTECTION                           the slope when IREG varies.
+An external reverse-battery-blocking diode should be              Since both Equation 1-2 and Equation 1-3 must be
+used to provide polarity protection (see Figure 1-12).            fulfilled, the maximum allowed value for RTP is thus the
+                                                                  smaller of the two values found when solving
+1.6.2        TRANSIENT VOLTAGE                                    Equation 1-2 and Equation 1-3.
+             PROTECTION (LOAD DUMP)                               Usually Equation 1-2 gives the higher constraint
+An external 43V transient suppressor (TVS) diode,                 (smaller value) for RTP as shown in the following
+between VBB and ground, with a transient protection               example where VBATmin is 8V.
+resistor (RTP) in series with the battery supply and the          However, the user needs to check that the value found
+VBB pin protects the device from power transients and             with Equation 1-2 also fulfills Equation 1-3 and
+ESD events greater than 43V (see Figure 1-12). The                Equation 1-4.
+maximum value for the RTP protection resistor depends
+on two parameters: the minimum voltage the part will              While this protection is optional, it should be
+start at, and the impacts of this RTP resistor on the VBB         considered as good engineering practice.
+value, thus on the Bus recessive level and slopes.
+This leads to a set of three equations to fulfill.
+Equation 1-2 provides a max RTP value according to
+the minimum battery voltage the user wants the part to
+start at.
+Equation 1-3 provides a max RTP value according to
+the maximum error on the recessive level thus VBB
+since the part uses VBB as the reference value for the
+recessive level.
+DS20002299C-page 14                                                                    2012-2014 Microchip Technology Inc.
+
+
+                                                                                                                                                 MCP2050
+EQUATION 1-2:                                                                          The following formula gives an indication of the
+                                                                                       minimum value of CBAT using RTOT and L:
+                       V BATmin – 5.5V
+                R TP  -------------------------------------                           EQUATION 1-5:
+                                 250mA                                                                                                            2              2
+                                                                                                                  C BAT               100L + R TOT
+                                                                                                                  -------------- =    -----------------------------------
+                                                                                                                                                                 2
+                                                                                                                                                                        -
+                5.5V = VOFF + 1.0V                                                                                C REG                             2        RTOT
+                                                                                                                                      1 + L + -------------
+                                                                                                                                                               100
+    250 mA is the peak current at power-on when                                        Where:
+                    VBB =5.5V                                                                         L = Inductor (measured in mH)
+Assume VBATMIN = 8V. Equation 1-2 shows 10Ω                                             RTOT = RLINE + RTP (measured in )
+EQUATION 1-3:                                                                          Equation 1-5 allows lower CBAT/CREG values than the
+                                                                                       10x ratio we recommend.
+                                V RECESSIVE
+                         R TP  ----------------------------------                     Assume that we have a good quality VBAT connection
+                                      I REGMAX                                         with RTOT = 0.1 and L = 0.1 mH.
+                                                                                       Solving the equation gives CBAT/CREG = 1.
+ Where:
+                                                                                       If we increase RTOT up to 1 the result becomes
+  VRECESSIVE = Maximum variation tolerated on                                         CBAT/CREG = 1.4. However, if the connection is highly
+                the recessive level                                                    resistive or highly inductive (poor connection), the
+                                                                                       CBAT/CREG ratio greatly increases.
+Assume ∆VRECCESSIVE = 1V and IREGMAX = 50 mA
+Equation 1-3 shows 20Ω                                                                TABLE 1-5:                        CBAT/CREG RATIO BY VBAT
+                                                                                                                         CONNECTION TYPE
+EQUATION 1-4:                                                                            Connection                                                                     CBAT/CREG
+                                                                                                                           RTOT                   L
+                                                                                           Type                                                                           Ratio
+                   Slope   V BATMIN – 1V 
+            R TP  -----------------------------------------------------------------                 Good                  0.1           0.1 mH                            1
+                                        I REGMAX
+                                                                                                     Typical                 1           0.1 mH                            1.4
+ Where:
+                                                                                       Highly inductive                    0.1              1 mH                           7
+   Slope = Maximum variation tolerated on the                                          Highly resistive                    10           0.1 mH                            7
+            slope level
+                                                                                       Figure 1-11 shows the minimum recommended
+  IREGMAX = Maximum current the current will
+                                                                                       CBAT/CREG ratio as a function of the impedance of the
+            provide to the load
+                                                                                       VBAT connection.
+  VBATMIN > VOFF + 1.0V
+                                                                                       FIGURE 1-11:                                  MINIMUM
+Assume ∆Slope = 15%, VBATMIN = 8V and                                                                                                RECOMMENDED
+IREGMAX = 50 mA. Equation 1-3 shows 20Ω                                                                                             CBAT/CREG RATIO
+                                                                                                            CBAT/CREG Ratio as Function of the VBAT Line
+1.6.3       CBAT CAPACITOR                                                                                                  Impedance
+                                                                                           10
+Selecting   CBAT = 10 x CREG     is   recommended.                                                         RBAT = 10
+However, this leads to a high-value capacitor. Lower
+values for CBAT capacitor can be used with respect to                                                         RBAT = 4
+                                                                                         CBAT/CREG
+some rules. In any case, the voltage at the VBB pin
+should remain above VOFF when the device is turned on.                                                      RBAT = 2
+                                                                                                                                          RBAT = 1
+The current peak at start-up (due to the fast charge of
+                                                                                                                            RBAT = 0.3
+the CREG and CBAT capacitors) may induce a
+significant drop on the VBB pin. This drop is                                                    1            RBAT = 0.1
+proportional to the impedance of the VBAT connection                                                 0.1                                                                          1
+(see Figure 1-12).                                                                                                     VBAT Line Inductance [mH]
+The VBAT connection is mainly inductive and resistive.
+Therefore, it can be modeled as a resistor (RTOT) in
+series with an inductor (L). RTOT and L can be
+measured.
+ 2012-2014 Microchip Technology Inc.                                                                                                                    DS20002299C-page 15
+
+
+MCP2050
+1.7     Typical Applications
+FIGURE 1-12:          TYPICAL APPLICATION CIRCUIT
+                                                                      VBAT
+                                 VBAT
+                                                                         RTP
+                          220 kΩ
+                                                                 43V(5)     CBAT    Master Node Only
+                                                    CREG                                  VBB
+                      WAKE-UP
+                   VDD                                   VREG         VBB
+                   TXD                                   TXD
+                                                (6)                                   1 kΩ
+                   RXD                                   RXD
+                   A/D                                   VBATRATIO    LBUS                               LIN Bus
+                    I/O                                  CS/LWAKE
+          MCU                  (3)                                                              MMBZ27V (4)
+                    I/O                                  FAULT/TXE         220 pF
+                    I/O                                  WWDTTRIG
+                   IRQ                                   WWDTRESET
+                RESET                                    RESET
+                                                         WWDTSELECT
+           VSS
+                                                                 VSS
+                                            (6)
+                                     100 nF
+      Note 1: CREG, the load capacitor, should be ceramic or tantalum rated for extended temperatures,
+               1.0-22 µF. See Figure 2-1 for selecting the correct ESR.
+           2: CBAT is the filter capacitor for the external voltage supply. It’s typically 10 · CREG, with no ESR
+               restriction. See Figure 1-11 to select the minimum recommended value for CBAT. The RTP value is
+               added to the line resistance.
+           3: This diode is only needed if CS/LWAKE is connected to VBAT supply.
+           4: ESD protection diode.
+           5: This component is for additional load dump protection.
+           6: An external 10 kΩ resistor is recommended for some applications.
+DS20002299C-page 16                                                                 2012-2014 Microchip Technology Inc.
+
+
+                                                                         MCP2050
+FIGURE 1-13:           TYPICAL LIN NETWORK CONFIGURATION
+                                                        40m
+                                                      + Return
+                                                                                 LIN bus
+                1 kΩ
+    VBB
+                    LIN bus                  LIN bus            LIN bus    LIN bus
+                   MCP2050                 MCP2050             MCP202XA   MCP2003
+                                              Slave 1            Slave 2 Slave n <16
+                                              (MCU)              (MCU)     (MCU)
+                     Master
+                     (MCU)
+1.8      ICSP™ Considerations
+The following should be considered when the
+MCP2050 is connected to pins supporting in-circuit
+programming:
+• Power used for programming the microcontroller
+  can be supplied from the programmer, or from the
+  MCP2050.
+• The voltage on the VREG pin should not exceed
+  the maximum value of VREG as shown in
+  Section 2.3, DC Specifications.
+ 2012-2014 Microchip Technology Inc.                                     DS20002299C-page 17
+
+
+MCP2050
+2.0       ELECTRICAL
+          CHARACTERISTICS
+2.1       Absolute Maximum Ratings†
+VIN DC Voltage on RXD, and RESET ................................................................................................ -0.3V to VREG + 0.3
+VIN DC Voltage on TXD, CS/LWAKE, FAULT/TXE......................................................................................... -0.3 to + 40V
+VBB Battery Voltage, continuous, non-operating (Note 1)............................................................................ -0.3 to + 40V
+VBB Battery Voltage, non-operating (LIN bus recessive, no regulator load, t < 60s) (Note 2) ..................... -0.3 to + 43V
+VBB Battery Voltage, transient ISO 7637 Test 1 ..................................................................................................... -100V
+VBB Battery Voltage, transient ISO 7637 Test 2a .....................................................................................................+75V
+VBB Battery Voltage, transient ISO 7637 Test 3a ................................................................................................... -150V
+VBB Battery Voltage, transient ISO 7637 Test 3b ...................................................................................................+100V
+VLBUS Bus Voltage, continuous ..................................................................................................................... -18 to + 30V
+VLBUS Bus Voltage, transient (Note 3) .......................................................................................................... -27 to + 43V
+ILBUS Bus Short-Circuit Current Limit ....................................................................................................................200 mA
+ESD protection on LIN, VBB (IEC 61000-4-2) (Note 4) ......................................................................................... ±15 KV
+ESD protection on LIN, VBB (Human Body Model) (Note 5) ................................................................................... ±8 KV
+ESD protection on all other pins (Human Body Model) (Note 5) ............................................................................ ±4 KV
+ESD protection on all pins (Charge Device Model) (Note 6).................................................................................±1500V
+ESD protection on all pins (Machine Model) (Note 7).............................................................................................±200V
+Maximum Junction Temperature ............................................................................................................................. 150C
+Storage Temperature..................................................................................................................................-65 to + 150C
+ † NOTICE: Stresses above those listed under “Maximum Ratings” may cause permanent damage to the device. This
+ is a stress rating only and functional operation of the device at those or any other conditions above those indicated in
+ the operational listings of this specification is not implied. Exposure to maximum rating conditions for extended periods
+ may affect device reliability.
+   Note 1: LIN 2.x compliant specification.
+         2: SAE J2602-2 compliant specification.
+         3: ISO 7637/1 load dump compliant (t < 500 ms).
+         4: According to IEC 61000-4-2, 330 ohm, 150 pF and Tranceiver EMC Test Specifications [2] to [4]
+         5: According to AEC-Q100-002/JESD22-A114
+         6: According to AEC-Q100-011B
+         7: According to AEC-Q100-003/JESD22-A115
+2.2       Nomenclature used in this document
+Some terms and names used in this data sheet deviate from those referred to in the LIN specifications. Equivalent
+values are shown below.
+            LIN 2.1 Name                      Term used in the following tables                                                    Definition
+                  VBAT                                             not used                                ECU operating voltage
+                  VSUP                                                 VBB                                 Supply voltage at device pin
+               VBUS_LIM                                                 ISC                                Current Limit of Driver
+               VBUSREC                                             VIH(LBUS)                               Recessive state
+               VBUSDOM                                             VIL(LBUS)                               Dominant state
+DS20002299C-page 18                                                                                                  2012-2014 Microchip Technology Inc.
+
+
+                                                                                                 MCP2050
+2.3      DC Specifications
+                                Electrical Characteristics:
+                                Unless otherwise indicated, all limits are specified for:
+     DC Specifications
+                                VBB = 6.0V to 18.0V, TA = -40°C to +125°C
+                                CREG = 10 µF
+          Parameter                 Sym.          Min.          Typ.        Max.        Units        Conditions
+Power
+VBB Quiescent Operating              IBBQ          —              —         200           µA  IOUT = 0 mA,
+Current                                                                                       LBUS recessive
+                                                                                              VREG = 5.0V
+                                                   —              —         200           µA  IOUT = 0 mA,
+                                                                                              LBUS recessive
+                                                                                              VREG = 3.3V
+VBB Quiescent Operating           IBBQWDT          —              —         250           µA  IOUT = 0 mA,
+Current with Watchdog                                                                         LBUS recessive
+Enabled                                                                                       VREG = 5.0V
+                                                                            250               IOUT = 0 mA,
+                                                                                              LBUS recessive
+                                                                                              VREG = 3.3V
+VBB READY Current                   IBBRD          —              —         100           µA  IOUT = 0 mA,
+                                                                                              LBUS recessive
+                                                                                              VREG = 5.0V
+                                                   —              —         100           µA  IOUT = 0 mA,
+                                                                                              LBUS recessive
+                                                                                              VREG = 3.3V
+VBB Ready Current WWDT           IBBRDWDT          —              —         150           µA  With voltage regulator on,
+Enabled                                                                                       transmitter off, receiver
+                                                                                              on, FAULT/TXE = VIL,
+                                                                                              CS = VIH,VREG = 5.0V
+                                                                            150               With voltage regulator on,
+                                                                                              transmitter off, receiver
+                                                                                              on, FAULT/TXE = VIL,
+                                                                                              CS = VIH,VREG = 3.3V
+VBB Transmitter-Off                 IBBTO          —              —         100           µA  With voltage regulator on,
+Current with Watchdog                                                                         transmitter off, receiver
+Disabled                                                                                      on, FAULT/TXE = VIL,
+                                                                                              CS = VIH,VREG = 5.0V
+                                                   —              —         100           µA  With voltage regulator on,
+                                                                                              transmitter off, receiver
+                                                                                              on, FAULT/TXE = VIL,
+                                                                                              CS = VIH,VREG = 3.3V
+VBB Power-Down Current              IBBPD          —             4.5         8            µA  With voltage regulator
+                                                                                              powered-off, receiver on
+                                                                                              and transmitter off,
+                                                                                              FAULT/TXE = VIH,
+                                                                                              TXD = VIH, CS = VIL)
+VBB Current with VSS             IBBNOGND          -1             —          1            mA  VBB = 12V, GND to VBB,
+Floating                                                                                      VLIN = 0-18V
+Note 1:     Internal current limited. 2.0 ms maximum recovery time (RLBUS = 0Ω, TX = 0, VLBUS = VBB).
+       2:   Characterized, not 100% tested.
+       3:   In Power-Down mode, normal LIN recessive/dominant threshold is disabled; VWK(LBUS) is used to detect
+            bus activities.
+ 2012-2014 Microchip Technology Inc.                                                               DS20002299C-page 19
+
+
+MCP2050
+2.3      DC Specifications (Continued)
+                                Electrical Characteristics:
+                                Unless otherwise indicated, all limits are specified for:
+     DC Specifications
+                                VBB = 6.0V to 18.0V, TA = -40°C to +125°C
+                                CREG = 10 µF
+          Parameter                 Sym.          Min.          Typ.        Max.        Units          Conditions
+ Microcontroller Interface
+ High-Level Input Voltage            VIH           2.0            —         VREG           V
+ (TXD, FAULT/TXE,                                                           +0.3
+ WWDTTRIG)
+ Low-Level Input Voltage             VIL          -0.3            —          0.8           V
+ (TXD, FAULT/TXE,
+ WWDTTRIG)
+ High-Level Input Current            IIH          -2.5            —          0.4          µA   Input voltage = 4.0V.
+ (TXD, FAULT/TXE,                                                                              ~800 kΩ internal adaptive
+ WWDTTRIG)                                                                                     pull-up
+ Low-Level Input Current             IIL           -10            —          —            µA   Input voltage = 0.5V.
+ (TXD, FAULT/TXE,                                                                              ~800 kΩ internal adaptive
+ WWDTTRIG)                                                                                     pull-up
+ High-Level Input Voltage            VIH           2.0            —         VBB            V   Through a current-limiting
+ (CS/LWAKE)                                                                                    resistor
+ Low-Level Input Voltage             VIL          -0.3            —          0.8           V
+ (CS/LWAKE)
+ High-Level Input Current            IIH            —             —          8.0          µA   Input voltage = 0.8VREG
+ (CS/LWAKE)                                                                                    ~1.3 MΩ internal pull-
+                                                                                               down to VSS
+ Low-Level Input Current             IIL            —             —          5.0          µA   Input voltage = 0.2VREG
+ (CS/LWAKE)                                                                                    ~1.3 MΩ internal pull-
+                                                                                               down to VSS
+ Low-Level Output Voltage         VOLRXD            —             —       0.2VREG          V   IOL = 2 mA
+ (RXD)
+ High-Level Output Voltage        VOHRXD        0.8VREG           —          —             V   IOH = 2 mA
+ (RXD)
+ Low-Level Output Voltage          VOLOD            —                        1.0           V   IOL = 4 mA
+ (FAULT/TXE)
+ Low-Level Output Voltage          VOLRST           —             —          1.0           V    IOL = 4 mA
+ (RESET)
+ Note 1:    Internal current limited. 2.0 ms maximum recovery time (RLBUS = 0Ω, TX = 0, VLBUS = VBB).
+       2:   Characterized, not 100% tested.
+       3:   In Power-Down mode, normal LIN recessive/dominant threshold is disabled; VWK(LBUS) is used to detect
+            bus activities.
+DS20002299C-page 20                                                                     2012-2014 Microchip Technology Inc.
+
+
+                                                                                                MCP2050
+2.3      DC Specifications (Continued)
+                                Electrical Characteristics:
+                                Unless otherwise indicated, all limits are specified for:
+     DC Specifications
+                                VBB = 6.0V to 18.0V, TA = -40°C to +125°C
+                                CREG = 10 µF
+          Parameter                 Sym.          Min.          Typ.        Max.        Units        Conditions
+Bus Interface
+High-Level Input Voltage         VIH(LBUS)      0.6 VBB           —           —            V  Recessive state
+Low-Level Input Voltage           VIL(LBUS)         -8            —        0.4 VBB         V  Dominant state
+Input Hysteresis                    VHYS            —             —      0.175 VBB         V  VIH(LBUS) – VIL(LBUS)
+Low-Level Output Current         IOL(LBUS)         40             —          200          mA  Output voltage = 0.1 VBB,
+                                                                                              VBB = 12V
+Pull-Up Current on Input         IPU(LBUS)        -180            —          -72          µA  ~30 kΩ internal pull-up
+                                                                                              @ VIH (LBUS) = 0.7 VBB,
+                                                                                              VBB=12V
+Short-Circuit Current Limit          ISC           50             —          200          mA  (Note 1)
+High-Level Output Voltage       VOH(LBUS)       0.8 VBB           —          VBB           V
+Driver Dominant Voltage           V_LOSUP           —             —          1.1           V  VBB = 7.3V,
+                                                                                              RLOAD = 1000Ω
+Driver Dominant Voltage           V_HISUP           —             —          1.2           V  VBB = 18V,
+                                                                                              RLOAD = 1000Ω
+Input Leakage Current           IBUS_PAS_           -1            —           —           mA  Driver off,
+(at the receiver during              DOM                                                      VBUS = 0V,
+dominant bus level)                                                                           VBB = 12V
+Input Leakage Current           IBUS_PAS_          -20            —           20          µA  Driver off,
+(at the receiver during              REC                                                      8V < VBB < 18V
+recessive bus level)                                                                          8V < VBUs < 18V
+                                                                                              VBUS  VBB
+Leakage Current                 IBUS_NO_G          -10            —          +10          µA  GNDDEVICE = VBB,
+(disconnected from ground)            ND                                                      0V < VBUS < 18V,
+                                                                                              VBB = 12V
+Leakage Current                  IBUS_NO_P         -10            —          +10          µA  VBB = GND,
+(disconnected from VBB)              WR                                                       0 < VBUS < 18V
+Receiver Center Voltage          VBUS_CNT      0.475 VBB         0.5     0.525 VBB         V  VBUS_CNT = (VIL (LBUS) +
+                                                                VBB                           VIH (LBUS))/2
+Slave Termination                  RSLAVE          20             30          47          kΩ  (Note 2)
+Capacitance of slave node          CSLAVE                                     50          pF  (Note 2)
+Wake-Up Voltage                  VWK(LBUS)          —             —          3.4           V  Wake up from Power-
+Threshold on LIN Bus                                                                          Down mode (Note 3)
+Note 1:     Internal current limited. 2.0 ms maximum recovery time (RLBUS = 0Ω, TX = 0, VLBUS = VBB).
+       2:   Characterized, not 100% tested.
+       3:   In Power-Down mode, normal LIN recessive/dominant threshold is disabled; VWK(LBUS) is used to detect
+            bus activities.
+ 2012-2014 Microchip Technology Inc.                                                               DS20002299C-page 21
+
+
+MCP2050
+2.3       DC Specifications (Continued)
+                                 Electrical Characteristics:
+                                 Unless otherwise indicated, all limits are specified for:
+     DC Specifications
+                                 VBB = 6.0V to 18.0V, TA = -40°C to +125°C
+                                 CREG = 10 µF
+           Parameter                Sym.           Min.          Typ.        Max.        Units         Conditions
+ Voltage Regulator – 5.0V
+ Output Voltage Range               VREG           4.85          5.00        5.15           V   0 mA < IOUT < 70 mA
+ Line Regulation                   VOUT1           —              10         50           mV   IOUT = 1 mA,
+                                                                                                6.0V < VBB < 18V
+ Load Regulation                   VOUT2           —              10         50           mV   5 mA < IOUT <70 mA
+                                                                                                6.0V < VBB < 12V
+ Power Supply Ripple Reject         PSRR            —              —          50           dB   1 VPP @10-20 kHz
+                                                                                                ILOAD = 20 mA
+ Output Noise Voltage                 eN            —              —         100        µVRMS 10 Hz – 40 MHz
+                                                                                                CFILTER = 10 µf,
+                                                                                                CBP = 0.1 µf,
+                                                                                                ILOAD = 20 mA
+ Shutdown Voltage                    VSD            3.5            —          4.0           V   See Figure 1-10 (Note 2)
+ Threshold
+ Input Voltage to Turn Off          VOFF            3.9            —          4.5           V
+ Output
+ Input Voltage to Turn On            VON           5.25            —          6.0           V
+ Output
+ Voltage Regulator – 3.3V
+ Output Voltage                     VREG           3.20          3.30        3.40           V   0 mA < IOUT < 70 mA
+ Line Regulation                   VOUT1           —              10         50           mV   IOUT = 1 mA,
+                                                                                                6.0V < VBB < 18V
+ Load Regulation                   VOUT2           —              10         50           mV   5 mA < IOUT < 70 mA,
+                                                                                                6.0V < VBB < 12V
+ Power Supply Ripple Reject         PSRR            —              —          50           dB   1 VPP @10-20 kHz,
+                                                                                                ILOAD = 20 mA
+ Output Noise Voltage                 eN            —              —         100        µVRMS 10 Hz – 40 MHz
+                                                                                          /Hz CFILTER = 10 µf,
+                                                                                                CBP = 0.1 µf,
+                                                                                                ILOAD = 20 mA
+ Shutdown Voltage                    VSD            2.5            —          2.7           V   See Figure 1-10 (Note 2)
+ Note 1:     Internal current limited. 2.0 ms maximum recovery time (RLBUS = 0Ω, TX = 0, VLBUS = VBB).
+        2:   Characterized, not 100% tested.
+        3:   In Power-Down mode, normal LIN recessive/dominant threshold is disabled; VWK(LBUS) is used to detect
+             bus activities.
+DS20002299C-page 22                                                                      2012-2014 Microchip Technology Inc.
+
+
+                                                                                                MCP2050
+FIGURE 2-1:                  ESR CURVES FOR LOAD CAPACITOR SELECTION
+                                                      ESR Curves
+                10
+                                                                 Instable
+                                                                 Unstable
+                                            Stable only
+                 1                          with Tantalum or
+                                            Electrolytic cap.
+                                                                      Stable with
+  ESR [ohm]
+                                                                         Tantalum,
+                                                                       Electrolytic and
+                            Unstable
+                            Instable                                    Ceramic cap.
+                0.1
+               0.01
+                                                                 Instable
+                                                                 Unstable
+              0.001
+                      0.1               1                       10                        100               1000
+                                                  Load Capacitance
+                                                    Load Capacitor [uF]
+    Note 1: The graph shows the minimum capacitance after de-rating due to tolerance, temperature and voltage
+ 2012-2014 Microchip Technology Inc.                                                           DS20002299C-page 23
+
+
+MCP2050
+2.4      AC Specifications
+                              Electrical Characteristics: Unless otherwise indicated, all limits are specified for
+ AC CHARACTERISTICS
+                              VBB = 6.0V to 18.0V; TA = -40°C to +125°C
+          Parameter                Sym.      Min.        Typ.     Max.      Units            Test Conditions
+ Bus Interface - Constant Slope Time Parameters (DC specifications are for a VBB range of 6.0 to 18.0V)
+ Slope Rising and Falling        tSLOPE        3.5        —        22.5      µs     7.3V <= VBB <= 18V
+ Edges
+ Propagation Delay of          tTRANSPD        —          —         5.0      µs     tTRANSPD = max (tTRANSPDR or
+ Transmitter                                                                        tTRANSPDF)
+ Propagation Delay of            tRECPD        —          —         6.0      µs     tRECPD = max (tRECPDR or
+ Receiver                                                                           tRECPDF)
+ Symmetry of Propagation        tRECSYM       -2.0        —         2.0      µs     trecsym = max (tRECPDF –
+ Delay of Receiver Rising                                                           tRECPDR)
+ Edge w.r.t. Falling Edge                                                           RRXD 2.4 kΩto VCC,
+                                                                                    CRXD 20pF
+ Symmetry of Propagation      tTRANSSYM       -2.0        —        2.0       µs     tTRANSSYM = max (tTRANSPDF -
+ Delay of Transmitter Rising                                                        tTRANSPDR)
+ Edge w.r.t. Falling Edge
+ Bus Dominant Time-Out           tTO(LIN)      —          25        —        mS
+ Time
+ Time to Sample of                tFAULT       —          —        32.5      µs     tFAULT = max (tTRANSPD +
+ FAULT/TXE for Bus Conflict                                                         tSLOPE + tRECPD)
+ Reporting
+ Duty Cycle 1 @ 20.0 kbit/sec                0.396        —         —       %tBIT   CBUS;RBUS conditions:
+                                                                                    1 nF; 1 kΩ | 6.8 nF;
+                                                                                    660Ω |
+                                                                                    10 nF; 500Ω
+                                                                                    THREC(MAX) = 0.744 x VBB,
+                                                                                    THDOM(MAX) = 0.581 x VBB,
+                                                                                    VBB =7.0V - 18V; tBIT = 50 µs.
+                                                                                    D1 = tBUS_REC(MIN) / 2 x tBIT)
+ Duty Cycle 2 @ 20.0 kbit/sec                  —          —       0.581     %tBIT   CBUS;RBUS conditions:
+                                                                                    1 nF; 1 kΩ | 6.8 nF;
+                                                                                    660Ω |
+                                                                                    10 nF; 500Ω
+                                                                                    THREC(MAX) = 0.284 x VBB,
+                                                                                    THDOM(MAX) = 0.422 x VBB,
+                                                                                    VBB =7.6V - 18V; tBIT = 50 µs.
+                                                                                    D2 = tBUS_REC(MAX) / 2 x tBIT)
+ Duty Cycle 3 @ 10.4 kbit/sec                0.417        —         —       %tBIT   CBUS;RBUS conditions:
+                                                                                    1 nF; 1 kΩ | 6.8 nF;
+                                                                                    660Ω |
+                                                                                    10 nF; 500Ω
+                                                                                    THREC(MAX) = 0.778 x VBB,
+                                                                                    THDOM(MAX) = 0.616 x VBB,
+                                                                                    VBB =7.0V - 18V; tBIT = 96 µs.
+                                                                                    D3 = tBUS_REC(MIN) / 2 x tBIT)
+ Duty Cycle 4 @ 10.4 kbit/sec                  —          —       0.590     %tBIT   CBUS;RBUS conditions:
+                                                                                    1 nF; 1 kΩ | 6.8 nF;
+                                                                                    660Ω |
+                                                                                    10 nF; 500Ω
+                                                                                    THREC(MAX) = 0.251 x VBB,
+                                                                                    THDOM(MAX) = 0.389 x VBB,
+                                                                                    VBB =7.6V - 18V; tBIT = 96 µs.
+                                                                                    D4 = tBUS_REC(MAX) / 2 x tBIT)
+DS20002299C-page 24                                                              2012-2014 Microchip Technology Inc.
+
+
+                                                                                              MCP2050
+2.4      AC Specifications (Continued)
+                               Electrical Characteristics: Unless otherwise indicated, all limits are specified for
+AC CHARACTERISTICS
+                               VBB = 6.0V to 18.0V; TA = -40°C to +125°C
+          Parameter                 Sym.        Min.      Typ.     Max.      Units             Test Conditions
+Voltage Regulator
+Bus Activity Debounce time           tBDB         30       80       250       µs
+Bus Activity to Voltage           tBACTIVE        35       —        200       µs
+Regulator Enabled
+Voltage Regulator Enabled           tVEVR        300       —       1200       µs     (Note 1)
+to Ready
+Chip Select to Ready Mode            tCSR         —        —        230       µs
+Chip Select to Power-Down           tCSPD         —        —        300       µs     (Note 2)
+Short-Circuit to Shutdown       tSHUTDOWN         20       —        100       µs
+RESET Timing
+VREG OK detect to RESET              tRPU         —        —        60.0      µs
+inactive
+VREG not OK detect to                tRPD         —        —        60.0      µs
+RESET active
+WWDT
+Reset Pulse Length                 tWDRST         —       150        —        µs     -40/+100%
+Power-Up Watchdog                tPOWERUP         —       27.2       —        ms     ±15%
+Window Length                                                                        RWWDTSELECT = 33 kΩ
+                                                                                     (Note 2, Note 3)
+Watchdog Window Length           tWLENGTH       5.95       7        8.05      ms     ±15%
+                                                                                     RWWDTSELECT = 33 kΩ
+                                                                                     (Note 4, Note 5)
+                                                 102      120       138       ms     ±15%
+                                                                                     RWWDTSELECT = 680 kΩ
+                                                                                     (Note 4, Note 5)
+Note 1:    Time depends on external capacitance and load. Test condition: CREG = 4.7uF, no resistor load.
+       2:  Characterized, not 100% tested.
+       3:  tPOWERUP = 0.8 ms × (RWWDTSELECT+1); R in kΩ.
+       4:  tWLENGTH = (0.175 ms × RWWDTSELECT) + 1.2 ±15%; R in kΩ.
+       5:  Characterized; tested for RWWDTSELECT = 33 kΩ and 680 kΩ
+2.5      Thermal Specifications
+            Parameter                     Symbol      Typ        Max     Units               Test Conditions
+Recovery Temperature                    RECOVERY     +140        —        C
+Shutdown Temperature                   SHUTDOWN      +150        —        C
+Short Circuit Recovery Time               tTHERM       1.5       5.0       ms
+Thermal Package Resistances
+Thermal Resistance, 14L-PDIP                JA        70         —       C/W
+Thermal Resistance, 14L-SOIC                JA       90.8        —       C/W
+Thermal Resistance, 20L-QFN                 JA       44.6        —       C/W
+Note 1:    The maximum power dissipation is a function of TJMAX, JA and ambient temperature TA. The maximum
+           allowable power dissipation at an ambient temperature is PD = (TJMAX - TA)JA. If this dissipation is
+           exceeded, the die temperature will rise above 150C and the MCP2050 will go into thermal shutdown.
+ 2012-2014 Microchip Technology Inc.                                                             DS20002299C-page 25
+
+
+MCP2050
+2.6                   Typical Performance Curves
+  Note:                  The graphs and tables provided following this note are a statistical summary based on a limited number of
+                         samples and are provided for informational purposes only. The performance characteristics listed herein
+                         are not tested or guaranteed. In some graphs or tables, the data presented may be outside the specified
+                         operating range (e.g., outside specified power supply range) and therefore outside the warranted range.
+Note: Unless otherwise indicated, VBB = 6.0V to 18.0V; TA = -40°C to +125°C
+               200                                                                          200
+               180                                                                          180
+               160                                                                          160
+  IBBQ (μA)                                                                    IBBQ (μA)
+               140                                                                          140
+               120                                                                          120                                          VBB = 6V
+                                                           VBB = 6V
+               100                                         VBB = 12V                        100                                          VBB = 12V
+                                                           VBB = 18V                                                                     VBB = 18V
+                80                                                                           80
+                     -40 -25 -10   5 20 35 50 65      80    95 110 125                            -40 -25 -10    5 20 35 50 65      80    95 110 125
+                                   Temperature(°C)                                                                Temperature(°C)
+FIGURE 2-2:        Typical IBBQ vs.                                         FIGURE 2-5:        Typical IBBQ vs.
+Temperature – 5.0V.                                                         Temperature – 3.3V.
+               90                                                                           100
+                                                                                            90
+               80
+  IBBTO (μA)
+                                                                                            80
+                                                                               IBBTO (μA)
+               70
+                                                                                            70
+                                                           VBB = 6V                                                                       VBB = 6V
+               60
+                                                           VBB = 12V                        60                                            VBB = 12V
+                                                           VBB = 18V                                                                      VBB = 18V
+               50                                                                           50
+                    -40 -25 -10    5 20 35 50 65      80    95 110 125                            -40 -25 -10    5 20 35 50 65      80     95 110 125
+                                    Temperature(°C)                                                              Temperature(°C)
+FIGURE 2-3:        Typical IBBTO vs.                                        FIGURE 2-6:        Typical IBBTO vs.
+Temperature – 5.0V.                                                         Temperature – 3.3V.
+               5.2                                                                          5.2
+                5                                                                             5
+               4.8                                                                          4.8
+  IPD (μA)                                                                     IPD (μA)
+               4.6                                                                          4.6
+               4.4                                         VBB = 6V                         4.4
+                                                                                                                                          VBB=6V
+                                                           VBB = 12V                                                                      VBB=12V
+               4.2                                                                          4.2
+                                                           VBB = 18V
+                                                                                                                                          VBB=18V
+                4                                                                             4
+                     -40 -25 -10   5 20 35 50 65      80    95 110 125                            -40 -25 -10    5 20 35 50 65      80    95 110 125
+                                    Temperature(°C)                                                              Temperature(°C)
+FIGURE 2-4:        Typical IPD vs.                                          FIGURE 2-7:        Typical IPD vs.
+Temperature – 5.0V.                                                         Temperature – 3.3V.
+DS20002299C-page 26                                                                                              2012-2014 Microchip Technology Inc.
+
+
+                                                                                                          MCP2050
+             6                                                                3.5
+                                                                               3
+             5
+                                                                              2.5
+             4
+  VREG (V)
+                                                                               2
+                                                                   VREG (V)
+             3
+                                                                              1.5
+             2       -40°C                                                     1        -40°C
+                     +25°C                                                              +25°C
+             1                                                                0.5       +90°C
+                     +90°C
+                                                                                        +125°C
+                     +125°C                                                    0
+             0                                                                      0       50   100     150    200    250   300
+                 0      50    100      150      200   250   300
+                                    IREG (mA)                                                      IREG (mA)
+FIGURE 2-8:                     5.0 VREG vs. IREG at VBB =        FIGURE 2-9:                     3.3V VREG vs. IREG at VBB =
+12V.                                                              12V.
+ 2012-2014 Microchip Technology Inc.                                                                          DS20002299C-page 27
+
+
+MCP2050
+2.7      Timing Diagrams and Specifications
+FIGURE 2-10:           BUS TIMING DIAGRAM
+                 TXD
+                                  50%                                 50%
+                 LBUS
+                                                                              .95VLBUS
+                                                                              .50VBB
+                                                                              .05VLBUS
+                                                                                               0.0V
+                                         tTRANSPDF                             tTRANSPDR
+                                               tRECPDF                               tRECPDR
+                 RXD
+                                              50%                                 50%
+     Internal TXD/RXD
+          Compare        Match    Match                Match          Match         Match
+     FAULT Sampling
+                                                  tFAULT                              tFAULT
+                                  Hold                                 Hold
+    FAULT/TXE Output       Stable                        Stable                       Stable
+                                  Value                                Value
+FIGURE 2-11:           REGULATOR BUS WAKE TIMING DIAGRAM
+               LBUS
+                                        VWK(LBUS)
+                                                                        tVEVR
+                                          tBDB               tBACTIVE
+                  VREG-NOM
+               VREG
+DS20002299C-page 28                                                         2012-2014 Microchip Technology Inc.
+
+
+                                                                         MCP2050
+FIGURE 2-12:           CS/LWAKE, REGULATOR AND RESET TIMING DIAGRAM
+              CS/LWAKE
+                                      tCSR
+                                           tVEVR
+                                                                        VREG-NOM
+              VREG
+                                                                   tRPD
+                          tRPU                                tCSPD
+            RESET
+ 2012-2014 Microchip Technology Inc.                                       DS20002299C-page 29
+
+
+MCP2050
+3.0     PACKAGING INFORMATION
+3.1     Package Marking Information
+             14-Lead PDIP (300 mil)                                          Example
+                                                                         MCP2050-500
+                                                                                E/P e^^
+                                                                                      3
+                                                                              1429256
+             14-Lead SOIC (.150”)                                            Example
+                                                                         MCP2050-500
+                                                                              E/SL e^^
+                                                                                     3
+                                                                              1429256
+             20-Lead QFN (5x5x0.9 mm)                                        Example
+     PIN 1                                                        PIN 1
+                                                                                 MCP2050
+                                                                                 500E/MQ
+                                                                                        e^^
+                                                                                         3
+                                                                                  1429256
+              Legend: XX...X     Customer-specific information
+                        Y        Year code (last digit of calendar year)
+                        YY       Year code (last 2 digits of calendar year)
+                        WW       Week code (week of January 1 is week ‘01’)
+                        NNN      Alphanumeric traceability code
+                         e3      Pb-free JEDEC® designator for Matte Tin (Sn)
+                        *        This package is Pb-free. The Pb-free JEDEC designator ( e3 )
+                                 can be found on the outer packaging for this package.
+              Note:  In the event the full Microchip part number cannot be marked on one line, it will
+                     be carried over to the next line, thus limiting the number of available
+                     characters for customer-specific information.
+DS20002299C-page 30                                                              2012-2014 Microchip Technology Inc.
+
+
+                                                                                                         MCP2050
+                     
+          )RUWKHPRVWFXUUHQWSDFNDJHGUDZLQJVSOHDVHVHHWKH0LFURFKLS3DFNDJLQJ6SHFLILFDWLRQORFDWHGDW
+             KWWSZZZPLFURFKLSFRPSDFNDJLQJ
+                            N
+     NOTE 1
+                                                                         E1
+                            1     2     3
+                                            D
+                                                                                                         E
+            A                                                          A2
+                                                                                L                                         c
+             A1
+                                      b1
+                                    b                     e                                              eB
+                                                                8QLWV                 ,1&+(6
+                                                    'LPHQVLRQ/LPLWV       0,1          120            0$;
+                    1XPEHURI3LQV                                1                      
+                    3LWFK                                          H                 %6&
+                    7RSWR6HDWLQJ3ODQH                          $          ±            ±            
+                    0ROGHG3DFNDJH7KLFNQHVV                     $                            
+                    %DVHWR6HDWLQJ3ODQH                        $                   ±              ±
+                    6KRXOGHUWR6KRXOGHU:LGWK                    (                            
+                    0ROGHG3DFNDJH:LGWK                         (                            
+                    2YHUDOO/HQJWK                                '                            
+                    7LSWR6HDWLQJ3ODQH                           /                           
+                    /HDG7KLFNQHVV                                 F                           
+                    8SSHU/HDG:LGWK                              E                           
+                    /RZHU/HDG:LGWK                               E                           
+                    2YHUDOO5RZ6SDFLQJ                       H%          ±            ±            
+ 
+ 3LQYLVXDOLQGH[IHDWXUHPD\YDU\EXWPXVWEHORFDWHGZLWKWKHKDWFKHGDUHD
+ 6LJQLILFDQW&KDUDFWHULVWLF
+ 'LPHQVLRQV'DQG(GRQRWLQFOXGHPROGIODVKRUSURWUXVLRQV0ROGIODVKRUSURWUXVLRQVVKDOOQRWH[FHHGSHUVLGH
+ 'LPHQVLRQLQJDQGWROHUDQFLQJSHU$60(<0
+       %6&%DVLF'LPHQVLRQ7KHRUHWLFDOO\H[DFWYDOXHVKRZQZLWKRXWWROHUDQFHV
+                                                                                          0LFURFKLS 7HFKQRORJ\ 'UDZLQJ &%
+ 2012-2014 Microchip Technology Inc.                                                                       DS20002299C-page 31
+
+
+MCP2050
+  Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+          http://www.microchip.com/packaging
+DS20002299C-page 32                                                           2012-2014 Microchip Technology Inc.
+
+
+                                                                                        MCP2050
+   Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+           http://www.microchip.com/packaging
+ 2012-2014 Microchip Technology Inc.                                                       DS20002299C-page 33
+
+
+MCP2050
+        )RUWKHPRVWFXUUHQWSDFNDJHGUDZLQJVSOHDVHVHHWKH0LFURFKLS3DFNDJLQJ6SHFLILFDWLRQORFDWHGDW
+           KWWSZZZPLFURFKLSFRPSDFNDJLQJ
+DS20002299C-page 34                                                            2012-2014 Microchip Technology Inc.
+
+
+                                                                                          MCP2050
+20-Lead Plastic Quad Flat, No Lead Package (MQ) – 5x5x0.9 mm Body [QFN]
+   Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+           http://www.microchip.com/packaging
+                                                                            Microchip Technology Drawing C04-120A
+ 2012-2014 Microchip Technology Inc.                                                        DS20002299C-page 35
+
+
+MCP2050
+  Note:   For the most current package drawings, please see the Microchip Packaging Specification located at
+          http://www.microchip.com/packaging
+DS20002299C-page 36                                                            2012-2014 Microchip Technology Inc.
+
+
+                                                                                                                     MCP2050
+PRODUCT IDENTIFICATION SYSTEM
+To order or obtain information, e.g., on pricing or delivery, refer to the factory or the listed sales office.
+  PART NO.                [X](1)                 –X              /XX                Examples:
+                                                                                    a) MCP2050-330E/P:                3.3V, Extended
+    Device           Tape and Reel        Temperature        Package                                                  Temperature, 14-LD PDIP
+                        Option               Range                                                                    Package
+                                                                                    b) MCP2050-330E/MQ:               3.3V, Extended
+                                                                                                                      Temperature, 20-LD QFN
+  Device:        MCP2050:     LIN Transceiver with Voltage Regulator                                                  Package
+                                                                                    c) MCP2050T-330E/MQ:              Tape and Reel, 3.3V,
+                 MCP2050T: LIN Transceiver with Voltage Regulator                                                     Extended Temperature,
+                              (Tape and Reel) (SOIC and QFN)                                                          20-LD QFN Package
+                                                                                    d) MCP2050-330E/SL:               3.3V, Extended
+                                                                                                                      Temperature, 14-LD SOIC
+  Tape and       Blank   = Standard packaging (tube or tray)
+                                                                                                                      Package
+  Reel Option:   T       = Tape and Reel(1)
+                                                                                    e) MCP2050T-330E/SL:              Tape and Reel, 3.3V,
+                                                                                                                      Extended Temperature,
+  Temperature    E     = -40°C to +125°C                                                                              14-LD SOIC Package
+  Range:                                                                            f)  MCP2050-500E/P:               5.0V, Extended Tempera-
+                                                                                                                      ture, 14-LD PDIP Package
+                                                                                    g) MCP2050-500E/MQ:               5.0V, Extended Tempera-
+  Package:       MQ = 20-Lead Plastic Quad Flat, No Lead Package –                                                    ture, 20-LD QFN Package
+                         5x5x0.9 mm Body (QFN)                                      h) MCP2050T-500E/MQ:              Tape and Reel, 5.0V,
+                 P     = 14-Lead Plastic Dual In-Line – 300 mil Body (PDIP)                                           Extended Temperature,
+                                                                                                                      20-LD QFN Package
+                 SL    = 14-Lead Plastic Small Outline – Narrow, 3.90 mm Body
+                                                                                    i)  MCP2050-500E/SL:              5.0V, Extended Tempera-
+                         (SOIC)
+                                                                                                                      ture, 14-LD SOIC Package
+                                                                                    j)  MCP2050T-500E/SL:             Tape and Reel, 5.0V,
+                                                                                                                      Extended Temperature,
+                                                                                                                      14-LD SOIC package
+                                                                                       Note 1:    Tape and Reel identifier only appears in the
+                                                                                                  catalog part number description. This identi-
+                                                                                                  fier is used for ordering purposes and is not
+                                                                                                  printed on the device package. Check with
+                                                                                                  your Microchip Sales Office for package
+                                                                                                  availability with the Tape and Reel option.
+ 2012-2014 Microchip Technology Inc.                                                                                     DS20002299C-page 37
+
+
+MCP2050
+APPENDIX A:              REVISION HISTORY
+Revision D (September 2014)
+The following is the list of modifications:
+1.   Added Exposed Thermal Pad pin on QFN and in
+     Section 1.3, Pin Descriptions.
+2.   Updated Figure 1-7.
+3.   Added note in Figure 2-1.
+4.   Added AC parameter for WWDT in Section 2.4,
+     AC Specifications.
+5.   Created new Section 2.6, Typical Perfor-
+     mance Curves.
+6.   Fixed minor typographical errors.
+Revision C (August 2012)
+The following is the list of modifications:
+1.   Removed two notes in Section 2.4 “AC Speci-
+     fications”.
+Revision B (April 2012)
+The following is the list of modifications:
+1.   Corrected a label in Figure 1-12.
+2.   Corrected a label in Figure 1-13.
+3.   Updated the Product Identification System
+     page.
+Revision A (March 2012)
+Original release of this document.
+DS20002299C-page 38                               2012-2014 Microchip Technology Inc.
+
+
+ Note the following details of the code protection feature on Microchip devices:
+ •     Microchip products meet the specification contained in their particular Microchip Data Sheet.
+ •     Microchip believes that its family of products is one of the most secure families of its kind on the market today, when used in the
+       intended manner and under normal conditions.
+ •     There are dishonest and possibly illegal methods used to breach the code protection feature. All of these methods, to our
+       knowledge, require using the Microchip products in a manner outside the operating specifications contained in Microchip’s Data
+       Sheets. Most likely, the person doing so is engaged in theft of intellectual property.
+ •     Microchip is willing to work with the customer who is concerned about the integrity of their code.
+ •     Neither Microchip nor any other semiconductor manufacturer can guarantee the security of their code. Code protection does not
+       mean that we are guaranteeing the product as “unbreakable.”
+ Code protection is constantly evolving. We at Microchip are committed to continuously improving the code protection features of our
+ products. Attempts to break Microchip’s code protection feature may be a violation of the Digital Millennium Copyright Act. If such acts
+ allow unauthorized access to your software or other copyrighted work, you may have a right to sue for relief under that Act.
+Information contained in this publication regarding device                  Trademarks
+applications and the like is provided only for your convenience             The Microchip name and logo, the Microchip logo, dsPIC,
+and may be superseded by updates. It is your responsibility to
+                                                                            FlashFlex, flexPWR, JukeBlox, KEELOQ, KEELOQ logo, Kleer,
+ensure that your application meets with your specifications.
+                                                                            LANCheck, MediaLB, MOST, MOST logo, MPLAB,
+MICROCHIP MAKES NO REPRESENTATIONS OR
+                                                                            OptoLyzer, PIC, PICSTART, PIC32 logo, RightTouch, SpyNIC,
+WARRANTIES OF ANY KIND WHETHER EXPRESS OR
+                                                                            SST, SST Logo, SuperFlash and UNI/O are registered
+IMPLIED, WRITTEN OR ORAL, STATUTORY OR                                      trademarks of Microchip Technology Incorporated in the
+OTHERWISE, RELATED TO THE INFORMATION,                                      U.S.A. and other countries.
+INCLUDING BUT NOT LIMITED TO ITS CONDITION,
+QUALITY, PERFORMANCE, MERCHANTABILITY OR                                    The Embedded Control Solutions Company and mTouch are
+FITNESS FOR PURPOSE. Microchip disclaims all liability                      registered trademarks of Microchip Technology Incorporated
+arising from this information and its use. Use of Microchip                 in the U.S.A.
+devices in life support and/or safety applications is entirely at           Analog-for-the-Digital Age, BodyCom, chipKIT, chipKIT logo,
+the buyer’s risk, and the buyer agrees to defend, indemnify and             CodeGuard, dsPICDEM, dsPICDEM.net, ECAN, In-Circuit
+hold harmless Microchip from any and all damages, claims,                   Serial Programming, ICSP, Inter-Chip Connectivity, KleerNet,
+suits, or expenses resulting from such use. No licenses are                 KleerNet logo, MiWi, MPASM, MPF, MPLAB Certified logo,
+conveyed, implicitly or otherwise, under any Microchip                      MPLIB, MPLINK, MultiTRAK, NetDetach, Omniscient Code
+intellectual property rights.                                               Generation, PICDEM, PICDEM.net, PICkit, PICtail,
+                                                                            RightTouch logo, REAL ICE, SQI, Serial Quad I/O, Total
+                                                                            Endurance, TSHARC, USBCheck, VariSense, ViewSpan,
+                                                                            WiperLock, Wireless DNA, and ZENA are trademarks of
+                                                                            Microchip Technology Incorporated in the U.S.A. and other
+                                                                            countries.
+                                                                            SQTP is a service mark of Microchip Technology Incorporated
+                                                                            in the U.S.A.
+                                                                            Silicon Storage Technology is a registered trademark of
+                                                                            Microchip Technology Inc. in other countries.
+                                                                            GestIC is a registered trademarks of Microchip Technology
+                                                                            Germany II GmbH & Co. KG, a subsidiary of Microchip
+                                                                            Technology Inc., in other countries.
+                                                                            All other trademarks mentioned herein are property of their
+                                                                            respective companies.
+                                                                            © 2012-2014, Microchip Technology Incorporated, Printed in
+                                                                            the U.S.A., All Rights Reserved.
+                                                                            ISBN: 978-1-63276-639-7
+  QUALITY MANAGEMENT SYSTEM                                                 Microchip received ISO/TS-16949:2009 certification for its worldwide
+                                                                            headquarters, design and wafer fabrication facilities in Chandler and
+                CERTIFIED BY DNV                                            Tempe, Arizona; Gresham, Oregon and design centers in California
+                                                                            and India. The Company’s quality system processes and procedures
+           == ISO/TS 16949 ==
+                                                                            are for its PIC® MCUs and dsPIC® DSCs, KEELOQ® code hopping
+                                                                            devices, Serial EEPROMs, microperipherals, nonvolatile memory and
+                                                                            analog products. In addition, Microchip’s quality system for the design
+                                                                            and manufacture of development systems is ISO 9001:2000 certified.
+ 2012-2014 Microchip Technology Inc.                                                                                  DS20002299C-page 39
+
+
+                          Worldwide Sales and Service
+AMERICAS                  ASIA/PACIFIC               ASIA/PACIFIC                   EUROPE
+Corporate Office          Asia Pacific Office        India - Bangalore              Austria - Wels
+2355 West Chandler Blvd.  Suites 3707-14, 37th Floor Tel: 91-80-3090-4444           Tel: 43-7242-2244-39
+Chandler, AZ 85224-6199   Tower 6, The Gateway       Fax: 91-80-3090-4123           Fax: 43-7242-2244-393
+Tel: 480-792-7200         Harbour City, Kowloon                                     Denmark - Copenhagen
+                                                     India - New Delhi
+Fax: 480-792-7277         Hong Kong                                                 Tel: 45-4450-2828
+                                                     Tel: 91-11-4160-8631
+Technical Support:        Tel: 852-2943-5100                                        Fax: 45-4485-2829
+                                                     Fax: 91-11-4160-8632
+http://www.microchip.com/ Fax: 852-2401-3431
+                                                     India - Pune                   France - Paris
+support
+                          Australia - Sydney         Tel: 91-20-3019-1500           Tel: 33-1-69-53-63-20
+Web Address:
+                          Tel: 61-2-9868-6733                                       Fax: 33-1-69-30-90-79
+www.microchip.com                                    Japan - Osaka
+                          Fax: 61-2-9868-6755                                       Germany - Dusseldorf
+Atlanta                                              Tel: 81-6-6152-7160
+                          China - Beijing                                           Tel: 49-2129-3766400
+Duluth, GA                                           Fax: 81-6-6152-9310
+                          Tel: 86-10-8569-7000                                      Germany - Munich
+Tel: 678-957-9614                                    Japan - Tokyo
+                          Fax: 86-10-8528-2104                                      Tel: 49-89-627-144-0
+Fax: 678-957-1455                                    Tel: 81-3-6880- 3770
+                          China - Chengdu                                           Fax: 49-89-627-144-44
+Austin, TX                                           Fax: 81-3-6880-3771
+                          Tel: 86-28-8665-5511
+Tel: 512-257-3370                                    Korea - Daegu
+                                                                                    Germany - Pforzheim
+                          Fax: 86-28-8665-7889                                      Tel: 49-7231-424750
+Boston                                               Tel: 82-53-744-4301
+Westborough, MA           China - Chongqing          Fax: 82-53-744-4302            Italy - Milan
+Tel: 774-760-0087         Tel: 86-23-8980-9588                                      Tel: 39-0331-742611
+                                                     Korea - Seoul
+Fax: 774-760-0088         Fax: 86-23-8980-9500                                      Fax: 39-0331-466781
+                                                     Tel: 82-2-554-7200
+Chicago                   China - Hangzhou           Fax: 82-2-558-5932 or          Italy - Venice
+Itasca, IL                Tel: 86-571-8792-8115      82-2-558-5934                  Tel: 39-049-7625286
+Tel: 630-285-0071         Fax: 86-571-8792-8116                                     Netherlands - Drunen
+                                                     Malaysia - Kuala Lumpur
+Fax: 630-285-0075         China - Hong Kong SAR      Tel: 60-3-6201-9857            Tel: 31-416-690399
+Cleveland                 Tel: 852-2943-5100         Fax: 60-3-6201-9859            Fax: 31-416-690340
+Independence, OH          Fax: 852-2401-3431                                        Poland - Warsaw
+                                                     Malaysia - Penang
+Tel: 216-447-0464         China - Nanjing                                           Tel: 48-22-3325737
+                                                     Tel: 60-4-227-8870
+Fax: 216-447-0643         Tel: 86-25-8473-2460       Fax: 60-4-227-4068             Spain - Madrid
+Dallas                    Fax: 86-25-8473-2470                                      Tel: 34-91-708-08-90
+                                                     Philippines - Manila
+Addison, TX               China - Qingdao                                           Fax: 34-91-708-08-91
+                                                     Tel: 63-2-634-9065
+Tel: 972-818-7423         Tel: 86-532-8502-7355      Fax: 63-2-634-9069             Sweden - Stockholm
+Fax: 972-818-2924
+                          Fax: 86-532-8502-7205                                     Tel: 46-8-5090-4654
+                                                     Singapore
+Detroit                   China - Shanghai           Tel: 65-6334-8870              UK - Wokingham
+Novi, MI                  Tel: 86-21-5407-5533       Fax: 65-6334-8850              Tel: 44-118-921-5800
+Tel: 248-848-4000         Fax: 86-21-5407-5066
+                                                     Taiwan - Hsin Chu              Fax: 44-118-921-5820
+Houston, TX
+                          China - Shenyang           Tel: 886-3-5778-366
+Tel: 281-894-5983
+                          Tel: 86-24-2334-2829       Fax: 886-3-5770-955
+Indianapolis              Fax: 86-24-2334-2393
+Noblesville, IN                                      Taiwan - Kaohsiung
+Tel: 317-773-8323
+                          China - Shenzhen           Tel: 886-7-213-7830
+                          Tel: 86-755-8864-2200
+Fax: 317-773-5453                                    Taiwan - Taipei
+                          Fax: 86-755-8203-1760      Tel: 886-2-2508-8600
+Los Angeles
+                          China - Wuhan              Fax: 886-2-2508-0102
+Mission Viejo, CA
+                          Tel: 86-27-5980-5300
+Tel: 949-462-9523                                    Thailand - Bangkok
+                          Fax: 86-27-5980-5118       Tel: 66-2-694-1351
+Fax: 949-462-9608
+                          China - Xian               Fax: 66-2-694-1350
+New York, NY
+Tel: 631-435-6000         Tel: 86-29-8833-7252
+                          Fax: 86-29-8833-7256
+San Jose, CA
+Tel: 408-735-9110         China - Xiamen
+                          Tel: 86-592-2388138
+Canada - Toronto
+                          Fax: 86-592-2388130
+Tel: 905-673-0699
+Fax: 905-673-6509         China - Zhuhai
+                          Tel: 86-756-3210040
+                                                                                                      03/25/14
+                          Fax: 86-756-3210049
+DS20002299C-page 40                                                         2012-2014 Microchip Technology Inc.
+
+
+Mouser Electronics
+Authorized Distributor
+Click to View Pricing, Inventory, Delivery & Lifecycle Information:
+Microchip:
+ MCP2050-330E/SL MCP2050T-330E/MQ MCP2050T-500E/SL MCP2050-500E/MQ MCP2050-330E/MQ
+MCP2050-500E/SL

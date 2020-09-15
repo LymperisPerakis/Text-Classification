@@ -1,18 +1,18 @@
 from src.make_training_files import MakeTrainingFiles
 from src.classification import Classifier
 from sklearn.metrics import plot_confusion_matrix
-from src.configs import interface_pdf_path, interface_text_path
+from src.configs import interface_pdf_path2, interface_text_path2
 import pickle
-from src.transformer import MultiHeadSelfAttention, TransformerBlock, TokenAndPositionEmbedding
+import matplotlib.pyplot as plt
 
-# training_files = MakeTrainingFiles(pdf_path=interface_pdf_path,
-#                                    text_path=interface_text_path)
-# documents_list, label_list, labels, label_dummy, documents = training_files.run()
-#
-# with open('train.pickle', 'wb') as f:
-#     pickle.dump([documents_list, label_list, labels, label_dummy, documents], f)
+training_files = MakeTrainingFiles(pdf_path=interface_pdf_path2,
+                                   text_path=interface_text_path2)
+documents_list, label_list, labels, label_dummy, documents = training_files.run(process=False)
 
-with open('train.pickle', 'rb') as f:
+with open('training_data/train.pickle', 'wb') as f:
+    pickle.dump([documents_list, label_list, labels, label_dummy, documents], f)
+
+with open('training_data/train.pickle', 'rb') as f:
     documents_list, label_list, labels, label_dummy, documents = pickle.load(f)
 
 
@@ -44,3 +44,37 @@ accuracy6, report6, confusion_matrix6 = classifier6.test_model(text_clf6, X_test
 classifier7 = Classifier(docs=documents, label_dummy=label_dummy)
 text_clf7 = classifier7.train_model_LogR(X_train=X_train, y_train=y_train)
 accuracy7, report7, confusion_matrix7 = classifier7.test_model(text_clf7, X_test, y_test, labels)
+
+fig, ax = plt.subplots(nrows=1, ncols=2)
+
+# ## Plot roc
+# for i in range(len(label_list)):
+#     fpr, tpr, thresholds = metrics.roc_curve(y_test_array[:,i],
+#                            predicted_prob[:,i])
+#     ax[0].plot(fpr, tpr, lw=3,
+#               label='{0} (area={1:0.2f})'.format(classes[i],
+#                               metrics.auc(fpr, tpr))
+#                )
+# ax[0].plot([0,1], [0,1], color='navy', lw=3, linestyle='--')
+# ax[0].set(xlim=[-0.05,1.0], ylim=[0.0,1.05],
+#           xlabel='False Positive Rate',
+#           ylabel="True Positive Rate (Recall)",
+#           title="Receiver operating characteristic")
+# ax[0].legend(loc="lower right")
+# ax[0].grid(True)
+#
+# ## Plot precision-recall curve
+# for i in range(len(classes)):
+#     precision, recall, thresholds = metrics.precision_recall_curve(
+#                  y_test_array[:,i], predicted_prob[:,i])
+#     ax[1].plot(recall, precision, lw=3,
+#                label='{0} (area={1:0.2f})'.format(classes[i],
+#                                   metrics.auc(recall, precision))
+#               )
+# ax[1].set(xlim=[0.0,1.05], ylim=[0.0,1.05], xlabel='Recall',
+#           ylabel="Precision", title="Precision-Recall curve")
+# ax[1].legend(loc="best")
+# ax[1].grid(True)
+# plt.show()
+
+# TODO:  confuson matrix with the down labels vertical
