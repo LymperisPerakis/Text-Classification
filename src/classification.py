@@ -1,4 +1,4 @@
-from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfTransformer, TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
@@ -6,11 +6,13 @@ from sklearn.pipeline import Pipeline
 import numpy as np
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn import metrics
 from typing import List, Tuple
+from sklearn import tree
 
 
 class Classifier(object):
@@ -98,6 +100,30 @@ class Classifier(object):
         text_clf = self.train_model(
             LogisticRegression(multi_class='multinomial'), X_train, y_train)
         return text_clf
+
+    def train_model_AdaB(self, X_train: List[str], y_train: List[int]):
+        text_clf = self.train_model(
+            AdaBoostClassifier(), X_train, y_train)
+        return text_clf
+
+    def train_model_Rocchio(self, X_train: List[str], y_train: List[int]):
+        text_clf = self.train_model(
+            NearestCentroid(), X_train, y_train)
+        return text_clf
+
+    def train_model_DecisionTree(self, X_train: List[str], y_train: List[int]):
+        text_clf = self.train_model(
+            DecisionTreeClassifier(), X_train, y_train)
+        return text_clf
+
+    def export_decision_tree_graph(self, X_train: List[str], y_train: List[int], output_file: str = 'tree.dot'):
+        vectorizer = TfidfVectorizer()
+        X = vectorizer.fit_transform(X_train)
+        clf = DecisionTreeClassifier().fit(X, y_train)
+        tree.export_graphviz(clf, output_file)
+        return f'Decision tree graph saved in file {output_file}'
+
+# TODO: prettify https://scikit-learn.org/stable/modules/tree.html
 
     @staticmethod
     def get_metrics(y_test, predicted, labels):

@@ -15,7 +15,6 @@ with open('training_data/train.pickle', 'wb') as f:
 with open('training_data/train.pickle', 'rb') as f:
     documents_list, label_list, labels, label_dummy, documents = pickle.load(f)
 
-
 classifier = Classifier(docs=documents, label_dummy=label_dummy)
 X_train, X_test, y_train, y_test = classifier.split_set(test_size=0.2, random_state=0)
 text_clf = classifier.train_model_SVM(X_train=X_train, y_train=y_train)
@@ -33,17 +32,41 @@ classifier4 = Classifier(docs=documents, label_dummy=label_dummy)
 text_clf4 = classifier4.train_model_RandomForest(X_train=X_train, y_train=y_train)
 accuracy4, report4, confusion_matrix4 = classifier4.test_model(text_clf4, X_test, y_test, labels)
 
-classifier5 = Classifier(docs=documents, label_dummy=label_dummy) # doesnt work
+classifier5 = Classifier(docs=documents, label_dummy=label_dummy)  # doesnt work
 text_clf5 = classifier5.train_model_LinearRegression(X_train=X_train, y_train=y_train)
 accuracy5, report5, confusion_matrix5 = classifier5.test_model(text_clf5, X_test, y_test, labels)
 
-classifier6 = Classifier(docs=documents, label_dummy=label_dummy) # doesnt work
+classifier6 = Classifier(docs=documents, label_dummy=label_dummy)  # doesnt work
 text_clf6 = classifier6.train_model_LDA(X_train=X_train, y_train=y_train)
 accuracy6, report6, confusion_matrix6 = classifier6.test_model(text_clf6, X_test, y_test, labels)
 
 classifier7 = Classifier(docs=documents, label_dummy=label_dummy)
 text_clf7 = classifier7.train_model_LogR(X_train=X_train, y_train=y_train)
 accuracy7, report7, confusion_matrix7 = classifier7.test_model(text_clf7, X_test, y_test, labels)
+
+classifier8 = Classifier(docs=documents, label_dummy=label_dummy)
+text_clf8 = classifier8.train_model_AdaB(X_train=X_train, y_train=y_train)
+accuracy8, report8, confusion_matrix8 = classifier8.test_model(text_clf8, X_test, y_test, labels)
+
+classifier9 = Classifier(docs=documents, label_dummy=label_dummy)
+text_clf9 = classifier9.train_model_Rocchio(X_train=X_train, y_train=y_train)
+accuracy9, report9, confusion_matrix9 = classifier9.test_model(text_clf9, X_test, y_test, labels)
+
+classifier10 = Classifier(docs=documents, label_dummy=label_dummy)
+text_clf10 = classifier10.train_model_DecisionTree(X_train=X_train, y_train=y_train)
+accuracy10, report10, confusion_matrix10 = classifier10.test_model(text_clf10, X_test, y_test, labels)
+
+X_tree = []
+y_tree = []
+
+for i, y in enumerate(y_train):
+    if y == 0 or y == 1 or y == 2 or y == 3 or y == 4:
+        X_tree.append(X_train[i])
+        y_tree.append(y_train[i])
+
+classifier_tree = Classifier(docs=documents, label_dummy=label_dummy)
+classifier_tree.export_decision_tree_graph(X_tree, y_tree, 'tree_5_classes.dot')
+
 
 fig, ax = plt.subplots(nrows=1, ncols=2)
 
