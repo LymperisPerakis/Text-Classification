@@ -65,7 +65,8 @@ for i, y in enumerate(y_train):
         y_tree.append(y_train[i])
 
 classifier_tree = Classifier(docs=documents, label_dummy=label_dummy)
-classifier_tree.export_decision_tree_graph(X_tree, y_tree, 'tree_5_classes.dot')
+class_names = labels[:5]
+dot_data, _ = classifier_tree.export_decision_tree_graph(X_tree, y_tree, class_names, 'tree_5_classes.dot')
 
 
 fig, ax = plt.subplots(nrows=1, ncols=2)

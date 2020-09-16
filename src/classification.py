@@ -116,15 +116,21 @@ class Classifier(object):
             DecisionTreeClassifier(), X_train, y_train)
         return text_clf
 
-    def export_decision_tree_graph(self, X_train: List[str], y_train: List[int], output_file: str = 'tree.dot'):
+    def export_decision_tree_graph(self, X_train: List[str], y_train: List[int],
+                                   class_names: List[str], output_file: str = 'tree.dot'):
         vectorizer = TfidfVectorizer()
         X = vectorizer.fit_transform(X_train)
+        feature_names = vectorizer.get_feature_names()
         clf = DecisionTreeClassifier().fit(X, y_train)
-        tree.export_graphviz(clf, output_file)
-        return f'Decision tree graph saved in file {output_file}'
+        dot_data = tree.export_graphviz(clf, out_file=output_file,
+                                        feature_names=feature_names,
+                                        class_names=class_names,
+                                        filled=True, rounded=True, special_characters=True)
+        return dot_data, f'Decision tree graph saved in file {output_file}'
 
 # TODO: prettify https://scikit-learn.org/stable/modules/tree.html
-
+# TODO: sklearn.ensemble.BaggingClassifier
+# TODO: check ripper from wittgenstein
     @staticmethod
     def get_metrics(y_test, predicted, labels):
         accuracy = np.mean(predicted == y_test)
