@@ -1,14 +1,12 @@
-from src.classification import Classifier
-from src.make_training_files import MakeTrainingFiles
-from src.configs import interface_pdf_path, interface_text_path
+from src.classification.classification import Classifier
 import fasttext
 import numpy as np
+import pickle
 
-training_files = MakeTrainingFiles(pdf_path=interface_pdf_path,
-                                   text_path=interface_text_path)
+with open('training_data/cleaned_docs_25_classes_on_vocab_lem.pickle', 'rb') as f:
+    documents_list, label_list, labels, label_dummy, documents = pickle.load(f)
 
-documents_list, label_list, labels, label_dummy, documents = \
-    training_files.run('lem', True)
+
 
 training_data = []
 
@@ -43,3 +41,5 @@ predicted = model.predict(X_test2)
 pred = [int(p[0].split('__label__')[1]) for p in predicted[0]]
 accuracy = np.mean(np.array(pred) == y_test)
 print(f'The accuracy of the model is: {accuracy*100}% ')
+
+model.save_model("model_filename.bin")

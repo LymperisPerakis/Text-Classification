@@ -1,6 +1,5 @@
-from src.classification import Classifier
+from src.classification.classification import Classifier
 import pickle
-from src.transformer import MultiHeadSelfAttention, TransformerBlock, TokenAndPositionEmbedding
 import keras
 
 with open('train.pickle', 'rb') as f:

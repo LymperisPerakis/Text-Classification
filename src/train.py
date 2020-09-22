@@ -1,18 +1,52 @@
-from src.make_training_files import MakeTrainingFiles
-from src.classification import Classifier
-from sklearn.metrics import plot_confusion_matrix
-from src.configs import interface_pdf_path2, interface_text_path2
+from src.data_loading.make_training_files_from_text import MakeTrainingFilesFromText
+from src.classification.classification import Classifier
 import pickle
 import matplotlib.pyplot as plt
+import time
+from src.data_processing.nltk_processing import NltkProcessor
+from src.data_processing.spacy_processing import SpacyProcessor
 
-training_files = MakeTrainingFiles(pdf_path=interface_pdf_path2,
-                                   text_path=interface_text_path2)
-documents_list, label_list, labels, label_dummy, documents = training_files.run(process=False)
 
-with open('training_data/train.pickle', 'wb') as f:
+training_files = MakeTrainingFilesFromText()
+start = time.process_time()
+documents_list, label_list, labels, label_dummy, documents = training_files.run(lem_or_stem='lem', process=True)
+print(time.process_time() - start)
+
+start = time.process_time()
+tokens = []
+for document in documents:
+    processor = SpacyProcessor(document)
+    tokens.append(processor.normalized())
+print(time.process_time() - start)
+
+processor = NltkProcessor(documents[0])
+tokens = processor.tokenize()
+start = time.process_time()
+lemm = []
+for token in tokens:
+    lemm.append(processor.lemmatize(token))
+print(time.process_time() - start)
+start2 = time.process_time()
+for token in tokens:
+    processor.stemming(token)
+print(time.process_time() - start2)
+
+processor = SpacyProcessor(documents[0])
+start = time.process_time()
+lemm = []
+for token in processor.nlp_document:
+    lemm.append(token.lemma_)
+print(time.process_time() - start)
+
+training_files2 = MakeTrainingFilesFromText()
+start2 = time.process_time()
+documents_list2, label_list2, labels2, label_dummy2, documents2 = training_files.run(lem_or_stem='stem', process=True)
+print(time.process_time() - start2)
+
+with open('training_data/cleaned_docs_25_classes.pickle', 'wb') as f:
     pickle.dump([documents_list, label_list, labels, label_dummy, documents], f)
 
-with open('training_data/train.pickle', 'rb') as f:
+with open('training_data/cleaned_docs_25_classes.pickle', 'rb') as f:
     documents_list, label_list, labels, label_dummy, documents = pickle.load(f)
 
 classifier = Classifier(docs=documents, label_dummy=label_dummy)
@@ -33,7 +67,7 @@ text_clf4 = classifier4.train_model_RandomForest(X_train=X_train, y_train=y_trai
 accuracy4, report4, confusion_matrix4 = classifier4.test_model(text_clf4, X_test, y_test, labels)
 
 classifier5 = Classifier(docs=documents, label_dummy=label_dummy)  # doesnt work
-text_clf5 = classifier5.train_model_LinearRegression(X_train=X_train, y_train=y_train)
+text_clf5 = classifier5.train_model_SVC(X_train=X_train, y_train=y_train)
 accuracy5, report5, confusion_matrix5 = classifier5.test_model(text_clf5, X_test, y_test, labels)
 
 classifier6 = Classifier(docs=documents, label_dummy=label_dummy)  # doesnt work
@@ -58,15 +92,15 @@ accuracy10, report10, confusion_matrix10 = classifier10.test_model(text_clf10, X
 
 X_tree = []
 y_tree = []
-
+number_of_classes = 4
 for i, y in enumerate(y_train):
-    if y == 0 or y == 1 or y == 2 or y == 3 or y == 4:
+    if y in range(5, number_of_classes+5):
         X_tree.append(X_train[i])
         y_tree.append(y_train[i])
 
 classifier_tree = Classifier(docs=documents, label_dummy=label_dummy)
-class_names = labels[:5]
-dot_data, _ = classifier_tree.export_decision_tree_graph(X_tree, y_tree, class_names, 'tree_5_classes.dot')
+class_names = labels[5:number_of_classes+5]
+dot_data, _ = classifier_tree.export_decision_tree_graph(X_tree, y_tree, class_names, 'tree_5_9_classes.dot')
 
 
 fig, ax = plt.subplots(nrows=1, ncols=2)
