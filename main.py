@@ -26,6 +26,8 @@ from typing import List
 import pandas as pd
 import docx
 from random import randint
+import seaborn as sns
+sns.displot(label_dummy)
 
 def find_average(metric: List[List[float]]):
     averages = []
@@ -70,9 +72,11 @@ data = {'Method': conventional_models,
 
 
 df = pd.DataFrame(data, columns=['Method', 'Accuracy', 'Precision', 'Recall', 'F1'])
+list = [round(x, 2) for x in list]
 
 doc = docx.Document('Text.docx')
 t = doc.add_table(df.shape[0]+1, df.shape[1])
+t.style = 'TableGrid'
 for j in range(df.shape[-1]):
     t.cell(0, j).text = df.columns[j]
 

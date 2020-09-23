@@ -58,7 +58,7 @@ class TrainClassificationModel:
     def preprocess_files(self):
         self.documents_list, self.label_list, self.labels, self.label_dummy, self.documents \
             = self.training_files.run(self.lem_or_stem, self.process)
-        return self.documents_list, self.label_list, self.label_dummy, self.documents
+        return self.documents_list, self.label_list, self.labels, self.label_dummy, self.documents
 
     def save_training_files(self, file_path):
         with open(file_path, 'wb') as f:
