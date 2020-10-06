@@ -5,11 +5,10 @@ from typing import List
 
 
 class SpacyProcessor(object):
+    """
+    This class uses the spaCy library to process a document
+    """
     def __init__(self, document: str):
-        """
-
-        :param document:
-        """
         self.nlp = English()
         self.nlp.max_length = 3500000
         self.document = document
@@ -18,21 +17,14 @@ class SpacyProcessor(object):
         self.punctuations = string.punctuation
 
     def spacy_tokenizer(self):
-        # Creating our token object, which is used to create documents with
-        # linguistic annotations.
-
-        # Lemmatizing each token and converting each token into lowercase
         mytokens = [
             word.lemma_.lower().strip() if word.lemma_ != "-PRON-" else
             word.lower_
             for word in self.nlp_document]
-
-        # Removing stop words
         mytokens = [word for word in mytokens if
                     word not in self.stop_words and
                     word not in self.punctuations]
 
-        # return preprocessed list of tokens
         return mytokens
 
     def is_stopword(self, word: str, with_stopwords=True,

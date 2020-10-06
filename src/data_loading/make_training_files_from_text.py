@@ -5,7 +5,9 @@ from src.data_loading.make_training_files_from_pdf import MakeTrainingFiles
 
 
 class MakeTrainingFilesFromText(MakeTrainingFiles):
-
+    """A class to make training files from a given file path containing
+    text fils
+    """
     def __init__(self, text_path: str = text_path_interface):
         self.text_path = text_path
 

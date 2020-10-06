@@ -1,7 +1,4 @@
-import pandas as pd
-from src.train_classification_model import TrainClassificationModel
-import time
-from typing import List
+from src.classification.train_classification_model import TrainClassificationModel
 
 model = 'fasttext'
 train_model = TrainClassificationModel(model=model)
@@ -9,8 +6,7 @@ documents_list, label_list, labels, label_dummy, documents = train_model.load_fi
 fitted_model = train_model.train_model(test_size=0.2, random_state=0, epoch=10, lr=1, wordNgrams=3)
 accuracy, report, confusion_matrix, predicted = train_model.validate_model()
 
-from src.train_classification_model import TrainClassificationModel
-from src.configs.configs import transformers_models
+from src.classification.train_classification_model import TrainClassificationModel
 
 model = 'distilbert-base-uncased'
 train_model = TrainClassificationModel(model=model)
@@ -19,7 +15,7 @@ X_train, X_test, y_train, y_test = train_model.split_training_files()
 fitted_model = train_model.train_model()
 accuracy, report, confusion_matrix, predicted = train_model.validate_model()
 
-from src.train_classification_model import TrainClassificationModel
+from src.classification.train_classification_model import TrainClassificationModel
 from src.configs.configs import conventional_models
 import time
 from typing import List
