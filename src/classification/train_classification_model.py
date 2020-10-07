@@ -19,6 +19,7 @@ class TrainClassificationModel:
     """
     A class to train various ML models
     """
+
     def __init__(self, model: str = 'SVM',
                  text_path: str = text_path_interface,
                  process: bool = True, lem_or_stem: str = 'lem',

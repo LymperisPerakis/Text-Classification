@@ -67,7 +67,6 @@ class PdfToText(object):
         if os.path.isfile(self.destination):
             pdf = self.read_from_text()
         else:
-            print(self.destination)
             pdf = self.convert_to_text
             self.save_text_to_file(pdf)
         return pdf
